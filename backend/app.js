@@ -12,7 +12,15 @@ const nearbyPlaces = require("./routes/nearbyPlaces");
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://bharat-trip-opal.vercel.app"
+    ],
+    credentials: true
+  })
+);
 app.use(express.json());
 
 /* ── MongoDB Connection ── */
