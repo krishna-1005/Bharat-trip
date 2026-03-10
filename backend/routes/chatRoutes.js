@@ -52,6 +52,10 @@ router.post("/", async (req, res) => {
     if (msg.includes("culture")) interests.push("Culture");
     if (msg.includes("temple")) interests.push("Spiritual");
     if (msg.includes("adventure")) interests.push("Adventure");
+    
+    if (interests.length === 0) {
+      interests = ["Nature", "Food", "Culture"];
+    }
 
     /* fallback interests if user gives none */
     if (interests.length === 0) {
@@ -66,11 +70,27 @@ router.post("/", async (req, res) => {
       msg.includes("itinerary")
     ) {
 
-      const plan = generatePlan({
-        days,
-        budget,
-        interests
-      });
+      let plan;
+
+      try {
+
+        plan = generatePlan({
+          days,
+          budget,
+          interests
+        });
+
+      } catch (e) {
+
+        console.log("Planner fallback triggered");
+
+        plan = generatePlan({
+          days: 2,
+          budget: "medium",
+          interests: ["Nature", "Food"]
+        });
+
+      }
 
       /* safety fallback */
       if (!plan || !plan.itinerary) {
