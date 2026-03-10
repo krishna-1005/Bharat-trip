@@ -14,26 +14,57 @@ router.post("/", async (req, res) => {
 
   try {
 
-    // Detect trip keywords
     const msg = message.toLowerCase();
 
     let days = 1;
     let budget = "low";
     let interests = [];
 
-    if (msg.includes("2 day")) days = 2;
-    if (msg.includes("3 day")) days = 3;
+    /* ───── Detect number of days ───── */
 
-    if (msg.includes("low")) budget = "low";
-    if (msg.includes("medium")) budget = "medium";
-    if (msg.includes("high")) budget = "high";
+    const dayMatch = msg.match(/(\d+)\s*day/);
+
+    if (dayMatch) {
+      days = parseInt(dayMatch[1]);
+    }
+
+    /* limit days to avoid crazy numbers */
+    if (days > 7) days = 7;
+
+    /* ───── Budget detection ───── */
+
+    if (msg.includes("low") || msg.includes("cheap") || msg.includes("budget")) {
+      budget = "low";
+    }
+
+    if (msg.includes("medium") || msg.includes("comfort")) {
+      budget = "medium";
+    }
+
+    if (msg.includes("high") || msg.includes("luxury")) {
+      budget = "high";
+    }
+
+    /* ───── Interest detection ───── */
 
     if (msg.includes("nature")) interests.push("Nature");
+    if (msg.includes("food")) interests.push("Food");
     if (msg.includes("culture")) interests.push("Culture");
     if (msg.includes("temple")) interests.push("Spiritual");
+    if (msg.includes("adventure")) interests.push("Adventure");
 
-    // If it looks like a trip request → generate plan
-    if (msg.includes("trip") || msg.includes("plan")) {
+    /* fallback interests if user gives none */
+    if (interests.length === 0) {
+      interests = ["Culture", "Nature"];
+    }
+
+    /* ───── If message asks for trip plan ───── */
+
+    if (
+      msg.includes("trip") ||
+      msg.includes("plan") ||
+      msg.includes("itinerary")
+    ) {
 
       const plan = generatePlan({
         days,
@@ -42,11 +73,13 @@ router.post("/", async (req, res) => {
       });
 
       console.log("Generated plan:", plan);
+
       return res.json({ plan });
 
     }
 
-    // Otherwise normal AI chat
+    /* ───── Otherwise normal AI chat ───── */
+
     const chat = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
@@ -54,7 +87,10 @@ router.post("/", async (req, res) => {
           role: "system",
           content: "You are BharatTrip AI, a helpful travel assistant for India."
         },
-        { role: "user", content: message }
+        {
+          role: "user",
+          content: message
+        }
       ]
     });
 
@@ -62,8 +98,7 @@ router.post("/", async (req, res) => {
       reply: chat.choices[0].message.content
     });
 
-  }
-  catch (error) {
+  } catch (error) {
 
     console.error(error);
 
