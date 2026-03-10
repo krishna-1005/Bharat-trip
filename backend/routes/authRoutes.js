@@ -23,7 +23,12 @@ router.post("/signup", async (req, res) => {
     if (existing)
       return res.status(400).json({ error: "Email already registered." });
 
-    const user  = await User.create({ name, email, password });
+    const user = await User.create({
+      name,
+      email,
+      password,
+      firebaseUid: null
+    });
     const token = signToken(user._id);
 
     res.status(201).json({
