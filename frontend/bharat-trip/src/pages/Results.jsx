@@ -5,6 +5,7 @@ import "./results.css";
 import { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { getAuth } from "firebase/auth";
+const API = import.meta.env.VITE_API_URL;
 
 function Results() {
 
@@ -160,7 +161,7 @@ function Results() {
 
       const token = await user.getIdToken(true);
 
-      const res = await fetch("http://localhost:5000/api/profile/trips", {
+      const res = await fetch(`${API}/api/profile/trips`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
