@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import "../styles/profile.css";
+const API = import.meta.env.VITE_API_URL;
 
 /* always returns a fresh Firebase token */
 const getToken = async () => {
@@ -52,7 +53,7 @@ const fetchTrips = async () => {
 
     const token = await getToken();
 
-    const res = await fetch("http://localhost:5000/api/profile/trips", {
+    const res = await fetch(`${API}/api/profile/trips`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -103,7 +104,7 @@ try {
   const token = await getToken();
 
   const res = await fetch(
-    `http://localhost:5000/api/profile/trips/${id}`,
+    `${API}/api/profile/trips/${id}`,
     {
       method: "DELETE",
       headers: {
