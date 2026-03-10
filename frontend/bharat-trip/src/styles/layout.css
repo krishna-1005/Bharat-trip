@@ -1,0 +1,324 @@
+/* ================= ROOT APP ================= */
+
+.app {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ================= PLANNER PAGE ================= */
+
+.planner-page {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ================= LEFT PANEL ================= */
+
+.planner-wrapper {
+  
+  width: 360px;
+  min-width: 360px;
+  padding: 24px;
+  overflow-y: auto;
+  background: #111;
+
+  /* animation */
+  transform: translateX(0);
+  margin: 0;
+
+  transition:
+    transform 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+    margin 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================= RIGHT MAP PANEL ================= */
+
+.map-wrapper {
+  flex: 1;
+  height: 100vh;                 /* 🔥 REQUIRED */
+  min-width: 0;                  /* 🔥 REQUIRED */
+  position: relative;
+  z-index: 2;
+
+  /* animation defaults */
+  opacity: 1;                    /* 🔥 FIX */
+  transform: translateX(0);      /* 🔥 FIX */
+  pointer-events: auto;          /* 🔥 FIX */
+
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================= MAP ANIMATION WRAPPER ================= */
+
+.map-anim {
+  height: 100%;                  /* 🔥 REQUIRED */
+  width: 100%;
+  opacity: 1;                    /* 🔥 FIX */
+  transform: translateX(0);      /* 🔥 FIX */
+  pointer-events: auto;          /* 🔥 FIX */
+
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================= MAP ROOT ================= */
+
+.map-container {
+  position: relative;
+  z-index: 3;
+  height: 100%;                  /* 🔥 REQUIRED */
+  width: 100%;
+}
+
+/* ================= LEAFLET CORE ================= */
+
+.leaflet-container {
+  height: 100% !important;       /* 🔥 MOST IMPORTANT */
+  width: 100% !important;
+  z-index: 5 !important;
+  background: #ddd;
+  overflow: hidden;
+}
+
+/* ================= LANDING STATE ================= */
+
+.app.landing,
+.planner-page.landing {
+  justify-content: center;
+}
+
+.app.landing .planner-wrapper {
+  margin: auto;
+}
+
+.app.landing .map-wrapper {
+  opacity: 0;
+  transform: translateX(120px);
+  pointer-events: none;
+}
+
+/* ================= RESULTS STATE ================= */
+
+.app.results,
+.planner-page.results {
+  justify-content: flex-start;
+}
+
+.app.results .planner-wrapper,
+.planner-page.results .planner-wrapper {
+  margin: 0;
+}
+
+.app.results .map-wrapper,
+.planner-page.results .map-wrapper {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.app.results .map-anim,
+.planner-page.results .map-anim {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+/* ================= MAP ZOOM CONTROLS ================= */
+
+.map-zoom-controls {
+  position: absolute;
+  top: 40%;
+  right: 20px;
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-zoom-controls button {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(15, 23, 32, 0.9);
+  color: white;
+
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.map-zoom-controls button:hover {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  transform: scale(1.05);
+}
+
+/* pages */
+
+
+.page {
+  width: 100%;
+  min-height: 100vh;
+  width: 100vw;
+  padding: 120px 80px;
+  background: #0f172a;
+  color: white;
+}
+
+.page h1 {
+  margin-bottom: 20px;
+}
+
+.page p {
+  color: #ffffff;
+  margin-bottom: 30px;
+}
+
+.page-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.page-card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  transition: 0.3s;
+}
+
+.page-card:hover {
+  background: #243244;
+  transform: translateY(-4px);
+}
+
+.page-list {
+  list-style: none;
+  padding: 0;
+}
+
+.page-list li {
+  margin-bottom: 12px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 500px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+}
+
+.contact-form button {
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Navbar Fixed Logic */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5%;
+  background: rgba(2, 6, 23, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  z-index: 1000;
+}
+
+/* Dashboard Sidebar */
+.planner-page {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  padding-top: 80px;
+}
+
+.planner-wrapper {
+  width: 420px;
+  background: var(--bg-card);
+  border-right: 1px solid rgba(255,255,255,0.1);
+  padding: 30px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+/* Full Screen Map */
+.map-wrapper {
+  flex: 1;
+  position: relative;
+  background: #000;
+}
+
+/* Dark Mode Map Filter */
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(85%);
+}
+
+.map-info-bar {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  padding: 15px 25px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  gap: 20px;
+  z-index: 1000;
+}
+
+.three-scene-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Behind the planner content */
+  background: #020617; /* Matches Bharat Trip dark theme */
+}
+
+/* Ensure the planner content sits on top */
+.planner-content {
+  position: relative;
+  z-index: 2;
+  pointer-events: none; /* Allows cursor to interact with 3D globe */
+}
+
+.planner-wrapper, .planner-hero {
+  pointer-events: auto; /* Re-enables clicks for the form */
+}

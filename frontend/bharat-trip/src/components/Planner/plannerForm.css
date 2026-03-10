@@ -1,0 +1,275 @@
+/* =============================================
+   PLANNER FORM — plannerForm.css
+   All classes prefixed pf- to avoid conflicts
+============================================= */
+
+.pf-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pf-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+  margin: 0 0 2px;
+}
+
+.pf-subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.38);
+  margin: 0;
+}
+
+/* ── FIELD WRAPPER ── */
+.pf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pf-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+
+/* ── DAYS ── */
+.pf-days-row {
+  display: flex;
+  gap: 8px;
+}
+
+.pf-day-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 6px 9px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  color: rgba(255,255,255,0.5);
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.pf-day-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  margin-top: 3px;
+  opacity: 0.7;
+}
+
+.pf-day-btn:hover {
+  background: rgba(37,99,235,0.12);
+  border-color: rgba(64,128,255,0.3);
+  color: #7aadff;
+}
+
+.pf-day-btn.active {
+  background: rgba(37,99,235,0.2);
+  border-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15),
+              0 4px 16px rgba(37,99,235,0.3);
+}
+
+/* ── BUDGET ── */
+.pf-budget-row {
+  display: flex;
+  gap: 8px;
+}
+
+.pf-budget-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 12px 13px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  gap: 2px;
+}
+
+.pf-budget-icon {
+  font-size: 18px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.pf-budget-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  display: block;
+}
+
+.pf-budget-desc {
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  display: block;
+}
+
+.pf-budget-btn:hover {
+  background: rgba(37,99,235,0.1);
+  border-color: rgba(64,128,255,0.25);
+}
+
+.pf-budget-btn.active {
+  background: rgba(37,99,235,0.18);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12),
+              0 4px 16px rgba(37,99,235,0.25);
+}
+.pf-budget-btn.active .pf-budget-name { color: #ffffff; }
+
+/* ── INTERESTS ── */
+.pf-interest-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pf-interest-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  color: rgba(255,255,255,0.5);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.pf-interest-btn:hover {
+  background: rgba(37,99,235,0.1);
+  border-color: rgba(64,128,255,0.3);
+  color: #9fc3ff;
+}
+
+.pf-interest-btn.active {
+  background: rgba(37,99,235,0.2);
+  border-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+.pf-check {
+  background: #2563eb;
+  color: white;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+/* ── SUBMIT BUTTON ── */
+.pf-submit {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  border: none;
+  border-radius: 16px;
+  color: #ffffff;
+  font-family: 'Syne', sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 28px rgba(37,99,235,0.45),
+              inset 0 1px 0 rgba(255,255,255,0.15);
+  position: relative;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+/* shimmer sweep */
+.pf-submit::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  transform: skewX(-15deg);
+  transition: left 0.5s ease;
+}
+.pf-submit:hover::before { left: 160%; }
+
+.pf-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(37,99,235,0.6);
+}
+
+.pf-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pf-submit.loading,
+.pf-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pf-loader-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pf-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: pfSpin 0.75s linear infinite;
+  display: inline-block;
+}
+
+@keyframes pfSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── ERROR ── */
+.pf-error {
+  font-size: 13px;
+  color: #f87171;
+  margin: 0;
+  padding: 10px 14px;
+  background: rgba(248,113,113,0.08);
+  border: 1px solid rgba(248,113,113,0.2);
+  border-radius: 10px;
+}

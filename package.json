@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@hello-pangea/dnd": "^18.0.1",
+    "axios": "^1.13.6",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "firebase": "^12.10.0",
+    "firebase-admin": "^13.7.0",
+    "openai": "^6.27.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.13.1"
+  }
+}
