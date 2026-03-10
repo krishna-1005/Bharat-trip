@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import "../styles/travelBot.css";
+const API = import.meta.env.VITE_API_URL;
 
 export default function TravelBot({ isOpen, setIsOpen }) {
   const [messages, setMessages] = useState([
@@ -30,7 +31,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
     setTyping(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/chat", {
+      const res = await fetch(`${API}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: messageToSend })

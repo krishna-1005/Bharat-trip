@@ -12,6 +12,12 @@ router.post("/", async (req, res) => {
 
   const { message } = req.body;
 
+  if (!message || typeof message !== "string") {
+    return res.json({
+      reply: "Please type a message."
+    });
+  }
+
   try {
 
     const msg = message.toLowerCase();
