@@ -187,7 +187,10 @@ function Results() {
 
       setSaved(true);
 
-      setTimeout(() => setSaved(false), 3000);
+      /* redirect to profile after saving */
+      setTimeout(() => {
+        navigate("/profile");
+      }, 1200);
 
     } catch {
 
