@@ -1,59 +1,49 @@
-// const mongoose = require("mongoose");
-// const bcrypt = require("bcryptjs");
-
-// const userSchema = new mongoose.Schema(
-//   {
-//     name: { type: String, required: true, trim: true },
-//     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-//     password: { type: String, required: false, minlength: 6, select: false },
-//     bio: { type: String, default: "Adventure seeker & digital nomad" },
-//     savedPlaces: [
-//       {
-//         name: String,
-//         tag: String,
-//         img: String,
-//       }
-//     ],
-//   },
-//   { timestamps: true }
-// );
-
-// userSchema.pre("save", async function () {
-
-//   if (!this.isModified("password")) return;
-
-//   this.password = await bcrypt.hash(this.password, 12);
-
-// });
-
-// userSchema.methods.comparePassword = async function (candidate) {
-//   return bcrypt.compare(candidate, this.password);
-// };
-
-// userSchema.methods.toJSON = function () {
-//   const obj = this.toObject();
-//   delete obj.password;
-//   return obj;
-// };
-
-// module.exports = mongoose.model("User", userSchema);
-
-
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema({
-  name: String,
+const userSchema = new mongoose.Schema(
+{
+  name: {
+    type: String,
+    required: true
+  },
+
   email: {
     type: String,
     required: true,
     unique: true
   },
+
+  password: {
+    type: String,
+    required: true,
+    select: false
+  },
+
   firebaseUid: {
     type: String,
-    required: true
-  },
-  photo: String,
-  savedPlaces: []
-}, { timestamps: true });
+    default: null
+  }
+
+},
+{ timestamps: true }
+);
+
+/* Hash password before saving */
+userSchema.pre("save", async function(next) {
+
+  if (!this.isModified("password")) return next();
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+
+  next();
+
+});
+
+/* Compare password during login */
+userSchema.methods.comparePassword = async function(password) {
+  return bcrypt.compare(password, this.password);
+};
 
 module.exports = mongoose.model("User", userSchema);
