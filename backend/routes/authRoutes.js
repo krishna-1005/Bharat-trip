@@ -36,10 +36,10 @@ router.post("/signup", async (req, res) => {
       token,
       user: { id: user._id, name: user.name, email: user.email },
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error." });
-  }
+    } catch (err) {
+      console.error("Signup error:", err);
+      res.status(500).json({ error: err.message });
+    }
 });
 
 /* ── LOGIN ── */
