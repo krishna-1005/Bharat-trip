@@ -20,8 +20,10 @@ const userSchema = new mongoose.Schema(
     select: false
   },
 
+  /* IMPORTANT FIX */
   firebaseUid: {
     type: String,
+    required: false,
     default: null
   }
 
@@ -38,7 +40,6 @@ userSchema.pre("save", async function(next){
   this.password = await bcrypt.hash(this.password, salt);
 
   next();
-
 });
 
 /* Compare password */
