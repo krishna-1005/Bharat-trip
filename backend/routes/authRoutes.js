@@ -9,8 +9,9 @@ const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
 /* ── SIGNUP ── */
-router.post("/signup", async (req, res) => {
+router.post("/signup", async (req, res, next) => {
   try {
+
     const { name, email, password } = req.body;
 
     if (!name || !email || !password)
@@ -40,9 +41,10 @@ router.post("/signup", async (req, res) => {
 
   } catch (err) {
     console.error("Signup error:", err);
-    res.status(500).json({ error: err.message });
+    next(err);   // ← important
   }
 });
+
 
 /* ── CHANGE PASSWORD ── */
 router.put("/change-password", protect, async (req, res) => {
