@@ -12,16 +12,18 @@ function Signup() {
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
 
+  const API = import.meta.env.VITE_API_URL;
+
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
-        method:  "POST",
+      const res = await fetch(`${API}/api/auth/signup`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await res.json();
@@ -31,12 +33,11 @@ function Signup() {
         return;
       }
 
-      // store user properly via AuthContext
       login({ ...data.user, token: data.token });
       navigate("/");
-
     } catch (err) {
-      setError("Cannot connect to server. Make sure backend is running.");
+      console.error(err);
+      setError("Cannot connect to server.");
     } finally {
       setLoading(false);
     }
