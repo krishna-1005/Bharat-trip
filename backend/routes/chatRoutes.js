@@ -28,22 +28,18 @@ router.post("/", async (req, res) => {
       days = parseInt(dayMatch[1]);
     }
 
-    /* limit days to avoid crazy numbers */
-    if (days > 7) days = 7;
+    if (days > 5) days = 5;
 
     /* ───── Budget detection ───── */
 
-    if (msg.includes("low") || msg.includes("cheap") || msg.includes("budget")) {
+    if (msg.includes("low") || msg.includes("cheap") || msg.includes("budget"))
       budget = "low";
-    }
 
-    if (msg.includes("medium") || msg.includes("comfort")) {
+    if (msg.includes("medium") || msg.includes("comfort"))
       budget = "medium";
-    }
 
-    if (msg.includes("high") || msg.includes("luxury")) {
+    if (msg.includes("high") || msg.includes("luxury"))
       budget = "high";
-    }
 
     /* ───── Interest detection ───── */
 
@@ -52,17 +48,12 @@ router.post("/", async (req, res) => {
     if (msg.includes("culture")) interests.push("Culture");
     if (msg.includes("temple")) interests.push("Spiritual");
     if (msg.includes("adventure")) interests.push("Adventure");
-    
-    if (interests.length === 0) {
-      interests = ["Nature", "Food", "Culture"];
-    }
 
-    /* fallback interests if user gives none */
     if (interests.length === 0) {
       interests = ["Nature", "Food", "Culture", "Adventure"];
     }
 
-    /* ───── If message asks for trip plan ───── */
+    /* ───── Trip planner trigger ───── */
 
     if (
       msg.includes("trip") ||
@@ -92,10 +83,9 @@ router.post("/", async (req, res) => {
 
       }
 
-      /* safety fallback */
       if (!plan || !plan.itinerary) {
         return res.json({
-          reply: "I couldn't generate a plan for that. Try adding interests like nature, food, or culture."
+          reply: "I couldn't generate a plan. Try adding interests like nature or food."
         });
       }
 
@@ -105,7 +95,7 @@ router.post("/", async (req, res) => {
 
     }
 
-    /* ───── Otherwise normal AI chat ───── */
+    /* ───── Normal AI chat ───── */
 
     const chat = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
