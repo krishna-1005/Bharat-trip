@@ -8,20 +8,40 @@ function PlannerForm({ onPlanGenerated }) {
   const [interests, setInterests] = useState([]);
   const [plan, setPlan]           = useState(null);
   const [loading, setLoading]     = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async () => {
-    setLoading(true);
-    setPlan(null);
-    try {
-      const result = await generatePlan({ days, budget, interests });
-      setPlan(result);
-      if (onPlanGenerated && result?.itinerary) onPlanGenerated(result);
-    } catch {
-      setPlan({ message: "Something went wrong. Try again." });
-    } finally {
-      setLoading(false);
+
+  if (interests.length === 0) {
+    setError("Please select at least one interest.");
+    return;
+  }
+
+  setError("");
+  setLoading(true);
+  setPlan(null);
+
+  try {
+
+    const result = await generatePlan({ days, budget, interests });
+
+    setPlan(result);
+
+    if (onPlanGenerated && result?.itinerary) {
+      onPlanGenerated(result);
     }
-  };
+
+  } catch {
+
+    setPlan({ message: "Something went wrong. Try again." });
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
 
   const toggleInterest = (value) => {
     setInterests(prev =>
@@ -92,7 +112,7 @@ function PlannerForm({ onPlanGenerated }) {
         <label className="pf-label">
           <span>✨</span> Interests
         </label>
-        <div className="pf-interest-row">
+        <div className={`pf-interest-row ${error ? "pf-error-border" : ""}`}>
           {interestOptions.map(opt => (
             <button
               key={opt.value}
@@ -125,6 +145,10 @@ function PlannerForm({ onPlanGenerated }) {
         )}
       </button>
 
+      {error && (
+        <p className="pf-error-message">{error}</p>
+      )}
+      
       {plan?.message && (
         <p className="pf-error">{plan.message}</p>
       )}
