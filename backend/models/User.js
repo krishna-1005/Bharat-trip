@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
+console.log("User model loaded v2");
+
 const userSchema = new mongoose.Schema(
 {
   name: {
