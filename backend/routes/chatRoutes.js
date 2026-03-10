@@ -20,7 +20,7 @@ router.post("/", async (req, res) => {
     let budget = "low";
     let interests = [];
 
-    /* ───── Detect number of days ───── */
+    /* -------- Detect days -------- */
 
     const dayMatch = msg.match(/(\d+)\s*day/);
 
@@ -28,32 +28,45 @@ router.post("/", async (req, res) => {
       days = parseInt(dayMatch[1]);
     }
 
+    if (msg.includes("weekend")) days = 2;
+
+    if (msg.includes("tomorrow")) days = 1;
+
     if (days > 5) days = 5;
 
-    /* ───── Budget detection ───── */
+    /* -------- Budget detection -------- */
 
-    if (msg.includes("low") || msg.includes("cheap") || msg.includes("budget"))
+    if (msg.includes("cheap") || msg.includes("budget") || msg.includes("low"))
       budget = "low";
 
     if (msg.includes("medium") || msg.includes("comfort"))
       budget = "medium";
 
-    if (msg.includes("high") || msg.includes("luxury"))
+    if (msg.includes("luxury") || msg.includes("high"))
       budget = "high";
 
-    /* ───── Interest detection ───── */
+    /* -------- Interest detection -------- */
 
-    if (msg.includes("nature")) interests.push("Nature");
-    if (msg.includes("food")) interests.push("Food");
-    if (msg.includes("culture")) interests.push("Culture");
-    if (msg.includes("temple")) interests.push("Spiritual");
-    if (msg.includes("adventure")) interests.push("Adventure");
+    if (msg.includes("nature") || msg.includes("park") || msg.includes("lake"))
+      interests.push("Nature");
+
+    if (msg.includes("food") || msg.includes("restaurant") || msg.includes("cafe"))
+      interests.push("Food");
+
+    if (msg.includes("culture") || msg.includes("museum") || msg.includes("heritage"))
+      interests.push("Culture");
+
+    if (msg.includes("temple") || msg.includes("spiritual"))
+      interests.push("Spiritual");
+
+    if (msg.includes("adventure") || msg.includes("trek"))
+      interests.push("Adventure");
 
     if (interests.length === 0) {
-      interests = ["Nature", "Food", "Culture", "Adventure"];
+      interests = ["Nature", "Food", "Culture"];
     }
 
-    /* ───── Trip planner trigger ───── */
+    /* -------- Trip planner trigger -------- */
 
     if (
       msg.includes("trip") ||
@@ -95,7 +108,7 @@ router.post("/", async (req, res) => {
 
     }
 
-    /* ───── Normal AI chat ───── */
+    /* -------- Normal AI chat -------- */
 
     const chat = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
