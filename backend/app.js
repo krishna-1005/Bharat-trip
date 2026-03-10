@@ -36,4 +36,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/trips", tripRoutes);
 
+app.get("/", (req, res) => {
+  res.json({
+    status: "Bharat Trip API running 🚀"
+  });
+});
+
 module.exports = app;
