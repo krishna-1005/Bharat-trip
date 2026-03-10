@@ -55,7 +55,7 @@ router.post("/", async (req, res) => {
 
     /* fallback interests if user gives none */
     if (interests.length === 0) {
-      interests = ["Culture", "Nature"];
+      interests = ["Nature", "Food", "Culture", "Adventure"];
     }
 
     /* ───── If message asks for trip plan ───── */
@@ -71,6 +71,13 @@ router.post("/", async (req, res) => {
         budget,
         interests
       });
+
+      /* safety fallback */
+      if (!plan || !plan.itinerary) {
+        return res.json({
+          reply: "I couldn't generate a plan for that. Try adding interests like nature, food, or culture."
+        });
+      }
 
       console.log("Generated plan:", plan);
 
