@@ -10,7 +10,11 @@ function filterPlaces(budget, interests) {
     const budgetMatch = !budget || place.budget === budget;
 
     const interestMatch =
-      !interests || interests.includes(place.category);
+      !interests ||
+      interests.length === 0 ||
+      interests
+        .map(i => i.toLowerCase())
+        .includes(place.category.toLowerCase());
 
     return budgetMatch && interestMatch;
 
@@ -24,14 +28,10 @@ function generatePlan({ days, budget, interests }) {
   const filtered = filterPlaces(budget, interests);
 
   /* If no places found */
-  if (filtered.length === 0) {
-    return {
-      city: "Bengaluru",
-      days,
-      budget,
-      totalTripCost: 0,
-      itinerary: {}
-    };
+  let filteredPlaces = filtered;
+
+  if (filteredPlaces.length === 0) {
+    filteredPlaces = places;
   }
 
   const itinerary = {};
@@ -50,7 +50,7 @@ function generatePlan({ days, budget, interests }) {
   let dayIndex = 1;
 
   /* Distribute places across days */
-  for (let place of filtered) {
+  for (let place of filteredPlaces) {
 
     const dayKey = `Day ${dayIndex}`;
     const day = itinerary[dayKey];
