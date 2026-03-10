@@ -68,11 +68,17 @@ router.post("/", async (req, res) => {
 
     /* -------- Trip planner trigger -------- */
 
-    if (
+    const travelIntent =
       msg.includes("trip") ||
       msg.includes("plan") ||
-      msg.includes("itinerary")
-    ) {
+      msg.includes("itinerary") ||
+      msg.includes("places") ||
+      msg.includes("visit") ||
+      msg.includes("tour") ||
+      msg.includes("bangalore") ||
+      msg.includes("bengaluru");
+
+    if (travelIntent) {
 
       let plan;
 
