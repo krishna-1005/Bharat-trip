@@ -1,238 +1,214 @@
 import { useNavigate, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSettings } from "../context/SettingsContext";
 import "./home.css";
 import img1 from "../assets/images/img1.webp";
-// import img2 from "../assets/images/img2.webp";
+import img2 from "../assets/images/img2.webp";
 import img3 from "../assets/images/img3.webp";
 import img4 from "../assets/images/img4.webp";
-// import img5 from "../assets/images/img5.webp";
+import img5 from "../assets/images/img5.webp";
+import img6 from "../assets/images/img6.png";
 import TravelBot from "../components/TravelBot";
+import ThreeScene from "../components/ThreeScene";
 
 function Home() {
   const navigate = useNavigate();
   const { t } = useSettings();
   const [hoveredCard, setHoveredCard] = useState(null);
   const [chatOpen, setChatOpen] = useState(false);
+  const heroRef = useRef(null);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
-      document.documentElement.style.setProperty("--mouse-x", `${e.clientX}px`);
-      document.documentElement.style.setProperty("--mouse-y", `${e.clientY}px`);
+      const { clientX, clientY } = e;
+      const x = (clientX / window.innerWidth - 0.5) * 20;
+      const y = (clientY / window.innerHeight - 0.5) * 20;
+      
+      document.documentElement.style.setProperty("--mouse-x", `${clientX}px`);
+      document.documentElement.style.setProperty("--mouse-y", `${clientY}px`);
+      document.documentElement.style.setProperty("--parallax-x", `${x}px`);
+      document.documentElement.style.setProperty("--parallax-y", `${y}px`);
     };
+    
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  const scrollToSection = (id) => {
-    const section = document.getElementById(id);
-    if (section) {
-      const yOffset = -80;
-      const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
-
   return (
     <div className="home">
+      {/* ── 3D BACKGROUND ── */}
+      <div className="hero-3d-bg">
+        <ThreeScene />
+      </div>
 
-      {/* ── HERO ── */}
+      {/* ── HERO SECTION ── */}
       <section id="home" className="hero">
-
-        {/* LEFT TEXT */}
+        
+        {/* LEFT TEXT CONTENT */}
         <div className="hero-text">
-          <span className="badge">
-            <span className="badge-dot">◉</span> AI-POWERED TRAVEL V2.0
-          </span>
+          <div className="hero-content-reveal">
+            <span className="premium-badge">
+              <span className="pulse-dot"></span>
+              NEXT-GEN AI TRAVEL
+            </span>
 
-          <h1>
-            {t("home_hero_title")}
-          </h1>
+            <h1 className="main-title">
+              {t("home_hero_title").split(" ").map((word, i) => (
+                <span key={i} className="title-word">{word} </span>
+              ))}
+            </h1>
 
-          <p>
-            {t("home_hero_sub")}
-          </p>
+            <p className="hero-description">
+              {t("home_hero_sub")}
+            </p>
 
-          <div className="hero-actions">
-            <button className="primary" onClick={() => navigate("/planner")}>
-              {t("plan_trip_btn")} →
-            </button>
-            <Link to="/sample-plan">
-              <button className="secondary">{t("view_samples_btn")}</button>
-            </Link>
-          </div>
-
-          <div className="social-proof">
-            <div className="avatars">
-              <div className="av av1"></div>
-              <div className="av av2"></div>
-              <div className="av av3"></div>
-              <div className="av av4"></div>
+            <div className="hero-actions">
+              <button className="btn-premium-primary" onClick={() => navigate("/planner")}>
+                <span className="btn-text">{t("plan_trip_btn")}</span>
+                <span className="btn-icon">→</span>
+              </button>
+              <Link to="/sample-plan" className="btn-premium-outline">
+                {t("view_samples_btn")}
+              </Link>
             </div>
-            <span><strong>5,000+</strong> travelers planned today</span>
+
+            <div className="trust-meter">
+              <div className="avatars-group">
+                {[1,2,3,4].map(i => <div key={i} className={`avatar-pill av-${i}`}></div>)}
+                <div className="avatar-count">+12k</div>
+              </div>
+              <span className="trust-text">Trusted by 12,000+ explorers worldwide</span>
+            </div>
           </div>
         </div>
 
-        {/* RIGHT CARDS */}
-        <div className="hero-image">
-          <div className="hero-image-wrapper">
-
-            {/* Cubbon Park – top left, tallest */}
-            <div
-              className={`place-card pc-cubbon ${hoveredCard === "cubbon" ? "card-hovered" : ""}`}
-              onMouseEnter={() => setHoveredCard("cubbon")}
+        {/* RIGHT INTERACTIVE IMAGE GALLERY */}
+        <div className="hero-visual">
+          <div className="gallery-container">
+            
+            {/* Main Centerpiece */}
+            <div 
+              className={`gallery-card main-feat ${hoveredCard === 'main' ? 'active' : ''}`}
+              onMouseEnter={() => setHoveredCard('main')}
               onMouseLeave={() => setHoveredCard(null)}
             >
-              <div className="card-img-wrap">
+              <img src={img6} alt="Vibrant Bangalore" />
+              <div className="card-overlay">
+                <span className="card-tag">Featured</span>
+                <h4>Vidhana Soudha</h4>
+              </div>
+            </div>
+
+            {/* Floating Cards */}
+            <div className="floating-elements">
+              <div className="float-card c1">
                 <img src={img1} alt="Cubbon Park" />
-                <div className="card-img-overlay"></div>
+                <div className="mini-label">Nature</div>
               </div>
-              <div className="place-info">
-                <h4>Cubbon Park</h4>
-                <div className="rating-row">
-                  <span className="star">★</span>
-                  <span className="rating-val">4.8</span>
-                </div>
+              <div className="float-card c2">
+                <img src={img2} alt="Iskcon" />
+                <div className="mini-label">Spiritual</div>
               </div>
-              <div className="place-meta">
-                <span>🕐 2–3h</span>
-                <span>🎟 ₹0</span>
-              </div>
-            </div>
-
-            {/* Nandi Hills – top right */}
-            <div
-              className={`place-card pc-nandi ${hoveredCard === "nandi" ? "card-hovered" : ""}`}
-              onMouseEnter={() => setHoveredCard("nandi")}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <div className="card-img-wrap">
+              <div className="float-card c3">
                 <img src={img3} alt="Nandi Hills" />
-                <div className="card-img-overlay"></div>
+                <div className="mini-label">Adventure</div>
               </div>
-              <div className="place-info">
-                <h4>Nandi Hills</h4>
-                <div className="rating-row">
-                  <span className="star">★</span>
-                  <span className="rating-val">4.7</span>
-                </div>
-              </div>
-              <div className="place-meta">
-                <span>🕐 4–5h</span>
-                <span>🎟 ₹100</span>
+              <div className="float-card c4">
+                <img src={img5} alt="Nightlife" />
+                <div className="mini-label">Nightlife</div>
               </div>
             </div>
 
-            {/* Lalbagh – bottom center */}
-            <div
-              className={`place-card pc-lalbagh ${hoveredCard === "lalbagh" ? "card-hovered" : ""}`}
-              onMouseEnter={() => setHoveredCard("lalbagh")}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <div className="card-img-wrap">
-                <img src={img4} alt="Lalbagh" />
-                <div className="card-img-overlay"></div>
-              </div>
-              <div className="place-info">
-                <h4>Lalbagh</h4>
-                <div className="rating-row">
-                  <span className="star">★</span>
-                  <span className="rating-val">4.6</span>
-                </div>
-              </div>
-              <div className="place-meta">
-                <span>🕐 2h</span>
-                <span>🎟 ₹25</span>
-              </div>
-            </div>
-
+            {/* Decorative Elements */}
+            <div className="decor-circle"></div>
+            <div className="decor-grid"></div>
           </div>
         </div>
       </section>
+
+      {/* ── STATS STRIP ── */}
+      <div className="stats-strip">
+        <div className="stat-item">
+          <span className="stat-num">42k+</span>
+          <span className="stat-label">Locations</span>
+        </div>
+        <div className="stat-divider"></div>
+        <div className="stat-item">
+          <span className="stat-num">98%</span>
+          <span className="stat-label">Accuracy</span>
+        </div>
+        <div className="stat-divider"></div>
+        <div className="stat-item">
+          <span className="stat-num">2sec</span>
+          <span className="stat-label">Generation</span>
+        </div>
+      </div>
 
       {/* ── HOW IT WORKS ── */}
       <section id="how-it-works" className="how-it-works">
-        <div className="how-header">
-          <h2>Everything you need<br />to travel like a <span className="highlight">Pro</span></h2>
-          <p className="section-subtitle">
-            Our AI simplifies every step of your journey, from landing to departure.
-          </p>
+        <div className="section-head">
+          <h2 className="reveal-text">Plan Smarter, <span className="gradient-text">Travel Better</span></h2>
+          <p>Everything you need to navigate India's most dynamic city.</p>
         </div>
-        <div className="how-grid">
-          <div className="how-card">
-            <div className="how-card-icon blue-icon">✦</div>
-            <h3>AI Trip Planning</h3>
-            <p>Tell us your vibe and preferences. Our LLM-powered engine crafts personalized itineraries in seconds.</p>
+        <div className="features-grid">
+          <div className="feature-premium-card">
+            <div className="card-glass-effect"></div>
+            <div className="feat-icon">⚡</div>
+            <h3>Instant Itinerary</h3>
+            <p>Our LLM analyzes millions of data points to create your perfect day-by-day plan.</p>
           </div>
-          <div className="how-card">
-            <div className="how-card-icon orange-icon">◎</div>
-            <h3>Budget Estimator</h3>
-            <p>Stay on track with real-time cost analysis including transit, tickets, and dining for your specific route.</p>
+          <div className="feature-premium-card">
+            <div className="card-glass-effect"></div>
+            <div className="feat-icon">📊</div>
+            <h3>Real-time Budgets</h3>
+            <p>No more surprises. Get accurate estimates for entry fees, transport, and meals.</p>
           </div>
-          <div className="how-card">
-            <div className="how-card-icon cyan-icon">⬡</div>
-            <h3>Smart Route Optimization</h3>
-            <p>Avoid traffic jams. We find the most efficient sequence to see your favorite spots using local transit data.</p>
+          <div className="feature-premium-card">
+            <div className="card-glass-effect"></div>
+            <div className="feat-icon">🗺️</div>
+            <h3>Route Optimization</h3>
+            <p>Smart sequencing that avoids traffic hotspots and maximizes your sightseeing time.</p>
           </div>
-        </div>
-      </section>
-
-      {/* ── WHY CHOOSE ── */}
-      <section id="why-choose" className="why-choose">
-        <h2>Why Choose Bharat Trip?</h2>
-        <div className="why-grid">
-          <div className="why-card"><div className="small-icon">🛡️</div><h4>Curated by Experts</h4></div>
-          <div className="why-card"><div className="small-icon">💰</div><h4>Budget Friendly</h4></div>
-          <div className="why-card"><div className="small-icon">⏱️</div><h4>Time Saving</h4></div>
-          <div className="why-card"><div className="small-icon">📞</div><h4>24/7 Support</h4></div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="cta">
-        <h2>Ready to explore Bengaluru like never before?</h2>
-        <p>Join thousands of travelers using AI to make their trips stress-free and memorable.</p>
-        <div className="hero-actions">
-          <button className="primary" onClick={() => navigate("/planner")}>Plan My First Trip</button>
-          <button className="secondary" onClick={() => setChatOpen(true)}>Talk to an Agent</button>
+      {/* ── CTA SECTION ── */}
+      <section className="cta-premium">
+        <div className="cta-glow"></div>
+        <div className="cta-content">
+          <h2>Ready for your next adventure?</h2>
+          <p>Join the community of travelers redefining how India is explored.</p>
+          <button className="btn-cta" onClick={() => navigate("/planner")}>Get Started Now</button>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer id="footer" className="footer">
-        <div className="footer-grid">
-          <div>
+      <footer className="premium-footer">
+        <div className="footer-main">
+          <div className="footer-brand">
             <h3>Bharat Trip</h3>
-            <p>Redefining travel planning for the modern Indian explorer.</p>
+            <p>Crafting memories across the Indian subcontinent with cutting-edge AI.</p>
           </div>
-          <div>
-            <h4>Quick Links</h4>
-            <ul>
-              <li><Link to="/destinations">Popular Destinations</Link></li>
-              <li><Link to="/weekend">Weekend Getaways</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4>Support</h4>
-            <ul>
-              <li><Link to="/contact">Contact Us</Link></li>
-              <li><Link to="/privacy">Privacy Policy</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4>Newsletter</h4>
-            <div className="newsletter">
-              <input type="email" placeholder="Email address" />
-              <button>→</button>
+          <div className="footer-links">
+            <div className="link-col">
+              <h4>Company</h4>
+              <Link to="/about">About Us</Link>
+              <Link to="/destinations">Destinations</Link>
+            </div>
+            <div className="link-col">
+              <h4>Support</h4>
+              <Link to="/contact">Help Center</Link>
+              <Link to="/privacy">Privacy</Link>
             </div>
           </div>
         </div>
-        <div className="footer-bottom">© 2024 BharatTrip AI. Crafted for India's digital travelers.</div>
+        <div className="footer-bottom">
+          <span>© 2024 BharatTrip AI • Designed for the modern explorer</span>
+        </div>
       </footer>
 
-      {/* ── CHATBOT ── */}
+      {/* CHATBOT */}
       <TravelBot isOpen={chatOpen} setIsOpen={setChatOpen} />
-
     </div>
   );
 }
