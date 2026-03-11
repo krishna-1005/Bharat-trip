@@ -16,7 +16,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://bharat-trip-opal.vercel.app"
+      "https://bharat-trip-opal.vercel.app",
+      "https://*.vercel.app"
     ],
     credentials: true
   })
