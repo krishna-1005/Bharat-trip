@@ -14,6 +14,7 @@ router.post("/", async (req, res) => {
 
   if (!message || typeof message !== "string") {
     return res.json({
+      type: "chat",
       reply: "Please type a message."
     });
   }
@@ -69,7 +70,7 @@ router.post("/", async (req, res) => {
       interests.push("Adventure");
 
     if (interests.length === 0) {
-      interests = ["Nature", "Food", "Culture"];
+      interests = ["Nature", "Food"];
     }
 
     /* -------- Trip planner trigger -------- */
@@ -108,15 +109,20 @@ router.post("/", async (req, res) => {
 
       }
 
-      if (!plan || !plan.itinerary) {
+      if (!plan || !plan.itinerary || Object.keys(plan.itinerary).length === 0) {
         return res.json({
+          type: "chat",
           reply: "I couldn't generate a plan. Try adding interests like nature or food."
         });
       }
 
       console.log("Generated plan:", plan);
 
-      return res.json({ plan });
+      return res.json({
+        type: "trip",
+        message: `Here's a ${days}-day ${budget} trip plan for Bengaluru.`,
+        plan
+      });
 
     }
 
@@ -137,6 +143,7 @@ router.post("/", async (req, res) => {
     });
 
     res.json({
+      type: "chat",
       reply: chat.choices[0].message.content
     });
 
@@ -145,6 +152,7 @@ router.post("/", async (req, res) => {
     console.error(error);
 
     res.status(500).json({
+      type: "chat",
       reply: "Server error"
     });
 
