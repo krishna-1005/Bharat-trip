@@ -1,35 +1,23 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, signOut } from "firebase/auth";
+import { useSettings } from "../context/SettingsContext";
 import "../styles/settings.css";
 
 export default function Settings() {
   const navigate = useNavigate();
   const auth = getAuth();
   
-  // State for toggles - Initialize from localStorage
-  const [emailAlerts, setEmailAlerts] = useState(() => {
-    const saved = localStorage.getItem("settings_emailAlerts");
-    return saved !== null ? JSON.parse(saved) : true;
-  });
-  
-  const [tripReminders, setTripReminders] = useState(() => {
-    const saved = localStorage.getItem("settings_tripReminders");
-    return saved !== null ? JSON.parse(saved) : true;
-  });
-  
-  const [promoOffers, setPromoOffers] = useState(() => {
-    const saved = localStorage.getItem("settings_promoOffers");
-    return saved !== null ? JSON.parse(saved) : false;
-  });
-  
-  const [currency, setCurrency] = useState(() => {
-    return localStorage.getItem("settings_currency") || "INR";
-  });
-  
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem("settings_language") || "English";
-  });
+  // Use Global Settings Context
+  const { 
+    currency, setCurrency, 
+    language, setLanguage 
+  } = useSettings();
+
+  // Load toggles from local storage since they are simple
+  const getInitialToggle = (key, def) => {
+    const saved = localStorage.getItem(key);
+    return saved !== null ? JSON.parse(saved) : def;
+  };
 
   const handleLogout = async () => {
     try {
@@ -42,13 +30,6 @@ export default function Settings() {
   };
 
   const handleSave = () => {
-    // Save all current states to localStorage
-    localStorage.setItem("settings_emailAlerts", JSON.stringify(emailAlerts));
-    localStorage.setItem("settings_tripReminders", JSON.stringify(tripReminders));
-    localStorage.setItem("settings_promoOffers", JSON.stringify(promoOffers));
-    localStorage.setItem("settings_currency", currency);
-    localStorage.setItem("settings_language", language);
-    
     alert("Settings saved successfully!");
   };
 
@@ -56,7 +37,6 @@ export default function Settings() {
     const confirm = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
     if (confirm) {
       alert("Account deletion request submitted. Support will contact you shortly.");
-      // Actual deletion logic would go here
     }
   };
 
@@ -123,8 +103,8 @@ export default function Settings() {
                 <label className="toggle-switch">
                   <input 
                     type="checkbox" 
-                    checked={emailAlerts} 
-                    onChange={() => setEmailAlerts(!emailAlerts)} 
+                    defaultChecked={getInitialToggle("settings_emailAlerts", true)}
+                    onChange={(e) => localStorage.setItem("settings_emailAlerts", e.target.checked)} 
                   />
                   <span className="slider"></span>
                 </label>
@@ -138,23 +118,8 @@ export default function Settings() {
                 <label className="toggle-switch">
                   <input 
                     type="checkbox" 
-                    checked={tripReminders} 
-                    onChange={() => setTripReminders(!tripReminders)} 
-                  />
-                  <span className="slider"></span>
-                </label>
-              </div>
-
-              <div className="setting-item">
-                <div className="setting-info">
-                  <label>Promotional Offers</label>
-                  <span>Receive marketing and discount emails</span>
-                </div>
-                <label className="toggle-switch">
-                  <input 
-                    type="checkbox" 
-                    checked={promoOffers} 
-                    onChange={() => setPromoOffers(!promoOffers)} 
+                    defaultChecked={getInitialToggle("settings_tripReminders", true)}
+                    onChange={(e) => localStorage.setItem("settings_tripReminders", e.target.checked)} 
                   />
                   <span className="slider"></span>
                 </label>
@@ -173,13 +138,6 @@ export default function Settings() {
                   <span>Change your account password</span>
                 </div>
                 <button className="setting-btn outline">Update Password</button>
-              </div>
-              <div className="setting-item">
-                <div className="setting-info">
-                  <label>Two-Factor Authentication</label>
-                  <span>Add an extra layer of security</span>
-                </div>
-                <button className="setting-btn outline">Enable 2FA</button>
               </div>
             </div>
           </section>

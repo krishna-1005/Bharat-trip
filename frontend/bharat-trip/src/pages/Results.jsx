@@ -5,12 +5,14 @@ import "./results.css";
 import { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { getAuth } from "firebase/auth";
+import { useSettings } from "../context/SettingsContext";
 const API = import.meta.env.VITE_API_URL;
 
 function Results() {
 
   const navigate = useNavigate();
   const loc = useLocation();
+  const { formatPrice } = useSettings();
 
   const [plan, setPlan] = useState(() => {
     if (loc.state?.plan) {
@@ -232,7 +234,7 @@ function Results() {
         <div className="res-map-pill">
 
           <div className="res-pill-stat">
-            <span className="res-pill-val">₹{totalTripCost}</span>
+            <span className="res-pill-val">{formatPrice(totalTripCost)}</span>
             <span className="res-pill-label">Total Cost</span>
           </div>
 
@@ -297,7 +299,7 @@ function Results() {
 
           <div className="res-panel-title-row">
             <h2>Your Itinerary</h2>
-            <span className="res-cost-badge">₹{totalTripCost}</span>
+            <span className="res-cost-badge">{formatPrice(totalTripCost)}</span>
           </div>
 
           <p className="res-panel-sub">
@@ -390,7 +392,7 @@ function Results() {
 
                       <div className="res-day-meta">
                         <span>⏱ {d.estimatedHours}h</span>
-                        <span>💰 ₹{d.estimatedCost}</span>
+                        <span>💰 {formatPrice(d.estimatedCost)}</span>
                       </div>
 
                     </div>
@@ -432,7 +434,7 @@ function Results() {
 
                                   {p.estimatedCost > 0 && (
                                     <span className="res-place-cost">
-                                      ₹{p.estimatedCost}
+                                      {formatPrice(p.estimatedCost)}
                                     </span>
                                   )}
 

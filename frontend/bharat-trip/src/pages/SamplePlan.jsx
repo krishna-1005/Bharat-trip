@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSettings } from "../context/SettingsContext";
 import "./results.css";
 
 import img2 from "../assets/images/img2.webp";
@@ -65,6 +66,8 @@ export default function SamplePlan() {
   ];
 
   const FILTERS = ["All Plans", "Nature", "Heritage", "Adventure", "Nightlife"];
+
+  const { formatPrice } = useSettings();
 
   const filtered =
     activeFilter === "All Plans"
@@ -179,7 +182,7 @@ export default function SamplePlan() {
               </div>
               <div className="sp-card-meta">
                 <span className="sp-meta-item">{trip.days.length} Days</span>
-                <span className="sp-total-price">₹{trip.total}</span>
+                <span className="sp-total-price">{formatPrice(trip.total)}</span>
               </div>
               <div className="sp-card-actions">
                 <button className="sp-view-btn" onClick={() => setModalTrip(trip)}>Details</button>
@@ -204,7 +207,7 @@ export default function SamplePlan() {
                   <div className="sp-modal-day" key={i}>
                     <div className="sp-modal-day-header">
                       <span>{d.day}</span>
-                      <span>₹{d.cost}</span>
+                      <span>{formatPrice(d.cost)}</span>
                     </div>
                     <div className="sp-modal-places">
                       {d.places.map((p, idx) => (

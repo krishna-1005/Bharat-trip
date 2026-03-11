@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { useSettings } from "../context/SettingsContext";
 import "../styles/profile.css";
 
 const API = import.meta.env.VITE_API_URL;
@@ -17,6 +18,7 @@ const getToken = async () => {
 export default function Profile() {
 
   const navigate = useNavigate();
+  const { formatPrice } = useSettings();
 
   const [dbTrips, setDbTrips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -242,7 +244,7 @@ export default function Profile() {
                 <h3 className="pro-trip-title">{trip.title}</h3>
 
                 <div className="pro-trip-meta">
-                  📍 {trip.location} • {trip.days} days • ₹{trip.totalCost}
+                  📍 {trip.location} • {trip.days} days • {formatPrice(trip.totalCost)}
                 </div>
               </div>
 
