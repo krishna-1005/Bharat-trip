@@ -74,6 +74,7 @@ export default function Profile() {
         budget: t.budget,
         days: t.days,
         totalCost: t.totalTripCost,
+        itinerary: t.itinerary,
         img:
           t.image ||
           "https://images.unsplash.com/photo-1580752300992-559f8e0734e0?w=600&q=80",
@@ -86,6 +87,35 @@ export default function Profile() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewOnMap = (trip) => {
+    // Results page expects itinerary as an object { "Day 1": {...}, "Day 2": {...} }
+    // but MongoDB stores it as an array [{day: "Day 1", ...}, ...]
+    
+    const itineryObj = {};
+    if (Array.isArray(trip.itinerary)) {
+      trip.itinerary.forEach((d, idx) => {
+        const key = d.day || `Day ${idx + 1}`;
+        itineryObj[key] = {
+          places: d.places,
+          estimatedCost: d.estimatedCost,
+          estimatedHours: d.estimatedHours,
+          color: ["#3b82f6","#10b981","#f59e0b","#ef4444"][idx % 4]
+        };
+      });
+    }
+
+    const planData = {
+      city: trip.location,
+      days: trip.days,
+      itinerary: Object.keys(itineryObj).length > 0 ? itineryObj : trip.itinerary,
+      totalTripCost: trip.totalCost,
+      isSaved: true
+    };
+
+    localStorage.setItem("tripPlan", JSON.stringify(planData));
+    navigate("/results", { state: { plan: planData } });
   };
 
 
@@ -246,11 +276,16 @@ export default function Profile() {
                 <div className="pro-trip-meta">
                   📍 {trip.location} • {trip.days} days • {formatPrice(trip.totalCost)}
                 </div>
-              </div>
 
-              <button onClick={() => deleteTrip(trip.id)}>
-                Delete
-              </button>
+                <div className="pro-trip-actions">
+                  <button className="pro-map-btn" onClick={() => handleViewOnMap(trip)}>
+                    🗺️ View on Map
+                  </button>
+                  <button className="pro-del-btn" onClick={() => deleteTrip(trip.id)}>
+                    🗑️ Delete
+                  </button>
+                </div>
+              </div>
 
             </div>
 

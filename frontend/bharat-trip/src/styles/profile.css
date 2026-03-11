@@ -719,9 +719,59 @@
 .badge-upcoming { background:rgba(37,99,235,0.85); color:#fff; backdrop-filter:blur(6px); }
 .pro-trip-body { padding:20px 20px 22px; display:flex; flex-direction:column; gap:10px; }
 .pro-trip-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:#fff; letter-spacing:-0.3px; margin:0; }
-.pro-trip-meta { display:flex; gap:12px; font-size:12.5px; color:var(--pro-muted); flex-wrap:wrap; }
-.pro-delete-trip { background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.2); color:#f87171; padding:8px 14px; border-radius:10px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; width:fit-content; }
-.pro-delete-trip:hover { background:rgba(248,113,113,0.15); border-color:rgba(248,113,113,0.4); }
+.pro-trip-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12.5px;
+  color: var(--pro-muted);
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.pro-trip-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.pro-map-btn {
+  flex: 1;
+  background: rgba(37,99,235,0.1);
+  border: 1px solid rgba(37,99,235,0.2);
+  color: var(--pro-accent2);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pro-map-btn:hover {
+  background: var(--pro-accent);
+  color: #fff;
+}
+
+.pro-del-btn {
+  background: rgba(248,113,113,0.08);
+  border: 1px solid rgba(248,113,113,0.2);
+  color: #f87171;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pro-del-btn:hover {
+  background: #ef4444;
+  color: #fff;
+}
 
 /* ── SAVED ── */
 .pro-saved-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
