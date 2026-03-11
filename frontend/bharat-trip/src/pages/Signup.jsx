@@ -3,16 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "./auth.css";
 
+// console.log(API);
+// const API = "https://api.example.com";
+
 function Signup() {
   const navigate        = useNavigate();
   const { login }       = useContext(AuthContext);
+  
+  console.log(API);
+  const API = import.meta.env.VITE_API_URL;
+
   const [name, setName] = useState("");
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
-
-  const API = import.meta.env.VITE_API_URL;
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -26,7 +31,13 @@ function Signup() {
         body: JSON.stringify({ name, email, password }),
       });
 
-      const data = await res.json();
+      let data;
+
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Invalid server response");
+      }
 
       if (!res.ok) {
         setError(data.error || "Signup failed. Try again.");
