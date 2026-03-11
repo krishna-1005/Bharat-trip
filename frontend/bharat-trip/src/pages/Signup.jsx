@@ -1,17 +1,14 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import "./auth.css";
 
-// console.log(API);
-// const API = "https://api.example.com";
+/* API URL from environment */
+const API = import.meta.env.VITE_API_URL;
+console.log(API);
 
 function Signup() {
   const navigate        = useNavigate();
   const { login }       = useContext(AuthContext);
-  
-  console.log(API);
-  const API = import.meta.env.VITE_API_URL;
 
   const [name, setName] = useState("");
   const [email, setEmail]       = useState("");
@@ -68,6 +65,7 @@ function Signup() {
             onChange={(e) => setName(e.target.value)}
             required
           />
+
           <input
             type="email"
             placeholder="Email"
@@ -75,6 +73,7 @@ function Signup() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
+
           <input
             type="password"
             placeholder="Password (min 6 characters)"
