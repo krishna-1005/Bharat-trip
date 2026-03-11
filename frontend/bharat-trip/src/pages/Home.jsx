@@ -36,11 +36,6 @@ function Home() {
 
   return (
     <div className="home">
-      {/* ── 3D BACKGROUND ── */}
-      <div className="hero-3d-bg">
-        <ThreeScene />
-      </div>
-
       {/* ── HERO SECTION ── */}
       <section id="home" className="hero">
         

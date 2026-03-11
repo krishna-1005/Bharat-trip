@@ -8,7 +8,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text: "Hi! I'm BharatTrip AI.\nAsk me about trips around Bangalore — I'll plan your perfect itinerary. 🗺️"
+      text: "Hi! I'm BharatTrip AI. 🤖\nI can plan your perfect Bangalore itinerary in seconds. What's on your mind?"
     }
   ]);
 
@@ -26,169 +26,93 @@ export default function TravelBot({ isOpen, setIsOpen }) {
 
   const handleViewOnMap = (plan) => {
     if (!plan) return;
-    
-    // Persist for refresh reliability
     localStorage.setItem("tripPlan", JSON.stringify(plan));
     sessionStorage.setItem("tripPlan", JSON.stringify(plan));
-    
-    // Navigate with state
     navigate("/results", { state: { plan } });
-    
-    // Optional: close chat window on navigate
     setOpen(false);
   };
 
-  const sendMessage = async (customMessage) => {
-    const messageToSend = customMessage || input;
-    if (!messageToSend.trim()) return;
+  const sendMessage = async (e) => {
+    e?.preventDefault();
+    if (!input.trim()) return;
 
-    setMessages(prev => [...prev, { sender: "user", text: messageToSend }]);
+    const userMsg = input;
+    setMessages(prev => [...prev, { sender: "user", text: userMsg }]);
     setInput("");
     setTyping(true);
 
     try {
-      const baseUrl = API || (import.meta.env.DEV ? "http://localhost:5000" : "");
-      const res = await fetch(`${baseUrl}/api/chat`, {
+      const res = await fetch(`${API}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: messageToSend })
+        body: JSON.stringify({ message: userMsg })
       });
 
       const data = await res.json();
-      let botText = "";
       const plan = data.plan;
 
-      if (plan && plan.itinerary && Object.keys(plan.itinerary).length > 0) {
-        if (data.message) {
-          botText += `${data.message}\n\n`;
-        }
-        botText += `🗺️ Trip Plan — ${plan.days} days in ${plan.city}\n\n`;
+      if (plan?.itinerary) {
+        let botText = `🗺️ I've crafted a ${plan.days}-day plan for you!\n\n`;
         Object.keys(plan.itinerary).forEach(day => {
-          botText += `📅 ${day}\n`;
-          plan.itinerary[day].places.forEach(place => {
-            botText += `  • ${place.name}\n`;
-          });
-          botText += `  💰 Cost: ₹${plan.itinerary[day].estimatedCost}\n\n`;
+          botText += `📍 ${day}: ${plan.itinerary[day].places.length} spots\n`;
         });
-        botText += `✨ Total Trip Cost: ₹${plan.totalTripCost}`;
-        
-        // Ensure plan is attached to the message object
-        setMessages(prev => [...prev, { 
-          sender: "bot", 
-          text: botText, 
-          plan: plan // This triggers the button
-        }]);
-      } else if (data.reply) {
-        setMessages(prev => [...prev, { sender: "bot", text: data.reply }]);
+        setMessages(prev => [...prev, { sender: "bot", text: botText, plan }]);
       } else {
-        setMessages(prev => [...prev, { sender: "bot", text: "Sorry, I couldn't generate a trip plan. Try again!" }]);
+        setMessages(prev => [...prev, { sender: "bot", text: data.reply || "I'm here to help with your Bangalore travels!" }]);
       }
-
     } catch {
-      setMessages(prev => [...prev, { sender: "bot", text: "⚠️ Server error. Please try again." }]);
+      setMessages(prev => [...prev, { sender: "bot", text: "⚠️ Connection issue. Please try again." }]);
     }
-
     setTyping(false);
   };
-
-  const quickPrompts = [
-    { label: "🌿 2 Day Nature", msg: "Plan a 2 day nature trip near Bangalore" },
-    { label: "🏛️ Heritage",     msg: "Plan a heritage trip near Bangalore" },
-    { label: "💸 Budget Trip",   msg: "Low budget trip near Bangalore" },
-    { label: "🏔️ Weekend",      msg: "Suggest a weekend trip from Bangalore" },
-  ];
 
   return (
     <>
       {/* ── FLOATING BUTTON ── */}
-      <button className="cb-fab" onClick={() => setOpen(!open)} aria-label="Chat">
-        <span className="cb-fab-icon">{open ? "✕" : "💬"}</span>
-        {!open && <span className="cb-fab-ping"></span>}
-      </button>
+      {!open && (
+        <div className="cb-fab" onClick={() => setOpen(true)}>
+          <span className="cb-fab-icon">💬</span>
+        </div>
+      )}
 
       {/* ── CHAT WINDOW ── */}
       {open && (
         <div className="cb-window">
-
-          {/* Header */}
           <div className="cb-header">
-            <div className="cb-header-left">
-              <div className="cb-avatar-wrap">
-                <span className="cb-avatar-emoji">🤖</span>
-                <span className="cb-online-dot"></span>
-              </div>
-              <div className="cb-header-info">
-                <span className="cb-header-name">BharatTrip AI</span>
-                <span className="cb-header-status">Online · Replies instantly</span>
+            <div className="cb-header-info">
+              <h3>BharatTrip AI</h3>
+              <div className="cb-status">
+                <span className="pulse-dot"></span>
+                Online & Ready
               </div>
             </div>
-            <button className="cb-close-btn" onClick={() => setOpen(false)}>✕</button>
+            <button className="cb-close" onClick={() => setOpen(false)}>✕</button>
           </div>
 
-          {/* Quick prompts */}
-          <div className="cb-quick-wrap">
-            <p className="cb-quick-label">Quick suggestions</p>
-            <div className="cb-quick-row">
-              {quickPrompts.map((q, i) => (
-                <button key={i} className="cb-quick-btn" onClick={() => sendMessage(q.msg)}>
-                  {q.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Messages */}
           <div className="cb-messages">
             {messages.map((msg, i) => (
-              <div key={i} className={`cb-msg-wrap ${msg.sender}`}>
-                {msg.sender === "bot" && (
-                  <div className="cb-msg-avatar">🤖</div>
+              <div key={i} className={`cb-bubble ${msg.sender}`}>
+                {msg.text}
+                {msg.plan && (
+                  <button className="cb-map-redirect-btn" onClick={() => handleViewOnMap(msg.plan)}>
+                    🗺️ View Full Plan on Map →
+                  </button>
                 )}
-                <div className={`cb-bubble ${msg.sender}`}>
-                  <div className="cb-msg-text">{msg.text}</div>
-                  {msg.plan && (
-                    <button 
-                      className="cb-map-redirect-btn"
-                      onClick={() => handleViewOnMap(msg.plan)}
-                    >
-                      🗺️ View Full Plan on Map →
-                    </button>
-                  )}
-                </div>
               </div>
             ))}
-
-            {typing && (
-              <div className="cb-msg-wrap bot">
-                <div className="cb-msg-avatar">🤖</div>
-                <div className="cb-bubble bot cb-typing">
-                  <span></span><span></span><span></span>
-                </div>
-              </div>
-            )}
+            {typing && <div className="cb-bubble bot">AI is thinking...</div>}
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="cb-input-bar">
+          <form className="cb-input-area" onSubmit={sendMessage}>
             <input
               className="cb-input"
               value={input}
-              onChange={e => setInput(e.target.value)}
-              placeholder="Ask about trips, budget, places…"
-              onKeyDown={e => { if (e.key === "Enter") sendMessage(); }}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask anything..."
             />
-            <button
-              className="cb-send-btn"
-              onClick={() => sendMessage()}
-              disabled={!input.trim()}
-            >
-              ➤
-            </button>
-          </div>
-
-          <div className="cb-footer">Powered by BharatTrip AI · Always free</div>
-
+            <button className="cb-send" type="submit">➤</button>
+          </form>
         </div>
       )}
     </>

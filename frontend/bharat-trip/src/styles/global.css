@@ -1,387 +1,105 @@
-/* ================= GLOBAL ================= */
-* {
-  box-sizing: border-box;
-}
+/* =============================================
+   PREMIUM GLOBAL STYLES — BharatTrip
+============================================= */
 
-.page-content{
-  padding-top: 100px;
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-dark: #020617;
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --text-main: #f8fafc;
+  --text-dim: #94a3b8;
 }
 
 body {
   margin: 0;
-  font-family: "Poppins", system-ui, sans-serif;
-  background: radial-gradient(circle at top, #0f172a, #020617);
-  color: #ffffff;
+  padding: 0;
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
 }
 
-/* ================= TYPOGRAPHY ================= */
-h1, h2, h3, h4 {
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
-
-.subtitle {
-  color: #b0b0b0;
-  opacity: 0.85;
-}
-
-.total-cost,
-.meta {
-  font-family: "Manrope", sans-serif;
-}
-
-/* ================= APP ROOT ================= */
-.app {
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-}
-
-/* ================= STATES ================= */
-
-/* LANDING → planner centered */
-.app.landing {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* RESULTS → planner left, map right */
-.app.results {
-  display: flex;
-  flex-direction: row;
-}
-
-/* ================= PLANNER ================= */
-
-
-/* landing position */
-.app.landing .planner-wrapper {
-  transform: translateX(0);
-  opacity: 1;
-}
-
-/* results position */
-.app.results .planner-wrapper {
-  transform: translateX(0);
-  opacity: 1;
-}
-
-/* ================= FORM ================= */
-.field {
-  margin-bottom: 16px;
-}
-
-input,
-select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  margin-top: 6px;
-}
-
-.checkbox-row {
-  display: flex;
-  gap: 12px;
-}
-
-button.primary {
-  width: 100%;
-  padding: 12px;
-  margin-top: 16px;
-  background: #3b82f6;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-
-
-/* ================= MAP ================= */
-.map-wrapper {
-  flex: 1;
-  height: 100vh;
-  min-width: 0;
-
-  opacity: 0;
-  transform: translateX(80px);
-  pointer-events: none;
-
-  transition:
-    opacity 0.8s ease,
-    transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* show map only after plan */
-.app.results .map-wrapper {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-  position: relative;
-  overflow: visible;
-}
-/* 
-.map-wrapper {
-  flex: 1;
-  height: 100vh;
-  min-width: 0;
-  position: relative;
-} */
-
-/* ================= LEAFLET FIX ================= */
-.map-container {
-  position: relative;
-  height: 100%;
-  width: 100%;
-}
-
-.map-info-bar {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10000;       /* 🔥 ABOVE LEAFLET */
-  background: rgba(15, 23, 32, 0.95);
+/* ── PREMIUM CARDS ── */
+.premium-card {
+  background: var(--glass);
   backdrop-filter: blur(12px);
-  padding: 14px 20px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 32px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s;
 }
 
-
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 30px);
-  }
-  to {
-    opacity: 4;
-    transform: translate(-50%, 0);
-  }
+.premium-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
-.map-container {
-  position: relative;   /* 🔥 REQUIRED */
-  height: 100%;
-  width: 100%;
-}
-
-.map-info-bar {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10000;       /* 🔥 ABOVE LEAFLET */
-  background: rgba(15, 23, 32, 0.95);
-  backdrop-filter: blur(12px);
-  padding: 14px 20px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-}
-
-/* ================= MAP LEGEND ================= */
-.map-legend {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(15,23,32,0.9);
-  padding: 8px 12px;
-  border-radius: 14px;
-  display: flex;
-  gap: 12px;
-  z-index: 1000;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  opacity: 0.6;
+/* ── BUTTONS ── */
+.btn-premium {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
   cursor: pointer;
-}
-
-.legend-item.active {
-  opacity: 1;
-  font-weight: 600;
-}
-
-.legend-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-}
-
-/* ================= LOCATION MARKER ================= */
-.location-marker {
-  background: none;
+  transition: all 0.3s;
   border: none;
-}
-
-.marker-outer {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  box-shadow:
-    0 0 0 3px rgba(255,255,255,0.15),
-    0 4px 10px rgba(0,0,0,0.35);
+  gap: 8px;
 }
 
-.marker-inner {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #fff;
+.btn-premium.primary {
+  background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+  color: white;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
 }
 
-/* Reduce map brightness */
-.leaflet-container {
-  filter: brightness(0.9) contrast(1.05) saturate(0.9);
-}
-
-/* ===== LOCATION HOVER TOOLTIP ===== */
-
-.location-tooltip {
-  background: none !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.tooltip-card {
-  width: 180px;
-  background: #0f172a;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.45);
-}
-
-.tooltip-card img {
-  width: 100%;
-  height: 90px;
-  object-fit: cover;
-}
-
-.tooltip-content {
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: #e5e7eb;
-}
-
-.tooltip-content strong {
-  font-size: 13px;
-  color: #ffffff;
-}
-
-/* Tooltip container */
-.location-tooltip {
-  background: none !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* Tooltip card */
-.tooltip-card {
-  width: 180px;
-  background: #0f172a;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.45);
-}
-
-/* Image */
-.tooltip-card img {
-  width: 100%;
-  height: 90px;
-  object-fit: cover;
-}
-
-/* Content */
-.tooltip-content {
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: #e5e7eb;
-}
-
-.tooltip-content strong {
-  font-size: 13px;
+.btn-premium.outline {
+  background: transparent;
+  border: 1px solid var(--glass-border);
   color: white;
 }
 
-/* Skeleton loader */
-.image-skeleton {
-  width: 160px;
-  height: 100px;
-  border-radius: 8px;
-  background: linear-gradient(
-    90deg,
-    #2a2a2a 25%,
-    #3a3a3a 37%,
-    #2a2a2a 63%
-  );
-  background-size: 400% 100%;
-  animation: shimmer 1.4s ease infinite;
+.btn-premium:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: 100% 0;
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+/* ── UTILS ── */
+.gradient-text {
+  background: linear-gradient(90deg, #60a5fa, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Page Containers */
+.page-container {
+  padding: 120px 80px 60px;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 100px 20px 40px;
   }
-  100% {
-    background-position: -100% 0;
-  }
 }
-
-/* ================= MARKER ================= */
-
-.location-marker {
-  background: none;
-  border: none;
-}
-
-/* outer ring */
-.marker-outer {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 3px solid white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.55);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* inner dot */
-.marker-inner {
-  width: 10px;
-  height: 10px;
-  border-radius: 100%;
-}
-
-/* hover effect */
-.location-marker:hover .marker-outer {
-  transform: scale(1.15);
-  box-shadow: 0 0 0 6px rgba(255,255,255,0.25);
-}
-
