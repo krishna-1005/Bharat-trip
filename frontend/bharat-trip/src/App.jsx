@@ -52,7 +52,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/results" element={<Results />} />
-          <Route path="/sample-plan" element={<SamplePlan/>}/>
+          <Route path="/sample-plan" element={<SamplePlan />} />
           <Route path="/nearby" element={<NearbyPlaces />} />
 
           <Route
@@ -77,7 +77,6 @@ function App() {
 
       {/* AI Chatbot */}
       <TravelBot />
-
     </>
   );
 }

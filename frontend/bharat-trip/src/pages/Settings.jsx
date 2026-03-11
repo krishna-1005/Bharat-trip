@@ -7,12 +7,29 @@ export default function Settings() {
   const navigate = useNavigate();
   const auth = getAuth();
   
-  // State for toggles
-  const [emailAlerts, setEmailAlerts] = useState(true);
-  const [tripReminders, setTripReminders] = useState(true);
-  const [promoOffers, setPromoOffers] = useState(false);
-  const [currency, setCurrency] = useState("INR");
-  const [language, setLanguage] = useState("English");
+  // State for toggles - Initialize from localStorage
+  const [emailAlerts, setEmailAlerts] = useState(() => {
+    const saved = localStorage.getItem("settings_emailAlerts");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  
+  const [tripReminders, setTripReminders] = useState(() => {
+    const saved = localStorage.getItem("settings_tripReminders");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  
+  const [promoOffers, setPromoOffers] = useState(() => {
+    const saved = localStorage.getItem("settings_promoOffers");
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+  
+  const [currency, setCurrency] = useState(() => {
+    return localStorage.getItem("settings_currency") || "INR";
+  });
+  
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem("settings_language") || "English";
+  });
 
   const handleLogout = async () => {
     try {
@@ -25,7 +42,13 @@ export default function Settings() {
   };
 
   const handleSave = () => {
-    // In a real app, this would save to the backend
+    // Save all current states to localStorage
+    localStorage.setItem("settings_emailAlerts", JSON.stringify(emailAlerts));
+    localStorage.setItem("settings_tripReminders", JSON.stringify(tripReminders));
+    localStorage.setItem("settings_promoOffers", JSON.stringify(promoOffers));
+    localStorage.setItem("settings_currency", currency);
+    localStorage.setItem("settings_language", language);
+    
     alert("Settings saved successfully!");
   };
 
