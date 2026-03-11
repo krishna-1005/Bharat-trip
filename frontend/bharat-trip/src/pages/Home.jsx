@@ -34,21 +34,6 @@ function Home() {
   return (
     <div className="home">
 
-      {/* ── NAVBAR ── */}
-      <nav className="navbar">
-        <div className="nav-logo">
-          <span className="logo-icon">◈</span> BharatTrip
-        </div>
-        <ul className="nav-links">
-          <li className="active" onClick={() => scrollToSection("home")}>Home</li>
-          <li onClick={() => scrollToSection("how-it-works")}>How it Works</li>
-          <li onClick={() => scrollToSection("why-choose")}>Why Choose</li>
-          <li onClick={() => navigate("/sample-plan")}>Sample Plans</li>
-          <li onClick={() => scrollToSection("footer")}>About</li>
-        </ul>
-        <button className="nav-cta" onClick={() => navigate("/planner")}>Get Started</button>
-      </nav>
-
       {/* ── HERO ── */}
       <section id="home" className="hero">
 

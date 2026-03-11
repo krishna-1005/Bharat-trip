@@ -1,31 +1,18 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 import "../styles/navbar.css";
 
 function Navbar() {
 
   const navigate  = useNavigate();
   const location  = useLocation();
+  const { user, logout } = useContext(AuthContext);
   const [open, setOpen]           = useState(false);
   const [scrolled, setScrolled]   = useState(false);
   const dropdownRef = useRef(null);
 
-  /* -------- FIX USER PARSING -------- */
-  const storedUser = localStorage.getItem("user");
-
-  let user = null;
-  let username = "";
-
-  if (storedUser) {
-    try {
-      const parsed = JSON.parse(storedUser);
-      user = parsed;
-      username = parsed.name || "";
-    } catch {
-      username = storedUser;
-    }
-  }
-  /* ---------------------------------- */
+  const username = user?.name || user?.email || "";
 
   /* scroll shadow */
   useEffect(() => {
@@ -60,10 +47,8 @@ function Navbar() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    logout();
     navigate("/");
-    window.location.reload();
   };
 
   const navLinks = [

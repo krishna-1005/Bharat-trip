@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import MapView from "../components/Map/MapView";
 import { DAY_COLORS } from "../constants/dayColors";
 import "./results.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { getAuth } from "firebase/auth";
 const API = import.meta.env.VITE_API_URL;
@@ -12,11 +12,23 @@ function Results() {
   const navigate = useNavigate();
   const loc = useLocation();
 
-  const savedPlan = localStorage.getItem("tripPlan");
+  const [plan, setPlan] = useState(() => {
+    if (loc.state?.plan) {
+      localStorage.setItem("tripPlan", JSON.stringify(loc.state.plan));
+      return loc.state.plan;
+    }
+    const saved = localStorage.getItem("tripPlan") || sessionStorage.getItem("tripPlan");
+    return saved ? JSON.parse(saved) : null;
+  });
 
-  const [plan, setPlan] = useState(
-    loc.state?.plan || (savedPlan ? JSON.parse(savedPlan) : null)
-  );
+  useEffect(() => {
+    if (!plan) {
+      const saved = localStorage.getItem("tripPlan") || sessionStorage.getItem("tripPlan");
+      if (saved) {
+        setPlan(JSON.parse(saved));
+      }
+    }
+  }, [plan]);
 
   const [tripTitle, setTripTitle] = useState("");
   const [tripType, setTripType] = useState("Adventure");
@@ -26,7 +38,7 @@ function Results() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  if (!plan) {
+  if (!plan || !plan.itinerary) {
     return (
       <div className="res-empty">
         <div className="res-empty-icon">🗺️</div>
@@ -42,9 +54,12 @@ function Results() {
   const totalDays = days.length;
 
   const totalPlaces = days.reduce(
-    (sum, d) => sum + plan.itinerary[d].places.length,
+    (sum, d) => sum + (plan.itinerary[d]?.places?.length || 0),
     0
   );
+
+  const totalTripCost = plan.totalTripCost || days.reduce((sum, d) => sum + (plan.itinerary[d]?.estimatedCost || 0), 0);
+
 
   /* ---------- DRAG ---------- */
 
@@ -217,7 +232,7 @@ function Results() {
         <div className="res-map-pill">
 
           <div className="res-pill-stat">
-            <span className="res-pill-val">₹{plan.totalTripCost}</span>
+            <span className="res-pill-val">₹{totalTripCost}</span>
             <span className="res-pill-label">Total Cost</span>
           </div>
 
@@ -282,7 +297,7 @@ function Results() {
 
           <div className="res-panel-title-row">
             <h2>Your Itinerary</h2>
-            <span className="res-cost-badge">₹{plan.totalTripCost}</span>
+            <span className="res-cost-badge">₹{totalTripCost}</span>
           </div>
 
           <p className="res-panel-sub">

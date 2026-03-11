@@ -90,6 +90,40 @@
               0 4px 16px rgba(37,99,235,0.3);
 }
 
+.pf-days-input {
+  width: 70px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  color: #ffffff;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 0 10px;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.pf-days-input:focus {
+  border-color: #3b82f6;
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+.pf-days-input::placeholder {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  font-weight: 400;
+}
+
+/* Hide spin arrows */
+.pf-days-input::-webkit-inner-spin-button,
+.pf-days-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /* ── BUDGET ── */
 .pf-budget-row {
   display: flex;

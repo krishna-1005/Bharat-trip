@@ -70,10 +70,10 @@ function PlannerForm({ onPlanGenerated }) {
       {/* ── DAYS ── */}
       <div className="pf-field">
         <label className="pf-label">
-          <span>📅</span> Duration
+          <span>📅</span> Duration (1–30 days)
         </label>
         <div className="pf-days-row">
-          {[1,2,3,4,5].map(d => (
+          {[1,2,3,4,5,7,10].map(d => (
             <button
               key={d}
               className={`pf-day-btn ${days === d ? "active" : ""}`}
@@ -83,6 +83,15 @@ function PlannerForm({ onPlanGenerated }) {
               {d}<span className="pf-day-label">day{d > 1 ? "s" : ""}</span>
             </button>
           ))}
+          <input 
+            type="number" 
+            min="1" 
+            max="30" 
+            value={days} 
+            onChange={(e) => setDays(Math.min(30, Math.max(1, parseInt(e.target.value) || 1)))}
+            className="pf-days-input"
+            placeholder="Custom"
+          />
         </div>
       </div>
 
@@ -145,6 +154,8 @@ function PlannerForm({ onPlanGenerated }) {
         )}
       </button>
 
+ 
+ 
       {error && (
         <p className="pf-error-message">{error}</p>
       )}

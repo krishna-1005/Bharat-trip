@@ -44,7 +44,8 @@ function Login() {
     setLoading(true);
 
     try {
-      const res  = await fetch("http://localhost:5000/api/auth/login", {
+      const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
+      const res  = await fetch(`${API_URL}/api/auth/login`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ email, password }),
@@ -72,11 +73,13 @@ function Login() {
     <div className="auth-container">
       <div className="auth-card">
 
-        <h2>Welcome Back</h2>
-        <p className="auth-subtitle">Sign in to continue your journey</p>
+        <div className="auth-header">
+          <h2>Welcome Back</h2>
+          <p className="auth-subtitle">Sign in to continue your journey</p>
+        </div>
 
         {/* ── GOOGLE BUTTON ── */}
-        <button className="google-btn" onClick={handleGoogleLogin}>
+        <button className="auth-google-btn" onClick={handleGoogleLogin}>
           <img
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             alt="Google"
@@ -89,32 +92,34 @@ function Login() {
 
         {/* ── EMAIL / PASSWORD ── */}
         <form onSubmit={handleEmailLogin}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="auth-form-group">
+            <input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-          {error && <p className="auth-error">{error}</p>}
+          {error && <div className="auth-error">{error}</div>}
 
-          <button type="submit" disabled={loading}>
+          <button type="submit" className="auth-submit-btn" disabled={loading}>
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
-        <p className="auth-switch">
+        <div className="auth-footer">
           Don't have an account?{" "}
           <span onClick={() => navigate("/signup")}>Sign Up</span>
-        </p>
+        </div>
 
       </div>
     </div>

@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/travelBot.css";
 const API = import.meta.env.VITE_API_URL;
 
 export default function TravelBot({ isOpen, setIsOpen }) {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([
     {
       sender: "bot",
@@ -22,6 +24,20 @@ export default function TravelBot({ isOpen, setIsOpen }) {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing]);
 
+  const handleViewOnMap = (plan) => {
+    if (!plan) return;
+    
+    // Persist for refresh reliability
+    localStorage.setItem("tripPlan", JSON.stringify(plan));
+    sessionStorage.setItem("tripPlan", JSON.stringify(plan));
+    
+    // Navigate with state
+    navigate("/results", { state: { plan } });
+    
+    // Optional: close chat window on navigate
+    setOpen(false);
+  };
+
   const sendMessage = async (customMessage) => {
     const messageToSend = customMessage || input;
     if (!messageToSend.trim()) return;
@@ -31,7 +47,8 @@ export default function TravelBot({ isOpen, setIsOpen }) {
     setTyping(true);
 
     try {
-      const res = await fetch(`${API}/api/chat`, {
+      const baseUrl = API || (import.meta.env.DEV ? "http://localhost:5000" : "");
+      const res = await fetch(`${baseUrl}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: messageToSend })
@@ -41,7 +58,10 @@ export default function TravelBot({ isOpen, setIsOpen }) {
       let botText = "";
       const plan = data.plan;
 
-      if (plan && plan.itinerary) {
+      if (plan && plan.itinerary && Object.keys(plan.itinerary).length > 0) {
+        if (data.message) {
+          botText += `${data.message}\n\n`;
+        }
         botText += `🗺️ Trip Plan — ${plan.days} days in ${plan.city}\n\n`;
         Object.keys(plan.itinerary).forEach(day => {
           botText += `📅 ${day}\n`;
@@ -51,13 +71,19 @@ export default function TravelBot({ isOpen, setIsOpen }) {
           botText += `  💰 Cost: ₹${plan.itinerary[day].estimatedCost}\n\n`;
         });
         botText += `✨ Total Trip Cost: ₹${plan.totalTripCost}`;
+        
+        // Ensure plan is attached to the message object
+        setMessages(prev => [...prev, { 
+          sender: "bot", 
+          text: botText, 
+          plan: plan // This triggers the button
+        }]);
       } else if (data.reply) {
-        botText = data.reply;
+        setMessages(prev => [...prev, { sender: "bot", text: data.reply }]);
       } else {
-        botText = "Sorry, I couldn't generate a trip plan. Try again!";
+        setMessages(prev => [...prev, { sender: "bot", text: "Sorry, I couldn't generate a trip plan. Try again!" }]);
       }
 
-      setMessages(prev => [...prev, { sender: "bot", text: botText }]);
     } catch {
       setMessages(prev => [...prev, { sender: "bot", text: "⚠️ Server error. Please try again." }]);
     }
@@ -119,7 +145,15 @@ export default function TravelBot({ isOpen, setIsOpen }) {
                   <div className="cb-msg-avatar">🤖</div>
                 )}
                 <div className={`cb-bubble ${msg.sender}`}>
-                  {msg.text}
+                  <div className="cb-msg-text">{msg.text}</div>
+                  {msg.plan && (
+                    <button 
+                      className="cb-map-redirect-btn"
+                      onClick={() => handleViewOnMap(msg.plan)}
+                    >
+                      🗺️ View Full Plan on Map →
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
