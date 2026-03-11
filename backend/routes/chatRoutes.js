@@ -27,50 +27,106 @@ router.post("/", async (req, res) => {
     let budget = "low";
     let interests = [];
 
-    /* -------- Detect days -------- */
+    /* -------- AI Parsing (NEW) -------- */
 
-    const dayMatch = msg.match(/(\d+)\s*day/);
+    try {
 
-    if (dayMatch) {
-      days = parseInt(dayMatch[1]);
+      const aiParse = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "system",
+            content: `
+Extract travel details from the user message.
+
+Return ONLY JSON in this format:
+
+{
+ "days": number,
+ "budget": "low | medium | high",
+ "interests": ["Nature","Food","Culture","Spiritual","Adventure"]
+}
+
+Do not include explanation.
+`
+          },
+          {
+            role: "user",
+            content: message
+          }
+        ]
+      });
+
+      const parsed = JSON.parse(aiParse.choices[0].message.content);
+
+      days = parsed.days || days;
+      budget = parsed.budget || budget;
+      interests = parsed.interests || interests;
+
+      console.log("AI Parsed:", parsed);
+
+    } catch (err) {
+
+      console.log("AI parsing failed, using rule-based detection");
+
     }
 
-    if (msg.includes("weekend")) days = 2;
+    /* -------- Detect days (Fallback) -------- */
 
-    if (msg.includes("tomorrow")) days = 1;
+    if (days === 1) {
 
-    if (days > 5) days = 5;
+      const dayMatch = msg.match(/(\d+)\s*day[s]?/);
 
-    /* -------- Budget detection -------- */
+      if (dayMatch) {
+        days = parseInt(dayMatch[1]);
+      }
 
-    if (msg.includes("cheap") || msg.includes("budget") || msg.includes("low"))
-      budget = "low";
+      if (msg.includes("weekend")) days = 2;
 
-    if (msg.includes("medium") || msg.includes("comfort"))
-      budget = "medium";
+      if (msg.includes("tomorrow")) days = 1;
 
-    if (msg.includes("luxury") || msg.includes("high"))
-      budget = "high";
+    }
 
-    /* -------- Interest detection -------- */
+    if (days > 10) days = 10;
 
-    if (msg.includes("nature") || msg.includes("park") || msg.includes("lake"))
-      interests.push("Nature");
+    /* -------- Budget detection (Fallback) -------- */
 
-    if (msg.includes("food") || msg.includes("restaurant") || msg.includes("cafe"))
-      interests.push("Food");
+    if (budget === "low") {
 
-    if (msg.includes("culture") || msg.includes("museum") || msg.includes("heritage"))
-      interests.push("Culture");
+      if (msg.includes("cheap") || msg.includes("budget") || msg.includes("low"))
+        budget = "low";
 
-    if (msg.includes("temple") || msg.includes("spiritual"))
-      interests.push("Spiritual");
+      if (msg.includes("medium") || msg.includes("comfort"))
+        budget = "medium";
 
-    if (msg.includes("adventure") || msg.includes("trek"))
-      interests.push("Adventure");
+      if (msg.includes("luxury") || msg.includes("high"))
+        budget = "high";
+
+    }
+
+    /* -------- Interest detection (Fallback) -------- */
 
     if (interests.length === 0) {
-      interests = ["Nature", "Food"];
+
+      if (msg.includes("nature") || msg.includes("park") || msg.includes("lake"))
+        interests.push("Nature");
+
+      if (msg.includes("food") || msg.includes("restaurant") || msg.includes("cafe"))
+        interests.push("Food");
+
+      if (msg.includes("culture") || msg.includes("museum") || msg.includes("heritage"))
+        interests.push("Culture");
+
+      if (msg.includes("temple") || msg.includes("spiritual"))
+        interests.push("Spiritual");
+
+      if (msg.includes("adventure") || msg.includes("trek"))
+        interests.push("Adventure");
+
+      if (interests.length === 0) {
+        interests = ["Nature", "Food"];
+      }
+
     }
 
     /* -------- Trip planner trigger -------- */
