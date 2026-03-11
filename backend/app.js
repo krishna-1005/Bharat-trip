@@ -36,10 +36,16 @@ app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/trips", tripRoutes);
 
+// health check
 app.get("/", (req, res) => {
   res.json({
     status: "Bharat Trip API running 🚀"
   });
+});
+
+/* ── ping route (keeps server awake) ── */
+app.get("/ping", (req, res) => {
+  res.status(200).send("BharatTrip server alive 🚀");
 });
 
 module.exports = app;
