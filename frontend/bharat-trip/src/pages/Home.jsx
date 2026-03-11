@@ -1,5 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useSettings } from "../context/SettingsContext";
 import "./home.css";
 import img1 from "../assets/images/img1.webp";
 // import img2 from "../assets/images/img2.webp";
@@ -10,6 +11,7 @@ import TravelBot from "../components/TravelBot";
 
 function Home() {
   const navigate = useNavigate();
+  const { t } = useSettings();
   const [hoveredCard, setHoveredCard] = useState(null);
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -44,23 +46,19 @@ function Home() {
           </span>
 
           <h1>
-            Plan Your<br />
-            Bengaluru Trip<br />
-            <span className="highlight">Without<br />Confusion</span>
+            {t("home_hero_title")}
           </h1>
 
           <p>
-            Experience the future of AI-powered travel planning for the
-            Silicon Valley of India. Personalized itineraries, live budgets,
-            and smart routing.
+            {t("home_hero_sub")}
           </p>
 
           <div className="hero-actions">
             <button className="primary" onClick={() => navigate("/planner")}>
-              Start Planning →
+              {t("plan_trip_btn")} →
             </button>
             <Link to="/sample-plan">
-              <button className="secondary">See Sample Plans</button>
+              <button className="secondary">{t("view_samples_btn")}</button>
             </Link>
           </div>
 

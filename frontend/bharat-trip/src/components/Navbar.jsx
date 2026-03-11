@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { useSettings } from "../context/SettingsContext";
 import "../styles/navbar.css";
 
 function Navbar() {
@@ -8,6 +9,7 @@ function Navbar() {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { user, logout } = useContext(AuthContext);
+  const { t } = useSettings();
   const [open, setOpen]           = useState(false);
   const [scrolled, setScrolled]   = useState(false);
   const dropdownRef = useRef(null);
@@ -52,16 +54,16 @@ function Navbar() {
   };
 
   const navLinks = [
-    { label: "Home",         id: "home"         },
+    { label: t("nav_home"),         id: "home"         },
     { label: "How It Works", id: "how-it-works" },
-    { label: "Planner",      id: "why-choose"   },
+    { label: t("nav_planner"),      id: "why-choose"   },
     { label: "About",        id: "footer"       },
   ];
 
   const menuItems = [
-    { icon: "👤", label: "My Profile", sub: "View your account",   path: "/profile"  },
+    { icon: "👤", label: t("nav_profile"), sub: "View your account",   path: "/profile"  },
     { icon: "🗺️", label: "My Trips",   sub: "Your saved itineraries", path: "/planner" },
-    { icon: "⚙️", label: "Settings",   sub: "Preferences & privacy", path: "/settings" },
+    { icon: "⚙️", label: t("nav_settings"),   sub: "Preferences & privacy", path: "/settings" },
   ];
 
   return (
