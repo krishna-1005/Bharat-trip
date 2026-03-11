@@ -231,18 +231,17 @@ function Results() {
                         {pIdx < plan.itinerary[day].places.length - 1 && <span className="marker-line"></span>}
                       </div>
                       <div className="timeline-content">
-                        {travelTime && (
-                          <div className="travel-time-indicator">
-                            <span className="travel-icon">
-                              {travelMode === "Bike" ? "🏍️" : travelMode === "Car" ? "🚗" : "🚌"}
-                            </span>
-                            <span className="travel-text">{travelTime} travel</span>
-                          </div>
-                        )}
                         <div className="place-card-mini">
                           <div className="place-info-main">
                             <h4>{place.name}</h4>
-                            <span className="place-tag">{place.category || "Sightseeing"}</span>
+                            <div className="place-badge-row">
+                              <span className="place-tag">{place.category || "Sightseeing"}</span>
+                              {travelTime && (
+                                <span className="travel-time-badge">
+                                  {travelMode === "Bike" ? "🏍️" : travelMode === "Car" ? "🚗" : "🚌"} {travelTime}
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <span className="place-cost-mini">{formatPrice(place.estimatedCost || 0)}</span>
                         </div>
