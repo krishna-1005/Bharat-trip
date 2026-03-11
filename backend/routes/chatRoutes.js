@@ -81,7 +81,7 @@ Do not include explanation.
         days = parseInt(dayMatch[1]);
       }
 
-      if (msg.includes("weekend")) days = 2;
+      if (msg.includes("weekend") && days === 1) days = 2;
 
       if (msg.includes("tomorrow")) days = 1;
 
@@ -139,7 +139,12 @@ Do not include explanation.
       msg.includes("visit") ||
       msg.includes("tour") ||
       msg.includes("bangalore") ||
-      msg.includes("bengaluru");
+      msg.includes("bengaluru") ||
+      msg.includes("nature") ||
+      msg.includes("temple") ||
+      msg.includes("culture") ||
+      msg.includes("adventure") ||
+      msg.includes("food");
 
     if (travelIntent) {
 
