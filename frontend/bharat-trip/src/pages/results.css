@@ -215,6 +215,22 @@
 .marker-line { width: 1.5px; flex: 1; background: var(--res-border); margin: 2px 0; }
 .timeline-content { flex: 1; padding-bottom: 16px; }
 
+/* Travel Time Indicator */
+.travel-time-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+  width: fit-content;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.travel-icon { font-size: 12px; }
+.travel-text { font-size: 11px; font-weight: 600; color: var(--res-muted); }
+
 .place-card-mini {
   background: rgba(255,255,255,0.01);
   border: 1px solid var(--res-border);

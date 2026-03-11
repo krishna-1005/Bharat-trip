@@ -32,6 +32,34 @@ function Results() {
   const [travelMode, setTravelMode] = useState("Car");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [weather, setWeather] = useState({ temp: "--", desc: "Loading...", icon: "☁️" });
+
+  // Live Weather Fetch
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=12.9716&longitude=77.5946&current_weather=true");
+        const data = await res.json();
+        const code = data.current_weather.weathercode;
+        
+        // Simple mapping of WMO codes to text/icons
+        let desc = "Clear Skies";
+        let icon = "☀️";
+        if (code > 0 && code < 45) { desc = "Partly Cloudy"; icon = "⛅"; }
+        else if (code >= 45 && code < 60) { desc = "Foggy"; icon = "🌫️"; }
+        else if (code >= 60) { desc = "Rainy"; icon = "🌧️"; }
+
+        setWeather({ 
+          temp: Math.round(data.current_weather.temperature) + "°C", 
+          desc: `${desc} • Perfect for travel`,
+          icon 
+        });
+      } catch (err) {
+        setWeather({ temp: "28°C", desc: "Sunny • Perfect for travel", icon: "☀️" });
+      }
+    };
+    fetchWeather();
+  }, []);
 
   if (!plan || !plan.itinerary) {
     return (
@@ -78,6 +106,35 @@ function Results() {
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     alert("Trip link copied to clipboard!");
+  };
+
+  // Helper: Haversine distance in km
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  // Helper: Get travel time string
+  const getTravelTime = (dist) => {
+    if (!dist || dist < 0.1) return null;
+    let speed = 25; // Car
+    if (travelMode === "Bike") speed = 30;
+    if (travelMode === "Transit") speed = 15;
+    
+    const hours = dist / speed;
+    const mins = Math.round(hours * 60);
+    
+    if (mins < 1) return "1 min";
+    if (mins < 60) return `${mins} mins`;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return `${h}h ${m}m`;
   };
 
   return (
@@ -142,10 +199,10 @@ function Results() {
           {/* Weather Widget */}
           <div className="weather-preview-card">
             <div className="weather-info">
-              <span className="weather-temp">28°C</span>
-              <span className="weather-desc">Sunny • Perfect for travel</span>
+              <span className="weather-temp">{weather.temp}</span>
+              <span className="weather-desc">{weather.desc}</span>
             </div>
-            <span className="weather-icon">☀️</span>
+            <span className="weather-icon">{weather.icon}</span>
           </div>
 
           {days.map((day, idx) => (
@@ -162,23 +219,37 @@ function Results() {
               </div>
 
               <div className="place-timeline">
-                {plan.itinerary[day].places.map((place, pIdx) => (
-                  <div key={pIdx} className="timeline-item">
-                    <div className="timeline-marker">
-                      <span className="marker-dot"></span>
-                      {pIdx < plan.itinerary[day].places.length - 1 && <span className="marker-line"></span>}
-                    </div>
-                    <div className="timeline-content">
-                      <div className="place-card-mini">
-                        <div className="place-info-main">
-                          <h4>{place.name}</h4>
-                          <span className="place-tag">{place.category || "Sightseeing"}</span>
+                {plan.itinerary[day].places.map((place, pIdx) => {
+                  const prevPlace = pIdx > 0 ? plan.itinerary[day].places[pIdx - 1] : null;
+                  const distance = prevPlace ? getDistance(prevPlace.lat, prevPlace.lng, place.lat, place.lng) : 0;
+                  const travelTime = prevPlace ? getTravelTime(distance) : null;
+
+                  return (
+                    <div key={pIdx} className="timeline-item">
+                      <div className="timeline-marker">
+                        <span className="marker-dot"></span>
+                        {pIdx < plan.itinerary[day].places.length - 1 && <span className="marker-line"></span>}
+                      </div>
+                      <div className="timeline-content">
+                        {travelTime && (
+                          <div className="travel-time-indicator">
+                            <span className="travel-icon">
+                              {travelMode === "Bike" ? "🏍️" : travelMode === "Car" ? "🚗" : "🚌"}
+                            </span>
+                            <span className="travel-text">{travelTime} travel</span>
+                          </div>
+                        )}
+                        <div className="place-card-mini">
+                          <div className="place-info-main">
+                            <h4>{place.name}</h4>
+                            <span className="place-tag">{place.category || "Sightseeing"}</span>
+                          </div>
+                          <span className="place-cost-mini">{formatPrice(place.estimatedCost || 0)}</span>
                         </div>
-                        <span className="place-cost-mini">{formatPrice(place.estimatedCost || 0)}</span>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
