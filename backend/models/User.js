@@ -27,6 +27,13 @@ const userSchema = new mongoose.Schema(
     type: String,
     required: false,
     default: null
+  },
+
+  /* NOTIFICATION SETTINGS */
+  preferences: {
+    emailAlerts: { type: Boolean, default: true },
+    tripReminders: { type: Boolean, default: true },
+    promoOffers: { type: Boolean, default: false }
   }
 
 },

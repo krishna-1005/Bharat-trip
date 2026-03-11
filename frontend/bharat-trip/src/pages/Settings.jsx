@@ -7,16 +7,57 @@ export default function Settings() {
   const navigate = useNavigate();
   const auth = getAuth();
   
-  // Use Global Settings Context
   const { 
     currency, setCurrency, 
-    language, setLanguage 
+    language, setLanguage,
+    t 
   } = useSettings();
 
-  // Load toggles from local storage since they are simple
-  const getInitialToggle = (key, def) => {
-    const saved = localStorage.getItem(key);
-    return saved !== null ? JSON.parse(saved) : def;
+  const [emailAlerts, setEmailAlerts] = useState(true);
+  const [tripReminders, setTripReminders] = useState(true);
+
+  // Sync with backend on load
+  useEffect(() => {
+    const fetchPrefs = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+        const token = await user.getIdToken();
+        const res = await fetch(`${API}/api/profile`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.user?.preferences) {
+          setEmailAlerts(data.user.preferences.emailAlerts);
+          setTripReminders(data.user.preferences.tripReminders);
+        }
+      } catch (err) { console.error(err); }
+    };
+    fetchPrefs();
+  }, [auth.currentUser]);
+
+  const handleSave = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+      const token = await user.getIdToken();
+      
+      const res = await fetch(`${API}/api/profile`, {
+        method: "PUT",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          preferences: {
+            emailAlerts,
+            tripReminders
+          }
+        })
+      });
+
+      if (res.ok) alert(t("save_changes") + "!");
+    } catch (err) { alert("Failed to save to server"); }
   };
 
   const handleLogout = async () => {
@@ -29,14 +70,10 @@ export default function Settings() {
     }
   };
 
-  const handleSave = () => {
-    alert("Settings saved successfully!");
-  };
-
   const handleDeleteAccount = () => {
-    const confirm = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
+    const confirm = window.confirm("Are you sure?");
     if (confirm) {
-      alert("Account deletion request submitted. Support will contact you shortly.");
+      alert("Request submitted.");
     }
   };
 
@@ -45,21 +82,21 @@ export default function Settings() {
       <div className="settings-container">
         
         <div className="settings-header">
-          <h1>Account Settings</h1>
-          <p>Manage your preferences, notifications, and security.</p>
+          <h1>{t("settings_title")}</h1>
+          <p>{t("settings_sub")}</p>
         </div>
 
         <div className="settings-grid">
           
           {/* ── PREFERENCES ── */}
           <section className="settings-section">
-            <h2 className="section-title">🌍 Preferences</h2>
+            <h2 className="section-title">🌍 {t("pref_label")}</h2>
             
             <div className="settings-group">
               <div className="setting-item">
                 <div className="setting-info">
-                  <label>Language</label>
-                  <span>Select your preferred language</span>
+                  <label>{t("lang_label")}</label>
+                  <span>Select language</span>
                 </div>
                 <select 
                   className="setting-select" 
@@ -74,8 +111,8 @@ export default function Settings() {
 
               <div className="setting-item">
                 <div className="setting-info">
-                  <label>Currency</label>
-                  <span>Displayed currency for trips</span>
+                  <label>{t("curr_label")}</label>
+                  <span>Displayed currency</span>
                 </div>
                 <select 
                   className="setting-select" 
@@ -92,19 +129,19 @@ export default function Settings() {
 
           {/* ── NOTIFICATIONS ── */}
           <section className="settings-section">
-            <h2 className="section-title">🔔 Notifications</h2>
+            <h2 className="section-title">🔔 {t("notif_label")}</h2>
             
             <div className="settings-group">
               <div className="setting-item">
                 <div className="setting-info">
-                  <label>Email Alerts</label>
-                  <span>Receive updates about your account</span>
+                  <label>{t("email_alerts")}</label>
+                  <span>Email updates</span>
                 </div>
                 <label className="toggle-switch">
                   <input 
                     type="checkbox" 
-                    defaultChecked={getInitialToggle("settings_emailAlerts", true)}
-                    onChange={(e) => localStorage.setItem("settings_emailAlerts", e.target.checked)} 
+                    checked={emailAlerts}
+                    onChange={(e) => setEmailAlerts(e.target.checked)} 
                   />
                   <span className="slider"></span>
                 </label>
@@ -112,14 +149,14 @@ export default function Settings() {
 
               <div className="setting-item">
                 <div className="setting-info">
-                  <label>Trip Reminders</label>
-                  <span>Get notified before upcoming trips</span>
+                  <label>{t("trip_reminders")}</label>
+                  <span>Upcoming trips</span>
                 </div>
                 <label className="toggle-switch">
                   <input 
                     type="checkbox" 
-                    defaultChecked={getInitialToggle("settings_tripReminders", true)}
-                    onChange={(e) => localStorage.setItem("settings_tripReminders", e.target.checked)} 
+                    checked={tripReminders}
+                    onChange={(e) => setTripReminders(e.target.checked)} 
                   />
                   <span className="slider"></span>
                 </label>
@@ -129,38 +166,37 @@ export default function Settings() {
 
           {/* ── SECURITY ── */}
           <section className="settings-section">
-            <h2 className="section-title">🔒 Security</h2>
-            
+            <h2 className="section-title">🔒 {t("security_label")}</h2>
             <div className="settings-group">
               <div className="setting-item">
                 <div className="setting-info">
                   <label>Password</label>
-                  <span>Change your account password</span>
+                  <span>Change password</span>
                 </div>
-                <button className="setting-btn outline">Update Password</button>
+                <button className="setting-btn outline">Update</button>
               </div>
             </div>
           </section>
 
           {/* ── DANGER ZONE ── */}
           <section className="settings-section danger-zone">
-            <h2 className="section-title danger-text">⚠️ Danger Zone</h2>
+            <h2 className="section-title danger-text">⚠️ {t("danger_label")}</h2>
             
             <div className="settings-group">
               <div className="setting-item">
                 <div className="setting-info">
-                  <label>Log Out</label>
-                  <span>Sign out of your account on this device</span>
+                  <label>{t("logout_btn")}</label>
+                  <span>Sign out</span>
                 </div>
-                <button className="setting-btn outline-danger" onClick={handleLogout}>Log Out</button>
+                <button className="setting-btn outline-danger" onClick={handleLogout}>{t("logout_btn")}</button>
               </div>
 
               <div className="setting-item border-none">
                 <div className="setting-info">
-                  <label className="danger-text">Delete Account</label>
-                  <span>Permanently remove your account and all data</span>
+                  <label className="danger-text">{t("delete_acc")}</label>
+                  <span>Remove data</span>
                 </div>
-                <button className="setting-btn danger" onClick={handleDeleteAccount}>Delete Account</button>
+                <button className="setting-btn danger" onClick={handleDeleteAccount}>{t("delete_acc")}</button>
               </div>
             </div>
           </section>
@@ -168,7 +204,7 @@ export default function Settings() {
         </div>
 
         <div className="settings-footer">
-          <button className="settings-save-btn" onClick={handleSave}>Save Changes</button>
+          <button className="settings-save-btn" onClick={handleSave}>{t("save_changes")}</button>
         </div>
 
       </div>

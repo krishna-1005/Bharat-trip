@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { generatePlan } from "../../services/api";
+import { useSettings } from "../../context/SettingsContext";
 import "../Planner/plannerForm.css";
 
 function PlannerForm({ onPlanGenerated }) {
+  const { t, formatPrice } = useSettings();
   const [days, setDays]           = useState(2);
   const [budget, setBudget]       = useState("low");
   const [interests, setInterests] = useState([]);
@@ -11,37 +13,25 @@ function PlannerForm({ onPlanGenerated }) {
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
-
-  if (interests.length === 0) {
-    setError("Please select at least one interest.");
-    return;
-  }
-
-  setError("");
-  setLoading(true);
-  setPlan(null);
-
-  try {
-
-    const result = await generatePlan({ days, budget, interests });
-
-    setPlan(result);
-
-    if (onPlanGenerated && result?.itinerary) {
-      onPlanGenerated(result);
+    if (interests.length === 0) {
+      setError("Please select at least one interest.");
+      return;
     }
-
-  } catch {
-
-    setPlan({ message: "Something went wrong. Try again." });
-
-  } finally {
-
-    setLoading(false);
-
-  }
-
-};
+    setError("");
+    setLoading(true);
+    setPlan(null);
+    try {
+      const result = await generatePlan({ days, budget, interests });
+      setPlan(result);
+      if (onPlanGenerated && result?.itinerary) {
+        onPlanGenerated(result);
+      }
+    } catch {
+      setPlan({ message: "Something went wrong. Try again." });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleInterest = (value) => {
     setInterests(prev =>
@@ -50,9 +40,9 @@ function PlannerForm({ onPlanGenerated }) {
   };
 
   const budgetOptions = [
-    { value: "low",    label: "Budget",  icon: "💸", desc: "₹500–₹1500/day" },
-    { value: "medium", label: "Comfort", icon: "✈️", desc: "₹1500–₹4000/day" },
-    { value: "high",   label: "Luxury",  icon: "💎", desc: "₹4000+/day"      },
+    { value: "low",    label: t("budget_low"),  icon: "💸", desc: `${formatPrice(500)}–${formatPrice(1500)}/${t("days").toLowerCase().slice(0,-1)}` },
+    { value: "medium", label: t("budget_med"), icon: "✈️", desc: `${formatPrice(1500)}–${formatPrice(4000)}/${t("days").toLowerCase().slice(0,-1)}` },
+    { value: "high",   label: t("budget_high"),   icon: "💎", desc: `${formatPrice(4000)}+/${t("days").toLowerCase().slice(0,-1)}`      },
   ];
 
   const interestOptions = [
@@ -64,13 +54,13 @@ function PlannerForm({ onPlanGenerated }) {
 
   return (
     <div className="pf-wrap">
-      <h2 className="pf-title">Quick Trip Planner</h2>
-      <p className="pf-subtitle">Customize your perfect Bangalore getaway</p>
+      <h2 className="pf-title">{t("planner_title")}</h2>
+      <p className="pf-subtitle">{t("planner_sub")}</p>
 
       {/* ── DAYS ── */}
       <div className="pf-field">
         <label className="pf-label">
-          <span>📅</span> Duration (1–30 days)
+          <span>📅</span> {t("form_days")}
         </label>
         <div className="pf-days-row">
           {[1,2,3,4,5,7,10].map(d => (
@@ -80,7 +70,7 @@ function PlannerForm({ onPlanGenerated }) {
               onClick={() => setDays(d)}
               type="button"
             >
-              {d}<span className="pf-day-label">day{d > 1 ? "s" : ""}</span>
+              {d}<span className="pf-day-label">{t("days").toLowerCase()}</span>
             </button>
           ))}
           <input 
@@ -98,7 +88,7 @@ function PlannerForm({ onPlanGenerated }) {
       {/* ── BUDGET ── */}
       <div className="pf-field">
         <label className="pf-label">
-          <span>💰</span> Budget
+          <span>💰</span> {t("form_budget")}
         </label>
         <div className="pf-budget-row">
           {budgetOptions.map(opt => (
@@ -119,7 +109,7 @@ function PlannerForm({ onPlanGenerated }) {
       {/* ── INTERESTS ── */}
       <div className="pf-field">
         <label className="pf-label">
-          <span>✨</span> Interests
+          <span>✨</span> {t("form_interests")}
         </label>
         <div className={`pf-interest-row ${error ? "pf-error-border" : ""}`}>
           {interestOptions.map(opt => (
@@ -147,15 +137,13 @@ function PlannerForm({ onPlanGenerated }) {
         {loading ? (
           <span className="pf-loader-wrap">
             <span className="pf-spinner"></span>
-            Crafting your itinerary…
+            {t("crafting")}
           </span>
         ) : (
-          <span>Generate My Plan →</span>
+          <span>{t("gen_btn")}</span>
         )}
       </button>
 
- 
- 
       {error && (
         <p className="pf-error-message">{error}</p>
       )}
