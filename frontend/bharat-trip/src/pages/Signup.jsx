@@ -2,11 +2,14 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
-/* API URL from environment */
-const API = import.meta.env.VITE_API_URL;
-console.log(API);
+
 
 function Signup() {
+  
+  /* API URL from environment */
+  const API = import.meta.env.VITE_API_URL;
+  console.log(API);
+  
   const navigate        = useNavigate();
   const { login }       = useContext(AuthContext);
 
