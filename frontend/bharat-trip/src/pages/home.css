@@ -105,10 +105,24 @@
   border-radius: 24px; transition: all 0.4s; overflow: hidden; text-align: left;
 }
 .feature-premium-card:hover { transform: translateY(-10px); border-color: rgba(59, 130, 246, 0.3); }
-.feat-icon { font-size: 40px; margin-bottom: 24px; }
+.feat-3d-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 24px;
+}
 
 /* ── CTA ── */
-.cta-premium { padding: 100px 80px; position: relative; z-index: 1; display: flex; justify-content: center; }
+.cta-premium { padding: 100px 80px; position: relative; z-index: 1; display: flex; justify-content: center; overflow: hidden; }
+.cta-3d-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.4;
+  pointer-events: none;
+}
 .cta-content {
   width: 100%; max-width: 1100px; padding: 80px; border-radius: 40px;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
@@ -128,8 +142,21 @@
 .premium-footer {
   padding: 100px 80px 40px; background: #010411; border-top: 1px solid var(--p-border);
   position: relative; z-index: 1;
+  overflow: hidden;
+}
+.footer-3d-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.2;
+  z-index: 0;
+  pointer-events: none;
 }
 .footer-main {
+  position: relative;
+  z-index: 1;
   display: flex; justify-content: space-between; gap: 80px; margin-bottom: 80px;
 }
 .footer-brand { max-width: 400px; }
