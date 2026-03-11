@@ -29,7 +29,7 @@ function Results() {
   }, [plan]);
 
   const [tripTitle, setTripTitle] = useState("");
-  const [travelMode, setTravelMode] = useState("Car"); // Essential feature: Travel Mode
+  const [travelMode, setTravelMode] = useState("Car");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -84,9 +84,10 @@ function Results() {
     <div className="res-page">
       {/* ── LEFT: MAP SECTION ── */}
       <div className="res-map-section">
-        <MapView plan={plan} />
+        <div className="map-inner-container">
+          <MapView plan={plan} />
+        </div>
         
-        {/* Floating Stats Bar */}
         <div className="res-floating-stats">
           <div className="res-stat-pill">
             <span className="pill-icon">💰</span>
@@ -102,20 +103,12 @@ function Results() {
               <span className="pill-label">Duration</span>
             </div>
           </div>
-          <div className="res-stat-pill">
-            <span className="pill-icon">📍</span>
-            <div className="pill-texts">
-              <span className="pill-val">{totalPlaces}</span>
-              <span className="pill-label">{t("places")}</span>
-            </div>
-          </div>
         </div>
       </div>
 
       {/* ── RIGHT: PREMIUM INVENTORY PANEL ── */}
       <aside className="res-inventory-panel">
         
-        {/* Header Actions */}
         <div className="res-inventory-header">
           <div className="header-top">
             <button className="back-btn" onClick={() => navigate("/planner")}>←</button>
@@ -127,7 +120,7 @@ function Results() {
                 value={tripTitle}
                 onChange={e => setTripTitle(e.target.value)}
               />
-              <span className="header-sub">Bengaluru, Karnataka • AI Generated</span>
+              <span className="header-sub">Bengaluru • AI Generated</span>
             </div>
             <button className="share-btn" onClick={handleShare}>🔗</button>
           </div>
@@ -145,17 +138,16 @@ function Results() {
           </div>
         </div>
 
-        {/* Weather Widget (Essential Add-on) */}
-        <div className="weather-preview-card">
-          <div className="weather-info">
-            <span className="weather-temp">28°C</span>
-            <span className="weather-desc">Sunny • Perfect for travel</span>
-          </div>
-          <span className="weather-icon">☀️</span>
-        </div>
-
-        {/* Scrollable Itinerary */}
         <div className="res-itinerary-scroll">
+          {/* Weather Widget */}
+          <div className="weather-preview-card">
+            <div className="weather-info">
+              <span className="weather-temp">28°C</span>
+              <span className="weather-desc">Sunny • Perfect for travel</span>
+            </div>
+            <span className="weather-icon">☀️</span>
+          </div>
+
           {days.map((day, idx) => (
             <div key={day} className="premium-day-card" style={{ "--day-accent": DAY_COLORS[idx % DAY_COLORS.length] }}>
               <div className="day-header">
@@ -190,17 +182,17 @@ function Results() {
               </div>
             </div>
           ))}
-        </div>
 
-        {/* Fixed Footer Action */}
-        <div className="res-inventory-footer">
-          <button 
-            className={`premium-save-btn ${saved ? "saved" : ""}`} 
-            onClick={handleSaveTrip} 
-            disabled={saving || saved}
-          >
-            {saved ? "✓ Saved to Profile" : saving ? "Saving..." : "Confirm & Save Trip"}
-          </button>
+          {/* REDUCED SIZE SAVE BUTTON INSIDE INVENTORY */}
+          <div className="res-inventory-actions">
+            <button 
+              className={`compact-save-btn ${saved ? "saved" : ""}`} 
+              onClick={handleSaveTrip} 
+              disabled={saving || saved}
+            >
+              {saved ? "✓ Trip Saved" : saving ? "Saving..." : "Confirm & Save Plan"}
+            </button>
+          </div>
         </div>
 
       </aside>
