@@ -3,13 +3,11 @@ import MapView from "../components/Map/MapView";
 import { DAY_COLORS } from "../constants/dayColors";
 import "./results.css";
 import { useState, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { getAuth } from "firebase/auth";
 import { useSettings } from "../context/SettingsContext";
 const API = import.meta.env.VITE_API_URL;
 
 function Results() {
-
   const navigate = useNavigate();
   const loc = useLocation();
   const { formatPrice, t } = useSettings();
@@ -26,17 +24,12 @@ function Results() {
   useEffect(() => {
     if (!plan) {
       const saved = localStorage.getItem("tripPlan") || sessionStorage.getItem("tripPlan");
-      if (saved) {
-        setPlan(JSON.parse(saved));
-      }
+      if (saved) setPlan(JSON.parse(saved));
     }
   }, [plan]);
 
   const [tripTitle, setTripTitle] = useState("");
-  const [tripType, setTripType] = useState("Adventure");
-  const [travelers, setTravelers] = useState("Solo");
-
-  const [activeDay, setActiveDay] = useState(null);
+  const [travelMode, setTravelMode] = useState("Car"); // Essential feature: Travel Mode
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -45,7 +38,6 @@ function Results() {
       <div className="res-empty">
         <div className="res-empty-icon">🗺️</div>
         <h2>{t("no_trip")}</h2>
-        <p>{t("planner_sub")}</p>
         <button onClick={() => navigate("/planner")}>← {t("back_to_planner")}</button>
       </div>
     );
@@ -73,7 +65,7 @@ function Results() {
           budget: plan.budget,
           interests: plan.interests,
           itinerary: plan.itinerary,
-          totalCost: plan.totalTripCost
+          totalCost: totalTripCost
         })
       });
       if (res.ok) {
@@ -83,76 +75,134 @@ function Results() {
     } catch { alert("Server error"); } finally { setSaving(false); }
   };
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Trip link copied to clipboard!");
+  };
+
   return (
     <div className="res-page">
-      <div className="res-map-wrap">
+      {/* ── LEFT: MAP SECTION ── */}
+      <div className="res-map-section">
         <MapView plan={plan} />
-        <div className="res-map-pill">
-          <div className="res-pill-stat">
-            <span className="res-pill-val">{formatPrice(totalTripCost)}</span>
-            <span className="res-pill-label">{t("total_cost")}</span>
+        
+        {/* Floating Stats Bar */}
+        <div className="res-floating-stats">
+          <div className="res-stat-pill">
+            <span className="pill-icon">💰</span>
+            <div className="pill-texts">
+              <span className="pill-val">{formatPrice(totalTripCost)}</span>
+              <span className="pill-label">{t("total_cost")}</span>
+            </div>
           </div>
-          <div className="res-pill-divider" />
-          <div className="res-pill-stat">
-            <span className="res-pill-val">{totalDays}</span>
-            <span className="res-pill-label">{t("days")}</span>
+          <div className="res-stat-pill">
+            <span className="pill-icon">📅</span>
+            <div className="pill-texts">
+              <span className="pill-val">{totalDays} {t("days")}</span>
+              <span className="pill-label">Duration</span>
+            </div>
           </div>
-          <div className="res-pill-divider" />
-          <div className="res-pill-stat">
-            <span className="res-pill-val">{totalPlaces}</span>
-            <span className="res-pill-label">{t("places")}</span>
+          <div className="res-stat-pill">
+            <span className="pill-icon">📍</span>
+            <div className="pill-texts">
+              <span className="pill-val">{totalPlaces}</span>
+              <span className="pill-label">{t("places")}</span>
+            </div>
           </div>
-          <button className="res-pill-save" onClick={handleSaveTrip} disabled={saving || saved}>
-            {saved ? "✓" : saving ? "..." : t("save_trip")}
-          </button>
         </div>
       </div>
 
-      <aside className="res-panel">
-        <button className="res-optimize-btn" onClick={() => {}}>{t("optimize_route")}</button>
-        <div className="res-panel-header">
-          <div className="res-panel-title-row">
-            <h2>{t("results_title")}</h2>
-            <span className="res-cost-badge">{formatPrice(totalTripCost)}</span>
+      {/* ── RIGHT: PREMIUM INVENTORY PANEL ── */}
+      <aside className="res-inventory-panel">
+        
+        {/* Header Actions */}
+        <div className="res-inventory-header">
+          <div className="header-top">
+            <button className="back-btn" onClick={() => navigate("/planner")}>←</button>
+            <div className="header-titles">
+              <input 
+                type="text" 
+                placeholder="Name your adventure..." 
+                className="editable-title"
+                value={tripTitle}
+                onChange={e => setTripTitle(e.target.value)}
+              />
+              <span className="header-sub">Bengaluru, Karnataka • AI Generated</span>
+            </div>
+            <button className="share-btn" onClick={handleShare}>🔗</button>
+          </div>
+
+          <div className="header-tools">
+            <div className="tool-group">
+              <label>Travel Mode</label>
+              <select value={travelMode} onChange={e => setTravelMode(e.target.value)}>
+                <option>Car</option>
+                <option>Bike</option>
+                <option>Transit</option>
+              </select>
+            </div>
+            <button className="optimize-tool-btn">✨ Optimize</button>
           </div>
         </div>
 
-        <div className="res-form-section">
-          <p className="res-section-label">{t("trip_details")}</p>
-          <div className="res-input-wrap">
-            <input type="text" placeholder="Trip Name" className="res-input" value={tripTitle} onChange={e=>setTripTitle(e.target.value)} />
+        {/* Weather Widget (Essential Add-on) */}
+        <div className="weather-preview-card">
+          <div className="weather-info">
+            <span className="weather-temp">28°C</span>
+            <span className="weather-desc">Sunny • Perfect for travel</span>
           </div>
+          <span className="weather-icon">☀️</span>
         </div>
 
-        <div className="res-days-wrap">
-          <p className="res-section-label">{t("itinerary_label")}</p>
+        {/* Scrollable Itinerary */}
+        <div className="res-itinerary-scroll">
           {days.map((day, idx) => (
-            <div key={day} className="res-day-card" style={{ "--accent": DAY_COLORS[idx] }}>
-              <div className="res-day-body">
-                <div className="res-day-top">
-                  <h3 className="res-day-title">{day}</h3>
-                  <div className="res-day-meta">
-                    <span>💰 {formatPrice(plan.itinerary[day].estimatedCost)}</span>
-                  </div>
+            <div key={day} className="premium-day-card" style={{ "--day-accent": DAY_COLORS[idx % DAY_COLORS.length] }}>
+              <div className="day-header">
+                <div className="day-info">
+                  <span className="day-badge">{day}</span>
+                  <h3 className="day-title">Exploration Day</h3>
                 </div>
-                <ul className="res-places">
-                  {plan.itinerary[day].places.map((p, i) => (
-                    <li key={i} className="res-place-item">
-                      <span className="res-place-name">{p.name}</span>
-                      <span className="res-place-cost">{formatPrice(p.estimatedCost)}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="day-meta">
+                  <span>⏱️ {plan.itinerary[day].estimatedHours}h</span>
+                  <span>💰 {formatPrice(plan.itinerary[day].estimatedCost)}</span>
+                </div>
+              </div>
+
+              <div className="place-timeline">
+                {plan.itinerary[day].places.map((place, pIdx) => (
+                  <div key={pIdx} className="timeline-item">
+                    <div className="timeline-marker">
+                      <span className="marker-dot"></span>
+                      {pIdx < plan.itinerary[day].places.length - 1 && <span className="marker-line"></span>}
+                    </div>
+                    <div className="timeline-content">
+                      <div className="place-card-mini">
+                        <div className="place-info-main">
+                          <h4>{place.name}</h4>
+                          <span className="place-tag">{place.category || "Sightseeing"}</span>
+                        </div>
+                        <span className="place-cost-mini">{formatPrice(place.estimatedCost || 0)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
         </div>
 
-        <div className="res-save-wrap">
-          <button className="res-save-btn" onClick={handleSaveTrip} disabled={saving || saved}>
-            {saved ? "✓" : t("save_to_profile")}
+        {/* Fixed Footer Action */}
+        <div className="res-inventory-footer">
+          <button 
+            className={`premium-save-btn ${saved ? "saved" : ""}`} 
+            onClick={handleSaveTrip} 
+            disabled={saving || saved}
+          >
+            {saved ? "✓ Saved to Profile" : saving ? "Saving..." : "Confirm & Save Trip"}
           </button>
         </div>
+
       </aside>
     </div>
   );
