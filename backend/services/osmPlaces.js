@@ -42,7 +42,12 @@ async function fetchOSMPlaces() {
   );
 
   const places = response.data.elements
-    .filter(p => p.tags && p.tags.name) // remove unnamed places
+    .filter(p =>
+        p.tags &&
+        p.tags.name &&
+        p.tags.name.length > 3 &&
+        !p.tags.name.toLowerCase().includes("tree")
+    ) // remove unnamed places
     .map(p => ({
       name: p.tags.name,
       lat: p.lat,
