@@ -1,205 +1,142 @@
 const express = require("express");
-const router = express.Router();
-const Groq = require("groq-sdk");
-
+const router  = express.Router();
+const Groq    = require("groq-sdk");
 const generatePlan = require("../logic/planner");
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
-});
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 router.post("/", async (req, res) => {
 
   const { message } = req.body;
 
   if (!message || typeof message !== "string") {
-    return res.json({
-      type: "chat",
-      reply: "Please type a message."
-    });
+    return res.json({ type: "chat", reply: "Please type a message." });
   }
 
   try {
-
     const msg = message.toLowerCase();
 
-    let days = 1;
-    let budget = "low";
+    let days      = 2;
+    let budget    = "low";
     let interests = [];
 
-    /* -------- AI Parsing (NEW) -------- */
-
+    /* ── AI PARSING ── */
     try {
-
       const aiParse = await groq.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [
           {
             role: "system",
-            content: `
-Extract travel details from the user message.
+            content: `Extract travel details from the user message.
+Return ONLY valid JSON — no markdown, no backticks, no explanation.
 
-Return ONLY JSON in this format:
-
+Format:
 {
- "days": number,
- "budget": "low | medium | high",
- "interests": ["Nature","Food","Culture","Spiritual","Adventure"]
+  "days": number,
+  "budget": "low" | "medium" | "high",
+  "interests": ["Nature","Food","Culture","Spiritual","Adventure"]
 }
 
-Do not include explanation.
-`
+Rules:
+- "cheap"/"budget" → "low", "comfort"/"moderate" → "medium", "luxury" → "high"
+- "weekend" → days: 2
+- If no interests mentioned, use ["Nature","Food"]
+- days must be between 1 and 10`
           },
-          {
-            role: "user",
-            content: message
-          }
+          { role: "user", content: message }
         ]
       });
 
-      const parsed = JSON.parse(aiParse.choices[0].message.content);
+      // ✅ Strip markdown fences Groq sometimes wraps JSON in
+      let raw = aiParse.choices[0].message.content.trim();
+      raw = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
 
-      days = parsed.days || days;
-      budget = parsed.budget || budget;
-      interests = parsed.interests || interests;
+      const parsed = JSON.parse(raw);
 
-      console.log("AI Parsed:", parsed);
+      if (parsed.days)      days      = Math.min(Math.max(parseInt(parsed.days) || 2, 1), 10);
+      if (parsed.budget)    budget    = parsed.budget;
+      if (parsed.interests?.length) interests = parsed.interests;
+
+      console.log("✅ AI Parsed:", { days, budget, interests });
 
     } catch (err) {
-
-      console.log("AI parsing failed, using rule-based detection");
-
+      console.log("⚠️  AI parsing failed, using rule-based fallback:", err.message);
     }
 
-    /* -------- Detect days (Fallback) -------- */
-
-    if (days === 1) {
-
+    /* ── RULE-BASED FALLBACK ── */
+    if (days === 2) {
       const dayMatch = msg.match(/(\d+)\s*day[s]?/);
-
-      if (dayMatch) {
-        days = parseInt(dayMatch[1]);
-      }
-
-      if (msg.includes("weekend") && days === 1) days = 2;
-
+      if (dayMatch) days = Math.min(parseInt(dayMatch[1]), 10);
+      if (msg.includes("weekend")) days = 2;
       if (msg.includes("tomorrow")) days = 1;
-
     }
 
-    if (days > 10) days = 10;
-
-    /* -------- Budget detection (Fallback) -------- */
-
-    if (budget === "low") {
-
-      if (msg.includes("cheap") || msg.includes("budget") || msg.includes("low"))
-        budget = "low";
-
-      if (msg.includes("medium") || msg.includes("comfort"))
-        budget = "medium";
-
-      if (msg.includes("luxury") || msg.includes("high"))
-        budget = "high";
-
-    }
-
-    /* -------- Interest detection (Fallback) -------- */
+    if (!["low","medium","high"].includes(budget)) budget = "low";
 
     if (interests.length === 0) {
-
-      if (msg.includes("nature") || msg.includes("park") || msg.includes("lake"))
-        interests.push("Nature");
-
-      if (msg.includes("food") || msg.includes("restaurant") || msg.includes("cafe"))
-        interests.push("Food");
-
-      if (msg.includes("culture") || msg.includes("museum") || msg.includes("heritage"))
-        interests.push("Culture");
-
-      if (msg.includes("temple") || msg.includes("spiritual"))
-        interests.push("Spiritual");
-
-      if (msg.includes("adventure") || msg.includes("trek"))
-        interests.push("Adventure");
-
-      if (interests.length === 0) {
-        interests = ["Nature", "Food"];
-      }
-
+      if (msg.includes("nature") || msg.includes("park") || msg.includes("lake") || msg.includes("hill"))  interests.push("Nature");
+      if (msg.includes("food")   || msg.includes("restaurant") || msg.includes("cafe") || msg.includes("eat")) interests.push("Food");
+      if (msg.includes("culture")|| msg.includes("museum")     || msg.includes("heritage")) interests.push("Culture");
+      if (msg.includes("temple") || msg.includes("spiritual"))  interests.push("Spiritual");
+      if (msg.includes("adventure")||msg.includes("trek")||msg.includes("climb")) interests.push("Adventure");
+      if (interests.length === 0) interests = ["Nature", "Food"];
     }
 
-    /* -------- Trip planner trigger -------- */
-
+    /* ── TRAVEL INTENT CHECK ── */
     const travelIntent =
-      msg.includes("trip") ||
-      msg.includes("plan") ||
-      msg.includes("itinerary") ||
-      msg.includes("places") ||
-      msg.includes("visit") ||
-      msg.includes("tour") ||
-      msg.includes("bangalore") ||
-      msg.includes("bengaluru") ||
-      msg.includes("nature") ||
-      msg.includes("temple") ||
-      msg.includes("culture") ||
-      msg.includes("adventure") ||
-      msg.includes("food");
+      msg.includes("trip")      || msg.includes("plan")      || msg.includes("itinerary") ||
+      msg.includes("places")    || msg.includes("visit")     || msg.includes("tour")       ||
+      msg.includes("bangalore") || msg.includes("bengaluru") || msg.includes("nature")     ||
+      msg.includes("temple")    || msg.includes("culture")   || msg.includes("adventure")  ||
+      msg.includes("food")      || msg.includes("weekend")   || msg.includes("day trip")   ||
+      msg.includes("cheap")     || msg.includes("budget")    || msg.includes("luxury");
 
     if (travelIntent) {
 
-      let plan;
+      let plan = null;
 
       try {
-
-        plan = await generatePlan({
-          days,
-          budget,
-          interests
-        });
-
+        // ✅ generatePlan is async — always await it
+        plan = await generatePlan({ days, budget, interests });
       } catch (e) {
+        console.log("⚠️  Primary planner failed:", e.message);
+      }
 
-        console.log("Planner fallback triggered");
-
-        plan = generatePlan({
-          days: 2,
-          budget: "medium",
-          interests: ["Nature", "Food"]
-        });
-
+      // ✅ Fallback also awaited
+      if (!plan || !plan.itinerary || Object.keys(plan.itinerary).length === 0) {
+        console.log("⚠️  Plan empty, trying fallback...");
+        try {
+          plan = await generatePlan({ days: 2, budget: "medium", interests: ["Nature", "Food"] });
+        } catch (e) {
+          console.log("⚠️  Fallback planner also failed:", e.message);
+        }
       }
 
       if (!plan || !plan.itinerary || Object.keys(plan.itinerary).length === 0) {
         return res.json({
           type: "chat",
-          reply: "I couldn't generate a plan. Try adding interests like nature or food."
+          reply: "I couldn't generate a plan right now. Please try the Trip Planner page instead!"
         });
       }
 
-      console.log("Generated plan:", plan);
+      console.log("✅ Plan generated:", days, "days,", budget, "budget");
 
       return res.json({
         type: "trip",
-        message: `Here's a ${days}-day ${budget} trip plan for Bengaluru.`,
+        message: `Here's your ${days}-day ${budget} trip plan for Bengaluru! 🗺️`,
         plan
       });
-
     }
 
-    /* -------- Normal AI chat -------- */
-
+    /* ── NORMAL AI CHAT ── */
     const chat = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
-          content: "You are BharatTrip AI, a helpful travel assistant for India."
+          content: "You are BharatTrip AI, a friendly travel assistant specializing in India travel. Keep replies concise and helpful."
         },
-        {
-          role: "user",
-          content: message
-        }
+        { role: "user", content: message }
       ]
     });
 
@@ -209,16 +146,9 @@ Do not include explanation.
     });
 
   } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      type: "chat",
-      reply: "Server error"
-    });
-
+    console.error("Chat route error:", error);
+    res.status(500).json({ type: "chat", reply: "Server error. Please try again." });
   }
-
 });
 
 module.exports = router;
