@@ -1,38 +1,40 @@
-const places = require("../data/bangalorePlaces.json");
+const fetchOSMPlaces = require("../services/osmPlaces");
 
 const MAX_HOURS_PER_DAY = 6;
 
-/* Filter places based on budget + interests */
-function filterPlaces(budget, interests) {
+/* Filter places based on interests */
+function filterPlaces(places, interests) {
+
+  if (!interests || interests.length === 0) return places;
+
+  const normalizedInterests = interests.map(i => i.toLowerCase());
 
   return places.filter(place => {
 
-    const budgetMatch = !budget || place.budget === budget;
+    const category = (place.category || "").toLowerCase();
 
-    const interestMatch =
-      !interests ||
-      interests.length === 0 ||
-      interests
-        .map(i => i.toLowerCase())
-        .includes(place.category.toLowerCase());
-
-    return budgetMatch && interestMatch;
+    return normalizedInterests.includes(category);
 
   });
 
 }
 
 /* Generate itinerary */
-function generatePlan({ days, budget, interests }) {
+async function generatePlan({ days, budget, interests }) {
 
-  const filtered = filterPlaces(budget, interests);
+  /* Fetch places from OSM */
+  let places = await fetchOSMPlaces();
 
-  /* If no places found */
-  let filteredPlaces = filtered;
+  /* Add default fields for planner compatibility */
+  places = places.map(p => ({
+    ...p,
+    timeHours: 1.5,
+    avgCost: 100
+  }));
 
-  if (filteredPlaces.length === 0) {
-    filteredPlaces = places;
-  }
+  const filtered = filterPlaces(places, interests);
+
+  let filteredPlaces = filtered.length > 0 ? filtered : places;
 
   const itinerary = {};
 

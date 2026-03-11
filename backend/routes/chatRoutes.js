@@ -147,7 +147,7 @@ Do not include explanation.
 
       try {
 
-        plan = generatePlan({
+        plan = await generatePlan({
           days,
           budget,
           interests
