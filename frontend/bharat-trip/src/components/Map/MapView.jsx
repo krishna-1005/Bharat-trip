@@ -11,7 +11,6 @@ import "../../utils/fixLeafletIcons";
 import { useState, useEffect, Fragment } from "react";
 import { createLocationIcon } from "./markerIcons";
 import MapLegend from "./MapLegend";
-import MapInfoBar from "./MapInfoBar";
 import ResizeMap from "./ResizeMap";
 import { DAY_COLORS } from "../../constants/dayColors";
 import PlaceTooltip from "./PlaceTooltip";
@@ -186,12 +185,6 @@ function MapView({ plan }) {
         )}
 
       </MapContainer>
-
-      <MapInfoBar
-        totalCost={plan.totalTripCost}
-        days={days}
-        itinerary={plan.itinerary}
-      />
     </div>
   );
 }
