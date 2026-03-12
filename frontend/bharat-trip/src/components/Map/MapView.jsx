@@ -79,10 +79,9 @@ function FollowUser({ location }) {
   return null;
 }
 
-function MapView({ plan, isTracking }) {
+function MapView({ plan, isTracking, onHover }) {
   const [activeDay, setActiveDay] = useState("all");
   const [userLocation, setUserLocation] = useState(null);
-  const [hoveredPlace, setHoveredPlace] = useState(null);
   const [pathHistory, setPathHistory] = useState([]);
   const [roadRoute, setRoadRoute] = useState([]);
 
@@ -154,11 +153,6 @@ function MapView({ plan, isTracking }) {
 
   return (
     <div className="map-container">
-      {hoveredPlace && (
-        <div className="map-hover-overlay">
-          <HoverPlaceCard place={hoveredPlace} city={plan?.city} />
-        </div>
-      )}
       <MapContainer
         center={[12.9716, 77.5946]}
         zoom={11}
@@ -244,8 +238,8 @@ function MapView({ plan, isTracking }) {
                     activeDay === idx + 1
                   )}
                   eventHandlers={{
-                    mouseover: () => setHoveredPlace(p),
-                    mouseout: () => setHoveredPlace(null),
+                    mouseover: () => onHover(p),
+                    mouseout: () => onHover(null),
                   }}
                 >
                   <Tooltip

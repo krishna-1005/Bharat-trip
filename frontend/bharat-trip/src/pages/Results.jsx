@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import MapView from "../components/Map/MapView";
+import HoverPlaceCard from "../components/Map/HoverPlaceCard";
 import { DAY_COLORS } from "../constants/dayColors";
 import PlaceImage from "../components/PlaceImage";
 import "./results.css";
@@ -21,6 +22,7 @@ function Results() {
   const [saved, setSaved] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
+  const [hoveredPlace, setHoveredPlace] = useState(null);
   const [weather, setWeather] = useState({ temp: "--", desc: "Loading...", icon: "☁️" });
 
   useEffect(() => {
@@ -194,9 +196,21 @@ function Results() {
         <button className={showMap ? "active" : ""} onClick={() => setShowMap(true)}>Map</button>
       </div>
 
+      <aside className="res-details-panel">
+        {hoveredPlace ? (
+          <HoverPlaceCard place={hoveredPlace} city={plan.city} />
+        ) : (
+          <div className="details-placeholder">
+            <div className="placeholder-icon">📍</div>
+            <h3>Location Details</h3>
+            <p>Hover over a marker on the map to see original reviews and details.</p>
+          </div>
+        )}
+      </aside>
+
       <div className="res-map-section">
         <div className="map-inner-container">
-          <MapView plan={plan} isTracking={isTracking} />
+          <MapView plan={plan} isTracking={isTracking} onHover={setHoveredPlace} />
         </div>
         <div className="res-floating-stats">
           <button 

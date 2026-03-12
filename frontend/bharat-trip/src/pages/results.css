@@ -640,29 +640,59 @@
   .day-title { font-size: 12px; }
 }
 
-/* Map Hover Overlay */
-.map-hover-overlay {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 2000;
-  width: 320px;
-  pointer-events: none;
-  animation: fadeInHover 0.3s ease;
+/* ── DETAILS SIDE PANEL ── */
+.res-details-panel {
+  width: 350px;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border-main);
+  display: flex;
+  flex-direction: column;
+  z-index: 15;
+  box-shadow: 10px 0 40px var(--shadow-main);
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.details-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+  text-align: center;
+  color: var(--text-dim);
+}
+
+.placeholder-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  opacity: 0.3;
+}
+
+.details-placeholder h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: var(--text-main);
+}
+
+.details-placeholder p {
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .hover-place-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-  overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.05);
-  pointer-events: auto;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  border: none;
+  height: 100%;
 }
 
 .hover-card-header {
   position: relative;
-  height: 140px;
+  height: 220px;
 }
 
 .hover-card-img {
@@ -676,106 +706,107 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 15px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  padding: 20px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.9));
   color: white;
 }
 
 .hover-card-title-section h3 {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .hover-card-category {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   opacity: 0.9;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
 .hover-card-body {
-  padding: 15px;
-  background: white;
+  padding: 24px;
 }
 
 .hover-card-meta {
   display: flex;
-  gap: 15px;
-  margin-bottom: 15px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-main);
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.85rem;
-  color: #4b5563;
+  gap: 8px;
+  font-size: 1rem;
+  color: var(--text-main);
+  font-weight: 600;
 }
 
 .hover-card-reviews h4 {
-  margin: 0 0 10px 0;
-  font-size: 0.9rem;
-  color: #1f2937;
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  color: var(--text-main);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  font-weight: 700;
 }
 
 .reviews-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-height: 200px;
-  overflow-y: auto;
+  gap: 16px;
 }
 
 .review-item {
-  background: #f9fafb;
-  padding: 10px;
-  border-radius: 8px;
+  background: var(--glass);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-main);
 }
 
 .review-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .review-author {
-  font-weight: 600;
-  font-size: 0.8rem;
-  color: #374151;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-main);
 }
 
 .review-rating {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
 }
 
 .review-comment {
   margin: 0;
-  font-size: 0.8rem;
-  color: #6b7280;
-  line-height: 1.4;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 1.5;
   font-style: italic;
+}
+
+/* Custom Scrollbar for details panel */
+.res-details-panel::-webkit-scrollbar {
+  width: 4px;
+}
+.res-details-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.res-details-panel::-webkit-scrollbar-thumb {
+  background: var(--border-main);
+  border-radius: 10px;
 }
 
 @keyframes fadeInHover {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* Custom Scrollbar for reviews */
-.reviews-list::-webkit-scrollbar {
-  width: 4px;
-}
-.reviews-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-.reviews-list::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 10px;
 }
