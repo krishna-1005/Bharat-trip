@@ -5,12 +5,12 @@ import { useSettings } from "../context/SettingsContext";
 import "../styles/navbar.css";
 
 function Navbar() {
-
   const navigate  = useNavigate();
   const location  = useLocation();
   const { user, logout } = useContext(AuthContext);
   const { t, theme, toggleTheme } = useSettings();
   const [open, setOpen]           = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled]   = useState(false);
   const dropdownRef = useRef(null);
 
@@ -26,8 +26,9 @@ function Navbar() {
   /* close on outside click */
   useEffect(() => {
     const handler = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setOpen(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -35,21 +36,24 @@ function Navbar() {
 
   const scrollToSection = (id) => {
     setOpen(false);
+    setMobileMenuOpen(false);
 
     if (location.pathname !== "/") {
       navigate("/");
-
       setTimeout(() => {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
       }, 100);
-
     } else {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   const handleLogout = () => {
     logout();
+    setOpen(false);
+    setMobileMenuOpen(false);
     navigate("/");
   };
 
@@ -67,17 +71,16 @@ function Navbar() {
   ];
 
   return (
-    <nav className={`nb-nav ${scrolled ? "nb-scrolled" : ""}`}>
-
+    <nav className={`nb-nav ${scrolled ? "nb-scrolled" : ""} ${mobileMenuOpen ? "nb-mobile-active" : ""}`}>
       {/* ── LOGO ── */}
-      <div className="nb-logo" onClick={() => navigate("/")}>
+      <div className="nb-logo" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}>
         <span className="nb-logo-flag">🇮🇳</span>
         <span className="nb-logo-text">
           <span className="nb-logo-in">IN</span> Bharat Trip
         </span>
       </div>
 
-      {/* ── NAV LINKS ── */}
+      {/* ── DESKTOP NAV LINKS ── */}
       <ul className="nb-links">
         {navLinks.map(link => (
           <li
@@ -92,7 +95,6 @@ function Navbar() {
 
       {/* ── RIGHT SIDE ── */}
       <div className="nb-right">
-
         <button 
           className="nb-theme-toggle" 
           onClick={toggleTheme}
@@ -103,8 +105,6 @@ function Navbar() {
 
         {user ? (
           <div className="nb-profile-wrap" ref={dropdownRef}>
-
-            {/* Avatar button */}
             <button
               className={`nb-avatar ${open ? "nb-avatar-open" : ""}`}
               onClick={() => setOpen(!open)}
@@ -113,87 +113,84 @@ function Navbar() {
               <span className="nb-avatar-letter">
                 {username.charAt(0).toUpperCase()}
               </span>
-
               <span className="nb-avatar-chevron">
                 {open ? "▴" : "▾"}
               </span>
             </button>
 
-            {/* Dropdown */}
             {open && (
               <div className="nb-dropdown">
-
-                {/* User info header */}
                 <div className="nb-dd-header">
-
                   <div className="nb-dd-avatar-lg">
                     {username.charAt(0).toUpperCase()}
                   </div>
-
                   <div className="nb-dd-user-info">
                     <span className="nb-dd-name">{username}</span>
                     <span className="nb-dd-tag">✦ Explorer</span>
                   </div>
-
                 </div>
-
                 <div className="nb-dd-divider" />
-
-                {/* Menu items */}
                 <div className="nb-dd-menu">
                   {menuItems.map((item) => (
                     <button
                       key={item.path}
                       className="nb-dd-item"
-                      onClick={() => { setOpen(false); navigate(item.path); }}
+                      onClick={() => { setOpen(false); setMobileMenuOpen(false); navigate(item.path); }}
                     >
                       <span className="nb-dd-item-icon">{item.icon}</span>
-
                       <span className="nb-dd-item-text">
                         <span className="nb-dd-item-label">{item.label}</span>
                         <span className="nb-dd-item-sub">{item.sub}</span>
                       </span>
-
                       <span className="nb-dd-item-arrow">›</span>
                     </button>
                   ))}
                 </div>
-
                 <div className="nb-dd-divider" />
-
-                {/* Logout */}
                 <button className="nb-dd-logout" onClick={handleLogout}>
                   <span>🚪</span>
                   <span>Sign out</span>
                 </button>
-
               </div>
             )}
-
           </div>
-
         ) : (
-
           <div className="nb-auth-btns">
-            <button
-              className="nb-btn-ghost"
-              onClick={() => navigate("/login")}
-            >
-              Login
-            </button>
-
-            <button
-              className="nb-btn-primary"
-              onClick={() => navigate("/signup")}
-            >
-              Get Started
-            </button>
+            <button className="nb-btn-ghost" onClick={() => navigate("/login")}>Login</button>
+            <button className="nb-btn-primary" onClick={() => navigate("/signup")}>Get Started</button>
           </div>
-
         )}
 
+        {/* Hamburger */}
+        <button 
+          className={`nb-hamburger ${mobileMenuOpen ? "active" : ""}`}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </div>
 
+      {/* ── MOBILE MENU ── */}
+      {mobileMenuOpen && (
+        <div className="nb-mobile-menu">
+          <ul className="nb-mobile-links">
+            {navLinks.map(link => (
+              <li key={link.id} className="nb-mobile-item" onClick={() => scrollToSection(link.id)}>
+                {link.label}
+              </li>
+            ))}
+            {!user && (
+              <>
+                <li className="nb-mobile-item" onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}>Login</li>
+                <li className="nb-mobile-item" onClick={() => { navigate("/signup"); setMobileMenuOpen(false); }}>Get Started</li>
+              </>
+            )}
+          </ul>
+        </div>
+      )}
     </nav>
   );
 }

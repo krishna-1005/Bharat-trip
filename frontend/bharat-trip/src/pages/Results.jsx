@@ -19,6 +19,7 @@ function Results() {
   const [travelMode, setTravelMode] = useState("Car");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showMap, setShowMap] = useState(false); // Mobile toggle
   const [weather, setWeather] = useState({ temp: "--", desc: "Loading...", icon: "☁️" });
 
   useEffect(() => {
@@ -162,7 +163,13 @@ function Results() {
   };
 
   return (
-    <div className="res-page">
+    <div className={`res-page ${showMap ? "mobile-map-active" : ""}`}>
+      {/* ── MOBILE TOGGLE ── */}
+      <div className="res-mobile-toggle">
+        <button className={!showMap ? "active" : ""} onClick={() => setShowMap(false)}>List</button>
+        <button className={showMap ? "active" : ""} onClick={() => setShowMap(true)}>Map</button>
+      </div>
+
       <div className="res-map-section">
         <div className="map-inner-container">
           <MapView plan={plan} />

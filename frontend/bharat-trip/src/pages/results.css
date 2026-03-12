@@ -11,6 +11,38 @@
   transition: background 0.3s ease;
 }
 
+/* ── MOBILE TOGGLE ── */
+.res-mobile-toggle {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-main);
+  padding: 6px;
+  border-radius: 100px;
+  box-shadow: 0 10px 30px var(--shadow-main);
+}
+
+.res-mobile-toggle button {
+  padding: 8px 20px;
+  border-radius: 100px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.res-mobile-toggle button.active {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
 /* ── LEFT: MAP SECTION ── */
 .res-map-section {
   flex: 1;
@@ -436,4 +468,47 @@
   width: 100%;
   border-radius: 0;
   overflow: hidden;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .res-inventory-panel {
+    width: 100%;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    transition: transform 0.3s ease;
+  }
+
+  .res-mobile-toggle {
+    display: flex;
+  }
+
+  .res-page.mobile-map-active .res-inventory-panel {
+    transform: translateX(100%);
+  }
+
+  .res-map-section {
+    width: 100%;
+    height: 100%;
+  }
+
+  .res-floating-stats {
+    bottom: 80px;
+    padding: 8px 12px;
+  }
+
+  .res-stat-pill {
+    padding: 0 8px;
+  }
+
+  .pill-val { font-size: 12px; }
+  .pill-label { font-size: 8px; }
+}
+
+@media (max-width: 480px) {
+  .res-inventory-header { padding: 16px 14px; }
+  .res-itinerary-scroll { padding: 0 14px 100px; }
+  .premium-day-card { padding: 12px; }
+  .day-title { font-size: 12px; }
 }
