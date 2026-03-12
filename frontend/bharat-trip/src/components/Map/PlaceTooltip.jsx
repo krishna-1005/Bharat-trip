@@ -1,32 +1,17 @@
-import { useEffect, useState } from "react";
-import { getPlaceImage } from "../../services/imageService";
 import { useSettings } from "../../context/SettingsContext";
+import PlaceImage from "../PlaceImage";
 
 function PlaceTooltip({ place }) {
-  const [image, setImage] = useState(null);
   const { formatPrice } = useSettings();
-
-  useEffect(() => {
-    let mounted = true;
-
-    getPlaceImage(place.name, "Bengaluru").then(img => {
-      if (mounted) setImage(img);
-    });
-
-    return () => {
-      mounted = false;
-    };
-  }, [place.name]);
-
   const price = place.estimatedCost || place.avgCost || 0;
 
   return (
     <div className="tooltip-card">
-      {image ? (
-        <img src={image} alt={place.name} />
-      ) : (
-        <div className="image-skeleton"></div>
-      )}
+      <PlaceImage 
+        placeName={place.name} 
+        city="Bengaluru" 
+        className="tooltip-img"
+      />
 
       <div className="tooltip-content">
         <strong>{place.name}</strong>

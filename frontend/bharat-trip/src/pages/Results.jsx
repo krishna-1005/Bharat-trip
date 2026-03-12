@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import MapView from "../components/Map/MapView";
 import { DAY_COLORS } from "../constants/dayColors";
+import PlaceImage from "../components/PlaceImage";
 import "./results.css";
 import { useState, useEffect } from "react";
 import { getAuth } from "firebase/auth";
@@ -232,6 +233,11 @@ function Results() {
                       </div>
                       <div className="timeline-content">
                         <div className="place-card-mini">
+                          <PlaceImage 
+                            placeName={place.name} 
+                            city={plan.city || "Bengaluru"} 
+                            className="mini-card-img" 
+                          />
                           <div className="place-info-main">
                             <h4>{place.name}</h4>
                             <div className="place-badge-row">

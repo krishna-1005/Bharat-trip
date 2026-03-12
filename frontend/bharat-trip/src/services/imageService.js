@@ -10,7 +10,7 @@ export async function getPlaceImage(placeName, city) {
     return imageCache[cacheKey];
   }
 
-  const query = `${placeName} ${city}`;
+  const query = `${placeName} ${city} landmark`;
 
   const res = await fetch(
     `https://api.unsplash.com/search/photos?query=${encodeURIComponent(
