@@ -108,6 +108,99 @@
   z-index: 10;
 }
 
+/* ── LIVE TRAVEL INDEX ── */
+.live-index-marquee {
+  background: var(--p-bg);
+  border-bottom: 1px solid var(--p-border);
+  padding: 12px 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  z-index: 2;
+}
+
+.marquee-content {
+  display: flex;
+  gap: 40px;
+  white-space: nowrap;
+  animation: scrollText 30s linear infinite;
+}
+
+.marquee-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--p-text);
+  background: var(--p-glass);
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--p-border);
+}
+
+.marquee-item .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.status-dot.excellent { background: #10b981; box-shadow: 0 0 8px #10b981; }
+.status-dot.good { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+.status-dot.fair { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+
+@keyframes scrollText {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ── TRAVEL VIBE SELECTOR ── */
+.travel-vibe-section {
+  padding: 100px 80px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.vibe-grid {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.vibe-card {
+  background: var(--p-glass);
+  border: 1px solid var(--p-border);
+  padding: 24px 32px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-width: 160px;
+}
+
+.vibe-card:hover {
+  transform: translateY(-8px);
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+}
+
+.vibe-icon {
+  font-size: 32px;
+}
+
+.vibe-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--p-text);
+}
+
 /* ── STATS ── */
 .stats-strip {
   display: flex; justify-content: center; align-items: center; gap: 60px;

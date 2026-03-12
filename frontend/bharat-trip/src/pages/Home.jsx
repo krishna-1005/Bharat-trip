@@ -114,6 +114,44 @@ function Home() {
         </div>
       </section>
 
+      {/* ── LIVE TRAVEL INDEX MARQUEE ── */}
+      <div className="live-index-marquee">
+        <div className="marquee-content">
+          {[...Array(2)].map((_, j) => (
+            <div key={j} style={{ display: "flex", gap: "40px" }}>
+              <div className="marquee-item"><span className="status-dot excellent"></span> Bengaluru: 24°C • Perfect for Tech Parks & Cafes</div>
+              <div className="marquee-item"><span className="status-dot good"></span> Goa: 29°C • Ideal Beach Weather</div>
+              <div className="marquee-item"><span className="status-dot fair"></span> Mumbai: 31°C • Moderate Crowds</div>
+              <div className="marquee-item"><span className="status-dot excellent"></span> Jaipur: 22°C • Great for Heritage Walks</div>
+              <div className="marquee-item"><span className="status-dot excellent"></span> Manali: 15°C • Clear Skies</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── TRAVEL VIBE SELECTOR ── */}
+      <section className="travel-vibe-section">
+        <div className="section-head">
+          <h2 className="reveal-text">Discover Your <span className="gradient-text">Travel Vibe</span></h2>
+          <p>Not sure where to go? Pick a mood and let our AI do the rest.</p>
+        </div>
+        <div className="vibe-grid">
+          {[
+            { icon: "🧘‍♂️", title: "Soul Searching", desc: "Temples & Peace" },
+            { icon: "🏔️", title: "Adrenaline", desc: "Treks & Heights" },
+            { icon: "🍜", title: "Foodie Heaven", desc: "Street Eats & Spices" },
+            { icon: "🏛️", title: "Time Traveler", desc: "Forts & History" },
+            { icon: "🌴", title: "Beach Bum", desc: "Sun & Sand" }
+          ].map((vibe, i) => (
+            <div key={i} className="vibe-card" onClick={() => navigate("/planner")}>
+              <span className="vibe-icon">{vibe.icon}</span>
+              <span className="vibe-title">{vibe.title}</span>
+              <span style={{ fontSize: "12px", color: "var(--p-muted)" }}>{vibe.desc}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── STATS STRIP ── */}
       <div className="stats-strip">
         <div className="stat-item">
