@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import { auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useSettings } from "../context/SettingsContext";
+import PlaceImage from "../components/PlaceImage";
 import "../styles/profile.css";
 
 const API = import.meta.env.VITE_API_URL;
@@ -176,7 +177,11 @@ export default function MyTrips() {
               {dbTrips.map((trip) => (
                 <div className="pro-trip-card" key={trip.id}>
                   <div className="pro-trip-img-wrap">
-                    <img className="pro-trip-img" src={trip.img} alt={trip.title} />
+                    <PlaceImage 
+                      placeName={trip.title.includes("Trip") ? trip.location : trip.title} 
+                      city={trip.location} 
+                      className="pro-trip-img" 
+                    />
                     <div className="pro-trip-badge badge-upcoming">{trip.days} Days</div>
                   </div>
                   <div className="pro-trip-body">

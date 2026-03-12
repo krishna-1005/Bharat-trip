@@ -178,6 +178,21 @@ function Results() {
 
   return (
     <div className={`res-page ${showMap ? "mobile-map-active" : ""}`}>
+      {/* ── SUCCESS OVERLAY ── */}
+      {saved && (
+        <div className="res-success-overlay">
+          <div className="res-success-card">
+            <div className="success-icon">✨</div>
+            <h2>Adventure Saved!</h2>
+            <p>Your trip to {plan.city || "Bengaluru"} is ready.</p>
+            <div className="success-image-previews">
+              <PlaceImage placeName={plan.city || "Bengaluru"} city={plan.city || "Bengaluru"} className="success-preview-img" />
+            </div>
+            <p className="success-redirect">Redirecting to your trips...</p>
+          </div>
+        </div>
+      )}
+
       <div className="res-mobile-toggle">
         <button className={!showMap ? "active" : ""} onClick={() => setShowMap(false)}>List</button>
         <button className={showMap ? "active" : ""} onClick={() => setShowMap(true)}>Map</button>
