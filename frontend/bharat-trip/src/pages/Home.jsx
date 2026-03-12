@@ -17,13 +17,13 @@ function Home() {
   const { t } = useSettings();
   const [hoveredCard, setHoveredCard] = useState(null);
   const [chatOpen, setChatOpen] = useState(false);
-  const heroRef = useRef(null);
 
   useEffect(() => {
+    // Parallax Effect
     const handleMouseMove = (e) => {
       const { clientX, clientY } = e;
-      const x = (clientX / window.innerWidth - 0.5) * 20;
-      const y = (clientY / window.innerHeight - 0.5) * 20;
+      const x = (clientX / window.innerWidth - 0.5) * 30;
+      const y = (clientY / window.innerHeight - 0.5) * 30;
       
       document.documentElement.style.setProperty("--mouse-x", `${clientX}px`);
       document.documentElement.style.setProperty("--mouse-y", `${clientY}px`);
@@ -31,21 +31,44 @@ function Home() {
       document.documentElement.style.setProperty("--parallax-y", `${y}px`);
     };
     
+    // Intersection Observer for Scroll Reveal
+    const observerOptions = {
+      threshold: 0.15,
+      rootMargin: "0px 0px -50px 0px"
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("active");
+        }
+      });
+    }, observerOptions);
+
+    const revealElements = document.querySelectorAll(".reveal-on-scroll");
+    revealElements.forEach(el => observer.observe(el));
+
     window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      revealElements.forEach(el => observer.unobserve(el));
+    };
   }, []);
 
   return (
     <div className="home">
+      {/* ── BACKGROUND THREE.JS SCENE ── */}
+      <ThreeScene />
+
       {/* ── HERO SECTION ── */}
       <section id="home" className="hero">
         
         {/* LEFT TEXT CONTENT */}
-        <div className="hero-text">
+        <div className="hero-text reveal-on-scroll">
           <div className="hero-content-reveal">
             <span className="premium-badge">
               <span className="pulse-dot"></span>
-              NEXT-GEN AI TRAVEL
+              ULTIMATE BENGALURU GUIDE
             </span>
 
             <h1 className="main-title">
@@ -55,7 +78,7 @@ function Home() {
             </h1>
 
             <p className="hero-description">
-              {t("home_hero_sub")}
+              Experience the Silicon Valley of India like never before. From heritage palaces to lush parks and vibrant nightlife, plan your perfect Bengaluru escape.
             </p>
 
             <div className="hero-actions">
@@ -71,15 +94,15 @@ function Home() {
             <div className="trust-meter">
               <div className="avatars-group">
                 {[1,2,3,4].map(i => <div key={i} className={`avatar-pill av-${i}`}></div>)}
-                <div className="avatar-count">+12k</div>
+                <div className="avatar-count">+15k</div>
               </div>
-              <span className="trust-text">Trusted by 12,000+ explorers worldwide</span>
+              <span className="trust-text">Trusted by 15,000+ travelers in Bengaluru</span>
             </div>
           </div>
         </div>
 
         {/* RIGHT INTERACTIVE IMAGE GALLERY */}
-        <div className="hero-visual">
+        <div className="hero-visual reveal-on-scroll">
           <div className="gallery-container">
             
             {/* Main Centerpiece */}
@@ -88,9 +111,9 @@ function Home() {
               onMouseEnter={() => setHoveredCard('main')}
               onMouseLeave={() => setHoveredCard(null)}
             >
-              <img src={img6} alt="Vibrant Bangalore" />
+              <img src={img6} alt="Vidhana Soudha Bengaluru" />
               <div className="card-overlay">
-                <span className="card-tag">Featured</span>
+                <span className="card-tag">Iconic Landmark</span>
                 <h4>Vidhana Soudha</h4>
               </div>
             </div>
@@ -99,19 +122,19 @@ function Home() {
             <div className="floating-elements">
               <div className="float-card c1">
                 <img src={img1} alt="Cubbon Park" />
-                <div className="mini-label">Nature</div>
+                <div className="mini-label">Cubbon Park</div>
               </div>
               <div className="float-card c2">
-                <img src={img2} alt="Iskcon" />
-                <div className="mini-label">Spiritual</div>
+                <img src={img2} alt="Iskcon Temple" />
+                <div className="mini-label">Iskcon Temple</div>
               </div>
               <div className="float-card c3">
                 <img src={img3} alt="Nandi Hills" />
-                <div className="mini-label">Adventure</div>
+                <div className="mini-label">Nandi Hills</div>
               </div>
               <div className="float-card c4">
-                <img src={img5} alt="Nightlife" />
-                <div className="mini-label">Nightlife</div>
+                <img src={img5} alt="MG Road Nightlife" />
+                <div className="mini-label">Brigade Road</div>
               </div>
             </div>
 
@@ -123,92 +146,93 @@ function Home() {
       </section>
 
       {/* ── STATS STRIP ── */}
-      <div className="stats-strip">
+      <div className="stats-strip reveal-on-scroll">
         <div className="stat-item">
-          <span className="stat-num">42k+</span>
-          <span className="stat-label">Locations</span>
+          <span className="stat-num">500+</span>
+          <span className="stat-label">Local Spots</span>
         </div>
         <div className="stat-divider"></div>
         <div className="stat-item">
-          <span className="stat-num">98%</span>
-          <span className="stat-label">Accuracy</span>
+          <span className="stat-num">100%</span>
+          <span className="stat-label">AI Powered</span>
         </div>
         <div className="stat-divider"></div>
         <div className="stat-item">
-          <span className="stat-num">2sec</span>
-          <span className="stat-label">Generation</span>
+          <span className="stat-num">24/7</span>
+          <span className="stat-label">Live Support</span>
         </div>
       </div>
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="how-it-works">
+      <section id="how-it-works" className="how-it-works reveal-on-scroll">
         <div className="section-head">
-          <h2 className="reveal-text">Plan Smarter, <span className="gradient-text">Travel Better</span></h2>
-          <p>Everything you need to navigate India's most dynamic city.</p>
+          <h2 className="reveal-text">Explore the <span className="gradient-text">Garden City</span></h2>
+          <p>Seamlessly navigate through Bangalore's unique blend of culture and technology.</p>
         </div>
         <div className="features-grid">
-          <div className="feature-premium-card">
+          <div className="feature-premium-card reveal-on-scroll">
             <div className="feat-3d-icon">
-              <Interactive3DIcon color="#3b82f6" size={1.2} />
+              <Interactive3DIcon color="#3b82f6" size={1.5} />
             </div>
-            <h3>Instant Itinerary</h3>
-            <p>Our LLM analyzes millions of data points to create your perfect day-by-day plan.</p>
+            <h3>Smart Itinerary</h3>
+            <p>Our AI crafts the best routes considering Bangalore's infamous traffic patterns.</p>
           </div>
-          <div className="feature-premium-card">
+          <div className="feature-premium-card reveal-on-scroll">
             <div className="feat-3d-icon">
-              <Interactive3DIcon color="#a855f7" size={1.2} />
+              <Interactive3DIcon color="#a855f7" size={1.5} />
             </div>
-            <h3>Real-time Budgets</h3>
-            <p>No more surprises. Get accurate estimates for entry fees, transport, and meals.</p>
+            <h3>Local Insights</h3>
+            <p>Discover hidden gems in Indiranagar, Koramangala, and beyond.</p>
           </div>
-          <div className="feature-premium-card">
+          <div className="feature-premium-card reveal-on-scroll">
             <div className="feat-3d-icon">
-              <Interactive3DIcon color="#10b981" size={1.2} />
+              <Interactive3DIcon color="#10b981" size={1.5} />
             </div>
-            <h3>Route Optimization</h3>
-            <p>Smart sequencing that avoids traffic hotspots and maximizes your sightseeing time.</p>
+            <h3>Cost Estimator</h3>
+            <p>Get real-time price ranges for cafes, pubs, and entry tickets across the city.</p>
           </div>
         </div>
       </section>
 
       {/* ── CTA SECTION ── */}
-      <section className="cta-premium">
+      <section className="cta-premium reveal-on-scroll">
         <div className="cta-glow"></div>
         <div className="cta-3d-background">
-           <Interactive3DIcon color="#f59e0b" size={2.5} />
+           <Interactive3DIcon color="#f59e0b" size={3.5} />
         </div>
         <div className="cta-content">
-          <h2>Ready for your next adventure?</h2>
-          <p>Join the community of travelers redefining how India is explored.</p>
-          <button className="btn-cta" onClick={() => navigate("/planner")}>Get Started Now</button>
+          <h2>Ready to explore Bengaluru?</h2>
+          <p>Start planning your customized trip to the heart of Karnataka today.</p>
+          <button className="btn-cta" onClick={() => navigate("/planner")}>Plan My Bangalore Trip</button>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="premium-footer">
+      <footer className="premium-footer reveal-on-scroll">
         <div className="footer-3d-layer">
-           <Interactive3DIcon color="#334155" size={4} />
+           <Interactive3DIcon color="#334155" size={5} />
         </div>
         <div className="footer-main">
           <div className="footer-brand">
             <h3>Bharat Trip</h3>
-            <p>Crafting memories across the Indian subcontinent with cutting-edge AI.</p>
+            <p>Your ultimate companion for exploring the diverse landscapes of India, starting with the vibrant city of Bangalore.</p>
           </div>
           <div className="footer-links">
             <div className="link-col">
-              <h4>Company</h4>
-              <Link to="/about">About Us</Link>
-              <Link to="/destinations">Destinations</Link>
+              <h4>Explore</h4>
+              <Link to="/about">Heritage</Link>
+              <Link to="/destinations">Parks</Link>
+              <Link to="/destinations">Nightlife</Link>
             </div>
             <div className="link-col">
               <h4>Support</h4>
-              <Link to="/contact">Help Center</Link>
-              <Link to="/privacy">Privacy</Link>
+              <Link to="/contact">Contact Us</Link>
+              <Link to="/privacy">Privacy Policy</Link>
             </div>
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© 2024 BharatTrip AI • Designed for the modern explorer</span>
+          <span>© 2024 BharatTrip AI • Crafted for Bengaluru Explorers</span>
         </div>
       </footer>
 
