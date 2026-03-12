@@ -23,7 +23,14 @@ function Results() {
   const [showMap, setShowMap] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
   const [hoveredPlace, setHoveredPlace] = useState(null);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [weather, setWeather] = useState({ temp: "--", desc: "Loading...", icon: "☁️" });
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(loc.search);
@@ -196,17 +203,19 @@ function Results() {
         <button className={showMap ? "active" : ""} onClick={() => setShowMap(true)}>Map</button>
       </div>
 
-      <aside className="res-details-panel">
-        {hoveredPlace ? (
-          <HoverPlaceCard place={hoveredPlace} city={plan.city} />
-        ) : (
-          <div className="details-placeholder">
-            <div className="placeholder-icon">📍</div>
-            <h3>Location Details</h3>
-            <p>Hover over a marker on the map to see original reviews and details.</p>
-          </div>
-        )}
-      </aside>
+      {windowWidth > 900 && (
+        <aside className="res-details-panel">
+          {hoveredPlace ? (
+            <HoverPlaceCard place={hoveredPlace} city={plan.city} />
+          ) : (
+            <div className="details-placeholder">
+              <div className="placeholder-icon">📍</div>
+              <h3>Location Details</h3>
+              <p>Hover over a marker on the map to see original reviews and details.</p>
+            </div>
+          )}
+        </aside>
+      )}
 
       <div className="res-map-section">
         <div className="map-inner-container">

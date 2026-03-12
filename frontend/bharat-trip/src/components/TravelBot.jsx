@@ -109,11 +109,9 @@ export default function TravelBot({ isOpen, setIsOpen }) {
   return (
     <>
       {/* ── FLOATING BUTTON ── */}
-      {!open && (
-        <div className="cb-fab" onClick={() => setOpen(true)}>
-          <span className="cb-fab-icon">🤖</span>
-        </div>
-      )}
+      <div className={`cb-fab ${open ? 'active' : ''}`} onClick={() => setOpen(!open)}>
+        <span className="cb-fab-icon">{open ? '✕' : '🤖'}</span>
+      </div>
 
       {/* ── CHAT WINDOW ── */}
       {open && (

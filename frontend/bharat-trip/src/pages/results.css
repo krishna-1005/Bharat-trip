@@ -631,6 +631,10 @@
 
   .pill-val { font-size: 12px; }
   .pill-label { font-size: 8px; }
+
+  .res-details-panel {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {

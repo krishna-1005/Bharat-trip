@@ -35,6 +35,11 @@
   box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
 }
 
+.cb-fab.active {
+  background: #ef4444;
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+}
+
 .cb-fab-icon {
   font-size: 30px;
   animation: float 3s ease-in-out infinite;
