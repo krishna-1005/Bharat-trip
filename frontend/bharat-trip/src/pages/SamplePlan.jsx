@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useSettings } from "../context/SettingsContext";
-import "./results.css";
+import "./samplePlan.css";
 
 import img2 from "../assets/images/img2.webp";
 import img5 from "../assets/images/img5.webp";
@@ -14,7 +14,6 @@ export default function SamplePlan() {
   const [activeFilter, setActiveFilter] = useState("All Plans");
   const [modalTrip, setModalTrip] = useState(null);
 
-  // COMPLETELY NEW SAMPLE PLANS
   const sampleTrips = [
     {
       title: "Bangalore Spiritual Journey",
@@ -76,8 +75,6 @@ export default function SamplePlan() {
       : sampleTrips.filter((t) => t.category === activeFilter);
 
   const handleViewOnMap = (trip) => {
-    console.log("🚀 Redirecting to Map with trip:", trip.title);
-    
     const placeCoords = {
       "ISKCON Temple": { lat: 13.0098, lng: 77.5511 },
       "Bull Temple": { lat: 12.9424, lng: 77.5681 },
@@ -131,20 +128,17 @@ export default function SamplePlan() {
       isSample: true
     };
 
-    // Store in both localStorage and sessionStorage for maximum reliability
     localStorage.setItem("tripPlan", JSON.stringify(planData));
-    sessionStorage.setItem("tripPlan", JSON.stringify(planData));
-    
-    // Use navigate with state as primary method
-    navigate("/results", { state: { plan: planData }, replace: false });
+    navigate("/results", { state: { plan: planData } });
   };
 
   return (
     <div className="sp-page">
+      <Navbar />
       <div className="sp-hero">
-        <span className="sp-badge">✦ NEW ITINERARIES ADDED</span>
+        <span className="sp-badge">✦ CURATED FOR YOU</span>
         <h1>Explore Sample <span className="sp-highlight">Travel Plans</span></h1>
-        <p>Expertly curated itineraries for every kind of explorer.</p>
+        <p>Expertly crafted itineraries to inspire your next great adventure across the city.</p>
       </div>
 
       <div className="sp-filters">
@@ -174,9 +168,10 @@ export default function SamplePlan() {
                   <div className="sp-day-row" key={i}>
                     <div className="sp-day-label">{d.day}</div>
                     <div className="sp-day-places">
-                      {d.places.map((place, p) => (
+                      {d.places.slice(0, 2).map((place, p) => (
                         <span className="sp-place-tag" key={p}>📍 {place}</span>
                       ))}
+                      {d.places.length > 2 && <span className="sp-place-tag">+{d.places.length - 2} more</span>}
                     </div>
                   </div>
                 ))}
@@ -203,6 +198,9 @@ export default function SamplePlan() {
             </div>
             <div className="sp-modal-body">
               <h2>{modalTrip.title}</h2>
+              <p style={{ color: 'var(--text-dim)', marginBottom: '20px' }}>
+                A perfectly balanced {modalTrip.category.toLowerCase()} experience.
+              </p>
               <div className="sp-modal-days">
                 {modalTrip.days.map((d, i) => (
                   <div className="sp-modal-day" key={i}>
@@ -218,7 +216,9 @@ export default function SamplePlan() {
                   </div>
                 ))}
               </div>
-              <button className="sp-map-btn" style={{width:'100%'}} onClick={() => handleViewOnMap(modalTrip)}>Plan This Trip →</button>
+              <button className="sp-map-btn" style={{width:'100%', height:'54px'}} onClick={() => handleViewOnMap(modalTrip)}>
+                View Interactive Map →
+              </button>
             </div>
           </div>
         </div>
