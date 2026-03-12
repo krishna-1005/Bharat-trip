@@ -59,9 +59,13 @@ export default function TravelBot({ isOpen, setIsOpen }) {
       if (plan?.itinerary) {
         let botText = botReply ? `${botReply}\n\n` : "";
         botText += `🗺️ I've crafted a ${plan.days}-day plan for you!\n\n`;
+        
         Object.keys(plan.itinerary).forEach(day => {
-          botText += `📍 ${day}: ${plan.itinerary[day].places.length} spots\n`;
+          const dayData = plan.itinerary[day];
+          const placeNames = dayData.places.map(p => p.name).join(", ");
+          botText += `📍 ${day}: ${placeNames}\n`;
         });
+
         setMessages(prev => [...prev, { sender: "bot", text: botText, plan }]);
       } else {
         setMessages(prev => [...prev, { sender: "bot", text: botReply || "I'm here to help with your Bangalore travels!" }]);
