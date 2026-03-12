@@ -7,6 +7,7 @@ export const useSettings = () => useContext(SettingsContext);
 export const SettingsProvider = ({ children }) => {
   const [currency, setCurrency] = useState(() => localStorage.getItem("settings_currency") || "INR");
   const [language, setLanguage] = useState(() => localStorage.getItem("settings_language") || "English");
+  const [theme, setTheme] = useState(() => localStorage.getItem("settings_theme") || "dark");
 
   const translations = {
     English: {
@@ -238,6 +239,15 @@ export const SettingsProvider = ({ children }) => {
     localStorage.setItem("settings_language", language);
   }, [language]);
 
+  useEffect(() => {
+    localStorage.setItem("settings_theme", theme);
+    document.body.className = theme === 'dark' ? 'dark-theme' : 'light-theme';
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
   const formatPrice = (priceInINR) => {
     const rate = conversionRates[currency] || 1;
     const converted = (priceInINR * rate).toFixed(currency === "INR" ? 0 : 2);
@@ -253,6 +263,7 @@ export const SettingsProvider = ({ children }) => {
     <SettingsContext.Provider value={{ 
       currency, setCurrency, 
       language, setLanguage, 
+      theme, setTheme, toggleTheme,
       formatPrice, 
       currencySymbol: currencySymbols[currency],
       t

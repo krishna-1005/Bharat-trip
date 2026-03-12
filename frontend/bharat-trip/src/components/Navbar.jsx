@@ -9,7 +9,7 @@ function Navbar() {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { user, logout } = useContext(AuthContext);
-  const { t } = useSettings();
+  const { t, theme, toggleTheme } = useSettings();
   const [open, setOpen]           = useState(false);
   const [scrolled, setScrolled]   = useState(false);
   const dropdownRef = useRef(null);
@@ -92,6 +92,14 @@ function Navbar() {
 
       {/* ── RIGHT SIDE ── */}
       <div className="nb-right">
+
+        <button 
+          className="nb-theme-toggle" 
+          onClick={toggleTheme}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          {theme === 'dark' ? "☀️" : "🌙"}
+        </button>
 
         {user ? (
           <div className="nb-profile-wrap" ref={dropdownRef}>

@@ -98,7 +98,8 @@ function Home() {
             {/* Floating Cards */}
             <div className="floating-elements">
               <div className="float-card c1">
-                <img src={img1} alt="Cubbon Park" />
+                <img src={
+                  img1} alt="Cubbon Park" />
               </div>
               <div className="float-card c2">
                 <img src={img2} alt="Iskcon" />
