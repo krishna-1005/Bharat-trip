@@ -37,7 +37,8 @@ export default function TravelBot({ isOpen, setIsOpen }) {
     if (!input.trim()) return;
 
     const userMsg = input;
-    setMessages(prev => [...prev, { sender: "user", text: userMsg }]);
+    const updatedMessages = [...messages, { sender: "user", text: userMsg }];
+    setMessages(updatedMessages);
     setInput("");
     setTyping(true);
 
@@ -45,22 +46,28 @@ export default function TravelBot({ isOpen, setIsOpen }) {
       const res = await fetch(`${API}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg })
+        body: JSON.stringify({ 
+          message: userMsg,
+          history: messages // Send previous messages for context
+        })
       });
 
       const data = await res.json();
       const plan = data.plan;
+      const botReply = data.reply || data.message; // Use 'reply' from new backend logic
 
       if (plan?.itinerary) {
-        let botText = `🗺️ I've crafted a ${plan.days}-day plan for you!\n\n`;
+        let botText = botReply ? `${botReply}\n\n` : "";
+        botText += `🗺️ I've crafted a ${plan.days}-day plan for you!\n\n`;
         Object.keys(plan.itinerary).forEach(day => {
           botText += `📍 ${day}: ${plan.itinerary[day].places.length} spots\n`;
         });
         setMessages(prev => [...prev, { sender: "bot", text: botText, plan }]);
       } else {
-        setMessages(prev => [...prev, { sender: "bot", text: data.reply || "I'm here to help with your Bangalore travels!" }]);
+        setMessages(prev => [...prev, { sender: "bot", text: botReply || "I'm here to help with your Bangalore travels!" }]);
       }
-    } catch {
+    } catch (err) {
+      console.error("Chat Error:", err);
       setMessages(prev => [...prev, { sender: "bot", text: "⚠️ Connection issue. Please try again." }]);
     }
     setTyping(false);

@@ -8,139 +8,107 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 router.post("/", async (req, res) => {
-
-  const { message } = req.body;
+  const { message, history } = req.body;
   if (!message || typeof message !== "string") {
     return res.json({ type: "chat", reply: "Please type a message." });
   }
 
   try {
-    const msg = message.toLowerCase();
+    const formattedHistory = (history || []).map(msg => ({
+      role: msg.sender === "bot" ? "model" : "user",
+      parts: [{ text: msg.text }]
+    }));
 
-    let days      = null;
-    let budget    = "low";
-    let interests = [];
-    let aiWorked  = false;
+    const systemInstruction = `You are BharatTrip AI, a friendly and expert travel assistant for Bengaluru, India. 
+Your goal is to help users plan their perfect trip.
 
-    /* ── AI PARSING (Gemini First) ── */
-    try {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const prompt = `Extract travel details from the user message.
-Return ONLY valid JSON — no markdown, no backticks, no explanation.
+CONVERSATION LOGIC:
+1. If the user wants a trip plan, you NEED three pieces of information:
+   - Number of days (1-30)
+   - Budget (low, medium, or high)
+   - Interests (e.g., Nature, Food, Culture, Spiritual, Adventure, Shopping)
 
-Format:
+2. If any of these are missing, ask for them politely and conversationally. Don't ask all at once if it feels overwhelming—be natural.
+3. If you have all three pieces of information, you MUST provide a JSON block at the end of your message to trigger the plan generator.
+
+JSON FORMAT (at the end of your response):
+\`\`\`json
 {
+  "generatePlan": true,
   "days": number,
   "budget": "low" | "medium" | "high",
-  "interests": ["Nature","Food","Culture","Spiritual","Adventure"]
+  "interests": ["Interest1", "Interest2"]
 }
+\`\`\`
 
-Rules:
-- "cheap"/"budget" → "low", "comfort"/"moderate" → "medium", "luxury" → "high"
-- "weekend" → days: 2, UNLESS a number is mentioned
-- days must be 1–30
-- User Message: "${message}"`;
+4. Even if you trigger a plan, still give a friendly introductory sentence.
+5. If the user is just chatting or asking general questions about Bengaluru, answer them expertly without the JSON block.`;
 
-      const result = await model.generateContent(prompt);
-      let raw = result.response.text().trim();
-      
-      const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      if (jsonMatch) raw = jsonMatch[0];
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: systemInstruction 
+    });
 
-      const parsed = JSON.parse(raw);
-      if (parsed.days)              days      = Math.min(Math.max(parseInt(parsed.days), 1), 30);
-      if (parsed.budget)            budget    = parsed.budget;
-      if (parsed.interests?.length) interests = parsed.interests;
-      aiWorked = true;
-      console.log("✅ Gemini Parsed:", parsed);
+    const chat = model.startChat({
+      history: formattedHistory,
+      generationConfig: {
+        maxOutputTokens: 500,
+      },
+    });
 
-    } catch (err) {
-      console.log("⚠️ Gemini parsing failed, trying Groq:", err.message);
-      /* ── Groq Fallback for Parsing ── */
+    const result = await chat.sendMessage(message);
+    let replyText = result.response.text();
+
+    // Check for JSON block
+    const jsonMatch = replyText.match(/```json\s*([\s\S]*?)\s*```/);
+    let planData = null;
+
+    if (jsonMatch) {
       try {
-        const aiParse = await groq.chat.completions.create({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            {
-              role: "system",
-              content: `Extract travel details... { "days": number, "budget": "low"|"medium"|"high", "interests": [] }`
-            },
-            { role: "user", content: message }
-          ]
-        });
-        let raw = aiParse.choices[0].message.content.trim();
-        const jsonMatch = raw.match(/\{[\s\S]*\}/);
-        if (jsonMatch) raw = jsonMatch[0];
-        const parsed = JSON.parse(raw);
-        if (parsed.days) days = parsed.days;
-        if (parsed.budget) budget = parsed.budget;
-        if (parsed.interests) interests = parsed.interests;
-        aiWorked = true;
-      } catch (e2) {
-        console.log("⚠️ Groq fallback parsing failed:", e2.message);
+        planData = JSON.parse(jsonMatch[1]);
+        // Remove the JSON block from the reply text so the user doesn't see raw JSON
+        replyText = replyText.replace(/```json\s*[\s\S]*?\s*```/, "").trim();
+      } catch (e) {
+        console.error("Failed to parse AI JSON:", e);
       }
     }
 
-    /* ── RULE-BASED FALLBACK ── */
-    if (!aiWorked) {
-      const dayMatch = msg.match(/(\d+)\s*day[s]?/);
-      if (dayMatch)                    days = Math.min(parseInt(dayMatch[1]), 30);
-      else if (msg.includes("weekend")) days = 2;
-
-      if (msg.includes("cheap"))  budget = "low";
-      if (msg.includes("luxury")) budget = "high";
-
-      if (msg.includes("nature")) interests.push("Nature");
-      if (msg.includes("food"))   interests.push("Food");
-    }
-
-    if (!days || days < 1) days = 2;
-    if (interests.length === 0) interests = ["Nature", "Food"];
-
-    /* ── TRAVEL INTENT CHECK ── */
-    const travelIntent =
-      msg.includes("trip")      || msg.includes("plan")      || msg.includes("itinerary") ||
-      msg.includes("places")    || msg.includes("visit")     || msg.includes("tour")       ||
-      msg.includes("bangalore") || msg.includes("bengaluru") || msg.includes("near");
-
-    if (travelIntent) {
-      const plan = await generatePlan({ days, budget, interests });
-      if (plan && plan.itinerary && Object.keys(plan.itinerary).length > 0) {
-        return res.json({
-          type: "trip",
-          message: `Here's your ${plan.days}-day ${plan.budget} trip plan for Bengaluru! 🗺️`,
-          plan
-        });
-      }
-    }
-
-    /* ── GEMINI CHAT ── */
-    try {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const result = await model.generateContent([
-        { text: "You are BharatTrip AI, a friendly travel assistant for India. Keep replies concise, helpful, and personable. You can talk about anything but try to relate it back to travel or Bangalore if possible." },
-        { text: message }
-      ]);
-      return res.json({ type: "chat", reply: result.response.text() });
-    } catch (err) {
-      console.log("⚠️ Gemini Chat failed, trying Groq:", err.message);
-      /* ── Groq Fallback for Chat ── */
-      const chat = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: "You are BharatTrip AI, a friendly travel assistant for India." },
-          { role: "user",   content: message }
-        ]
+    if (planData && planData.generatePlan) {
+      const { days, budget, interests } = planData;
+      const plan = await generatePlan({ 
+        days: days || 2, 
+        budget: budget || "medium", 
+        interests: interests || ["Culture", "Food"] 
       });
-      res.json({ type: "chat", reply: chat.choices[0].message.content });
+
+      return res.json({
+        type: "trip",
+        reply: replyText || `Great! I've crafted a ${days}-day plan for you.`,
+        plan
+      });
     }
+
+    // Regular chat response
+    return res.json({ type: "chat", reply: replyText });
 
   } catch (error) {
     console.error("Chat route error:", error);
-    res.status(500).json({ type: "chat", reply: "Server error. Please try again." });
+    
+    // Fallback to basic Groq if Gemini fails
+    try {
+        const groqChat = await groq.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+                { role: "system", content: "You are BharatTrip AI, a travel assistant for Bengaluru. Be helpful and ask for days, budget, and interests if the user wants a plan." },
+                ...(history || []).map(m => ({ role: m.sender === "bot" ? "assistant" : "user", content: m.text })),
+                { role: "user", content: message }
+            ]
+        });
+        return res.json({ type: "chat", reply: groqChat.choices[0].message.content });
+    } catch (e2) {
+        res.status(500).json({ type: "chat", reply: "I'm having a bit of trouble connecting right now. Please try again in a moment!" });
+    }
   }
 });
-
-module.exports = router;
 
 module.exports = router;
