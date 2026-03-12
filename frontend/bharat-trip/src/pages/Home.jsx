@@ -175,6 +175,36 @@ function Home() {
         </div>
       </section>
 
+      {/* ── WHY CHOOSE US ── */}
+      <section className="why-us-section">
+        <div className="section-head">
+          <h2 className="reveal-text">Why Choose <span className="gradient-text">BharatTrip</span></h2>
+          <p>The personalized touch you won't find on Google or generic AI tools.</p>
+        </div>
+        <div className="why-us-grid">
+          <div className="why-us-card">
+            <div className="why-icon">🎯</div>
+            <h3>Personalized Itineraries</h3>
+            <p>I create customized trip plans based on your interests, budget, and time constraints. You won't find generic suggestions here!</p>
+          </div>
+          <div className="why-us-card">
+            <div className="why-icon">🏘️</div>
+            <h3>Local Expertise</h3>
+            <p>As a dedicated Bengaluru travel assistant, I have in-depth knowledge of the city's hidden gems and off-the-beaten-path attractions.</p>
+          </div>
+          <div className="why-us-card">
+            <div className="why-icon">💬</div>
+            <h3>Interactive Conversations</h3>
+            <p>You can have a conversation with me, ask questions, and clarify doubts in real-time. I'm here to help throughout your planning.</p>
+          </div>
+          <div className="why-us-card">
+            <div className="why-icon">✨</div>
+            <h3>Human Touch</h3>
+            <p>I offer a personalized, human-like experience, making your trip planning process more enjoyable and engaging.</p>
+          </div>
+        </div>
+      </section>
+
       {/* ── STATS STRIP ── */}
       <div className="stats-strip">
         <div className="stat-item">

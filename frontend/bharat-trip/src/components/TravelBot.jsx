@@ -9,7 +9,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text: "Hi! I'm BharatTrip AI. 🤖\nI can plan your perfect Bangalore itinerary in seconds. What's on your mind?"
+      text: "Hi! I'm your personal Bengaluru travel assistant. 😊\n\nI specialize in creating **personalized itineraries** based on your interests and budget. Whether you're looking for hidden gems, local food, or off-the-beaten-path spots, I'm here to help!\n\nHow can I make your Bengaluru trip unforgettable today?"
     }
   ]);
 

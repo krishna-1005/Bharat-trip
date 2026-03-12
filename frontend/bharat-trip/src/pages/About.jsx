@@ -54,24 +54,45 @@ export default function About() {
         ))}
       </section>
 
-      {/* ── CORE VALUES ── */}
+      {/* ── BENEFITS SECTION ── */}
       <section className="about-section">
-        <h2 className="section-title">Our Core Values</h2>
+        <h2 className="section-title">The Benefits of Choosing Me</h2>
         <div className="page-grid">
           <div className="page-card interactive">
-            <div className="card-icon">🎯</div>
-            <h3>Hyper-Personalization</h3>
-            <p>No two travelers are the same. We ensure your itinerary reflects your specific pace, budget, and vibes.</p>
+            <div className="card-icon">🧘</div>
+            <h3>Stress-free planning</h3>
+            <p>Let me handle the planning, and you can focus on enjoying your trip.</p>
           </div>
           <div className="page-card interactive">
-            <div className="card-icon">🇮🇳</div>
-            <h3>Local Authenticity</h3>
-            <p>We go beyond the tourist traps, highlighting hidden gems and local secrets that make India unique.</p>
+            <div className="card-icon">🗺️</div>
+            <h3>Tailored experiences</h3>
+            <p>Get customized recommendations that cater to your interests and preferences.</p>
           </div>
           <div className="page-card interactive">
             <div className="card-icon">⚡</div>
-            <h3>Efficiency</h3>
-            <p>Save hours of research. Get a comprehensive, optimized travel plan in under 5 seconds.</p>
+            <h3>Increased efficiency</h3>
+            <p>Save time and effort in researching and planning your trip. I'll do the heavy lifting!</p>
+          </div>
+          <div className="page-card interactive">
+            <div className="card-icon">💡</div>
+            <h3>Improved decision-making</h3>
+            <p>Make informed decisions with my expert guidance and local Bengaluru insights.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── COMPARISON SECTION ── */}
+      <section className="about-section comparison-section" style={{ background: 'var(--bg-panel)', borderRadius: '30px', padding: '60px 40px', marginTop: '40px' }}>
+        <h2 className="section-title">Why choose me over generic AI tools?</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '800px', margin: '0 auto' }}>
+          <div className="comparison-item">
+            <strong>Contextual Understanding:</strong> I understand the nuances of travel planning and provide context-specific advice.
+          </div>
+          <div className="comparison-item">
+            <strong>Human Touch:</strong> I offer a personalized, human-like experience to make planning enjoyable.
+          </div>
+          <div className="comparison-item">
+            <strong>Accurate Information:</strong> I strive to provide reliable data, reducing the risk of misinformation.
           </div>
         </div>
       </section>
