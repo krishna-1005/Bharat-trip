@@ -10,6 +10,7 @@ import img5 from "../assets/images/img5.webp";
 import img6 from "../assets/images/img6.png";
 import TravelBot from "../components/TravelBot";
 import ThreeScene from "../components/ThreeScene";
+import TravelAnimation from "../components/TravelAnimation";
 import Interactive3DIcon from "../components/Interactive3DIcon";
 
 function Home() {
@@ -17,18 +18,20 @@ function Home() {
   const { t } = useSettings();
   const [hoveredCard, setHoveredCard] = useState(null);
   const [chatOpen, setChatOpen] = useState(false);
-  const heroRef = useRef(null);
+  const galleryRef = useRef(null);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
       const { clientX, clientY } = e;
-      const x = (clientX / window.innerWidth - 0.5) * 20;
-      const y = (clientY / window.innerHeight - 0.5) * 20;
+      const x = (clientX / window.innerWidth - 0.5) * 30;
+      const y = (clientY / window.innerHeight - 0.5) * 30;
       
-      document.documentElement.style.setProperty("--mouse-x", `${clientX}px`);
-      document.documentElement.style.setProperty("--mouse-y", `${clientY}px`);
       document.documentElement.style.setProperty("--parallax-x", `${x}px`);
       document.documentElement.style.setProperty("--parallax-y", `${y}px`);
+      
+      if (galleryRef.current) {
+        galleryRef.current.style.transform = `rotateY(${x * 0.5}deg) rotateX(${-y * 0.5}deg)`;
+      }
     };
     
     window.addEventListener("mousemove", handleMouseMove);
@@ -37,6 +40,8 @@ function Home() {
 
   return (
     <div className="home">
+      <ThreeScene />
+      
       {/* ── HERO SECTION ── */}
       <section id="home" className="hero">
         
@@ -67,21 +72,16 @@ function Home() {
                 {t("view_samples_btn")}
               </Link>
             </div>
-
-            <div className="trust-meter">
-              <div className="avatars-group">
-                {[1,2,3,4].map(i => <div key={i} className={`avatar-pill av-${i}`}></div>)}
-                <div className="avatar-count">+12k</div>
-              </div>
-              <span className="trust-text">Trusted by 12,000+ explorers worldwide</span>
-            </div>
           </div>
         </div>
 
-        {/* RIGHT INTERACTIVE IMAGE GALLERY */}
+        {/* RIGHT INTERACTIVE 3D VISUAL */}
         <div className="hero-visual">
-          <div className="gallery-container">
-            
+          <div className="flight-3d-container">
+            <TravelAnimation />
+          </div>
+          
+          <div className="gallery-container" ref={galleryRef}>
             {/* Main Centerpiece */}
             <div 
               className={`gallery-card main-feat ${hoveredCard === 'main' ? 'active' : ''}`}
@@ -99,25 +99,17 @@ function Home() {
             <div className="floating-elements">
               <div className="float-card c1">
                 <img src={img1} alt="Cubbon Park" />
-                <div className="mini-label">Nature</div>
               </div>
               <div className="float-card c2">
                 <img src={img2} alt="Iskcon" />
-                <div className="mini-label">Spiritual</div>
               </div>
               <div className="float-card c3">
                 <img src={img3} alt="Nandi Hills" />
-                <div className="mini-label">Adventure</div>
               </div>
               <div className="float-card c4">
                 <img src={img5} alt="Nightlife" />
-                <div className="mini-label">Nightlife</div>
               </div>
             </div>
-
-            {/* Decorative Elements */}
-            <div className="decor-circle"></div>
-            <div className="decor-grid"></div>
           </div>
         </div>
       </section>
