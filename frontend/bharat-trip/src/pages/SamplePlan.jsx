@@ -22,10 +22,25 @@ export default function SamplePlan() {
       popular: true,
       image: img5,
       days: [
-        { day: "Day 1", places: ["ISKCON Temple", "Bull Temple", "Someshwara Temple"], cost: 300 },
-        { day: "Day 2", places: ["St. Mary's Basilica", "Jamia Masjid", "Gavi Gangadhareshwara Temple"], cost: 350 },
+        { 
+          day: "Day 1", 
+          places: [
+            { name: "ISKCON Temple", cost: 0 }, 
+            { name: "Bull Temple", cost: 50 }, 
+            { name: "Someshwara Temple", cost: 20 }
+          ], 
+          dayMealCost: 300 
+        },
+        { 
+          day: "Day 2", 
+          places: [
+            { name: "St. Mary's Basilica", cost: 0 }, 
+            { name: "Jamia Masjid", cost: 0 }, 
+            { name: "Gavi Gangadhareshwara Temple", cost: 30 }
+          ], 
+          dayMealCost: 350 
+        },
       ],
-      total: 650,
     },
     {
       title: "Pub Capital Experience",
@@ -34,10 +49,24 @@ export default function SamplePlan() {
       popular: true,
       image: img2,
       days: [
-        { day: "Day 1", places: ["MG Road", "Church Street", "Brigade Road"], cost: 800 },
-        { day: "Day 2", places: ["Indiranagar 100ft Road", "Koramangala 5th Block"], cost: 1200 },
+        { 
+          day: "Day 1", 
+          places: [
+            { name: "MG Road", cost: 200 }, 
+            { name: "Church Street", cost: 300 }, 
+            { name: "Brigade Road", cost: 200 }
+          ], 
+          dayMealCost: 1500 
+        },
+        { 
+          day: "Day 2", 
+          places: [
+            { name: "Indiranagar 100ft Road", cost: 500 }, 
+            { name: "Koramangala 5th Block", cost: 400 }
+          ], 
+          dayMealCost: 2000 
+        },
       ],
-      total: 2000,
     },
     {
       title: "Silicon Valley Explorer",
@@ -46,10 +75,24 @@ export default function SamplePlan() {
       popular: false,
       image: img3,
       days: [
-        { day: "Day 1", places: ["Visvesvaraya Museum", "HAL Aerospace Museum", "Jawaharlal Nehru Planetarium"], cost: 500 },
-        { day: "Day 2", places: ["Electronic City", "Bannerghatta Bio Park"], cost: 600 },
+        { 
+          day: "Day 1", 
+          places: [
+            { name: "Visvesvaraya Museum", cost: 100 }, 
+            { name: "HAL Aerospace Museum", cost: 50 }, 
+            { name: "Jawaharlal Nehru Planetarium", cost: 60 }
+          ], 
+          dayMealCost: 500 
+        },
+        { 
+          day: "Day 2", 
+          places: [
+            { name: "Electronic City", cost: 0 }, 
+            { name: "Bannerghatta Bio Park", cost: 400 }
+          ], 
+          dayMealCost: 600 
+        },
       ],
-      total: 1100,
     },
     {
       title: "The Green Circuit",
@@ -58,10 +101,24 @@ export default function SamplePlan() {
       popular: false,
       image: img1,
       days: [
-        { day: "Day 1", places: ["Cubbon Park", "Lalbagh Botanical Garden", "Freedom Park"], cost: 200 },
-        { day: "Day 2", places: ["Turahalli Forest", "Hesaraghatta Lake"], cost: 400 },
+        { 
+          day: "Day 1", 
+          places: [
+            { name: "Cubbon Park", cost: 0 }, 
+            { name: "Lalbagh Botanical Garden", cost: 50 }, 
+            { name: "Freedom Park", cost: 0 }
+          ], 
+          dayMealCost: 400 
+        },
+        { 
+          day: "Day 2", 
+          places: [
+            { name: "Turahalli Forest", cost: 0 }, 
+            { name: "Hesaraghatta Lake", cost: 0 }
+          ], 
+          dayMealCost: 500 
+        },
       ],
-      total: 600,
     },
   ];
 
@@ -100,20 +157,27 @@ export default function SamplePlan() {
     };
 
     const formattedItinerary = {};
+    let totalTripCost = 0;
+
     trip.days.forEach((dayObj, index) => {
       const dayKey = `Day ${index + 1}`;
+      const dayPlaceCosts = dayObj.places.reduce((sum, p) => sum + p.cost, 0);
+      const totalDayCost = dayPlaceCosts + dayObj.dayMealCost;
+      totalTripCost += totalDayCost;
+
       formattedItinerary[dayKey] = {
-        places: dayObj.places.map(placeName => ({
-          name: placeName,
-          lat: placeCoords[placeName]?.lat || 12.9716,
-          lng: placeCoords[placeName]?.lng || 77.5946,
-          estimatedCost: Math.round(dayObj.cost / dayObj.places.length),
+        places: dayObj.places.map(p => ({
+          name: p.name,
+          lat: placeCoords[p.name]?.lat || 12.9716,
+          lng: placeCoords[p.name]?.lng || 77.5946,
+          estimatedCost: p.cost,
           timeHours: 2,
           category: trip.category,
           tags: [trip.category.toLowerCase()]
         })),
-        estimatedCost: dayObj.cost,
+        estimatedCost: totalDayCost,
         estimatedHours: dayObj.places.length * 2,
+        dayMealCost: dayObj.dayMealCost,
         color: ["#3b82f6","#10b981","#f59e0b","#ef4444"][index % 4]
       };
     });
@@ -121,15 +185,22 @@ export default function SamplePlan() {
     const planData = {
       city: "Bangalore",
       days: trip.days.length,
-      budget: trip.category.toLowerCase().includes("budget") ? "low" : "medium",
+      budget: trip.category.toLowerCase().includes("nightlife") ? "high" : "medium",
       interests: [trip.category],
       itinerary: formattedItinerary,
-      totalTripCost: trip.total,
+      totalTripCost: totalTripCost,
       isSample: true
     };
 
     localStorage.setItem("tripPlan", JSON.stringify(planData));
     navigate("/results", { state: { plan: planData } });
+  };
+
+  const calculateTripTotal = (days) => {
+    return days.reduce((acc, day) => {
+      const placesCost = day.places.reduce((pSum, p) => pSum + p.cost, 0);
+      return acc + placesCost + day.dayMealCost;
+    }, 0);
   };
 
   return (
@@ -139,7 +210,7 @@ export default function SamplePlan() {
         <div className="sp-hero">
           <span className="sp-badge">✦ CURATED FOR YOU</span>
           <h1>Explore Sample <span className="sp-highlight">Travel Plans</span></h1>
-          <p>Expertly crafted itineraries to inspire your next adventure.</p>
+          <p>Expertly crafted itineraries with realistic cost breakdowns.</p>
         </div>
 
         <div className="sp-filters">
@@ -155,39 +226,42 @@ export default function SamplePlan() {
         </div>
 
         <div className="sp-grid">
-          {filtered.map((trip, index) => (
-            <div className="sp-card" key={index}>
-              <div className="sp-card-img-wrap">
-                <img src={trip.image} alt={trip.title} />
-                <span className="sp-rating">★ {trip.rating}</span>
-                {trip.popular && <span className="sp-popular-badge">POPULAR</span>}
-              </div>
-              <div className="sp-card-body">
-                <h3>{trip.title}</h3>
-                <div className="sp-days">
-                  {trip.days.map((d, i) => (
-                    <div className="sp-day-row" key={i}>
-                      <div className="sp-day-label">{d.day}</div>
-                      <div className="sp-day-places">
-                        {d.places.slice(0, 2).map((place, p) => (
-                          <span className="sp-place-tag" key={p}>📍 {place}</span>
-                        ))}
-                        {d.places.length > 2 && <span className="sp-place-tag">+{d.places.length - 2}</span>}
+          {filtered.map((trip, index) => {
+            const tripTotal = calculateTripTotal(trip.days);
+            return (
+              <div className="sp-card" key={index}>
+                <div className="sp-card-img-wrap">
+                  <img src={trip.image} alt={trip.title} />
+                  <span className="sp-rating">★ {trip.rating}</span>
+                  {trip.popular && <span className="sp-popular-badge">POPULAR</span>}
+                </div>
+                <div className="sp-card-body">
+                  <h3>{trip.title}</h3>
+                  <div className="sp-days">
+                    {trip.days.map((d, i) => (
+                      <div className="sp-day-row" key={i}>
+                        <div className="sp-day-label">{d.day}</div>
+                        <div className="sp-day-places">
+                          {d.places.slice(0, 2).map((place, p) => (
+                            <span className="sp-place-tag" key={p}>📍 {place.name}</span>
+                          ))}
+                          {d.places.length > 2 && <span className="sp-place-tag">+{d.places.length - 2}</span>}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="sp-card-meta">
-                  <span className="sp-meta-item">{trip.days.length} Days</span>
-                  <span className="sp-total-price">{formatPrice(trip.total)}</span>
-                </div>
-                <div className="sp-card-actions">
-                  <button className="sp-view-btn" onClick={() => setModalTrip(trip)}>Details</button>
-                  <button className="sp-map-btn" onClick={() => handleViewOnMap(trip)}>View Map</button>
+                    ))}
+                  </div>
+                  <div className="sp-card-meta">
+                    <span className="sp-meta-item">{trip.days.length} Days</span>
+                    <span className="sp-total-price">{formatPrice(tripTotal)}</span>
+                  </div>
+                  <div className="sp-card-actions">
+                    <button className="sp-view-btn" onClick={() => setModalTrip(trip)}>Details</button>
+                    <button className="sp-map-btn" onClick={() => handleViewOnMap(trip)}>View Map</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -201,19 +275,29 @@ export default function SamplePlan() {
             <div className="sp-modal-body">
               <h2>{modalTrip.title}</h2>
               <div className="sp-modal-days">
-                {modalTrip.days.map((d, i) => (
-                  <div className="sp-modal-day" key={i}>
-                    <div className="sp-modal-day-header">
-                      <span>{d.day}</span>
-                      <span>{formatPrice(d.cost)}</span>
+                {modalTrip.days.map((d, i) => {
+                  const dayPlacesCost = d.places.reduce((sum, p) => sum + p.cost, 0);
+                  return (
+                    <div className="sp-modal-day" key={i}>
+                      <div className="sp-modal-day-header">
+                        <span>{d.day}</span>
+                        <span>Total: {formatPrice(dayPlacesCost + d.dayMealCost)}</span>
+                      </div>
+                      <div className="sp-modal-places">
+                        {d.places.map((p, idx) => (
+                          <div key={idx} className="sp-modal-place">
+                            <span>📍 {p.name}</span>
+                            <span style={{ marginLeft: 'auto', color: 'var(--text-dim)', fontSize: '12px' }}>{p.cost > 0 ? formatPrice(p.cost) : 'Free'}</span>
+                          </div>
+                        ))}
+                        <div className="sp-modal-place" style={{ borderTop: '1px solid var(--border-main)', marginTop: '8px', paddingTop: '8px', opacity: 0.8 }}>
+                          <span>🍴 Estimated Meals</span>
+                          <span style={{ marginLeft: 'auto', color: 'var(--text-dim)', fontSize: '12px' }}>{formatPrice(d.dayMealCost)}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="sp-modal-places">
-                      {d.places.map((p, idx) => (
-                        <div key={idx} className="sp-modal-place">📍 {p}</div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <button className="sp-map-btn" style={{width:'100%', height:'54px'}} onClick={() => handleViewOnMap(modalTrip)}>
                 View Interactive Map →

@@ -19,7 +19,7 @@ function Results() {
   const [travelMode, setTravelMode] = useState("Car");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [showMap, setShowMap] = useState(false); // Mobile toggle
+  const [showMap, setShowMap] = useState(false);
   const [weather, setWeather] = useState({ temp: "--", desc: "Loading...", icon: "☁️" });
 
   useEffect(() => {
@@ -35,7 +35,8 @@ function Results() {
             city: data.destination || "Bangalore",
             days: data.days,
             itinerary: data.itinerary,
-            isShared: true
+            isShared: true,
+            totalTripCost: data.totalTripCost
           };
           setPlan(formattedPlan);
           setTripTitle(data.title);
@@ -61,7 +62,6 @@ function Results() {
     }
   }, [loc.search, loc.state]);
 
-  // Live Weather Fetch
   useEffect(() => {
     const fetchWeather = async () => {
       try {
@@ -101,9 +101,22 @@ function Results() {
     );
   }
 
-  const days = Object.keys(plan.itinerary);
-  const totalDays = days.length;
-  const totalTripCost = plan.totalTripCost || days.reduce((sum, d) => sum + (plan.itinerary[d]?.estimatedCost || 0), 0);
+  const daysKeys = Object.keys(plan.itinerary);
+  const totalDays = daysKeys.length;
+  
+  // Calculate total cost accurately
+  const totalTripCost = plan.totalTripCost || daysKeys.reduce((total, dayKey) => {
+    const day = plan.itinerary[dayKey];
+    const placesCost = day.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0);
+    // Include dayMealCost if it exists, else use 0 (the day.estimatedCost might already include it in some objects)
+    const mealCost = day.dayMealCost || 0;
+    
+    // Fallback: If day.estimatedCost is significantly higher than placesCost, it likely already includes meals
+    if (day.estimatedCost > placesCost && !day.dayMealCost) {
+        return total + day.estimatedCost;
+    }
+    return total + placesCost + mealCost;
+  }, 0);
 
   const handleSaveTrip = async () => {
     setSaving(true);
@@ -164,7 +177,6 @@ function Results() {
 
   return (
     <div className={`res-page ${showMap ? "mobile-map-active" : ""}`}>
-      {/* ── MOBILE TOGGLE ── */}
       <div className="res-mobile-toggle">
         <button className={!showMap ? "active" : ""} onClick={() => setShowMap(false)}>List</button>
         <button className={showMap ? "active" : ""} onClick={() => setShowMap(true)}>Map</button>
@@ -232,58 +244,79 @@ function Results() {
             <span className="weather-icon">{weather.icon}</span>
           </div>
 
-          {days.map((day, idx) => (
-            <div key={day} className="premium-day-card" style={{ "--day-accent": DAY_COLORS[idx % DAY_COLORS.length] }}>
-              <div className="day-header">
-                <div className="day-info">
-                  <span className="day-badge">{day}</span>
-                  <h3 className="day-title">Exploration Day</h3>
-                </div>
-                <div className="day-meta">
-                  <span>⏱️ {plan.itinerary[day].estimatedHours}h</span>
-                  <span>💰 {formatPrice(plan.itinerary[day].estimatedCost)}</span>
-                </div>
-              </div>
+          {daysKeys.map((day, idx) => {
+            const dayData = plan.itinerary[day];
+            const placesCost = dayData.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0);
+            const mealCost = dayData.dayMealCost || (dayData.estimatedCost - placesCost > 0 ? dayData.estimatedCost - placesCost : 0);
 
-              <div className="place-timeline">
-                {plan.itinerary[day].places.map((place, pIdx) => {
-                  const prevPlace = pIdx > 0 ? plan.itinerary[day].places[pIdx - 1] : null;
-                  const distance = prevPlace ? getDistance(prevPlace.lat, prevPlace.lng, place.lat, place.lng) : 0;
-                  const travelTime = prevPlace ? getTravelTime(distance) : null;
+            return (
+              <div key={day} className="premium-day-card" style={{ "--day-accent": DAY_COLORS[idx % DAY_COLORS.length] }}>
+                <div className="day-header">
+                  <div className="day-info">
+                    <span className="day-badge">{day}</span>
+                    <h3 className="day-title">Exploration Day</h3>
+                  </div>
+                  <div className="day-meta">
+                    <span>⏱️ {dayData.estimatedHours}h</span>
+                    <span>💰 {formatPrice(placesCost + mealCost)}</span>
+                  </div>
+                </div>
 
-                  return (
-                    <div key={pIdx} className="timeline-item">
-                      <div className="timeline-marker">
-                        <span className="marker-dot"></span>
-                        {pIdx < plan.itinerary[day].places.length - 1 && <span className="marker-line"></span>}
-                      </div>
-                      <div className="timeline-content">
-                        <div className="place-card-mini">
-                          <PlaceImage 
-                            placeName={place.name} 
-                            city={plan.city || "Bengaluru"} 
-                            className="mini-card-img" 
-                          />
-                          <div className="place-info-main">
-                            <h4>{place.name}</h4>
-                            <div className="place-badge-row">
-                              <span className="place-tag">{place.category || "Sightseeing"}</span>
-                              {travelTime && (
-                                <span className="travel-time-badge">
-                                  {travelMode === "Bike" ? "🏍️" : travelMode === "Car" ? "🚗" : "🚌"} {travelTime}
-                                </span>
-                              )}
+                <div className="place-timeline">
+                  {dayData.places.map((place, pIdx) => {
+                    const prevPlace = pIdx > 0 ? dayData.places[pIdx - 1] : null;
+                    const distance = prevPlace ? getDistance(prevPlace.lat, prevPlace.lng, place.lat, place.lng) : 0;
+                    const travelTime = prevPlace ? getTravelTime(distance) : null;
+
+                    return (
+                      <div key={pIdx} className="timeline-item">
+                        <div className="timeline-marker">
+                          <span className="marker-dot"></span>
+                          {pIdx < dayData.places.length - 1 && <span className="marker-line"></span>}
+                        </div>
+                        <div className="timeline-content">
+                          <div className="place-card-mini">
+                            <PlaceImage 
+                              placeName={place.name} 
+                              city={plan.city || "Bengaluru"} 
+                              className="mini-card-img" 
+                            />
+                            <div className="place-info-main">
+                              <h4>{place.name}</h4>
+                              <div className="place-badge-row">
+                                <span className="place-tag">{place.category || "Sightseeing"}</span>
+                                {travelTime && (
+                                  <span className="travel-time-badge">
+                                    {travelMode === "Bike" ? "🏍️" : travelMode === "Car" ? "🚗" : "🚌"} {travelTime}
+                                  </span>
+                                )}
+                              </div>
                             </div>
+                            <span className="place-cost-mini">{place.estimatedCost > 0 ? formatPrice(place.estimatedCost) : 'Free'}</span>
                           </div>
-                          <span className="place-cost-mini">{formatPrice(place.estimatedCost || 0)}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {mealCost > 0 && (
+                    <div className="timeline-item" style={{ opacity: 0.8, marginTop: '8px' }}>
+                      <div className="timeline-marker"><span className="marker-dot" style={{ background: '#94a3b8' }}></span></div>
+                      <div className="timeline-content">
+                        <div className="place-card-mini" style={{ borderStyle: 'dashed', background: 'transparent' }}>
+                          <div style={{ fontSize: '20px', padding: '0 10px' }}>🍴</div>
+                          <div className="place-info-main">
+                            <h4>Estimated Meals</h4>
+                            <span className="place-tag">Food & Dining</span>
+                          </div>
+                          <span className="place-cost-mini">{formatPrice(mealCost)}</span>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {!plan.isShared && (
             <div className="res-inventory-actions">
