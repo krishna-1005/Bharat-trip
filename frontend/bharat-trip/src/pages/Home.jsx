@@ -266,8 +266,6 @@ function Home() {
         </div>
       </section>
 
-      {/* CHATBOT */}
-      <TravelBot isOpen={chatOpen} setIsOpen={setChatOpen} />
     </div>
   );
 }
