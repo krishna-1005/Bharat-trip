@@ -82,6 +82,7 @@ function MapView({ plan, isTracking }) {
   const [activeDay, setActiveDay] = useState("all");
   const [userLocation, setUserLocation] = useState(null);
   const [pathHistory, setPathHistory] = useState([]);
+  const [roadRoute, setRoadRoute] = useState([]);
 
   useEffect(() => {
     let watchId = null;
@@ -100,7 +101,8 @@ function MapView({ plan, isTracking }) {
         { enableHighAccuracy: true }
       );
     } else {
-      setPathHistory([]); // Reset path when tracking stops
+      setPathHistory([]); 
+      setRoadRoute([]);
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUserLocation({
@@ -118,19 +120,35 @@ function MapView({ plan, isTracking }) {
     };
   }, [isTracking]);
 
-  if (!plan || !plan.itinerary) return null;
-
-  const days = Object.keys(plan.itinerary);
-  const allPlaces = days.flatMap(
-    d => plan.itinerary[d]?.places || []
-  );
-
-  // Get first place of the day (or trip) to connect to user
+  // Fetch road route whenever userLocation or firstTarget changes
+  const days = plan?.itinerary ? Object.keys(plan.itinerary) : [];
+  const allPlaces = days.flatMap(d => plan.itinerary[d]?.places || []);
   const targetPlaces = activeDay === "all" 
     ? allPlaces 
     : (plan.itinerary[days[activeDay - 1]]?.places || []);
-  
   const firstTarget = targetPlaces[0];
+
+  useEffect(() => {
+    if (isTracking && userLocation && firstTarget) {
+      const fetchRoute = async () => {
+        try {
+          const res = await fetch(
+            `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${firstTarget.lng},${firstTarget.lat}?overview=full&geometries=geojson`
+          );
+          const data = await res.json();
+          if (data.routes && data.routes.length > 0) {
+            const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+            setRoadRoute(coords);
+          }
+        } catch (err) {
+          console.error("Routing error:", err);
+        }
+      };
+      fetchRoute();
+    }
+  }, [isTracking, userLocation?.lat, userLocation?.lng, firstTarget?.lat, firstTarget?.lng]);
+
+  if (!plan || !plan.itinerary) return null;
 
   return (
     <div className="map-container">
@@ -169,16 +187,24 @@ function MapView({ plan, isTracking }) {
               />
             )}
             
-            {/* Connection to first destination */}
-            {firstTarget && (
+            {/* Connection to first destination (Real Road Route) */}
+            {roadRoute.length > 0 && (
+              <Polyline 
+                positions={roadRoute}
+                pathOptions={{ color: '#3b82f6', weight: 5, opacity: 0.8 }}
+              >
+                <Tooltip permanent direction="center" className="route-tooltip">
+                  Navigating to {firstTarget?.name}
+                </Tooltip>
+              </Polyline>
+            )}
+
+            {/* Fallback to direct line if OSRM fails */}
+            {roadRoute.length === 0 && firstTarget && (
               <Polyline 
                 positions={[[userLocation.lat, userLocation.lng], [firstTarget.lat, firstTarget.lng]]}
                 pathOptions={{ color: '#3b82f6', weight: 4, opacity: 0.8, dashArray: '1, 10' }}
-              >
-                <Tooltip permanent direction="center" className="route-tooltip">
-                  Live Route to {firstTarget.name}
-                </Tooltip>
-              </Polyline>
+              />
             )}
           </>
         )}
