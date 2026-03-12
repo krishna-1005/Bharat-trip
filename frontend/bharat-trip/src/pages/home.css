@@ -252,7 +252,30 @@
 @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
 
 @media (max-width: 1024px) {
-  .hero, .how-it-works, .cta-premium, .premium-footer { padding: 80px 40px; }
+  .hero { flex-direction: column; padding: 120px 20px 60px; text-align: center; }
+  .hero-text { max-width: 100%; order: 2; }
+  .hero-visual { width: 100%; height: 400px; order: 1; }
+  .gallery-card.main-feat { width: 240px; height: 320px; }
+  .float-card { width: 100px; height: 130px; }
+  
+  .hero-actions { justify-content: center; }
+  .hero-description { margin-left: auto; margin-right: auto; }
+
+  .how-it-works, .cta-premium, .premium-footer, .travel-vibe-section { padding: 80px 20px; }
   .footer-main { flex-direction: column; gap: 40px; }
+  .footer-links { gap: 40px; flex-wrap: wrap; }
   .features-grid { grid-template-columns: 1fr; }
+  
+  .section-head h2 { font-size: 32px; }
+  .stats-strip { flex-wrap: wrap; gap: 30px; padding: 40px 20px; }
+  .stat-divider { display: none; }
+  
+  .cta-content { padding: 40px 20px; }
+}
+
+@media (max-width: 480px) {
+  .hero-actions { flex-direction: column; width: 100%; }
+  .btn-premium-primary, .btn-premium-outline { width: 100%; justify-content: center; }
+  .vibe-grid { gap: 10px; }
+  .vibe-card { min-width: 140px; padding: 16px; }
 }

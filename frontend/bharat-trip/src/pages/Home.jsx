@@ -17,10 +17,9 @@ function Home() {
   const galleryRef = useRef(null);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      const { clientX, clientY } = e;
-      const x = (clientX / window.innerWidth - 0.5) * 30;
-      const y = (clientY / window.innerHeight - 0.5) * 30;
+    const handleMove = (xPos, yPos) => {
+      const x = (xPos / window.innerWidth - 0.5) * 30;
+      const y = (yPos / window.innerHeight - 0.5) * 30;
       
       document.documentElement.style.setProperty("--parallax-x", `${x}px`);
       document.documentElement.style.setProperty("--parallax-y", `${y}px`);
@@ -29,9 +28,21 @@ function Home() {
         galleryRef.current.style.transform = `rotateY(${x * 0.5}deg) rotateX(${-y * 0.5}deg)`;
       }
     };
+
+    const onMouseMove = (e) => handleMove(e.clientX, e.clientY);
+    const onTouchMove = (e) => {
+      if (e.touches.length > 0) {
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
     
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("touchmove", onTouchMove);
+    };
   }, []);
 
   return (
@@ -78,6 +89,7 @@ function Home() {
               className={`gallery-card main-feat ${hoveredCard === 'main' ? 'active' : ''}`}
               onMouseEnter={() => setHoveredCard('main')}
               onMouseLeave={() => setHoveredCard(null)}
+              onClick={() => setHoveredCard(hoveredCard === 'main' ? null : 'main')} // Toggle for mobile
             >
               <img src={img6} alt="Vibrant Bangalore" />
               <div className="card-overlay">
@@ -89,8 +101,7 @@ function Home() {
             {/* Floating Cards */}
             <div className="floating-elements">
               <div className="float-card c1">
-                <img src={
-                  img1} alt="Cubbon Park" />
+                <img src={img1} alt="Cubbon Park" />
               </div>
               <div className="float-card c2">
                 <img src={img2} alt="Iskcon" />
@@ -110,11 +121,11 @@ function Home() {
       <div className="live-index-marquee">
         <div className="marquee-content">
           {[...Array(2)].map((_, j) => (
-            <div key={j} style={{ display: "flex", gap: "40px" }}>
-              <div className="marquee-item"><span className="status-dot excellent"></span> Bengaluru: 24°C • Perfect for Tech Parks & Cafes</div>
-              <div className="marquee-item"><span className="status-dot good"></span> Goa: 29°C • Ideal Beach Weather</div>
+            <div key={j} style={{ display: "flex", gap: "20px" }}>
+              <div className="marquee-item"><span className="status-dot excellent"></span> Bengaluru: 24°C • Tech Parks & Cafes</div>
+              <div className="marquee-item"><span className="status-dot good"></span> Goa: 29°C • Beach Weather</div>
               <div className="marquee-item"><span className="status-dot fair"></span> Mumbai: 31°C • Moderate Crowds</div>
-              <div className="marquee-item"><span className="status-dot excellent"></span> Jaipur: 22°C • Great for Heritage Walks</div>
+              <div className="marquee-item"><span className="status-dot excellent"></span> Jaipur: 22°C • Heritage Walks</div>
               <div className="marquee-item"><span className="status-dot excellent"></span> Manali: 15°C • Clear Skies</div>
             </div>
           ))}
@@ -138,7 +149,7 @@ function Home() {
             <div key={i} className="vibe-card" onClick={() => navigate("/planner")}>
               <span className="vibe-icon">{vibe.icon}</span>
               <span className="vibe-title">{vibe.title}</span>
-              <span style={{ fontSize: "12px", color: "var(--p-muted)" }}>{vibe.desc}</span>
+              <span style={{ fontSize: "12px", color: "var(--text-dim)" }}>{vibe.desc}</span>
             </div>
           ))}
         </div>
