@@ -27,11 +27,9 @@ function AnimatedOrb({ color, size }) {
 }
 
 export default function Interactive3DIcon({ color = "#3b82f6", size = 1 }) {
-  const cameraZ = Math.max(5, size * 3.5);
-  
   return (
     <div style={{ width: '100%', height: '100%' }}>
-      <Canvas camera={{ position: [0, 0, cameraZ], fov: 45 }}>
+      <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} intensity={1} />
         <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} />
