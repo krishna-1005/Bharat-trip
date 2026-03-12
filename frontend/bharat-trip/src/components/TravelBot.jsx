@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import "../styles/travelBot.css";
 const API = import.meta.env.VITE_API_URL;
 
@@ -103,7 +104,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
           <div className="cb-messages">
             {messages.map((msg, i) => (
               <div key={i} className={`cb-bubble ${msg.sender}`}>
-                {msg.text}
+                <ReactMarkdown>{msg.text}</ReactMarkdown>
                 {msg.plan && (
                   <button className="cb-map-redirect-btn" onClick={() => handleViewOnMap(msg.plan)}>
                     🗺️ View Full Plan on Map →
