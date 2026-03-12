@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { PerspectiveCamera, Float, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
@@ -8,21 +8,8 @@ function PremiumMesh() {
   const { mouse } = useThree();
 
   // Create a grid for the wave effect
-  const [positions, initialY] = useMemo(() => {
-    const width = 60, height = 60;
-    const p = new Float32Array(width * height * 3);
-    const iY = new Float32Array(width * height);
-    for (let i = 0; i < width; i++) {
-      for (let j = 0; j < height; j++) {
-        const idx = (i * height + j) * 3;
-        const x = (i - width / 2) * 1.5;
-        const z = (j - height / 2) * 1.5;
-        p.set([x, 0, z], idx);
-        iY[i * height + j] = 0;
-      }
-    }
-    return [p, iY];
-  }, []);
+  // Variables were unused and thus removed
+
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();

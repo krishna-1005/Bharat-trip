@@ -7,14 +7,16 @@ export default function PlaceImage({ placeName, city, className }) {
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
 
-    getPlaceImage(placeName, city).then(img => {
+    const fetchImg = async () => {
+      setLoading(true);
+      const img = await getPlaceImage(placeName, city);
       if (mounted) {
         setImage(img);
         setLoading(false);
       }
-    });
+    };
+    fetchImg();
 
     return () => {
       mounted = false;

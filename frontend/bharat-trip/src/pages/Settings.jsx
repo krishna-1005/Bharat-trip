@@ -34,7 +34,7 @@ export default function Settings() {
           setEmailAlerts(data.user.preferences.emailAlerts);
           setTripReminders(data.user.preferences.tripReminders);
         }
-      } catch (err) { console.error(err); }
+      } catch { console.error("Error fetching preferences"); }
     };
     fetchPrefs();
   }, [auth.currentUser]);
@@ -60,7 +60,7 @@ export default function Settings() {
       });
 
       if (res.ok) alert(t("save_changes") + "!");
-    } catch (err) { alert("Failed to save to server"); }
+    } catch { alert("Failed to save to server"); }
   };
 
   const handleLogout = async () => {

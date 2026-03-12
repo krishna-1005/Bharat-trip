@@ -2,20 +2,22 @@ import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
+function generateParticles(count) {
+  const positions = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 40;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 40;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+  }
+  return positions;
+}
+
 function ParticleField() {
   const points = useRef();
   const count = 2000;
 
   // Generate random positions once
-  const particles = useMemo(() => {
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 40;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 40;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
-    }
-    return positions;
-  }, []);
+  const particles = useMemo(() => generateParticles(count), []);
 
   useFrame((state) => {
     const { x, y } = state.mouse;

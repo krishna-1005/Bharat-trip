@@ -124,6 +124,7 @@ export default function Profile() {
     if (firebaseUser) {
       fetchTrips();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firebaseUser]);
 
 

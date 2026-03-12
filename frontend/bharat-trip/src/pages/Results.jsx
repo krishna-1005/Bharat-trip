@@ -55,7 +55,7 @@ function Results() {
           desc: `${desc} • Perfect for travel`,
           icon 
         });
-      } catch (err) {
+      } catch {
         setWeather({ temp: "28°C", desc: "Sunny • Perfect for travel", icon: "☀️" });
       }
     };
@@ -74,7 +74,6 @@ function Results() {
 
   const days = Object.keys(plan.itinerary);
   const totalDays = days.length;
-  const totalPlaces = days.reduce((sum, d) => sum + (plan.itinerary[d]?.places?.length || 0), 0);
   const totalTripCost = plan.totalTripCost || days.reduce((sum, d) => sum + (plan.itinerary[d]?.estimatedCost || 0), 0);
 
   const handleSaveTrip = async () => {
