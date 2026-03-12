@@ -62,7 +62,7 @@ function Navbar() {
 
   const menuItems = [
     { icon: "👤", label: t("nav_profile"), sub: "View your account",   path: "/profile"  },
-    { icon: "🗺️", label: "My Trips",   sub: "Your saved itineraries", path: "/planner" },
+    { icon: "🗺️", label: t("nav_trips"),   sub: "Your saved itineraries", path: "/trips" },
     { icon: "⚙️", label: t("nav_settings"),   sub: "Preferences & privacy", path: "/settings" },
   ];
 

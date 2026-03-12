@@ -15,6 +15,7 @@ import Help from "./pages/Help";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
+import MyTrips from "./pages/MyTrips";
 import Settings from "./pages/Settings";
 import Results from "./pages/Results";
 import SamplePlan from "./pages/SamplePlan";
@@ -60,6 +61,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/trips"
+            element={
+              <ProtectedRoute>
+                <MyTrips />
               </ProtectedRoute>
             }
           />
