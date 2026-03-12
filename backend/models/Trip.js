@@ -3,7 +3,9 @@ const mongoose = require("mongoose");
 const placeSchema = new mongoose.Schema({
   name: String,
   lat: Number,
-  lng: Number
+  lng: Number,
+  estimatedCost: Number,
+  category: String
 });
 
 const daySchema = new mongoose.Schema({

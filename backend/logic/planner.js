@@ -165,7 +165,8 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
 
       dayPlaces.push({
         name:          place.name,
-        estimatedCost: Number(place.avgCost) || 0,
+        estimatedCost: Number(place.avgCost) || 100,
+        avgCost:       Number(place.avgCost) || 100,
         timeHours:     Number(place.timeHours) || 2,
         lat:           Number(place.lat) || 12.9716,
         lng:           Number(place.lng) || 77.5946,
@@ -173,7 +174,7 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
         tags:          place.tags || [],
       });
 
-      dayCost  += (Number(place.avgCost) || 0);
+      dayCost  += (Number(place.avgCost) || 100);
       dayHours += (Number(place.timeHours) || 2);
       usedNames.add(place.name);
     }
@@ -183,14 +184,15 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
         const fallback = EMERGENCY_POOL[d % EMERGENCY_POOL.length];
         dayPlaces.push({
             name: fallback.name,
-            estimatedCost: fallback.avgCost,
+            estimatedCost: fallback.avgCost || 100,
+            avgCost: fallback.avgCost || 100,
             timeHours: fallback.timeHours,
             lat: fallback.lat,
             lng: fallback.lng,
             category: fallback.category,
             tags: fallback.tags
         });
-        dayCost += fallback.avgCost;
+        dayCost += (fallback.avgCost || 100);
     }
 
     const mealCost     = MEAL_COST[budget] || 200;

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { getPlaceImage } from "../../services/imageService";
+import { useSettings } from "../../context/SettingsContext";
 
 function PlaceTooltip({ place }) {
   const [image, setImage] = useState(null);
+  const { formatPrice } = useSettings();
 
   useEffect(() => {
     let mounted = true;
@@ -16,6 +18,8 @@ function PlaceTooltip({ place }) {
     };
   }, [place.name]);
 
+  const price = place.estimatedCost || place.avgCost || 0;
+
   return (
     <div className="tooltip-card">
       {image ? (
@@ -28,7 +32,7 @@ function PlaceTooltip({ place }) {
         <strong>{place.name}</strong>
         <span>{place.category}</span>
         <span>⏱ {place.timeHours} hrs</span>
-        <span>💰 ₹{place.avgCost}</span>
+        <span>💰 {formatPrice(price)}</span>
       </div>
     </div>
   );
