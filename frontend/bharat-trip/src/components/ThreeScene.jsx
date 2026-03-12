@@ -1,64 +1,86 @@
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Stars, PerspectiveCamera } from '@react-three/drei';
+import { PerspectiveCamera, Float, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
-function GoldenDust() {
-  const pointsRef = useRef();
-  const count = 2000;
+function PremiumMesh() {
+  const meshRef = useRef();
   const { mouse } = useThree();
 
-  const [positions, step] = useMemo(() => {
-    const p = new Float32Array(count * 3);
-    const s = new Float32Array(count);
-    for (let i = 0; i < count; i++) {
-      p.set([
-        (Math.random() - 0.5) * 40,
-        (Math.random() - 0.5) * 25,
-        (Math.random() - 0.5) * 20
-      ], i * 3);
-      s[i] = Math.random();
+  // Create a grid for the wave effect
+  const [positions, initialY] = useMemo(() => {
+    const width = 60, height = 60;
+    const p = new Float32Array(width * height * 3);
+    const iY = new Float32Array(width * height);
+    for (let i = 0; i < width; i++) {
+      for (let j = 0; j < height; j++) {
+        const idx = (i * height + j) * 3;
+        const x = (i - width / 2) * 1.5;
+        const z = (j - height / 2) * 1.5;
+        p.set([x, 0, z], idx);
+        iY[i * height + j] = 0;
+      }
     }
-    return [p, s];
+    return [p, iY];
   }, []);
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
-    
-    // Subtle rotation of the whole field
-    pointsRef.current.rotation.y = time * 0.02;
-    
-    // Move points toward mouse slightly
-    const targetX = mouse.x * 2;
-    const targetY = mouse.y * 2;
-    
-    pointsRef.current.position.x = THREE.MathUtils.lerp(pointsRef.current.position.x, targetX, 0.05);
-    pointsRef.current.position.y = THREE.MathUtils.lerp(pointsRef.current.position.y, targetY, 0.05);
+    const geo = meshRef.current.geometry;
+    const pos = geo.attributes.position.array;
 
-    // Update individual particle sizes or positions if needed, 
-    // but for performance we'll just pulse the opacity
-    pointsRef.current.material.opacity = 0.4 + Math.sin(time) * 0.2;
+    for (let i = 0; i < 60; i++) {
+      for (let j = 0; j < 60; j++) {
+        const idx = (i * 60 + j) * 3;
+        const x = pos[idx];
+        const z = pos[idx + 2];
+        
+        // Complex wave math for "liquid" feel
+        const dist = Math.sqrt(x * x + z * z);
+        const mouseDist = Math.sqrt(Math.pow(x - mouse.x * 20, 2) + Math.pow(z + mouse.y * 20, 2));
+        
+        pos[idx + 1] = 
+          Math.sin(dist * 0.2 - time * 0.5) * 1.5 + 
+          Math.cos(x * 0.3 + time) * 0.5 +
+          (mouseDist < 10 ? (10 - mouseDist) * 0.4 : 0); // Interaction
+      }
+    }
+    geo.attributes.position.needsUpdate = true;
+    
+    meshRef.current.rotation.y = time * 0.05;
   });
 
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute 
-          attach="attributes-position" 
-          count={count} 
-          array={positions} 
-          itemSize={3} 
-        />
-      </bufferGeometry>
-      <pointsMaterial 
-        size={0.06} 
-        color="#f59e0b" // Golden/Amber color
+    <mesh ref={meshRef} rotation={[-Math.PI / 3, 0, 0]} position={[0, -5, -10]}>
+      <planeGeometry args={[80, 80, 59, 59]} />
+      <meshStandardMaterial 
+        color="#0f172a" 
+        wireframe 
         transparent 
-        opacity={0.6} 
-        sizeAttenuation 
-        blending={THREE.AdditiveBlending}
+        opacity={0.3} 
+        emissive="#3b82f6"
+        emissiveIntensity={0.5}
       />
-    </points>
+    </mesh>
+  );
+}
+
+function FloatingOrbs() {
+  return (
+    <group>
+      <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+        <mesh position={[-15, 5, -10]}>
+          <sphereGeometry args={[2, 32, 32]} />
+          <MeshDistortMaterial color="#3b82f6" speed={2} distort={0.4} radius={1} />
+        </mesh>
+      </Float>
+      <Float speed={3} rotationIntensity={1} floatIntensity={2}>
+        <mesh position={[18, -2, -15]}>
+          <sphereGeometry args={[3, 32, 32]} />
+          <MeshDistortMaterial color="#1d4ed8" speed={1.5} distort={0.3} radius={1} />
+        </mesh>
+      </Float>
+    </group>
   );
 }
 
@@ -72,25 +94,18 @@ export default function ThreeScene() {
       height: '100%',
       zIndex: -1,
       pointerEvents: 'none',
-      background: '#010411' // Deep dark blue/black
+      background: 'radial-gradient(circle at center, #0f172a 0%, #020617 100%)'
     }}>
-      <Canvas>
-        <PerspectiveCamera makeDefault position={[0, 0, 15]} />
-        <ambientLight intensity={0.5} />
+      <Canvas shadowMap>
+        <PerspectiveCamera makeDefault position={[0, 0, 20]} fov={50} />
+        <ambientLight intensity={0.2} />
+        <pointLight position={[10, 10, 10]} intensity={1.5} color="#3b82f6" />
+        <spotLight position={[-20, 20, 10]} angle={0.15} penumbra={1} intensity={1} color="#60a5fa" />
         
-        {/* Static Golden Stars */}
-        <Stars 
-          radius={100} 
-          depth={50} 
-          count={5000} 
-          factor={4} 
-          saturation={0.5} 
-          fade 
-          speed={0.5} 
-        />
+        <PremiumMesh />
+        <FloatingOrbs />
         
-        {/* Interactive Golden Dust */}
-        <GoldenDust />
+        <fog attach="fog" args={['#020617', 10, 50]} />
       </Canvas>
     </div>
   );
