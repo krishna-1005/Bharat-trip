@@ -3,11 +3,17 @@
 ============================================= */
 
 .sp-page {
-  padding: 120px 8% 80px;
+  padding: 0;
   min-height: 100vh;
   background: var(--bg-main);
   color: var(--text-main);
   transition: background 0.3s ease;
+}
+
+.sp-container {
+  padding: 120px 8% 80px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 /* ── HERO ── */
@@ -33,7 +39,7 @@
 
 .sp-hero h1 {
   font-family: 'Syne', sans-serif;
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 800;
   margin-bottom: 16px;
   line-height: 1.1;
@@ -88,7 +94,7 @@
 /* ── GRID ── */
 .sp-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 32px;
   animation: spFadeUp 0.6s ease both 0.2s;
 }
@@ -111,7 +117,7 @@
 
 .sp-card-img-wrap {
   position: relative;
-  height: 220px;
+  height: 200px;
   overflow: hidden;
 }
 
@@ -161,7 +167,7 @@
 
 .sp-card-body h3 {
   font-family: 'Syne', sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 800;
   margin-bottom: 16px;
 }
@@ -180,7 +186,7 @@
 }
 
 .sp-day-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   color: var(--accent-blue);
   text-transform: uppercase;
@@ -195,7 +201,7 @@
 }
 
 .sp-place-tag {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-dim);
   background: var(--glass);
   padding: 2px 8px;
@@ -212,13 +218,13 @@
 }
 
 .sp-meta-item {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-dim);
   font-weight: 600;
 }
 
 .sp-total-price {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--accent-green);
 }
@@ -234,7 +240,7 @@
   padding: 12px;
   border-radius: 14px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
   border: none;
@@ -262,7 +268,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -273,8 +279,8 @@
 .sp-modal {
   background: var(--bg-panel);
   width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
+  max-width: 500px;
+  max-height: 85vh;
   border-radius: 32px;
   border: 1px solid var(--border-main);
   overflow-y: auto;
@@ -289,21 +295,23 @@
 
 .sp-modal-close {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: rgba(0,0,0,0.5);
   color: white;
   border: none;
   cursor: pointer;
   z-index: 10;
-  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sp-modal-img-wrap {
-  height: 280px;
+  height: 240px;
 }
 
 .sp-modal-img-wrap img {
@@ -313,34 +321,52 @@
 }
 
 .sp-modal-body {
-  padding: 32px;
+  padding: 28px;
+}
+
+.sp-modal-body h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 24px;
 }
 
 .sp-modal-days {
-  margin: 24px 0 32px;
+  margin-bottom: 28px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .sp-modal-day {
   background: var(--glass);
-  padding: 20px;
-  border-radius: 20px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border-main);
 }
 
 .sp-modal-day-header {
   display: flex;
   justify-content: space-between;
   font-weight: 800;
-  margin-bottom: 12px;
+  font-size: 12px;
+  margin-bottom: 10px;
   color: var(--accent-blue);
+  text-transform: uppercase;
+}
+
+.sp-modal-places {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .sp-modal-place {
   font-size: 14px;
   color: var(--text-main);
-  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 @keyframes spFadeUp {
@@ -350,17 +376,18 @@
 
 /* ── RESPONSIVE ── */
 @media (max-width: 1024px) {
-  .sp-page { padding: 100px 40px 60px; }
+  .sp-container { padding: 100px 40px 60px; }
 }
 
 @media (max-width: 768px) {
-  .sp-grid { grid-template-columns: 1fr; }
-  .sp-hero h1 { font-size: 2rem; }
+  .sp-grid { grid-template-columns: 1fr; gap: 24px; }
+  .sp-hero h1 { font-size: 1.8rem; }
   .sp-filter-btn { padding: 8px 18px; font-size: 13px; }
+  .sp-container { padding: 100px 24px 60px; }
 }
 
 @media (max-width: 480px) {
-  .sp-page { padding: 100px 20px 60px; }
   .sp-card-actions { grid-template-columns: 1fr; }
   .sp-modal-body { padding: 24px 20px; }
+  .sp-hero { margin-bottom: 40px; }
 }

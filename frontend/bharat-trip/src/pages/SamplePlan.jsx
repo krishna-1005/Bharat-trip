@@ -135,58 +135,60 @@ export default function SamplePlan() {
   return (
     <div className="sp-page">
       <Navbar />
-      <div className="sp-hero">
-        <span className="sp-badge">✦ CURATED FOR YOU</span>
-        <h1>Explore Sample <span className="sp-highlight">Travel Plans</span></h1>
-        <p>Expertly crafted itineraries to inspire your next great adventure across the city.</p>
-      </div>
+      <div className="sp-container">
+        <div className="sp-hero">
+          <span className="sp-badge">✦ CURATED FOR YOU</span>
+          <h1>Explore Sample <span className="sp-highlight">Travel Plans</span></h1>
+          <p>Expertly crafted itineraries to inspire your next adventure.</p>
+        </div>
 
-      <div className="sp-filters">
-        {FILTERS.map((f) => (
-          <button
-            key={f}
-            className={`sp-filter-btn ${activeFilter === f ? "sp-filter-active" : ""}`}
-            onClick={() => setActiveFilter(f)}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
+        <div className="sp-filters">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              className={`sp-filter-btn ${activeFilter === f ? "sp-filter-active" : ""}`}
+              onClick={() => setActiveFilter(f)}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
 
-      <div className="sp-grid">
-        {filtered.map((trip, index) => (
-          <div className="sp-card" key={index}>
-            <div className="sp-card-img-wrap">
-              <img src={trip.image} alt={trip.title} />
-              <span className="sp-rating">★ {trip.rating}</span>
-              {trip.popular && <span className="sp-popular-badge">POPULAR</span>}
-            </div>
-            <div className="sp-card-body">
-              <h3>{trip.title}</h3>
-              <div className="sp-days">
-                {trip.days.map((d, i) => (
-                  <div className="sp-day-row" key={i}>
-                    <div className="sp-day-label">{d.day}</div>
-                    <div className="sp-day-places">
-                      {d.places.slice(0, 2).map((place, p) => (
-                        <span className="sp-place-tag" key={p}>📍 {place}</span>
-                      ))}
-                      {d.places.length > 2 && <span className="sp-place-tag">+{d.places.length - 2} more</span>}
+        <div className="sp-grid">
+          {filtered.map((trip, index) => (
+            <div className="sp-card" key={index}>
+              <div className="sp-card-img-wrap">
+                <img src={trip.image} alt={trip.title} />
+                <span className="sp-rating">★ {trip.rating}</span>
+                {trip.popular && <span className="sp-popular-badge">POPULAR</span>}
+              </div>
+              <div className="sp-card-body">
+                <h3>{trip.title}</h3>
+                <div className="sp-days">
+                  {trip.days.map((d, i) => (
+                    <div className="sp-day-row" key={i}>
+                      <div className="sp-day-label">{d.day}</div>
+                      <div className="sp-day-places">
+                        {d.places.slice(0, 2).map((place, p) => (
+                          <span className="sp-place-tag" key={p}>📍 {place}</span>
+                        ))}
+                        {d.places.length > 2 && <span className="sp-place-tag">+{d.places.length - 2}</span>}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              <div className="sp-card-meta">
-                <span className="sp-meta-item">{trip.days.length} Days</span>
-                <span className="sp-total-price">{formatPrice(trip.total)}</span>
-              </div>
-              <div className="sp-card-actions">
-                <button className="sp-view-btn" onClick={() => setModalTrip(trip)}>Details</button>
-                <button className="sp-map-btn" onClick={() => handleViewOnMap(trip)}>View Map</button>
+                  ))}
+                </div>
+                <div className="sp-card-meta">
+                  <span className="sp-meta-item">{trip.days.length} Days</span>
+                  <span className="sp-total-price">{formatPrice(trip.total)}</span>
+                </div>
+                <div className="sp-card-actions">
+                  <button className="sp-view-btn" onClick={() => setModalTrip(trip)}>Details</button>
+                  <button className="sp-map-btn" onClick={() => handleViewOnMap(trip)}>View Map</button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {modalTrip && (
@@ -198,9 +200,6 @@ export default function SamplePlan() {
             </div>
             <div className="sp-modal-body">
               <h2>{modalTrip.title}</h2>
-              <p style={{ color: 'var(--text-dim)', marginBottom: '20px' }}>
-                A perfectly balanced {modalTrip.category.toLowerCase()} experience.
-              </p>
               <div className="sp-modal-days">
                 {modalTrip.days.map((d, i) => (
                   <div className="sp-modal-day" key={i}>

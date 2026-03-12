@@ -246,6 +246,26 @@ body {
   margin-top: 32px;
 }
 
+.auth-input-styled {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-main);
+  background: var(--glass);
+  color: var(--text-main);
+  font-size: 15px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.auth-input-styled:focus {
+  border-color: var(--accent-blue);
+  background: var(--bg-panel);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
 @media (max-width: 600px) {
   .cta-buttons {
     flex-direction: column;
