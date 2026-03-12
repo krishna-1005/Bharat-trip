@@ -1,5 +1,6 @@
 const path = require("path");
 const fetchOSMPlaces = require("../services/osmPlaces");
+const analyzeAndRefinePlan = require("../services/aiPlanner");
 
 /* ── Load curated dataset ── */
 let localPlaces = [];
@@ -168,15 +169,26 @@ async function generatePlan({ days = 2, budget = "low", interests = [], traveler
   const finalPool = getPool(allPlacesPool, budget, interests);
   console.log(`🎯 Generated pool of ${finalPool.length} places for ${days} days (${travelerType}, ${pace} pace)`);
 
-  const itinerary  = {};
-  const usedNames  = new Set();
-  let   totalCost  = 0;
-  let   poolIndex  = 0;
-
   // Pace adjustments
   let placesPerDay = 3;
   if (pace === "relaxed") placesPerDay = 2;
   if (pace === "fast")    placesPerDay = 5;
+
+  // AI Refinement - Pick top 40 candidates to stay within context limits
+  let aiItineraryMap = null;
+  try {
+    const candidates = finalPool.slice(0, 40);
+    aiItineraryMap = await analyzeAndRefinePlan({
+      days, budget, interests, travelerType, pace, candidates
+    });
+  } catch (err) {
+    console.error("AI Refinement failed, falling back to heuristics");
+  }
+
+  const itinerary  = {};
+  const usedNames  = new Set();
+  let   totalCost  = 0;
+  let   poolIndex  = 0;
 
   // Traveler multipliers
   const travelerMultipliers = { solo: 1, couple: 2, family: 3.5, friends: 4 };
@@ -188,15 +200,36 @@ async function generatePlan({ days = 2, budget = "low", interests = [], traveler
     let   dayCost   = 0;
     let   dayHours  = 0;
 
+    // 1. Try to use AI suggestions first
+    const suggestedNames = aiItineraryMap ? (aiItineraryMap[d] || aiItineraryMap[String(d)] || []) : [];
+    
+    suggestedNames.forEach(name => {
+      const place = allPlacesPool.find(p => p.name === name);
+      if (place && !usedNames.has(place.name)) {
+        let placeCost = calculateDynamicPrice(place, budget) * tMult;
+        dayPlaces.push({
+          name:          place.name,
+          estimatedCost: placeCost,
+          avgCost:       placeCost,
+          timeHours:     Number(place.timeHours) || 2,
+          lat:           Number(place.lat) || 12.9716,
+          lng:           Number(place.lng) || 77.5946,
+          category:      place.category,
+          tags:          place.tags || [],
+          source:        place.source
+        });
+        dayCost  += placeCost;
+        dayHours += (Number(place.timeHours) || 2);
+        usedNames.add(place.name);
+      }
+    });
+
+    // 2. Fill remaining slots with heuristics
     while (dayPlaces.length < placesPerDay && poolIndex < finalPool.length) {
       const place = finalPool[poolIndex++];
       if (usedNames.has(place.name)) continue;
 
-      let placeCost = calculateDynamicPrice(place, budget);
-      
-      // Some costs are per person (entry fees), some are fixed (transport/guide)
-      // For this app, we assume most are per-person
-      placeCost = placeCost * tMult;
+      let placeCost = calculateDynamicPrice(place, budget) * tMult;
 
       dayPlaces.push({
         name:          place.name,
