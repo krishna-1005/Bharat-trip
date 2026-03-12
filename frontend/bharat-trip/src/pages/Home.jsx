@@ -8,9 +8,6 @@ import img3 from "../assets/images/img3.webp";
 import img5 from "../assets/images/img5.webp";
 import img6 from "../assets/images/img6.png";
 import TravelBot from "../components/TravelBot";
-import ThreeScene from "../components/ThreeScene";
-import TravelAnimation from "../components/TravelAnimation";
-import Interactive3DIcon from "../components/Interactive3DIcon";
 
 function Home() {
   const navigate = useNavigate();
@@ -39,7 +36,6 @@ function Home() {
 
   return (
     <div className="home">
-      <ThreeScene />
       
       {/* ── HERO SECTION ── */}
       <section id="home" className="hero">
@@ -74,12 +70,8 @@ function Home() {
           </div>
         </div>
 
-        {/* RIGHT INTERACTIVE 3D VISUAL */}
+        {/* RIGHT VISUAL */}
         <div className="hero-visual">
-          <div className="flight-3d-container">
-            <TravelAnimation />
-          </div>
-          
           <div className="gallery-container" ref={galleryRef}>
             {/* Main Centerpiece */}
             <div 
@@ -178,23 +170,14 @@ function Home() {
         </div>
         <div className="features-grid">
           <div className="feature-premium-card">
-            <div className="feat-3d-icon">
-              <Interactive3DIcon color="#3b82f6" size={1.2} />
-            </div>
             <h3>Instant Itinerary</h3>
             <p>Our LLM analyzes millions of data points to create your perfect day-by-day plan.</p>
           </div>
           <div className="feature-premium-card">
-            <div className="feat-3d-icon">
-              <Interactive3DIcon color="#a855f7" size={1.2} />
-            </div>
             <h3>Real-time Budgets</h3>
             <p>No more surprises. Get accurate estimates for entry fees, transport, and meals.</p>
           </div>
           <div className="feature-premium-card">
-            <div className="feat-3d-icon">
-              <Interactive3DIcon color="#10b981" size={1.2} />
-            </div>
             <h3>Route Optimization</h3>
             <p>Smart sequencing that avoids traffic hotspots and maximizes your sightseeing time.</p>
           </div>
@@ -204,9 +187,6 @@ function Home() {
       {/* ── CTA SECTION ── */}
       <section className="cta-premium">
         <div className="cta-glow"></div>
-        <div className="cta-3d-background">
-           <Interactive3DIcon color="#f59e0b" size={2.5} />
-        </div>
         <div className="cta-content">
           <h2>Ready for your next adventure?</h2>
           <p>Join the community of travelers redefining how India is explored.</p>
@@ -216,9 +196,6 @@ function Home() {
 
       {/* ── FOOTER ── */}
       <footer className="premium-footer">
-        <div className="footer-3d-layer">
-           <Interactive3DIcon color="#334155" size={4} />
-        </div>
         <div className="footer-main">
           <div className="footer-brand">
             <h3>Bharat Trip</h3>

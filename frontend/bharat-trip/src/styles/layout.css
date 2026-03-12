@@ -302,27 +302,6 @@
   z-index: 1000;
 }
 
-.three-scene-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0; /* Behind the planner content */
-  background: #020617; /* Matches Bharat Trip dark theme */
-}
-
-/* Ensure the planner content sits on top */
-.planner-content {
-  position: relative;
-  z-index: 2;
-  pointer-events: none; /* Allows cursor to interact with 3D globe */
-}
-
-.planner-wrapper, .planner-hero {
-  pointer-events: auto; /* Re-enables clicks for the form */
-}
-
 * {
   box-sizing: border-box;
 }
