@@ -20,6 +20,7 @@ function Results() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [isTracking, setIsTracking] = useState(false);
   const [weather, setWeather] = useState({ temp: "--", desc: "Loading...", icon: "☁️" });
 
   useEffect(() => {
@@ -184,9 +185,20 @@ function Results() {
 
       <div className="res-map-section">
         <div className="map-inner-container">
-          <MapView plan={plan} />
+          <MapView plan={plan} isTracking={isTracking} />
         </div>
         <div className="res-floating-stats">
+          <button 
+            className={`res-stat-pill tracking-btn ${isTracking ? "active" : ""}`}
+            onClick={() => setIsTracking(!isTracking)}
+            title={isTracking ? "Stop Live Tracking" : "Start Live Tracking"}
+          >
+            <span className="pill-icon">{isTracking ? "📡" : "📍"}</span>
+            <div className="pill-texts">
+              <span className="pill-val">{isTracking ? "Tracking..." : "Live Track"}</span>
+              <span className="pill-label">{isTracking ? "ON" : "OFF"}</span>
+            </div>
+          </button>
           <div className="res-stat-pill">
             <span className="pill-icon">💰</span>
             <div className="pill-texts">

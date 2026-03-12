@@ -68,30 +68,53 @@ function FitBounds({ places, userLocation }) {
   return null;
 }
 
-function MapView({ plan }) {
+function FollowUser({ location }) {
+  const map = useMap();
+  useEffect(() => {
+    if (location) {
+      map.setView([location.lat, location.lng], map.getZoom(), { animate: true });
+    }
+  }, [location, map]);
+  return null;
+}
+
+function MapView({ plan, isTracking }) {
   const [activeDay, setActiveDay] = useState("all");
   const [userLocation, setUserLocation] = useState(null);
 
   useEffect(() => {
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const loc = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
+    let watchId = null;
 
-      console.log("User GPS:", loc);
-
-      setUserLocation(loc);
-    },
-    (error) => {
-      console.log("Location error:", error);
-    },
-    {
-      enableHighAccuracy: true
+    if (isTracking) {
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const loc = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setUserLocation(loc);
+        },
+        (error) => console.log("Tracking error:", error),
+        { enableHighAccuracy: true }
+      );
+    } else {
+      // One-time fetch if not tracking
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => console.log("Location error:", error),
+        { enableHighAccuracy: true }
+      );
     }
-  );
-}, []);
+
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [isTracking]);
 
   if (!plan || !plan.itinerary) return null;
 
@@ -100,23 +123,17 @@ function MapView({ plan }) {
     d => plan.itinerary[d]?.places || []
   );
 
-  const center = userLocation
-  ? [userLocation.lat, userLocation.lng]
-  : allPlaces.length > 0
-  ? [allPlaces[0].lat, allPlaces[0].lng]
-  : [12.9716, 77.5946]; // default to Bangalore
-
   return (
     <div className="map-container">
       <MapContainer
-        center={center}
+        center={[12.9716, 77.5946]}
         zoom={11}
         zoomControl={false}
         scrollWheelZoom
         style={{ height: "100%", width: "100%" }}
       >
-
-        <FitBounds places={allPlaces} userLocation={userLocation} />
+        {isTracking && userLocation && <FollowUser location={userLocation} />}
+        {!isTracking && <FitBounds places={allPlaces} userLocation={userLocation} />}
 
         <ResizeMap trigger={plan} />
 

@@ -92,6 +92,33 @@
 .pill-val { font-weight: 700; color: var(--text-main); font-size: 14px; line-height: 1.2; }
 .pill-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
 
+/* Tracking Button Specifics */
+.tracking-btn {
+  cursor: pointer;
+  border: none;
+  background: var(--bg-panel);
+  transition: all 0.3s ease;
+}
+
+.tracking-btn:hover {
+  background: var(--border-main);
+}
+
+.tracking-btn.active {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid var(--accent-blue);
+}
+
+.tracking-btn.active .pill-icon {
+  animation: pulse-tracking 2s infinite;
+}
+
+@keyframes pulse-tracking {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
 /* ── RIGHT: INVENTORY PANEL ── */
 .res-inventory-panel {
   width: 420px;
