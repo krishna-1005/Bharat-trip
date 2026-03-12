@@ -2,16 +2,16 @@ import L from "leaflet";
 
 export function createLocationIcon(color, isActive = false) {
   return L.divIcon({
-    className: "location-marker",
+    className: "custom-pin-container",
     html: `
-      <div class="marker-outer" style="
-        border-color: ${color};
-        ${isActive ? `box-shadow: 0 0 0 6px ${color}55;` : ""}
-      ">
-        <div class="marker-inner" style="background:${color}"></div>
+      <div class="pin-wrapper ${isActive ? 'active' : ''}">
+        <div class="pin-main" style="background-color: ${color}">
+          <div class="pin-inner-dot"></div>
+        </div>
+        <div class="pin-drop-shadow"></div>
       </div>
     `,
-    iconSize: [26, 26],
-    iconAnchor: [13, 13]
+    iconSize: [30, 42],
+    iconAnchor: [15, 42]
   });
 }

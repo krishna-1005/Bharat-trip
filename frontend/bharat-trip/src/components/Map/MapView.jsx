@@ -6,6 +6,8 @@ import {
   Tooltip,
   useMap
 } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import "../../utils/fixLeafletIcons";
 import { useState, useEffect, Fragment } from "react";
 import { createLocationIcon } from "./markerIcons";
 import MapLegend from "./MapLegend";
@@ -13,6 +15,22 @@ import MapInfoBar from "./MapInfoBar";
 import ResizeMap from "./ResizeMap";
 import { DAY_COLORS } from "../../constants/dayColors";
 import PlaceTooltip from "./PlaceTooltip";
+import L from "leaflet";
+
+// Create a special icon for user location
+const userIcon = L.divIcon({
+  className: "custom-pin-container",
+  html: `
+    <div class="pin-wrapper">
+      <div class="pin-main" style="background-color: #3b82f6; border-color: #fff;">
+        <div class="pin-inner-dot" style="background-color: #fff;"></div>
+      </div>
+      <div class="pin-drop-shadow"></div>
+    </div>
+  `,
+  iconSize: [30, 42],
+  iconAnchor: [15, 42]
+});
 
 /* ---------- ZOOM CONTROLS ---------- */
 function ZoomControls() {
@@ -160,7 +178,7 @@ function MapView({ plan }) {
         })}
 
         {userLocation && (
-          <Marker position={[userLocation.lat, userLocation.lng]}>
+          <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
             <Tooltip direction="top" offset={[0, -10]} opacity={1}>
               You are here
             </Tooltip>
