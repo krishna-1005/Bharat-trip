@@ -31,7 +31,6 @@ export default function About() {
 
   return (
     <div className="page about-page">
-      <Navbar />
       
       {/* ── HERO SECTION ── */}
       <section className="about-hero">
