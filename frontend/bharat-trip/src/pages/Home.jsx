@@ -29,7 +29,18 @@ function Home() {
       }
     };
 
-    const onMouseMove = (e) => handleMove(e.clientX, e.clientY);
+    const onMouseMove = (e) => {
+      handleMove(e.clientX, e.clientY);
+      
+      // Update glow positions for cards
+      document.querySelectorAll(".feature-premium-card").forEach(card => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty("--mouse-x", `${x}px`);
+        card.style.setProperty("--mouse-y", `${y}px`);
+      });
+    };
     const onTouchMove = (e) => {
       if (e.touches.length > 0) {
         handleMove(e.touches[0].clientX, e.touches[0].clientY);
