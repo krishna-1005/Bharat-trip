@@ -124,6 +124,87 @@
   margin: 0;
 }
 
+/* ── TRAVELER TYPE ── */
+.pf-traveler-row {
+  display: flex;
+  gap: 8px;
+}
+
+.pf-traveler-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  transition: all 0.2s;
+  gap: 4px;
+}
+
+.pf-traveler-btn:hover {
+  background: rgba(37,99,235,0.1);
+  border-color: rgba(64,128,255,0.25);
+}
+
+.pf-traveler-btn.active {
+  background: rgba(37,99,235,0.18);
+  border-color: #3b82f6;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.2);
+}
+
+.pf-opt-icon { font-size: 18px; }
+.pf-opt-label { font-size: 11px; font-weight: 600; text-transform: capitalize; }
+
+/* ── PACE ── */
+.pf-pace-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pf-pace-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.pf-pace-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pf-pace-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-opt-desc {
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+}
+
+.pf-pace-btn:hover {
+  background: rgba(37,99,235,0.1);
+  border-color: rgba(64,128,255,0.25);
+}
+
+.pf-pace-btn.active {
+  background: rgba(37,99,235,0.18);
+  border-color: #3b82f6;
+}
+
+.pf-pace-btn.active .pf-opt-label { color: #fff; }
+
 /* ── BUDGET ── */
 .pf-budget-row {
   display: flex;

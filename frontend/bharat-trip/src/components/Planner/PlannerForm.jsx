@@ -8,9 +8,10 @@ function PlannerForm({ onPlanGenerated }) {
   const [days, setDays]           = useState(2);
   const [budget, setBudget]       = useState("low");
   const [interests, setInterests] = useState([]);
-  const [plan, setPlan]           = useState(null);
+  const [travelerType, setTravelerType] = useState("solo");
+  const [pace, setPace]           = useState("moderate");
   const [loading, setLoading]     = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError]         = useState("");
 
   const handleSubmit = async () => {
     if (interests.length === 0) {
@@ -19,15 +20,19 @@ function PlannerForm({ onPlanGenerated }) {
     }
     setError("");
     setLoading(true);
-    setPlan(null);
     try {
-      const result = await generatePlan({ days, budget, interests });
-      setPlan(result);
+      const result = await generatePlan({ 
+        days, 
+        budget, 
+        interests,
+        travelerType,
+        pace 
+      });
       if (onPlanGenerated && result?.itinerary) {
         onPlanGenerated(result);
       }
     } catch {
-      setPlan({ message: "Something went wrong. Try again." });
+      setError("Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
@@ -40,9 +45,9 @@ function PlannerForm({ onPlanGenerated }) {
   };
 
   const budgetOptions = [
-    { value: "low",    label: t("budget_low"),  icon: "💸", desc: `${formatPrice(500)}–${formatPrice(1500)}/${t("days").toLowerCase().slice(0,-1)}` },
-    { value: "medium", label: t("budget_med"), icon: "✈️", desc: `${formatPrice(1500)}–${formatPrice(4000)}/${t("days").toLowerCase().slice(0,-1)}` },
-    { value: "high",   label: t("budget_high"),   icon: "💎", desc: `${formatPrice(4000)}+/${t("days").toLowerCase().slice(0,-1)}`      },
+    { value: "low",    label: t("budget_low"),  icon: "💸", desc: `${formatPrice(500)}–${formatPrice(1500)}/day` },
+    { value: "medium", label: t("budget_med"), icon: "✈️", desc: `${formatPrice(1500)}–${formatPrice(4000)}/day` },
+    { value: "high",   label: t("budget_high"),   icon: "💎", desc: `${formatPrice(4000)}+/day`      },
   ];
 
   const interestOptions = [
@@ -50,6 +55,21 @@ function PlannerForm({ onPlanGenerated }) {
     { value: "Food",    icon: "🍜", label: "Food"    },
     { value: "Culture", icon: "🏛️", label: "Culture" },
     { value: "Adventure", icon: "🏔️", label: "Adventure" },
+    { value: "Shopping", icon: "🛍️", label: "Shopping" },
+    { value: "Nightlife", icon: "🍸", label: "Nightlife" },
+  ];
+
+  const travelerOptions = [
+    { value: "solo", label: "Solo", icon: "👤" },
+    { value: "couple", label: "Couple", icon: "👫" },
+    { value: "family", label: "Family", icon: "👨‍👩‍👧‍👦" },
+    { value: "friends", label: "Friends", icon: "👯‍♂️" },
+  ];
+
+  const paceOptions = [
+    { value: "relaxed", label: "Relaxed", icon: "🧘", desc: "1-2 places/day" },
+    { value: "moderate", label: "Moderate", icon: "🚶", desc: "3-4 places/day" },
+    { value: "fast", label: "Fast-paced", icon: "🏃", desc: "5+ places/day" },
   ];
 
   return (
@@ -63,14 +83,14 @@ function PlannerForm({ onPlanGenerated }) {
           <span>📅</span> {t("form_days")}
         </label>
         <div className="pf-days-row">
-          {[1,2,3,4,5,7,10].map(d => (
+          {[1,2,3,5,7].map(d => (
             <button
               key={d}
               className={`pf-day-btn ${days === d ? "active" : ""}`}
               onClick={() => setDays(d)}
               type="button"
             >
-              {d}<span className="pf-day-label">{t("days").toLowerCase()}</span>
+              {d}<span className="pf-day-label">days</span>
             </button>
           ))}
           <input 
@@ -80,8 +100,53 @@ function PlannerForm({ onPlanGenerated }) {
             value={days} 
             onChange={(e) => setDays(Math.min(30, Math.max(1, parseInt(e.target.value) || 1)))}
             className="pf-days-input"
-            placeholder="Custom"
+            placeholder="Qty"
           />
+        </div>
+      </div>
+
+      {/* ── TRAVELER TYPE ── */}
+      <div className="pf-field">
+        <label className="pf-label">
+          <span>👥</span> Traveler Type
+        </label>
+        <div className="pf-traveler-row">
+          {travelerOptions.map(opt => (
+            <button
+              key={opt.value}
+              className={`pf-traveler-btn ${travelerType === opt.value ? "active" : ""}`}
+              onClick={() => setTravelerType(opt.value)}
+              type="button"
+            >
+              <span className="pf-opt-icon">{opt.icon}</span>
+              <span className="pf-opt-label">{opt.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── PACE ── */}
+      <div className="pf-field">
+        <label className="pf-label">
+          <span>⚡</span> Trip Pace
+        </label>
+        <div className="pf-pace-row">
+          {paceOptions.map(opt => (
+            <button
+              key={opt.value}
+              className={`pf-pace-btn ${pace === opt.value ? "active" : ""}`}
+              onClick={() => setPace(opt.value)}
+              type="button"
+            >
+              <div className="pf-pace-content">
+                <span className="pf-opt-icon">{opt.icon}</span>
+                <div className="pf-pace-text">
+                  <span className="pf-opt-label">{opt.label}</span>
+                  <span className="pf-opt-desc">{opt.desc}</span>
+                </div>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -111,7 +176,7 @@ function PlannerForm({ onPlanGenerated }) {
         <label className="pf-label">
           <span>✨</span> {t("form_interests")}
         </label>
-        <div className={`pf-interest-row ${error ? "pf-error-border" : ""}`}>
+        <div className={`pf-interest-row ${error && interests.length === 0 ? "pf-error-border" : ""}`}>
           {interestOptions.map(opt => (
             <button
               key={opt.value}
@@ -146,10 +211,6 @@ function PlannerForm({ onPlanGenerated }) {
 
       {error && (
         <p className="pf-error-message">{error}</p>
-      )}
-      
-      {plan?.message && (
-        <p className="pf-error">{plan.message}</p>
       )}
     </div>
   );
