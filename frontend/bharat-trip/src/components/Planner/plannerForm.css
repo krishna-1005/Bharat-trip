@@ -1,403 +1,298 @@
 /* =============================================
-   PLANNER FORM — plannerForm.css
-   All classes prefixed pf- to avoid conflicts
+   PLANNER FORM — plannerForm.css (PREMIUM REDESIGN)
 ============================================= */
 
 .pf-wrap {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  min-height: 500px;
 }
 
-.pf-title {
+/* ── PROGRESS BAR ── */
+.pf-progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  margin-bottom: 40px;
+  overflow: hidden;
+}
+
+.pf-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── STEP HEADER ── */
+.pf-step-header {
+  margin-bottom: 32px;
+}
+
+.pf-step-num {
   font-family: 'Syne', sans-serif;
-  font-size: 24px;
+  font-size: 12px;
   font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -0.5px;
-  margin: 0 0 2px;
+  color: var(--accent-blue);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  display: block;
 }
 
-.pf-subtitle {
-  font-size: 13px;
-  color: rgba(255,255,255,0.38);
+.pf-step-header h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  color: #fff;
+}
+
+.pf-step-header p {
+  font-size: 15px;
+  color: var(--text-dim);
   margin: 0;
 }
 
-/* ── FIELD WRAPPER ── */
+/* ── FIELDS & GRIDS ── */
 .pf-field {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  margin-bottom: 32px;
 }
 
 .pf-label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 11.5px;
+  display: block;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.45);
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
 }
 
-/* ── DAYS ── */
+/* ── DAYS ROW ── */
 .pf-days-row {
   display: flex;
-  gap: 8px;
-}
-
-.pf-day-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 6px 9px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  color: rgba(255,255,255,0.5);
-  font-family: 'Syne', sans-serif;
-  font-size: 18px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  line-height: 1;
-}
-
-.pf-day-label {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  margin-top: 3px;
-  opacity: 0.7;
-}
-
-.pf-day-btn:hover {
-  background: rgba(37,99,235,0.12);
-  border-color: rgba(64,128,255,0.3);
-  color: #7aadff;
-}
-
-.pf-day-btn.active {
-  background: rgba(37,99,235,0.2);
-  border-color: #3b82f6;
-  color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.15),
-              0 4px 16px rgba(37,99,235,0.3);
-}
-
-.pf-days-input {
-  width: 70px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 14px;
-  color: #ffffff;
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  padding: 0 10px;
-  text-align: center;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.pf-days-input:focus {
-  border-color: #3b82f6;
-  background: rgba(255,255,255,0.08);
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
-}
-
-.pf-days-input::placeholder {
-  font-size: 11px;
-  color: rgba(255,255,255,0.3);
-  font-weight: 400;
-}
-
-/* Hide spin arrows */
-.pf-days-input::-webkit-inner-spin-button,
-.pf-days-input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* ── TRAVELER TYPE ── */
-.pf-traveler-row {
-  display: flex;
-  gap: 8px;
-}
-
-.pf-traveler-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px 8px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  color: rgba(255,255,255,0.55);
-  cursor: pointer;
-  transition: all 0.2s;
-  gap: 4px;
-}
-
-.pf-traveler-btn:hover {
-  background: rgba(37,99,235,0.1);
-  border-color: rgba(64,128,255,0.25);
-}
-
-.pf-traveler-btn.active {
-  background: rgba(37,99,235,0.18);
-  border-color: #3b82f6;
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(37,99,235,0.2);
-}
-
-.pf-opt-icon { font-size: 18px; }
-.pf-opt-label { font-size: 11px; font-weight: 600; text-transform: capitalize; }
-
-/* ── PACE ── */
-.pf-pace-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.pf-pace-btn {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
-}
-
-.pf-pace-content {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.pf-pace-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.pf-opt-desc {
-  font-size: 10px;
-  color: rgba(255,255,255,0.3);
-}
-
-.pf-pace-btn:hover {
-  background: rgba(37,99,235,0.1);
-  border-color: rgba(64,128,255,0.25);
-}
-
-.pf-pace-btn.active {
-  background: rgba(37,99,235,0.18);
-  border-color: #3b82f6;
-}
-
-.pf-pace-btn.active .pf-opt-label { color: #fff; }
-
-/* ── BUDGET ── */
-.pf-budget-row {
-  display: flex;
-  gap: 8px;
-}
-
-.pf-budget-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 12px 13px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  color: rgba(255,255,255,0.55);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-  gap: 2px;
-}
-
-.pf-budget-icon {
-  font-size: 18px;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.pf-budget-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(255,255,255,0.7);
-  display: block;
-}
-
-.pf-budget-desc {
-  font-size: 10px;
-  color: rgba(255,255,255,0.3);
-  display: block;
-}
-
-.pf-budget-btn:hover {
-  background: rgba(37,99,235,0.1);
-  border-color: rgba(64,128,255,0.25);
-}
-
-.pf-budget-btn.active {
-  background: rgba(37,99,235,0.18);
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.12),
-              0 4px 16px rgba(37,99,235,0.25);
-}
-.pf-budget-btn.active .pf-budget-name { color: #ffffff; }
-
-/* ── INTERESTS ── */
-.pf-interest-row {
-  display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.pf-interest-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 999px;
-  color: rgba(255,255,255,0.5);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.pf-interest-btn:hover {
-  background: rgba(37,99,235,0.1);
-  border-color: rgba(64,128,255,0.3);
-  color: #9fc3ff;
-}
-
-.pf-interest-btn.active {
-  background: rgba(37,99,235,0.2);
-  border-color: #3b82f6;
-  color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-}
-
-.pf-check {
-  background: #2563eb;
-  color: white;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  font-size: 9px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-}
-
-/* ── SUBMIT BUTTON ── */
-.pf-submit {
-  width: 100%;
-  padding: 15px;
-  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
-  border: none;
-  border-radius: 16px;
-  color: #ffffff;
+.pf-day-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
   font-family: 'Syne', sans-serif;
-  font-size: 14.5px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.3px;
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 8px 28px rgba(37,99,235,0.45),
-              inset 0 1px 0 rgba(255,255,255,0.15);
-  position: relative;
-  overflow: hidden;
-  margin-top: 4px;
+  transition: all 0.2s;
 }
 
-/* shimmer sweep */
-.pf-submit::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%; width: 60%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
-  transform: skewX(-15deg);
-  transition: left 0.5s ease;
-}
-.pf-submit:hover::before { left: 160%; }
-
-.pf-submit:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 40px rgba(37,99,235,0.6);
+.pf-day-btn:hover {
+  border-color: var(--accent-blue);
+  color: #fff;
 }
 
-.pf-submit:active:not(:disabled) {
-  transform: translateY(0);
+.pf-day-btn.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }
 
-.pf-submit.loading,
-.pf-submit:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.pf-loader-wrap {
+.pf-custom-days {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0 16px;
+}
+
+.pf-days-input {
+  width: 40px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  outline: none;
+  text-align: center;
+}
+
+.pf-custom-days span {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+/* ── GRID LAYOUTS ── */
+.pf-traveler-grid, .pf-budget-grid, .pf-pace-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.pf-traveler-card, .pf-budget-card, .pf-pace-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pf-traveler-card:hover, .pf-budget-card:hover, .pf-pace-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.pf-traveler-card.active, .pf-budget-card.active, .pf-pace-card.active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--accent-blue);
+  box-shadow: inset 0 0 0 1px var(--accent-blue);
+}
+
+.pf-card-icon {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.pf-card-label {
+  display: block;
+  font-weight: 700;
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.pf-card-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ── INTERESTS ── */
+.pf-interest-grid {
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
-.pf-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: pfSpin 0.75s linear infinite;
-  display: inline-block;
+.pf-interest-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 100px;
+  color: var(--text-dim);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-@keyframes pfSpin {
+.pf-interest-pill:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.pf-interest-pill.active {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+
+/* ── FOOTER ── */
+.pf-footer {
+  margin-top: auto;
+  padding-top: 40px;
+  display: flex;
+  gap: 16px;
+}
+
+.pf-back-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pf-back-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.pf-next-btn, .pf-gen-btn {
+  flex: 1;
+  background: var(--accent-blue);
+  color: #fff;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.pf-next-btn:hover, .pf-gen-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 15px 30px rgba(59, 130, 246, 0.4);
+}
+
+.pf-gen-btn.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0.8;
+}
+
+.pf-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: pf-spin 0.8s linear infinite;
+}
+
+@keyframes pf-spin {
   to { transform: rotate(360deg); }
 }
 
-/* ── ERROR ── */
-.pf-error {
-  font-size: 13px;
+.pf-error-msg {
   color: #f87171;
-  margin: 0;
-  padding: 10px 14px;
-  background: rgba(248,113,113,0.08);
-  border: 1px solid rgba(248,113,113,0.2);
-  border-radius: 10px;
+  font-size: 13px;
+  margin-top: 20px;
+  text-align: center;
 }
 
-.pf-error-border {
-  border: 2px solid #ff4d4f;
-  border-radius: 12px;
-  padding: 10px;
+/* Animations */
+.animate-in {
+  animation: pf-fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.pf-error-message {
-  color: #ff4d4f;
-  margin-top: 10px;
-  font-size: 14px;
-  font-weight: 500;
+@keyframes pf-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .pf-traveler-grid, .pf-budget-grid, .pf-pace-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
