@@ -32,21 +32,37 @@ CONVERSATION LOGIC:
 2. If info is missing, ask for it using a clear bulleted list of what you still need.
 3. Once you have all info, provide a summary and the JSON block below.
 
-JSON FORMAT:
-\`\`\`json
+JSON FORMATS:
+1. For full plans:
+```json
 {
   "generatePlan": true,
   "days": number,
   "budget": "low" | "medium" | "high",
   "interests": ["Interest1", "Interest2"]
 }
-\`\`\`
+```
 
-Example Reply:
-"I'd love to help! To give you the best experience, could you tell me:
-• How many **days** are you staying?
-• What is your **budget** (Low, Medium, or High)?
-• Any specific **interests** like Food or Nature?"`;
+2. For locating a specific place:
+```json
+{
+  "locatePlace": true,
+  "placeName": "Name of the place",
+  "lat": latitude,
+  "lng": longitude
+}
+```
+
+Example Reply for a place:
+"The **Lalbagh Botanical Garden** is a stunning 240-acre park. It's famous for its glass house and annual flower shows."
+```json
+{
+  "locatePlace": true,
+  "placeName": "Lalbagh Botanical Garden",
+  "lat": 12.9507,
+  "lng": 77.5848
+}
+````;
 
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-flash",
@@ -89,6 +105,18 @@ Example Reply:
         type: "trip",
         reply: replyText || `Great! I've crafted a ${days}-day plan for you.`,
         plan
+      });
+    }
+
+    if (planData && planData.locatePlace) {
+      return res.json({
+        type: "location",
+        reply: replyText,
+        location: {
+          name: planData.placeName,
+          lat: planData.lat,
+          lng: planData.lng
+        }
       });
     }
 

@@ -33,6 +33,32 @@ export default function TravelBot({ isOpen, setIsOpen }) {
     setOpen(false);
   };
 
+  const handleLocateOnMap = (loc) => {
+    if (!loc) return;
+    // Create a mock 1-day plan for this specific place
+    const singlePlacePlan = {
+      city: "Bengaluru",
+      days: 1,
+      itinerary: {
+        "Day 1": {
+          places: [{
+            name: loc.name,
+            lat: loc.lat,
+            lng: loc.lng,
+            category: "Sightseeing",
+            timeHours: 2,
+            estimatedCost: 0
+          }],
+          estimatedCost: 0,
+          estimatedHours: 2,
+          color: "#3b82f6"
+        }
+      }
+    };
+    navigate("/results", { state: { plan: singlePlacePlan } });
+    setOpen(false);
+  };
+
   const sendMessage = async (e) => {
     e?.preventDefault();
     if (!input.trim()) return;
@@ -55,7 +81,8 @@ export default function TravelBot({ isOpen, setIsOpen }) {
 
       const data = await res.json();
       const plan = data.plan;
-      const botReply = data.reply || data.message; // Use 'reply' from new backend logic
+      const botLocation = data.location;
+      const botReply = data.reply || data.message;
 
       if (plan?.itinerary) {
         let botText = botReply ? `${botReply}\n\n` : "";
@@ -68,6 +95,8 @@ export default function TravelBot({ isOpen, setIsOpen }) {
         });
 
         setMessages(prev => [...prev, { sender: "bot", text: botText, plan }]);
+      } else if (botLocation) {
+        setMessages(prev => [...prev, { sender: "bot", text: botReply, location: botLocation }]);
       } else {
         setMessages(prev => [...prev, { sender: "bot", text: botReply || "I'm here to help with your Bangalore travels!" }]);
       }
@@ -108,6 +137,11 @@ export default function TravelBot({ isOpen, setIsOpen }) {
                 {msg.plan && (
                   <button className="cb-map-redirect-btn" onClick={() => handleViewOnMap(msg.plan)}>
                     🗺️ View Full Plan on Map →
+                  </button>
+                )}
+                {msg.location && (
+                  <button className="cb-map-redirect-btn" onClick={() => handleLocateOnMap(msg.location)}>
+                    📍 Locate {msg.location.name} on Map →
                   </button>
                 )}
               </div>
