@@ -48,59 +48,84 @@ body {
 /* ── PREMIUM CARDS ── */
 .premium-card {
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-main);
-  border-radius: 24px;
+  border-radius: 28px;
   padding: 32px;
-  box-shadow: 0 10px 30px var(--shadow-main);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s, background 0.3s;
+  box-shadow: 0 10px 40px var(--shadow-main);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+  pointer-events: none;
 }
 
 .premium-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px) scale(1.01);
   border-color: var(--accent-blue);
+  box-shadow: 0 20px 50px var(--shadow-main);
 }
 
 /* ── BUTTONS ── */
 .btn-premium {
-  padding: 12px 24px;
-  border-radius: 12px;
+  padding: 14px 28px;
+  border-radius: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   border: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.2px;
 }
 
 .btn-premium.primary {
   background: linear-gradient(135deg, var(--accent-blue), #2563eb);
   color: white;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
 }
 
 .btn-premium.outline {
-  background: transparent;
+  background: var(--glass);
   border: 1px solid var(--border-main);
   color: var(--text-main);
+  backdrop-filter: blur(10px);
 }
 
 .btn-premium:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   filter: brightness(1.1);
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4);
+}
+
+.btn-premium:active {
+  transform: translateY(-1px) scale(0.98);
 }
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--bg-main);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border-main);
-  border-radius: 10px;
+  border-radius: 20px;
+  border: 2px solid var(--bg-main);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-dim);
@@ -108,9 +133,17 @@ body {
 
 /* ── UTILS ── */
 .gradient-text {
-  background: linear-gradient(90deg, #60a5fa, #a855f7);
+  background: linear-gradient(135deg, #60a5fa 0%, #a855f7 50%, #ec4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: gradientFlow 5s linear infinite;
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* Page Containers */
@@ -123,9 +156,20 @@ body {
   flex-direction: column;
 }
 
+@media (max-width: 1024px) {
+  .page {
+    padding: 100px 40px 40px;
+  }
+}
+
 @media (max-width: 768px) {
   .page {
-    padding: 100px 20px 40px;
+    padding: 90px 20px 40px;
+  }
+  
+  .premium-card {
+    padding: 24px;
+    border-radius: 20px;
   }
 }
 

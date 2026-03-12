@@ -130,40 +130,75 @@
 /* ── GRID LAYOUTS ── */
 .pf-traveler-grid, .pf-budget-grid, .pf-pace-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
 }
 
 .pf-traveler-card, .pf-budget-card, .pf-pace-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 20px;
+  border-radius: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
 .pf-traveler-card:hover, .pf-budget-card:hover, .pf-pace-card:hover {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(59, 130, 246, 0.4);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
 }
 
 .pf-traveler-card.active, .pf-budget-card.active, .pf-pace-card.active {
   background: rgba(59, 130, 246, 0.1);
   border-color: var(--accent-blue);
-  box-shadow: inset 0 0 0 1px var(--accent-blue);
+  box-shadow: 0 0 0 1px var(--accent-blue), 0 10px 25px rgba(59, 130, 246, 0.2);
 }
 
-.pf-card-icon {
-  font-size: 24px;
-  margin-bottom: 12px;
+.pf-traveler-card.active::after, .pf-budget-card.active::after, .pf-pace-card.active::after {
+  content: '✓';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--accent-blue);
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
 }
 
+@media (max-width: 600px) {
+  .pf-traveler-grid, .pf-budget-grid, .pf-pace-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .pf-traveler-card, .pf-budget-card, .pf-pace-card {
+    padding: 16px;
+  }
+
+  .pf-card-icon {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .pf-traveler-grid, .pf-budget-grid, .pf-pace-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .pf-card-label {
   display: block;
   font-weight: 700;

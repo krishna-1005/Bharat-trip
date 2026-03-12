@@ -503,21 +503,20 @@
 /* ── MOBILE MENU ── */
 .nb-mobile-menu {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  background: var(--bg-main);
+  inset: 0;
+  background: var(--bg-panel);
   z-index: 999;
   display: flex;
   flex-direction: column;
-  padding: 100px 40px;
-  animation: mobileFadeIn 0.3s ease;
+  padding: 120px 40px;
+  animation: mobileSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-@keyframes mobileFadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes mobileSlideIn {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .nb-mobile-links {
@@ -526,30 +525,53 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 24px;
 }
 
 .nb-mobile-item {
   font-family: 'Syne', sans-serif;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 32px;
+  font-weight: 800;
   color: var(--text-main);
   cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: -1px;
 }
 
 .nb-mobile-item:hover {
   color: var(--accent-blue);
+  transform: translateX(10px);
+}
+
+.nb-mobile-auth {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 40px;
+}
+
+.nb-mobile-auth button {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
 }
 
 /* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .nb-nav { padding: 14px 40px; }
+  .nb-search-container { display: none; } /* Hide search on medium screens to avoid crowding */
+}
+
 @media (max-width: 900px) {
   .nb-links { display: none; }
   .nb-auth-btns { display: none; }
   .nb-hamburger { display: flex; }
-  .nb-nav { padding: 14px 30px; }
+  .nb-nav { padding: 14px 24px; }
 }
 
 @media (max-width: 768px) {
-  .nb-nav    { padding: 14px 20px; }
-  .nb-dropdown { width: 260px; right: 0; }
+  .nb-nav    { height: 70px; padding: 0 20px; }
+  .nb-logo-text { font-size: 16px; }
+  .nb-dropdown { width: calc(100vw - 40px); right: -10px; }
 }
