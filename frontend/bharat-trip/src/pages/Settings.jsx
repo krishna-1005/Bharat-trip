@@ -1,7 +1,10 @@
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, signOut } from "firebase/auth";
 import { useSettings } from "../context/SettingsContext";
 import "../styles/settings.css";
+
+const API = import.meta.env.VITE_API_URL;
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -82,7 +85,7 @@ export default function Settings() {
       <div className="settings-container">
         
         <div className="settings-header">
-          <h1>{t("settings_title")}</h1>
+          <h1><span>⚙️</span> {t("settings_title")}</h1>
           <p>{t("settings_sub")}</p>
         </div>
 
@@ -90,13 +93,13 @@ export default function Settings() {
           
           {/* ── PREFERENCES ── */}
           <section className="settings-section">
-            <h2 className="section-title">🌍 {t("pref_label")}</h2>
+            <h2 className="section-title"><span>🌍</span> {t("pref_label")}</h2>
             
             <div className="settings-group">
               <div className="setting-item">
                 <div className="setting-info">
                   <label>{t("lang_label")}</label>
-                  <span>Select language</span>
+                  <span>{language === "English" ? "Choose your preferred language" : language === "Hindi" ? "अपनी पसंदीदा भाषा चुनें" : "ನಿಮ್ಮ ಆದ್ಯತೆಯ ಭಾಷೆಯನ್ನು ಆರಿಸಿ"}</span>
                 </div>
                 <select 
                   className="setting-select" 
@@ -112,16 +115,26 @@ export default function Settings() {
               <div className="setting-item">
                 <div className="setting-info">
                   <label>{t("curr_label")}</label>
-                  <span>Displayed currency</span>
+                  <span>{language === "English" ? "Select display currency" : language === "Hindi" ? "डिस्प्ले मुद्रा चुनें" : "ಪ್ರದರ್ಶನ ಕರೆನ್ಸಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"}</span>
                 </div>
                 <select 
                   className="setting-select" 
                   value={currency} 
                   onChange={(e) => setCurrency(e.target.value)}
                 >
-                  <option value="INR">INR (₹)</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
+                  <option value="INR">INR (₹) - Indian Rupee</option>
+                  <option value="USD">USD ($) - US Dollar</option>
+                  <option value="EUR">EUR (€) - Euro</option>
+                </select>
+              </div>
+
+              <div className="setting-item">
+                <div className="setting-info">
+                  <label>Appearance</label>
+                  <span>Dark mode is default</span>
+                </div>
+                <select className="setting-select" disabled>
+                  <option>Deep Space (Dark)</option>
                 </select>
               </div>
             </div>
@@ -129,13 +142,13 @@ export default function Settings() {
 
           {/* ── NOTIFICATIONS ── */}
           <section className="settings-section">
-            <h2 className="section-title">🔔 {t("notif_label")}</h2>
+            <h2 className="section-title"><span>🔔</span> {t("notif_label")}</h2>
             
             <div className="settings-group">
               <div className="setting-item">
                 <div className="setting-info">
                   <label>{t("email_alerts")}</label>
-                  <span>Email updates</span>
+                  <span>Receive trip updates via email</span>
                 </div>
                 <label className="toggle-switch">
                   <input 
@@ -150,7 +163,7 @@ export default function Settings() {
               <div className="setting-item">
                 <div className="setting-info">
                   <label>{t("trip_reminders")}</label>
-                  <span>Upcoming trips</span>
+                  <span>Get reminded of upcoming journeys</span>
                 </div>
                 <label className="toggle-switch">
                   <input 
@@ -166,35 +179,42 @@ export default function Settings() {
 
           {/* ── SECURITY ── */}
           <section className="settings-section">
-            <h2 className="section-title">🔒 {t("security_label")}</h2>
+            <h2 className="section-title"><span>🔒</span> {t("security_label")}</h2>
             <div className="settings-group">
               <div className="setting-item">
                 <div className="setting-info">
                   <label>Password</label>
-                  <span>Change password</span>
+                  <span>Update your account password</span>
                 </div>
-                <button className="setting-btn outline">Update</button>
+                <button className="setting-btn outline">Update Password</button>
+              </div>
+              <div className="setting-item">
+                <div className="setting-info">
+                  <label>Two-Factor Auth</label>
+                  <span>Add an extra layer of security</span>
+                </div>
+                <button className="setting-btn outline">Enable</button>
               </div>
             </div>
           </section>
 
           {/* ── DANGER ZONE ── */}
           <section className="settings-section danger-zone">
-            <h2 className="section-title danger-text">⚠️ {t("danger_label")}</h2>
+            <h2 className="section-title danger-text"><span>⚠️</span> {t("danger_label")}</h2>
             
             <div className="settings-group">
               <div className="setting-item">
                 <div className="setting-info">
                   <label>{t("logout_btn")}</label>
-                  <span>Sign out</span>
+                  <span>Sign out from your current session</span>
                 </div>
                 <button className="setting-btn outline-danger" onClick={handleLogout}>{t("logout_btn")}</button>
               </div>
 
-              <div className="setting-item border-none">
+              <div className="setting-item">
                 <div className="setting-info">
                   <label className="danger-text">{t("delete_acc")}</label>
-                  <span>Remove data</span>
+                  <span>Permanently delete your account and data</span>
                 </div>
                 <button className="setting-btn danger" onClick={handleDeleteAccount}>{t("delete_acc")}</button>
               </div>

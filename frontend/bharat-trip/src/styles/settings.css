@@ -1,69 +1,80 @@
 /* =============================================
-   SETTINGS PAGE
+   SETTINGS PAGE - REFINED UI
 ============================================= */
 
 .settings-page {
-  padding: 100px 20px 60px;
+  padding: 120px 24px 80px;
   min-height: 100vh;
-  background: var(--bg-main, #040914);
-  color: var(--text-main, #ffffff);
+  background: radial-gradient(circle at 0% 0%, #0f172a 0%, #040914 100%);
+  color: #f8fafc;
   display: flex;
   justify-content: center;
 }
 
 .settings-container {
   width: 100%;
-  max-width: 800px;
-  background: rgba(255, 255, 255, 0.02);
+  max-width: 900px;
+  background: rgba(15, 23, 42, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  padding: 40px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  border-radius: 32px;
+  padding: 48px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.5);
 }
 
 .settings-header {
-  margin-bottom: 40px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding-bottom: 20px;
+  margin-bottom: 48px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 32px;
 }
 
 .settings-header h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-  background: linear-gradient(90deg, #ffffff, #a5b4fc);
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
 }
 
 .settings-header p {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.95rem;
+  color: #94a3b8;
+  font-size: 1.1rem;
+  font-weight: 400;
 }
 
 .settings-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
 }
 
 /* ── SECTIONS ── */
 .settings-section {
-  background: rgba(255, 255, 255, 0.015);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.3s ease, border-color 0.3s ease;
   overflow: hidden;
+  height: fit-content;
+}
+
+.settings-section:hover {
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  padding: 20px 24px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 24px;
   margin: 0;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  color: #e2e8f0;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .settings-group {
@@ -75,17 +86,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
+  padding: 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  transition: background 0.2s;
+  transition: background 0.2s ease;
 }
 
 .setting-item:hover {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.setting-item.border-none {
-  border-bottom: none;
+  background: rgba(255, 255, 255, 0.015);
 }
 
 .setting-item:last-child {
@@ -95,62 +102,65 @@
 .setting-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .setting-info label {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f8fafc;
 }
 
 .setting-info span {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.9rem;
+  color: #64748b;
 }
 
 /* ── INPUTS & BUTTONS ── */
 .setting-select {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  padding: 10px 16px;
-  border-radius: 10px;
+  background: #0f172a;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  padding: 12px 18px;
+  border-radius: 12px;
   font-size: 0.95rem;
+  font-weight: 500;
   outline: none;
   cursor: pointer;
-  min-width: 140px;
+  min-width: 150px;
+  transition: all 0.2s ease;
 }
 
-.setting-select option {
-  background: #0f172a;
-  color: white;
+.setting-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .setting-btn {
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .setting-btn.outline {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
 }
 .setting-btn.outline:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* ── TOGGLE SWITCH ── */
 .toggle-switch {
   position: relative;
   display: inline-block;
-  width: 46px;
-  height: 24px;
+  width: 52px;
+  height: 28px;
 }
 
 .toggle-switch input {
@@ -162,103 +172,125 @@
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.1);
-  transition: .3s;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #334155;
+  transition: .4s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 34px;
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
   background-color: white;
-  transition: .3s;
+  transition: .4s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 input:checked + .slider {
-  background-color: #3b82f6; /* Blue active */
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
 }
 
 input:checked + .slider:before {
-  transform: translateX(22px);
+  transform: translateX(24px);
 }
 
 /* ── DANGER ZONE ── */
 .danger-zone {
   border: 1px solid rgba(239, 68, 68, 0.2);
+  grid-column: 1 / -1;
+}
+
+.danger-zone:hover {
+  border-color: rgba(239, 68, 68, 0.4);
 }
 
 .danger-text {
-  color: #ef4444 !important;
+  color: #f87171 !important;
 }
 
 .setting-btn.outline-danger {
   background: transparent;
-  border: 1px solid rgba(239, 68, 68, 0.5);
-  color: #ef4444;
+  border: 1.5px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
 }
 .setting-btn.outline-danger:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.05);
+  border-color: #ef4444;
 }
 
 .setting-btn.danger {
   background: #ef4444;
   border: none;
   color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 .setting-btn.danger:hover {
   background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
 }
 
 /* ── FOOTER ── */
 .settings-footer {
-  margin-top: 40px;
+  margin-top: 48px;
   display: flex;
   justify-content: flex-end;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 32px;
 }
 
 .settings-save-btn {
-  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
   color: white;
   border: none;
-  padding: 14px 32px;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 16px 40px;
+  border-radius: 16px;
+  font-size: 1.05rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
 }
 
 .settings-save-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+  box-shadow: 0 15px 30px -5px rgba(59, 130, 246, 0.5);
+  filter: brightness(1.1);
+}
+
+.settings-save-btn:active {
+  transform: translateY(0);
 }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 600px) {
+@media (max-width: 900px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
   .settings-container {
-    padding: 24px 20px;
+    padding: 32px 20px;
+    border-radius: 0;
+  }
+  .settings-page {
+    padding: 80px 0 0;
   }
   .setting-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 20px;
   }
   .setting-select, .setting-btn {
     width: 100%;
   }
   .toggle-switch {
-    align-self: flex-start;
+    align-self: flex-end;
   }
 }
