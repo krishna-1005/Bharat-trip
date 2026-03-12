@@ -1,6 +1,7 @@
 const path = require("path");
 const fetchOSMPlaces = require("../services/osmPlaces");
 const analyzeAndRefinePlan = require("../services/aiPlanner");
+const { generateReviews } = require("../services/reviewService");
 
 /* ── Load curated dataset ── */
 let localPlaces = [];
@@ -266,6 +267,11 @@ async function generatePlan({ days = 2, budget = "low", interests = [], traveler
         });
         dayCost += fallbackCost;
     }
+
+    // 3. Generate reviews for each place in the day
+    await Promise.all(dayPlaces.map(async (p) => {
+      p.reviews = await generateReviews(p.name, p.category);
+    }));
 
     // Meal cost adjusted for traveler count and budget
     const mealCost     = (MEAL_COST[budget] || 500) * tMult;

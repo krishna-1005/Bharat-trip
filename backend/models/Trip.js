@@ -5,7 +5,12 @@ const placeSchema = new mongoose.Schema({
   lat: Number,
   lng: Number,
   estimatedCost: Number,
-  category: String
+  category: String,
+  reviews: [{
+    author: String,
+    rating: Number,
+    comment: String
+  }]
 });
 
 const daySchema = new mongoose.Schema({

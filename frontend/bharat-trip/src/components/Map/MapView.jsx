@@ -14,6 +14,7 @@ import MapLegend from "./MapLegend";
 import ResizeMap from "./ResizeMap";
 import { DAY_COLORS } from "../../constants/dayColors";
 import PlaceTooltip from "./PlaceTooltip";
+import HoverPlaceCard from "./HoverPlaceCard";
 import L from "leaflet";
 
 // Create a special icon for user location
@@ -81,6 +82,7 @@ function FollowUser({ location }) {
 function MapView({ plan, isTracking }) {
   const [activeDay, setActiveDay] = useState("all");
   const [userLocation, setUserLocation] = useState(null);
+  const [hoveredPlace, setHoveredPlace] = useState(null);
   const [pathHistory, setPathHistory] = useState([]);
   const [roadRoute, setRoadRoute] = useState([]);
 
@@ -152,6 +154,11 @@ function MapView({ plan, isTracking }) {
 
   return (
     <div className="map-container">
+      {hoveredPlace && (
+        <div className="map-hover-overlay">
+          <HoverPlaceCard place={hoveredPlace} city={plan?.city} />
+        </div>
+      )}
       <MapContainer
         center={[12.9716, 77.5946]}
         zoom={11}
@@ -236,6 +243,10 @@ function MapView({ plan, isTracking }) {
                     DAY_COLORS[idx],
                     activeDay === idx + 1
                   )}
+                  eventHandlers={{
+                    mouseover: () => setHoveredPlace(p),
+                    mouseout: () => setHoveredPlace(null),
+                  }}
                 >
                   <Tooltip
                     direction="top"

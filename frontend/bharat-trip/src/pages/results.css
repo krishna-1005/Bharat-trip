@@ -515,6 +515,7 @@
   width: 100%;
   border-radius: 0;
   overflow: hidden;
+  position: relative;
 }
 
 /* ── SUCCESS OVERLAY ── */
@@ -637,4 +638,144 @@
   .res-itinerary-scroll { padding: 0 14px 100px; }
   .premium-day-card { padding: 12px; }
   .day-title { font-size: 12px; }
+}
+
+/* Map Hover Overlay */
+.map-hover-overlay {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2000;
+  width: 320px;
+  pointer-events: none;
+  animation: fadeInHover 0.3s ease;
+}
+
+.hover-place-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.05);
+  pointer-events: auto;
+}
+
+.hover-card-header {
+  position: relative;
+  height: 140px;
+}
+
+.hover-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hover-card-title-section {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 15px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  color: white;
+}
+
+.hover-card-title-section h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.hover-card-category {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hover-card-body {
+  padding: 15px;
+  background: white;
+}
+
+.hover-card-meta {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.hover-card-reviews h4 {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.review-item {
+  background: #f9fafb;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.review-author {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: #374151;
+}
+
+.review-rating {
+  font-size: 0.7rem;
+}
+
+.review-comment {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+@keyframes fadeInHover {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Scrollbar for reviews */
+.reviews-list::-webkit-scrollbar {
+  width: 4px;
+}
+.reviews-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.reviews-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
 }
