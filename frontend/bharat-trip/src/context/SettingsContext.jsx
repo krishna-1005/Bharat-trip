@@ -25,8 +25,8 @@ export const SettingsProvider = ({ children }) => {
       nav_get_started: "Get Started",
       
       // Home
-      home_hero_title: "Explore India with AI",
-      home_hero_sub: "Your personal AI travel companion for crafting perfect itineraries.",
+      home_hero_title: "Crafting Unforgettable Journeys with AI",
+      home_hero_sub: "Beyond maps and lists—experience India through personalized, AI-powered adventures tailored to your soul.",
       plan_trip_btn: "Plan My Trip",
       view_samples_btn: "View Sample Plans",
       
@@ -94,8 +94,8 @@ export const SettingsProvider = ({ children }) => {
       nav_get_started: "शुरू करें",
 
       // Home
-      home_hero_title: "एआई के साथ भारत की खोज करें",
-      home_hero_sub: "सही यात्रा कार्यक्रम तैयार करने के लिए आपका व्यक्तिगत एआई यात्रा साथी।",
+      home_hero_title: "AI के साथ अपनी सपनों की यात्रा बुनें",
+      home_hero_sub: "नक्शों से परे, अपनी आत्मा के अनुरूप व्यक्तिगत एआई-संचालित रोमांच के साथ भारत का अनुभव करें।",
       plan_trip_btn: "मेरी यात्रा की योजना बनाएं",
       view_samples_btn: "नमूना योजनाएं देखें",
 
@@ -163,8 +163,8 @@ export const SettingsProvider = ({ children }) => {
       nav_get_started: "ಪ್ರಾರಂಭಿಸಿ",
 
       // Home
-      home_hero_title: "AI ನೊಂದಿಗೆ ಭಾರತವನ್ನು ಅನ್ವೇಷಿಸಿ",
-      home_hero_sub: "ಪರಿಪೂರ್ಣ ಪ್ರಯಾಣದ ವಿವರಗಳನ್ನು ರೂಪಿಸಲು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ AI ಪ್ರಯಾಣದ ಒಡನಾಡಿ.",
+      home_hero_title: "AI ಮೂಲಕ ಮರೆಯಲಾಗದ ಪ್ರಯಾಣಗಳನ್ನು ರೂಪಿಸಿ",
+      home_hero_sub: "ನಕ್ಷೆಗಳ ಆಚೆಗೆ—ನಿಮ್ಮ ಮನಸ್ಸಿಗೆ ತಕ್ಕಂತೆ ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ AI-ಚಾಲಿತ ಸಾಹಸಗಳ ಮೂಲಕ ಭಾರತವನ್ನು ಅನುಭವಿಸಿ.",
       plan_trip_btn: "ನನ್ನ ಪ್ರವಾಸವನ್ನು ಯೋಜಿಸಿ",
       view_samples_btn: "ಮಾದರಿ ಯೋಜನೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ",
 
