@@ -90,19 +90,24 @@ function Navbar() {
         </span>
       </div>
 
-      {/* ── SEARCH BAR ── */}
-      <form className="nb-search-form" onSubmit={handleSearch}>
-        <div className="nb-search-input-wrap">
-          <input 
-            type="text" 
-            placeholder="Search places..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="nb-search-input"
-          />
-          <button type="submit" className="nb-search-btn">🔍</button>
-        </div>
-      </form>
+      {/* ── SEARCH BAR (Home Page Only) ── */}
+      {location.pathname === "/" && (
+        <form className="nb-search-form" onSubmit={handleSearch}>
+          <div className="nb-search-input-wrap">
+            <input 
+              type="text" 
+              placeholder="Search destinations..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="nb-search-input"
+            />
+            <button type="submit" className="nb-search-btn" title="Search">
+              <span className="nb-search-icon">🔍</span>
+              <span className="nb-search-text">Search</span>
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* ── DESKTOP NAV LINKS ── */}
       <ul className="nb-links">

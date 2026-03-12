@@ -90,24 +90,35 @@
 
 .nb-search-btn {
   position: absolute;
-  right: 8px;
+  right: 6px;
   background: var(--accent-blue);
   border: none;
   color: white;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  padding: 0 16px;
+  height: 34px;
+  border-radius: 99px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 700;
   transition: all 0.2s ease;
 }
 
 .nb-search-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.02);
   background: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.nb-search-text {
+  display: inline;
+}
+
+@media (max-width: 1100px) {
+  .nb-search-text { display: none; }
+  .nb-search-btn { width: 34px; padding: 0; justify-content: center; }
 }
 
 /* ── NAV LINKS ── */
