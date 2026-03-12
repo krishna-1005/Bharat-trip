@@ -120,7 +120,6 @@ export default function Profile() {
 
   return (
     <div className="pro-page">
-      <Navbar />
       <div className="pro-body">
         <header className="pro-hero">
           <div className="pro-hero-inner">

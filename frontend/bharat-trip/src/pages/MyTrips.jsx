@@ -140,7 +140,6 @@ export default function MyTrips() {
 
   return (
     <div className="pro-page">
-      <Navbar />
       <div className="pro-body">
         <header className="pro-hero">
           <div className="pro-hero-inner">

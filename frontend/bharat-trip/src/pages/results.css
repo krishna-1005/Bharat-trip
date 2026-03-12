@@ -9,6 +9,8 @@
   background: var(--bg-main);
   overflow: hidden;
   transition: background 0.3s ease;
+  box-sizing: border-box;
+  padding-top: 80px;
 }
 
 /* ── MOBILE TOGGLE ── */
