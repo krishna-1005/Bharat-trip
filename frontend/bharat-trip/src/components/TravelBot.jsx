@@ -35,7 +35,6 @@ export default function TravelBot({ isOpen, setIsOpen }) {
 
   const handleLocateOnMap = (loc) => {
     if (!loc) return;
-    // Create a mock 1-day plan for this specific place
     const singlePlacePlan = {
       city: "Bengaluru",
       days: 1,
@@ -75,7 +74,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message: userMsg,
-          history: messages // Send previous messages for context
+          history: messages 
         })
       });
 
@@ -112,7 +111,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
       {/* ── FLOATING BUTTON ── */}
       {!open && (
         <div className="cb-fab" onClick={() => setOpen(true)}>
-          <span className="cb-fab-icon">💬</span>
+          <span className="cb-fab-icon">🤖</span>
         </div>
       )}
 
@@ -146,7 +145,13 @@ export default function TravelBot({ isOpen, setIsOpen }) {
                 )}
               </div>
             ))}
-            {typing && <div className="cb-bubble bot">AI is thinking...</div>}
+            {typing && (
+              <div className="cb-typing">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            )}
             <div ref={chatEndRef} />
           </div>
 
@@ -157,7 +162,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask anything..."
             />
-            <button className="cb-send" type="submit">➤</button>
+            <button className="cb-send" type="submit" disabled={!input.trim()}>➤</button>
           </form>
         </div>
       )}
