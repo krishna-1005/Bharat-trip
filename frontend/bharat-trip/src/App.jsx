@@ -21,6 +21,8 @@ import Settings from "./pages/Settings";
 import Results from "./pages/Results";
 import SamplePlan from "./pages/SamplePlan";
 import NearbyPlaces from "./components/NearbyPlaces";
+import PlaceDetails from "./pages/PlaceDetails";
+import SearchResults from "./pages/SearchResults";
 
 import TravelBot from "./components/TravelBot";
 
@@ -57,6 +59,8 @@ function App() {
           <Route path="/results" element={<Results />} />
           <Route path="/sample-plan" element={<SamplePlan />} />
           <Route path="/nearby" element={<NearbyPlaces />} />
+          <Route path="/place/:id" element={<PlaceDetails />} />
+          <Route path="/search" element={<SearchResults />} />
 
           <Route
             path="/profile"

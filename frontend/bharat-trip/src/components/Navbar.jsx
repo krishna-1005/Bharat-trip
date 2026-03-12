@@ -12,9 +12,19 @@ function Navbar() {
   const [open, setOpen]           = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled]   = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef(null);
 
   const username = user?.name || user?.email || "";
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
+      setMobileMenuOpen(false);
+    }
+  };
 
   /* scroll shadow */
   useEffect(() => {
@@ -79,6 +89,20 @@ function Navbar() {
           <span className="nb-logo-in">IN</span> Bharat Trip
         </span>
       </div>
+
+      {/* ── SEARCH BAR ── */}
+      <form className="nb-search-form" onSubmit={handleSearch}>
+        <div className="nb-search-input-wrap">
+          <input 
+            type="text" 
+            placeholder="Search places..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="nb-search-input"
+          />
+          <button type="submit" className="nb-search-btn">🔍</button>
+        </div>
+      </form>
 
       {/* ── DESKTOP NAV LINKS ── */}
       <ul className="nb-links">

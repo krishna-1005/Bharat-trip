@@ -9,6 +9,7 @@ const chatRoutes    = require("./routes/chatRoutes");
 const authRoutes    = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const nearbyPlaces = require("./routes/nearbyPlaces");
+const placeRoutes = require("./routes/placeRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
@@ -34,6 +35,7 @@ mongoose.connect(process.env.MONGO_URI)
 app.use("/api/plan", planRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/nearby", nearbyPlaces);
+app.use("/api/places", placeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/trips", tripRoutes);
