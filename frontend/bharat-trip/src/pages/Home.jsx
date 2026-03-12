@@ -7,13 +7,11 @@ import img2 from "../assets/images/img2.webp";
 import img3 from "../assets/images/img3.webp";
 import img5 from "../assets/images/img5.webp";
 import img6 from "../assets/images/img6.png";
-import TravelBot from "../components/TravelBot";
 
 function Home() {
   const navigate = useNavigate();
   const { t } = useSettings();
   const [hoveredCard, setHoveredCard] = useState(null);
-  const [chatOpen, setChatOpen] = useState(false);
   const galleryRef = useRef(null);
 
   useEffect(() => {
