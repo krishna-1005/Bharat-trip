@@ -81,6 +81,7 @@ function FollowUser({ location }) {
 function MapView({ plan, isTracking }) {
   const [activeDay, setActiveDay] = useState("all");
   const [userLocation, setUserLocation] = useState(null);
+  const [pathHistory, setPathHistory] = useState([]);
 
   useEffect(() => {
     let watchId = null;
@@ -93,12 +94,13 @@ function MapView({ plan, isTracking }) {
             lng: position.coords.longitude
           };
           setUserLocation(loc);
+          setPathHistory(prev => [...prev, [loc.lat, loc.lng]]);
         },
         (error) => console.log("Tracking error:", error),
         { enableHighAccuracy: true }
       );
     } else {
-      // One-time fetch if not tracking
+      setPathHistory([]); // Reset path when tracking stops
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUserLocation({
@@ -122,6 +124,13 @@ function MapView({ plan, isTracking }) {
   const allPlaces = days.flatMap(
     d => plan.itinerary[d]?.places || []
   );
+
+  // Get first place of the day (or trip) to connect to user
+  const targetPlaces = activeDay === "all" 
+    ? allPlaces 
+    : (plan.itinerary[days[activeDay - 1]]?.places || []);
+  
+  const firstTarget = targetPlaces[0];
 
   return (
     <div className="map-container">
@@ -148,6 +157,31 @@ function MapView({ plan, isTracking }) {
           activeDay={activeDay}
           setActiveDay={setActiveDay}
         />
+
+        {/* Live Tracking Routes */}
+        {isTracking && userLocation && (
+          <>
+            {/* Traveled Path (Breadcrumbs) */}
+            {pathHistory.length > 1 && (
+              <Polyline 
+                positions={pathHistory} 
+                pathOptions={{ color: '#3b82f6', weight: 3, dashArray: '5, 10', opacity: 0.6 }} 
+              />
+            )}
+            
+            {/* Connection to first destination */}
+            {firstTarget && (
+              <Polyline 
+                positions={[[userLocation.lat, userLocation.lng], [firstTarget.lat, firstTarget.lng]]}
+                pathOptions={{ color: '#3b82f6', weight: 4, opacity: 0.8, dashArray: '1, 10' }}
+              >
+                <Tooltip permanent direction="center" className="route-tooltip">
+                  Live Route to {firstTarget.name}
+                </Tooltip>
+              </Polyline>
+            )}
+          </>
+        )}
 
         {days.map((day, idx) => {
           if (activeDay !== "all" && activeDay !== idx + 1) return null;
