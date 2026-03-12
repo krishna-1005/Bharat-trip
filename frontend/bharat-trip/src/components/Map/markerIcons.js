@@ -11,7 +11,7 @@ export function createLocationIcon(color, isActive = false) {
         <div class="pin-drop-shadow"></div>
       </div>
     `,
-    iconSize: [30, 42],
-    iconAnchor: [15, 42]
+    iconSize: [22, 30],
+    iconAnchor: [11, 30]
   });
 }
