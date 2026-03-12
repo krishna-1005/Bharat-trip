@@ -133,6 +133,10 @@ function Home() {
                 <div className="mini-label">Nandi Hills</div>
               </div>
               <div className="float-card c4">
+                <img src={img4} alt="Lalbagh Botanical Garden" />
+                <div className="mini-label">Lalbagh</div>
+              </div>
+              <div className="float-card c5">
                 <img src={img5} alt="MG Road Nightlife" />
                 <div className="mini-label">Brigade Road</div>
               </div>
