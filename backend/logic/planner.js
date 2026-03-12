@@ -33,7 +33,7 @@ function loadData() {
       tags:         (p.tags || []).map(t => t.toLowerCase()),
       budget:       p.budget   || "low",
       timeHours:    p.timeHours || 2,
-      avgCost:      p.avgCost  || 100,
+      avgCost:      p.avgCost != null && !isNaN(Number(p.avgCost)) ? Number(p.avgCost) : 100,
       area:         p.area     || "Central",
       source:       "curated"
     }));
@@ -47,7 +47,7 @@ function loadData() {
       tags:         (p.tags || []).map(t => t.toLowerCase()),
       budget:       p.budget   || "medium",
       timeHours:    p.timeHours || 2,
-      avgCost:      p.avgCost  || 500,
+      avgCost:      p.avgCost != null && !isNaN(Number(p.avgCost)) ? Number(p.avgCost) : 500,
       area:         p.area     || "Bangalore",
       source:       "bulk"
     }));
@@ -163,10 +163,12 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
       const place = finalPool[poolIndex++];
       if (usedNames.has(place.name)) continue;
 
+      const placeCost = place.avgCost != null && !isNaN(Number(place.avgCost)) ? Number(place.avgCost) : 100;
+
       dayPlaces.push({
         name:          place.name,
-        estimatedCost: Number(place.avgCost) || 100,
-        avgCost:       Number(place.avgCost) || 100,
+        estimatedCost: placeCost,
+        avgCost:       placeCost,
         timeHours:     Number(place.timeHours) || 2,
         lat:           Number(place.lat) || 12.9716,
         lng:           Number(place.lng) || 77.5946,
@@ -174,7 +176,7 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
         tags:          place.tags || [],
       });
 
-      dayCost  += (Number(place.avgCost) || 100);
+      dayCost  += placeCost;
       dayHours += (Number(place.timeHours) || 2);
       usedNames.add(place.name);
     }
@@ -182,17 +184,19 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
     // Safety: If Day is still empty, grab from emergency pool
     if (dayPlaces.length === 0) {
         const fallback = EMERGENCY_POOL[d % EMERGENCY_POOL.length];
+        const fallbackCost = fallback.avgCost != null && !isNaN(Number(fallback.avgCost)) ? Number(fallback.avgCost) : 100;
+        
         dayPlaces.push({
             name: fallback.name,
-            estimatedCost: fallback.avgCost || 100,
-            avgCost: fallback.avgCost || 100,
+            estimatedCost: fallbackCost,
+            avgCost: fallbackCost,
             timeHours: fallback.timeHours,
             lat: fallback.lat,
             lng: fallback.lng,
             category: fallback.category,
             tags: fallback.tags
         });
-        dayCost += (fallback.avgCost || 100);
+        dayCost += fallbackCost;
     }
 
     const mealCost     = MEAL_COST[budget] || 200;
