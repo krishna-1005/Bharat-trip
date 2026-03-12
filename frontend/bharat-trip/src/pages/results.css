@@ -455,11 +455,13 @@
   height: 160px;
   object-fit: cover;
   border-bottom: 3px solid var(--accent-blue);
-  transition: transform 0.5s ease;
+  transition: all 0.5s ease;
+  filter: brightness(1) contrast(1.05); /* Slight contrast boost */
 }
 
 .tooltip-card:hover .tooltip-img {
-  transform: scale(1.05);
+  transform: scale(1.08);
+  filter: brightness(1.1) contrast(1.1); /* Brighter and sharper on hover */
 }
 
 .image-skeleton {
