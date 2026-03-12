@@ -122,7 +122,7 @@ function Home() {
       </div>
 
       {/* ── TRAVEL VIBE SELECTOR ── */}
-      <section className="travel-vibe-section">
+      <section id="why-choose" className="travel-vibe-section">
         <div className="section-head">
           <h2 className="reveal-text">Discover Your <span className="gradient-text">Travel Vibe</span></h2>
           <p>Not sure where to go? Pick a mood and let our AI do the rest.</p>
@@ -195,7 +195,7 @@ function Home() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="premium-footer">
+      <footer id="footer" className="premium-footer">
         <div className="footer-main">
           <div className="footer-brand">
             <h3>Bharat Trip</h3>

@@ -57,7 +57,7 @@ function Navbar() {
     { label: t("nav_home"),         id: "home"         },
     { label: "How It Works", id: "how-it-works" },
     { label: t("nav_planner"),      id: "why-choose"   },
-    { label: "About",        id: "footer"       },
+    { label: t("nav_about"),        id: "footer"       },
   ];
 
   const menuItems = [
