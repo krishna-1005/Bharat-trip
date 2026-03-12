@@ -205,7 +205,6 @@ export default function SamplePlan() {
 
   return (
     <div className="sp-page">
-      <Navbar />
       <div className="sp-container">
         <div className="sp-hero">
           <span className="sp-badge">✦ CURATED FOR YOU</span>

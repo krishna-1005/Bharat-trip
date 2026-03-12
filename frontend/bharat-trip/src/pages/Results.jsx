@@ -37,7 +37,9 @@ function Results() {
             days: data.days,
             itinerary: data.itinerary,
             isShared: true,
-            totalTripCost: data.totalTripCost
+            totalTripCost: data.totalTripCost,
+            travelerType: data.travelerType,
+            pace: data.pace
           };
           setPlan(formattedPlan);
           setTripTitle(data.title);
@@ -105,17 +107,10 @@ function Results() {
   const daysKeys = Object.keys(plan.itinerary);
   const totalDays = daysKeys.length;
   
-  // Calculate total cost accurately
   const totalTripCost = plan.totalTripCost || daysKeys.reduce((total, dayKey) => {
     const day = plan.itinerary[dayKey];
     const placesCost = day.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0);
-    // Include dayMealCost if it exists, else use 0 (the day.estimatedCost might already include it in some objects)
     const mealCost = day.dayMealCost || 0;
-    
-    // Fallback: If day.estimatedCost is significantly higher than placesCost, it likely already includes meals
-    if (day.estimatedCost > placesCost && !day.dayMealCost) {
-        return total + day.estimatedCost;
-    }
     return total + placesCost + mealCost;
   }, 0);
 
@@ -136,7 +131,9 @@ function Results() {
           budget: plan.budget,
           interests: plan.interests,
           itinerary: plan.itinerary,
-          totalCost: totalTripCost
+          totalCost: totalTripCost,
+          travelerType: plan.travelerType,
+          pace: plan.pace
         })
       });
       if (res.ok) {
@@ -178,7 +175,6 @@ function Results() {
 
   return (
     <div className={`res-page ${showMap ? "mobile-map-active" : ""}`}>
-      {/* ── SUCCESS OVERLAY ── */}
       {saved && (
         <div className="res-success-overlay">
           <div className="res-success-card">
@@ -244,7 +240,9 @@ function Results() {
                 onChange={e => setTripTitle(e.target.value)}
                 readOnly={plan.isShared}
               />
-              <span className="header-sub">{plan.city || "Bengaluru"} • {plan.isShared ? "Shared Trip" : "AI Generated"}</span>
+              <span className="header-sub">
+                {plan.city || "Bengaluru"} • {plan.travelerType || "Solo"} • {plan.pace || "Moderate"} Pace
+              </span>
             </div>
             <button className="share-btn" onClick={handleShare} title="Copy Link">🔗</button>
           </div>
@@ -274,7 +272,7 @@ function Results() {
           {daysKeys.map((day, idx) => {
             const dayData = plan.itinerary[day];
             const placesCost = dayData.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0);
-            const mealCost = dayData.dayMealCost || (dayData.estimatedCost - placesCost > 0 ? dayData.estimatedCost - placesCost : 0);
+            const mealCost = dayData.dayMealCost || 0;
 
             return (
               <div key={day} className="premium-day-card" style={{ "--day-accent": DAY_COLORS[idx % DAY_COLORS.length] }}>
@@ -319,7 +317,10 @@ function Results() {
                                 )}
                               </div>
                             </div>
-                            <span className="place-cost-mini">{place.estimatedCost > 0 ? formatPrice(place.estimatedCost) : 'Free'}</span>
+                            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
+                              <span className="place-cost-mini">{place.estimatedCost > 0 ? formatPrice(place.estimatedCost) : 'Free'}</span>
+                              <span style={{ fontSize: '8px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>{place.estimatedCost > 0 ? 'Est. Total' : ''}</span>
+                            </div>
                           </div>
                         </div>
                       </div>

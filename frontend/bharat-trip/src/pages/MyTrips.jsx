@@ -89,6 +89,8 @@ export default function MyTrips() {
       days: trip.days,
       itinerary: Object.keys(itineryObj).length > 0 ? itineryObj : trip.itinerary,
       totalTripCost: trip.totalCost,
+      travelerType: trip.travelerType,
+      pace: trip.pace,
       isSaved: true
     };
     localStorage.setItem("tripPlan", JSON.stringify(planData));

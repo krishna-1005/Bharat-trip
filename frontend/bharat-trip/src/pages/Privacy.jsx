@@ -5,7 +5,6 @@ import "../styles/global.css";
 export default function Privacy() {
   return (
     <div className="page about-page">
-      <Navbar />
       
       <section className="about-hero" style={{ textAlign: "center", margin: "0 auto 40px" }}>
         <div className="premium-badge">LEGAL</div>

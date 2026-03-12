@@ -21,7 +21,6 @@ export default function Destinations() {
 
   return (
     <div className="page about-page">
-      <Navbar />
       
       <section className="about-hero" style={{ textAlign: "center", margin: "0 auto 60px" }}>
         <div className="premium-badge">EXPLORE</div>

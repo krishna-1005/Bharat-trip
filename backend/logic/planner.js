@@ -22,37 +22,77 @@ const EMERGENCY_POOL = [
   { name: "Nandi Hills Sunrise", lat: 13.3702, lng: 77.6835, category: "Nature", budget: "medium", avgCost: 200, timeHours: 4, tags: ["nature", "adventure"] }
 ];
 
+/* ── Dynamic Price Generator ── */
+function calculateDynamicPrice(place, userBudget) {
+  const category = (place.category || "").toLowerCase();
+  
+  // If it's curated data and has a REAL price (not just default 100), use it
+  if (place.source === "curated" && place.avgCost > 0 && place.avgCost !== 100) {
+    return place.avgCost;
+  }
+
+  // Base prices by category
+  let basePrice = 150;
+  if (category.includes("hotel") || category.includes("resort") || category.includes("stay")) basePrice = 3000;
+  else if (category.includes("luxury") || category.includes("fine dining")) basePrice = 2500;
+  else if (category.includes("brewery") || category.includes("pub") || category.includes("nightlife")) basePrice = 1200;
+  else if (category.includes("restaurant") || category.includes("cafe") || category.includes("food")) basePrice = 450;
+  else if (category.includes("mall") || category.includes("shopping") || category.includes("market")) basePrice = 600;
+  else if (category.includes("museum") || category.includes("palace") || category.includes("fort") || category.includes("heritage")) basePrice = 250;
+  else if (category.includes("park") || category.includes("nature") || category.includes("lake") || category.includes("garden")) basePrice = 80;
+  else if (category.includes("temple") || category.includes("church") || category.includes("mosque") || category.includes("spiritual")) basePrice = 0;
+  else if (category.includes("trek") || category.includes("hill") || category.includes("adventure")) basePrice = 300;
+
+  // Scale based on user budget
+  const multipliers = { low: 0.5, medium: 1.0, high: 2.2 };
+  const multiplier = multipliers[userBudget] || 1.0;
+  
+  // High variance randomness (+/- 40%) to ensure unique prices
+  const randomFactor = 0.6 + Math.random() * 0.8;
+  
+  let finalPrice = Math.round(basePrice * multiplier * randomFactor);
+  
+  // Special case for free places
+  if (basePrice === 0) return 0;
+  
+  // Round to nearest 10 for "realistic" pricing
+  finalPrice = Math.ceil(finalPrice / 10) * 10;
+  
+  return Math.max(30, finalPrice);
+}
+
 function loadData() {
   try {
     const curated = require(path.join(__dirname, "../data/bengaluruPlaces.json"));
     localPlaces = curated.flat().filter(p => p && typeof p === "object" && p.name).map(p => ({
       name:         p.name,
-      lat:          p.lat,
-      lng:          p.lng,
-      category:     p.category || "Other",
+      lat:          Number(p.lat) || 12.9716,
+      lng:          Number(p.lng) || 77.5946,
+      category:     p.category || "Sightseeing",
       tags:         (p.tags || []).map(t => t.toLowerCase()),
       budget:       p.budget   || "low",
       timeHours:    p.timeHours || 2,
-      avgCost:      p.avgCost != null && !isNaN(Number(p.avgCost)) ? Number(p.avgCost) : 100,
-      area:         p.area     || "Central",
+      avgCost:      p.avgCost, // Keep raw, will handle in calculateDynamicPrice
+      area:         p.area     || "Bangalore",
       source:       "curated"
     }));
     
     const bulk = require(path.join(__dirname, "../data/bangalorePlaces.json"));
     bulkPlaces = bulk.filter(p => p && p.name).map(p => ({
       name:         p.name,
-      lat:          p.lat,
-      lng:          p.lng,
-      category:     p.category || "Other",
+      lat:          Number(p.lat) || 12.9716,
+      lng:          Number(p.lng) || 77.5946,
+      category:     p.category || "Place",
       tags:         (p.tags || []).map(t => t.toLowerCase()),
       budget:       p.budget   || "medium",
       timeHours:    p.timeHours || 2,
-      avgCost:      p.avgCost != null && !isNaN(Number(p.avgCost)) ? Number(p.avgCost) : 500,
+      avgCost:      null,
       area:         p.area     || "Bangalore",
       source:       "bulk"
     }));
     
     const existingNames = new Set(localPlaces.map(p => p.name.toLowerCase()));
+    // Combine but KEEP localPlaces at the beginning to prioritize them
     allPlacesPool = [...localPlaces, ...bulkPlaces.filter(p => !existingNames.has(p.name.toLowerCase()))];
 
     if (allPlacesPool.length === 0) {
@@ -70,7 +110,7 @@ function loadData() {
 loadData();
 
 const PLACES_PER_DAY    = 3;
-const MEAL_COST         = { low: 200, medium: 500, high: 1000 };
+const MEAL_COST         = { low: 200, medium: 500, high: 1500 };
 const DAY_COLORS        = ["#3b82f6","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#f97316","#ec4899","#84cc16","#14b8a6"];
 
 const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
@@ -79,36 +119,16 @@ const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
 function getPool(allPlaces, budget, interests) {
   const interestSet = new Set((interests || []).map(i => i.toLowerCase()));
   
-  // Flexible mapping: "Heritage" -> "Culture"
-  if (interestSet.has("heritage")) interestSet.add("culture");
+  // 1. Get curated places matching budget/interests first
+  let curated = allPlaces.filter(p => p.source === "curated");
+  let bulk    = allPlaces.filter(p => p.source !== "curated");
 
-  // 1. Filter by budget
-  let pool = allPlaces.filter(p => p.budget === budget);
-  
-  // 2. Prioritize interests
-  if (interestSet.size > 0) {
-    const matched = pool.filter(p => 
-      interestSet.has(p.category.toLowerCase()) || 
-      (p.tags && p.tags.some(t => interestSet.has(t.toLowerCase())))
-    );
-    
-    if (matched.length >= 5) {
-      const others = pool.filter(p => !matched.includes(p));
-      return [...shuffle(matched), ...shuffle(others)];
-    }
-  }
+  // Filter both by budget if possible
+  let curatedMatch = curated.filter(p => p.budget === budget);
+  let bulkMatch    = bulk.filter(p => p.budget === budget);
 
-  // 3. Fallback: if pool is small, add other budgets
-  if (pool.length < (PLACES_PER_DAY * 2)) {
-    pool = [...pool, ...allPlaces.filter(p => p.budget !== budget)];
-  }
-
-  // 4. Ultimate safety check
-  if (pool.length < 5) {
-      return shuffle([...EMERGENCY_POOL]);
-  }
-
-  return shuffle(pool);
+  // 2. Mix them, ensuring curated are front-loaded
+  return [...shuffle(curatedMatch), ...shuffle(curated), ...shuffle(bulkMatch), ...shuffle(bulk)];
 }
 
 async function updateOSM() {
@@ -125,7 +145,7 @@ async function updateOSM() {
         tags:      [],
         budget:    "low",
         timeHours: 1.5,
-        avgCost:   100,
+        avgCost:   null,
         area:      "Central",
         source:    "osm",
       }));
@@ -138,7 +158,7 @@ async function updateOSM() {
   } catch (e) {}
 }
 
-async function generatePlan({ days = 2, budget = "low", interests = [] }) {
+async function generatePlan({ days = 2, budget = "low", interests = [], travelerType = "solo", pace = "moderate" }) {
   days = Math.min(Math.max(parseInt(days) || 2, 1), 30);
   
   if (allPlacesPool.length < 10) {
@@ -146,12 +166,21 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
   }
 
   const finalPool = getPool(allPlacesPool, budget, interests);
-  console.log(`🎯 Generated pool of ${finalPool.length} places for ${days} days`);
+  console.log(`🎯 Generated pool of ${finalPool.length} places for ${days} days (${travelerType}, ${pace} pace)`);
 
   const itinerary  = {};
   const usedNames  = new Set();
   let   totalCost  = 0;
   let   poolIndex  = 0;
+
+  // Pace adjustments
+  let placesPerDay = 3;
+  if (pace === "relaxed") placesPerDay = 2;
+  if (pace === "fast")    placesPerDay = 5;
+
+  // Traveler multipliers
+  const travelerMultipliers = { solo: 1, couple: 2, family: 3.5, friends: 4 };
+  const tMult = travelerMultipliers[travelerType] || 1;
 
   for (let d = 1; d <= days; d++) {
     const dayKey    = `Day ${d}`;
@@ -159,11 +188,15 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
     let   dayCost   = 0;
     let   dayHours  = 0;
 
-    while (dayPlaces.length < PLACES_PER_DAY && poolIndex < finalPool.length) {
+    while (dayPlaces.length < placesPerDay && poolIndex < finalPool.length) {
       const place = finalPool[poolIndex++];
       if (usedNames.has(place.name)) continue;
 
-      const placeCost = place.avgCost != null && !isNaN(Number(place.avgCost)) ? Number(place.avgCost) : 100;
+      let placeCost = calculateDynamicPrice(place, budget);
+      
+      // Some costs are per person (entry fees), some are fixed (transport/guide)
+      // For this app, we assume most are per-person
+      placeCost = placeCost * tMult;
 
       dayPlaces.push({
         name:          place.name,
@@ -174,6 +207,7 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
         lng:           Number(place.lng) || 77.5946,
         category:      place.category,
         tags:          place.tags || [],
+        source:        place.source
       });
 
       dayCost  += placeCost;
@@ -184,7 +218,7 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
     // Safety: If Day is still empty, grab from emergency pool
     if (dayPlaces.length === 0) {
         const fallback = EMERGENCY_POOL[d % EMERGENCY_POOL.length];
-        const fallbackCost = fallback.avgCost != null && !isNaN(Number(fallback.avgCost)) ? Number(fallback.avgCost) : 100;
+        let fallbackCost = calculateDynamicPrice(fallback, budget) * tMult;
         
         dayPlaces.push({
             name: fallback.name,
@@ -194,12 +228,14 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
             lat: fallback.lat,
             lng: fallback.lng,
             category: fallback.category,
-            tags: fallback.tags
+            tags: fallback.tags,
+            source: "emergency"
         });
         dayCost += fallbackCost;
     }
 
-    const mealCost     = MEAL_COST[budget] || 200;
+    // Meal cost adjusted for traveler count and budget
+    const mealCost     = (MEAL_COST[budget] || 500) * tMult;
     const totalDayCost = dayCost + mealCost;
     totalCost         += totalDayCost;
 
@@ -207,6 +243,7 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
       places:         dayPlaces,
       estimatedCost:  totalDayCost,
       estimatedHours: Math.round(dayHours * 10) / 10,
+      dayMealCost:    mealCost,
       color:          DAY_COLORS[(d - 1) % DAY_COLORS.length],
     };
   }
@@ -216,6 +253,8 @@ async function generatePlan({ days = 2, budget = "low", interests = [] }) {
     days,
     budget,
     interests,
+    travelerType,
+    pace,
     itinerary,
     totalTripCost: totalCost,
     generatedAt:   new Date().toISOString(),

@@ -23,8 +23,6 @@ function Planner() {
 
   return (
     <div className="planner-page">
-      <Navbar />
-
       {/* ── HERO + FORM ── */}
       <section className="planner-hero-section">
         <div className="hero-overlay"></div>
