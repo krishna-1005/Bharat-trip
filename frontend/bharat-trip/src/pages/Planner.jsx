@@ -21,7 +21,10 @@ function Planner() {
   ];
 
   return (
-    <div className="planner-page">
+    <div className="planner-page" style={{ background: '#020617' }}>
+      <div style={{ position: 'fixed', top: 0, left: 0, background: 'red', color: 'white', zIndex: 9999, padding: '5px', fontSize: '10px' }}>
+        v2.0 REDESIGN LOADED
+      </div>
       <div className="planner-bg-gradient"></div>
       
       <div className="planner-container">

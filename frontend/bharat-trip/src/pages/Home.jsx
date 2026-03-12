@@ -102,7 +102,7 @@ function Home() {
 
             <div className="hero-actions">
               <button className="btn-premium-primary" onClick={() => navigate("/planner")}>
-                <span className="btn-text">{t("plan_trip_btn")}</span>
+                <span className="btn-text">Open AI Planner</span>
                 <span className="btn-icon">→</span>
               </button>
               <Link to="/sample-plan" className="btn-premium-outline">

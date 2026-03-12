@@ -79,7 +79,10 @@ function PlannerForm({ onPlanGenerated }) {
   ];
 
   return (
-    <div className="pf-wrap">
+    <div className="pf-wrap" style={{ position: 'relative' }}>
+      <div style={{ position: 'absolute', top: '-25px', right: 0, color: 'var(--accent-blue)', fontSize: '10px', fontWeight: '800' }}>
+        STEPS ENABLED
+      </div>
       <div className="pf-progress-bar">
         <div className="pf-progress-fill" style={{ width: `${(step / totalSteps) * 100}%` }}></div>
       </div>

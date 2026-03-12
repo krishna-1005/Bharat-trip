@@ -68,10 +68,10 @@ function Navbar() {
   };
 
   const navLinks = [
-    { label: t("nav_home"),         id: "home"         },
-    { label: "How It Works", id: "how-it-works" },
-    { label: t("nav_planner"),      id: "why-choose"   },
-    { label: t("nav_about"),        id: "footer"       },
+    { label: t("nav_home"),         id: "home",         path: "/"         },
+    { label: "How It Works",        id: "how-it-works", path: "/#how-it-works" },
+    { label: "AI Planner",          id: "planner",      path: "/planner"   },
+    { label: t("nav_about"),        id: "footer",       path: "/about"     },
   ];
 
   const menuItems = [
@@ -114,8 +114,15 @@ function Navbar() {
         {navLinks.map(link => (
           <li
             key={link.id}
-            className={`nb-link-item ${location.hash === `#${link.id}` ? "nb-active" : ""}`}
-            onClick={() => scrollToSection(link.id)}
+            className={`nb-link-item ${location.pathname === link.path ? "nb-active" : ""}`}
+            onClick={() => {
+              if (link.path.startsWith("/#")) {
+                scrollToSection(link.id);
+              } else {
+                navigate(link.path);
+                setMobileMenuOpen(false);
+              }
+            }}
           >
             {link.label}
           </li>
