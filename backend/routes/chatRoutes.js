@@ -34,35 +34,35 @@ CONVERSATION LOGIC:
 
 JSON FORMATS:
 1. For full plans:
-```json
+\`\`\`json
 {
   "generatePlan": true,
   "days": number,
   "budget": "low" | "medium" | "high",
   "interests": ["Interest1", "Interest2"]
 }
-```
+\`\`\`
 
 2. For locating a specific place:
-```json
+\`\`\`json
 {
   "locatePlace": true,
   "placeName": "Name of the place",
   "lat": latitude,
   "lng": longitude
 }
-```
+\`\`\`
 
 Example Reply for a place:
 "The **Lalbagh Botanical Garden** is a stunning 240-acre park. It's famous for its glass house and annual flower shows."
-```json
+\`\`\`json
 {
   "locatePlace": true,
   "placeName": "Lalbagh Botanical Garden",
   "lat": 12.9507,
   "lng": 77.5848
 }
-````;
+\`\`\``;
 
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-flash",
