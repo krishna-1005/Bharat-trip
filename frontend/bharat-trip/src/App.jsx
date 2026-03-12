@@ -3,6 +3,7 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/Home";
+import About from "./pages/About";
 import Planner from "./pages/Planner";
 import Destinations from "./pages/Destinations";
 import Weekend from "./pages/Weekend";
@@ -43,6 +44,7 @@ function App() {
           />
 
           <Route path="/destinations" element={<Destinations />} />
+          <Route path="/about" element={<About />} />
           <Route path="/weekend" element={<Weekend />} />
           <Route path="/honeymoon" element={<Honeymoon />} />
           <Route path="/cultural" element={<Cultural />} />

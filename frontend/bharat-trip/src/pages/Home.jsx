@@ -217,11 +217,14 @@ function Home() {
               <h4>Company</h4>
               <Link to="/about">About Us</Link>
               <Link to="/destinations">Destinations</Link>
+              <Link to="/sample-plan">Sample Plans</Link>
             </div>
             <div className="link-col">
               <h4>Support</h4>
-              <Link to="/contact">Help Center</Link>
-              <Link to="/privacy">Privacy</Link>
+              <Link to="/help">Help Center</Link>
+              <Link to="/contact">Contact Us</Link>
+              <Link to="/privacy">Privacy Policy</Link>
+              <Link to="/terms">Terms of Service</Link>
             </div>
           </div>
         </div>
