@@ -13,27 +13,52 @@ function Results() {
   const loc = useLocation();
   const { formatPrice, t } = useSettings();
 
-  const [plan, setPlan] = useState(() => {
-    if (loc.state?.plan) {
-      localStorage.setItem("tripPlan", JSON.stringify(loc.state.plan));
-      return loc.state.plan;
-    }
-    const saved = localStorage.getItem("tripPlan") || sessionStorage.getItem("tripPlan");
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  useEffect(() => {
-    if (!plan) {
-      const saved = localStorage.getItem("tripPlan") || sessionStorage.getItem("tripPlan");
-      if (saved) setPlan(JSON.parse(saved));
-    }
-  }, [plan]);
-
+  const [plan, setPlan] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [tripTitle, setTripTitle] = useState("");
   const [travelMode, setTravelMode] = useState("Car");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [weather, setWeather] = useState({ temp: "--", desc: "Loading...", icon: "☁️" });
+
+  useEffect(() => {
+    const params = new URLSearchParams(loc.search);
+    const sharedTripId = params.get("sharedTripId");
+
+    const fetchSharedTrip = async (id) => {
+      try {
+        const res = await fetch(`${API}/api/trips/${id}`);
+        const data = await res.json();
+        if (res.ok) {
+          const formattedPlan = {
+            city: data.destination || "Bangalore",
+            days: data.days,
+            itinerary: data.itinerary,
+            isShared: true
+          };
+          setPlan(formattedPlan);
+          setTripTitle(data.title);
+        }
+      } catch (err) {
+        console.error("Error fetching shared trip:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (sharedTripId) {
+      fetchSharedTrip(sharedTripId);
+    } else if (loc.state?.plan) {
+      setPlan(loc.state.plan);
+      setLoading(false);
+    } else {
+      const savedPlan = localStorage.getItem("tripPlan");
+      if (savedPlan) {
+        setPlan(JSON.parse(savedPlan));
+      }
+      setLoading(false);
+    }
+  }, [loc.search, loc.state]);
 
   // Live Weather Fetch
   useEffect(() => {
@@ -43,7 +68,6 @@ function Results() {
         const data = await res.json();
         const code = data.current_weather.weathercode;
         
-        // Simple mapping of WMO codes to text/icons
         let desc = "Clear Skies";
         let icon = "☀️";
         if (code > 0 && code < 45) { desc = "Partly Cloudy"; icon = "⛅"; }
@@ -61,6 +85,10 @@ function Results() {
     };
     fetchWeather();
   }, []);
+
+  if (loading) {
+    return <div className="res-empty"><h2>Loading Trip...</h2></div>;
+  }
 
   if (!plan || !plan.itinerary) {
     return (
@@ -88,7 +116,7 @@ function Results() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           title: tripTitle || `${totalDays}-Day Bangalore Trip`,
-          city: "Bangalore",
+          city: plan.city || "Bangalore",
           days: totalDays,
           budget: plan.budget,
           interests: plan.interests,
@@ -98,7 +126,7 @@ function Results() {
       });
       if (res.ok) {
         setSaved(true);
-        setTimeout(() => navigate("/profile"), 1200);
+        setTimeout(() => navigate("/trips"), 1200);
       }
     } catch { alert("Server error"); } finally { setSaving(false); }
   };
@@ -108,7 +136,6 @@ function Results() {
     alert("Trip link copied to clipboard!");
   };
 
-  // Helper: Haversine distance in km
   const getDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -120,16 +147,13 @@ function Results() {
     return R * c;
   };
 
-  // Helper: Get travel time string
   const getTravelTime = (dist) => {
     if (!dist || dist < 0.1) return null;
-    let speed = 25; // Car
+    let speed = 25; 
     if (travelMode === "Bike") speed = 30;
     if (travelMode === "Transit") speed = 15;
-    
     const hours = dist / speed;
     const mins = Math.round(hours * 60);
-    
     if (mins < 1) return "1 min";
     if (mins < 60) return `${mins} mins`;
     const h = Math.floor(mins / 60);
@@ -139,12 +163,10 @@ function Results() {
 
   return (
     <div className="res-page">
-      {/* ── LEFT: MAP SECTION ── */}
       <div className="res-map-section">
         <div className="map-inner-container">
           <MapView plan={plan} />
         </div>
-        
         <div className="res-floating-stats">
           <div className="res-stat-pill">
             <span className="pill-icon">💰</span>
@@ -163,9 +185,7 @@ function Results() {
         </div>
       </div>
 
-      {/* ── RIGHT: PREMIUM INVENTORY PANEL ── */}
       <aside className="res-inventory-panel">
-        
         <div className="res-inventory-header">
           <div className="header-top">
             <button className="back-btn" onClick={() => navigate("/planner")}>←</button>
@@ -176,10 +196,11 @@ function Results() {
                 className="editable-title"
                 value={tripTitle}
                 onChange={e => setTripTitle(e.target.value)}
+                readOnly={plan.isShared}
               />
-              <span className="header-sub">Bengaluru • AI Generated</span>
+              <span className="header-sub">{plan.city || "Bengaluru"} • {plan.isShared ? "Shared Trip" : "AI Generated"}</span>
             </div>
-            <button className="share-btn" onClick={handleShare}>🔗</button>
+            <button className="share-btn" onClick={handleShare} title="Copy Link">🔗</button>
           </div>
 
           <div className="header-tools">
@@ -196,7 +217,6 @@ function Results() {
         </div>
 
         <div className="res-itinerary-scroll">
-          {/* Weather Widget */}
           <div className="weather-preview-card">
             <div className="weather-info">
               <span className="weather-temp">{weather.temp}</span>
@@ -258,18 +278,26 @@ function Results() {
             </div>
           ))}
 
-          {/* REDUCED SIZE SAVE BUTTON INSIDE INVENTORY */}
-          <div className="res-inventory-actions">
-            <button 
-              className={`compact-save-btn ${saved ? "saved" : ""}`} 
-              onClick={handleSaveTrip} 
-              disabled={saving || saved}
-            >
-              {saved ? "✓ Trip Saved" : saving ? "Saving..." : "Confirm & Save Plan"}
-            </button>
-          </div>
+          {!plan.isShared && (
+            <div className="res-inventory-actions">
+              <button 
+                className={`compact-save-btn ${saved ? "saved" : ""}`} 
+                onClick={handleSaveTrip} 
+                disabled={saving || saved}
+              >
+                {saved ? "✓ Trip Saved" : saving ? "Saving..." : "Confirm & Save Plan"}
+              </button>
+            </div>
+          )}
+          
+          {plan.isShared && (
+            <div className="res-inventory-actions">
+              <button className="compact-save-btn" onClick={() => navigate("/planner")}>
+                Plan Your Own Trip
+              </button>
+            </div>
+          )}
         </div>
-
       </aside>
     </div>
   );

@@ -21,6 +21,7 @@ export default function MyTrips() {
   const [dbTrips, setDbTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [firebaseUser, setFirebaseUser] = useState(null);
+  const [shareStatus, setShareStatus] = useState(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -91,6 +92,31 @@ export default function MyTrips() {
     };
     localStorage.setItem("tripPlan", JSON.stringify(planData));
     navigate("/results", { state: { plan: planData } });
+  };
+
+  const handleShare = async (trip) => {
+    const shareUrl = `${window.location.origin}/results?sharedTripId=${trip.id}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `My Trip to ${trip.location}`,
+          text: `Check out my travel plan for ${trip.location} on Bharat Trip!`,
+          url: shareUrl,
+        });
+      } catch (err) {
+        console.log('Error sharing:', err);
+      }
+    } else {
+      // Fallback: Copy to clipboard
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareStatus(trip.id);
+        setTimeout(() => setShareStatus(null), 2000);
+      } catch (err) {
+        alert("Could not copy link. Manually copy: " + shareUrl);
+      }
+    }
   };
 
   const deleteTrip = async (id) => {
@@ -164,6 +190,11 @@ export default function MyTrips() {
                       <button className="pro-map-btn" onClick={() => handleViewOnMap(trip)}>
                         🗺️ View Map
                       </button>
+                      
+                      <button className="pro-share-btn" onClick={() => handleShare(trip)}>
+                        {shareStatus === trip.id ? "✅ Linked" : "🔗 Share"}
+                      </button>
+
                       <button className="pro-del-btn" title="Delete" onClick={() => deleteTrip(trip.id)}>
                         🗑️
                       </button>
