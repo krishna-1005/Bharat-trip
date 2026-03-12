@@ -92,7 +92,7 @@ function Navbar() {
 
       {/* ── SEARCH BAR (Home Page Only) ── */}
       {location.pathname === "/" && (
-        <form className="nb-search-form" onSubmit={handleSearch}>
+        <form className="nb-search-form nb-home-search" onSubmit={handleSearch}>
           <div className="nb-search-input-wrap">
             <input 
               type="text" 

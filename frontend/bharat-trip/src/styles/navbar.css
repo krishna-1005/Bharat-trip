@@ -88,6 +88,15 @@
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
+.nb-home-search {
+  max-width: 450px;
+}
+
+.nb-home-search .nb-search-input {
+  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(59, 130, 246, 0.03);
+}
+
 .nb-search-btn {
   position: absolute;
   right: 6px;

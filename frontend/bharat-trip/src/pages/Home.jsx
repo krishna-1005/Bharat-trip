@@ -69,6 +69,26 @@ function Home() {
               {t("home_hero_sub")}
             </p>
 
+            {/* HERO SEARCH BAR */}
+            <div className="hero-search-container">
+              <form className="hero-search-form" onSubmit={(e) => {
+                e.preventDefault();
+                const q = e.target.search.value;
+                if (q.trim()) navigate(`/search?q=${encodeURIComponent(q)}`);
+              }}>
+                <div className="hero-search-input-wrap">
+                  <span className="search-icon">🔍</span>
+                  <input 
+                    name="search"
+                    type="text" 
+                    placeholder="Search destinations, landmarks, or cities..." 
+                    className="hero-search-input"
+                  />
+                  <button type="submit" className="hero-search-btn">Explore</button>
+                </div>
+              </form>
+            </div>
+
             <div className="hero-actions">
               <button className="btn-premium-primary" onClick={() => navigate("/planner")}>
                 <span className="btn-text">{t("plan_trip_btn")}</span>
