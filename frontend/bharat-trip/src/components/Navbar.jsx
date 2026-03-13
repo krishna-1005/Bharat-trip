@@ -74,6 +74,11 @@ function Navbar() {
     { label: t("nav_about"),        id: "footer",       path: "/about"     },
   ];
 
+  // ONLY SHOW ADMIN TO YOU
+  if (user?.email === "krishkulkarni2005@gmail.com") {
+    navLinks.push({ label: "🛡️ Admin", id: "admin", path: "/admin" });
+  }
+
   const menuItems = [
     { icon: "👤", label: t("nav_profile"), sub: "View your account",   path: "/profile"  },
     { icon: "🗺️", label: t("nav_trips"),   sub: "Your saved itineraries", path: "/trips" },
