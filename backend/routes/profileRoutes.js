@@ -15,7 +15,10 @@ router.use(protect);
 /* GET /api/profile  — full profile + live stats */
 router.get("/", async (req, res) => {
   try {
-    const user       = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
     const tripsCount = await Trip.countDocuments({ userId: req.user._id });
     const upcoming = await Trip.countDocuments({userId: req.user._id,status: "upcoming"});
     const completed = await Trip.countDocuments({userId: req.user._id, status: "completed"});
@@ -25,7 +28,7 @@ router.get("/", async (req, res) => {
         memberSince: user.createdAt,
         stats: {
           tripsPlanned:     tripsCount,
-          savedPlacesCount: user.savedPlaces.length,
+          savedPlacesCount: user.savedPlaces ? user.savedPlaces.length : 0,
           upcoming,
           completed,
         },
@@ -208,6 +211,8 @@ router.post("/saved-places", async (req, res) => {
     if (!name) return res.status(400).json({ error: "name is required." });
 
     const user = await User.findById(req.user._id);
+    if (!user.savedPlaces) user.savedPlaces = [];
+    
     const already = user.savedPlaces.find((p) => p.name === name);
     if (already) return res.status(400).json({ error: "Place already saved." });
 
@@ -225,8 +230,12 @@ router.post("/saved-places", async (req, res) => {
 router.delete("/saved-places/:placeId", async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
+    if (!user.savedPlaces) {
+      return res.json({ message: "Place removed.", savedPlaces: [] });
+    }
+    
     user.savedPlaces = user.savedPlaces.filter(
-      (p) => p._id.toString() !== req.params.placeId
+      (p) => p._id && p._id.toString() !== req.params.placeId
     );
     await user.save();
     res.json({ message: "Place removed.", savedPlaces: user.savedPlaces });

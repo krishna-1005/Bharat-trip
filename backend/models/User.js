@@ -34,6 +34,11 @@ const userSchema = new mongoose.Schema(
     emailAlerts: { type: Boolean, default: true },
     tripReminders: { type: Boolean, default: true },
     promoOffers: { type: Boolean, default: false }
+  },
+
+  savedPlaces: {
+    type: [Object],
+    default: []
   }
 
 },
