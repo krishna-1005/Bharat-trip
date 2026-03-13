@@ -197,7 +197,7 @@ router.post("/trips/:id/memories", async (req, res) => {
 router.get("/saved-places", async (req, res) => {
   try {
     const user = await User.findById(req.user._id, "savedPlaces");
-    res.json({ savedPlaces: user.savedPlaces });
+    res.json({ savedPlaces: user.savedPlaces || [] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error." });
