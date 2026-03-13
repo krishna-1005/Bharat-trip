@@ -7,7 +7,7 @@ import { AuthContext } from "../context/AuthContext";
 function Signup() {
   
   /* API URL from environment */
-  const API = import.meta.env.VITE_API_URL;
+  const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
   console.log(API);
   
   const navigate        = useNavigate();

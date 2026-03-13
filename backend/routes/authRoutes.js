@@ -49,6 +49,37 @@ router.post("/signup", async (req, res) => {
 });
 
 
+/* ── LOGIN ── */
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password)
+      return res.status(400).json({ error: "Email and password are required." });
+
+    const user = await User.findOne({ email }).select("+password");
+    if (!user)
+      return res.status(401).json({ error: "Invalid credentials." });
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch)
+      return res.status(401).json({ error: "Invalid credentials." });
+
+    const token = signToken(user._id);
+
+    res.json({
+      message: "Login successful.",
+      token,
+      user: { id: user._id, name: user.name, email: user.email },
+    });
+
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Server error." });
+  }
+});
+
+
 /* ── CHANGE PASSWORD ── */
 router.put("/change-password", protect, async (req, res) => {
   try {
