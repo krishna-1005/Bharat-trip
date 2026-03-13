@@ -18,6 +18,7 @@ import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
 import MyTrips from "./pages/MyTrips";
 import Settings from "./pages/Settings";
+import Admin from "./pages/Admin";
 import Results from "./pages/Results";
 import SamplePlan from "./pages/SamplePlan";
 import NearbyPlaces from "./components/NearbyPlaces";
@@ -61,6 +62,7 @@ function App() {
           <Route path="/nearby" element={<NearbyPlaces />} />
           <Route path="/place/:id" element={<PlaceDetails />} />
           <Route path="/search" element={<SearchResults />} />
+          <Route path="/admin" element={<Admin />} />
 
           <Route
             path="/profile"

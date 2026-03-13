@@ -11,6 +11,7 @@ const profileRoutes = require("./routes/profileRoutes");
 const nearbyPlaces = require("./routes/nearbyPlaces");
 const placeRoutes = require("./routes/placeRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/admin", adminRoutes);
 
 // health check
 app.get("/", (req, res) => {

@@ -2,6 +2,9 @@ const express      = require("express");
 const generatePlan = require("../logic/planner");
 const protect      = require("../middleware/protect");
 const Trip         = require("../models/Trip");
+const UsageLog     = require("../models/UsageLog");
+const admin        = require("../firebaseAdmin");
+const User         = require("../models/User");
 
 const router = express.Router();
 
@@ -19,6 +22,33 @@ router.post("/generate", async (req, res) => {        // ✅ async added
   }
 
   try {
+    // Attempt to log the planner usage to MongoDB
+    try {
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      let loggedUserId = null;
+
+      // Check if user is logged in (optional auth for logging)
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        const token = authHeader.split(" ")[1];
+        try {
+          const decoded = await admin.auth().verifyIdToken(token);
+          const userObj = await User.findOne({ email: decoded.email });
+          if (userObj) loggedUserId = userObj._id;
+        } catch (e) { /* ignore invalid token for simple logging */ }
+      }
+
+      await UsageLog.create({
+        action: "generate_plan",
+        userId: loggedUserId,
+        details: { days, budget, interests },
+        ipAddress: ip,
+        userAgent: req.headers['user-agent']
+      });
+    } catch (logErr) {
+      console.error("Failed to save usage log:", logErr.message);
+    }
+
     const plan = await generatePlan({                 // ✅ await added
       days:      parseInt(days),
       budget,
