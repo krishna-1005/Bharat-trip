@@ -321,15 +321,22 @@ async function generatePlan({ city = "Bengaluru", days = 2, budget = "low", inte
     };
   }
 
+  const discoveredMap = new Map();
+  cityPool.forEach(p => {
+    if (!discoveredMap.has(p.name.toLowerCase())) {
+      discoveredMap.set(p.name.toLowerCase(), {
+        name: p.name,
+        lat: p.lat,
+        lng: p.lng,
+        category: p.category
+      });
+    }
+  });
+
   return {
     city,
     coordinates: coords,
-    allDiscoveredPlaces: cityPool.map(p => ({
-      name: p.name,
-      lat: p.lat,
-      lng: p.lng,
-      category: p.category
-    })),
+    allDiscoveredPlaces: Array.from(discoveredMap.values()),
     days,
     budget,
     interests,
