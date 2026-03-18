@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import ProjectReviews from "./ProjectReviews";
 
 export default function Layout() {
   return (
@@ -9,6 +10,7 @@ export default function Layout() {
       <div style={{ position: "relative", zIndex: 1, flex: 1 }}>
         <Outlet />
       </div>
+      <ProjectReviews />
       <Footer />
     </div>
   );

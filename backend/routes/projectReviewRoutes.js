@@ -1,0 +1,61 @@
+const express = require("express");
+const router = express.Router();
+const ProjectReview = require("../models/ProjectReview");
+const User = require("../models/User");
+const admin = require("../firebaseAdmin");
+
+// Public route to get all project reviews
+router.get("/", async (req, res) => {
+  try {
+    const reviews = await ProjectReview.find().sort({ createdAt: -1 });
+    res.json(reviews);
+  } catch (err) {
+    console.error("Error fetching project reviews:", err);
+    res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+});
+
+// Protected route to post a project review
+router.post("/", async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    
+    // Check for authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = await admin.auth().verifyIdToken(token);
+    const email = decoded.email;
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      // Create user if they don't exist (same logic as protect middleware)
+      user = await User.create({
+        firebaseUid: decoded.uid,
+        email: email,
+        name: decoded.name || "User",
+        photo: decoded.picture || ""
+      });
+    }
+
+    const newReview = new ProjectReview({
+      user: user._id,
+      userName: user.name,
+      userEmail: user.email,
+      rating: Number(rating),
+      comment: comment
+    });
+
+    await newReview.save();
+    res.status(201).json(newReview);
+
+  } catch (err) {
+    console.error("Error posting project review:", err);
+    res.status(500).json({ error: "Failed to post review" });
+  }
+});
+
+module.exports = router;

@@ -102,7 +102,7 @@ function MapView({ plan, isTracking, onHover }) {
         { enableHighAccuracy: true }
       );
     } else {
-      setPathHistory([]); 
+      setPathHistory([]);
       setRoadRoute([]);
       navigator.geolocation.getCurrentPosition(
         (position) => {
