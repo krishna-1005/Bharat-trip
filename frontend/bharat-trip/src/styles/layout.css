@@ -1,284 +1,85 @@
-/* ================= ROOT APP ================= */
+/* ================= ROOT LAYOUT ================= */
 
+/* We NO LONGER apply global overflow: hidden here. 
+   Scrolling is now native. */
 .app {
-  height: 100vh;
   width: 100%;
-  display: flex;
-  overflow: hidden;
-}
-
-/* ================= PLANNER PAGE ================= */
-
-.planner-page {
-  display: flex;
-  height: 100vh;
-  width: 100%;
-}
-
-/* ================= LEFT PANEL ================= */
-
-.planner-wrapper {
-  
-  width: 360px;
-  min-width: 360px;
-  padding: 24px;
-  overflow-y: auto;
-  background: #111;
-
-  /* animation */
-  transform: translateX(0);
-  margin: 0;
-
-  transition:
-    transform 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-    margin 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ================= RIGHT MAP PANEL ================= */
-
-.map-wrapper {
-  flex: 1;
-  height: 100vh;                 /* 🔥 REQUIRED */
-  min-width: 0;                  /* 🔥 REQUIRED */
-  position: relative;
-  z-index: 2;
-
-  /* animation defaults */
-  opacity: 1;                    /* 🔥 FIX */
-  transform: translateX(0);      /* 🔥 FIX */
-  pointer-events: auto;          /* 🔥 FIX */
-
-  transition:
-    opacity 0.8s ease,
-    transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ================= MAP ANIMATION WRAPPER ================= */
-
-.map-anim {
-  height: 100%;                  /* 🔥 REQUIRED */
-  width: 100%;
-  opacity: 1;                    /* 🔥 FIX */
-  transform: translateX(0);      /* 🔥 FIX */
-  pointer-events: auto;          /* 🔥 FIX */
-
-  transition:
-    opacity 0.8s ease,
-    transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ================= MAP ROOT ================= */
-
-.map-container {
-  position: relative;
-  z-index: 3;
-  height: 100%;                  /* 🔥 REQUIRED */
-  width: 100%;
-}
-
-/* ================= LEAFLET CORE ================= */
-
-.leaflet-container {
-  height: 100% !important;       /* 🔥 MOST IMPORTANT */
-  width: 100% !important;
-  z-index: 5 !important;
-  background: #ddd;
-  overflow: hidden;
-}
-
-/* ================= LANDING STATE ================= */
-
-.app.landing,
-.planner-page.landing {
-  justify-content: center;
-}
-
-.app.landing .planner-wrapper {
-  margin: auto;
-}
-
-.app.landing .map-wrapper {
-  opacity: 0;
-  transform: translateX(120px);
-  pointer-events: none;
-}
-
-/* ================= RESULTS STATE ================= */
-
-.app.results,
-.planner-page.results {
-  justify-content: flex-start;
-}
-
-.app.results .planner-wrapper,
-.planner-page.results .planner-wrapper {
-  margin: 0;
-}
-
-.app.results .map-wrapper,
-.planner-page.results .map-wrapper {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-}
-
-.app.results .map-anim,
-.planner-page.results .map-anim {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-}
-
-/* ================= MAP ZOOM CONTROLS ================= */
-
-.map-zoom-controls {
-  position: absolute;
-  top: 40%;
-  right: 20px;
-  z-index: 1000;
-
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  min-height: 100vh;
 }
 
-.map-zoom-controls button {
-  width: 44px;
-  height: 44px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: rgba(15, 23, 32, 0.9);
-  color: white;
-
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 1;
-
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-  cursor: pointer;
-
-  transition: all 0.2s ease;
-}
-
-.map-zoom-controls button:hover {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  transform: scale(1.05);
-}
-
-/* pages */
-
+/* ================= STANDARD PAGES ================= */
 
 .page {
   width: 100%;
   min-height: 100vh;
-  width: 100%;
-  padding: 120px 80px;
-  background: #0f172a;
-  color: white;
+  /* padding-top accounts for the fixed 80px navbar + some breathing room */
+  padding: 120px 5% 60px; 
+  background: var(--bg-main);
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
 }
 
 .page h1 {
-  margin-bottom: 20px;
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  margin-bottom: 24px;
 }
 
 .page p {
-  color: #ffffff;
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  line-height: 1.6;
   margin-bottom: 30px;
+  max-width: 800px;
 }
 
-.page-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
+/* ================= PLANNER / MAP SPECIFIC LAYOUT ================= */
 
-.page-card {
-  background: #1e293b;
-  padding: 20px;
-  border-radius: 12px;
-  transition: 0.3s;
-}
-
-.page-card:hover {
-  background: #243244;
-  transform: translateY(-4px);
-}
-
-.page-list {
-  list-style: none;
-  padding: 0;
-}
-
-.page-list li {
-  margin-bottom: 12px;
-}
-
-.contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  max-width: 500px;
-}
-
-.contact-form input,
-.contact-form textarea {
-  padding: 12px;
-  border-radius: 8px;
-  border: none;
-}
-
-.contact-form button {
-  padding: 12px;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-/* Navbar Fixed Logic */
-.navbar {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  height: 80px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 5%;
-  background: rgba(2, 6, 23, 0.8);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  z-index: 1000;
-}
-
-/* Dashboard Sidebar */
+/* The planner page needs to lock the screen to 100vh for the map */
 .planner-page {
   display: flex;
   height: 100vh;
-  width: 100%;
-  padding-top: 80px;
+  width: 100vw;
+  padding-top: 80px; /* Accounts for navbar */
+  overflow: hidden; /* Only lock overflow HERE, not globally */
+  background: var(--bg-main);
 }
 
 .planner-wrapper {
   width: 420px;
+  min-width: 420px;
   background: var(--bg-card);
-  border-right: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid var(--border-main);
   padding: 30px;
   overflow-y: auto;
   z-index: 10;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Full Screen Map */
 .map-wrapper {
   flex: 1;
+  height: 100%;
+  min-width: 0;
   position: relative;
   background: #000;
+  z-index: 2;
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.map-anim {
+  height: 100%;
+  width: 100%;
+}
+
+.map-container {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  width: 100%;
 }
 
 /* Dark Mode Map Filter - Apply to tiles only */
@@ -293,6 +94,41 @@
   overflow: hidden;
 }
 
+/* Map specific overlays */
+.map-zoom-controls {
+  position: absolute;
+  top: 40%;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-zoom-controls button {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-panel);
+  color: var(--text-main);
+  font-size: 22px;
+  font-weight: 600;
+  border: 1px solid var(--border-main);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.map-zoom-controls button:hover {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: white;
+  transform: scale(1.05);
+}
+
 .map-info-bar {
   position: absolute;
   bottom: 30px;
@@ -301,16 +137,33 @@
   background: var(--bg-card);
   padding: 15px 25px;
   border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--border-main);
   display: flex;
   gap: 20px;
   z-index: 1000;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 40px var(--shadow-main);
 }
 
-* {
-  box-sizing: border-box;
-}
+/* ================= LANDING/RESULTS STATES (If used) ================= */
+.app.landing .planner-wrapper { margin: auto; }
+.app.landing .map-wrapper { opacity: 0; transform: translateX(120px); pointer-events: none; }
+.app.results .planner-wrapper { margin: 0; }
+.app.results .map-wrapper { opacity: 1; transform: translateX(0); pointer-events: auto; }
 
-body {
-  overflow-x: hidden;
+/* Responsive */
+@media (max-width: 768px) {
+  .planner-page {
+    flex-direction: column;
+  }
+  .planner-wrapper {
+    width: 100%;
+    min-width: 100%;
+    height: 50%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-main);
+  }
+  .map-wrapper {
+    height: 50%;
+  }
 }

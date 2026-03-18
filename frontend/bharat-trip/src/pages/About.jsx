@@ -125,8 +125,8 @@ export default function About() {
         <h2>Ready to start your adventure?</h2>
         <p>Join thousands of travelers who plan their trips with Bharat Trip.</p>
         <div className="cta-buttons">
-          <button className="pro-btn-primary" onClick={() => navigate("/planner")}>Start Planning</button>
-          <button className="pro-btn-outline" onClick={() => navigate("/signup")}>Create Account</button>
+          <button className="btn-premium primary" onClick={() => navigate("/planner")}>Start Planning</button>
+          <button className="btn-premium outline" onClick={() => navigate("/signup")}>Create Account</button>
         </div>
       </section>
 
