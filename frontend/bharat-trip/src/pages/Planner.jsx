@@ -79,7 +79,6 @@ function Planner() {
         {/* ── RIGHT: FORM CARD ── */}
         <div className="planner-form-section reveal-on-scroll" style={{ animationDelay: "0.2s" }}>
           <div className="planner-glass-card">
-            <div className="card-top-accent"></div>
             <div className="planner-form-header">
                 <h3>Start Your Adventure</h3>
                 <p>Tell us your preferences to begin.</p>
@@ -89,11 +88,11 @@ function Planner() {
           
           <div className="planner-trust-badges">
               <div className="trust-item">
-                  <span className="trust-icon">🔒</span>
+                  <span className="trust-icon" role="img" aria-label="secure">🔒</span>
                   <span>Secure & Private</span>
               </div>
               <div className="trust-item">
-                  <span className="trust-icon">⚡</span>
+                  <span className="trust-icon" role="img" aria-label="fast">⚡</span>
                   <span>Instant Generation</span>
               </div>
           </div>

@@ -1,159 +1,170 @@
 /* =============================================
-   PLANNER FORM — plannerForm.css (REFINED)
+   PLANNER FORM — plannerForm.css (MODERN)
 ============================================= */
 
 .pf-wrap {
   display: flex;
   flex-direction: column;
-  min-height: 480px;
+  min-height: 440px;
 }
 
 /* ── PROGRESS BAR ── */
 .pf-progress-bar {
-  height: 6px;
+  height: 4px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  margin-bottom: 48px;
+  border-radius: 2px;
+  margin-bottom: 40px;
   overflow: hidden;
-  position: relative;
 }
 
 .pf-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  border-radius: 10px;
-  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+  background: #3b82f6;
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── STEP HEADER ── */
+/* ── STEP CONTENT ── */
+.pf-step-container {
+    flex: 1;
+}
+
+.pf-step.animate-in {
+    animation: fadeInSlide 0.5s ease forwards;
+}
+
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .pf-step-header {
-  margin-bottom: 40px;
-  text-align: left;
+  margin-bottom: 32px;
 }
 
 .pf-step-num {
-  font-family: 'Syne', sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   color: #3b82f6;
-  letter-spacing: 2px;
-  margin-bottom: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
   display: block;
 }
 
 .pf-step-header h2 {
-  font-family: 'Syne', sans-serif;
-  font-size: 32px;
-  font-weight: 800;
-  margin: 0 0 12px;
-  color: #fff;
-  letter-spacing: -1px;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #f8fafc;
 }
 
 .pf-step-header p {
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  color: #64748b;
   margin: 0;
 }
 
 /* ── FIELDS ── */
 .pf-field {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .pf-label {
   display: block;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: rgba(255, 255, 255, 0.4);
-  margin-bottom: 16px;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  margin-bottom: 12px;
 }
 
 /* ── CITY SELECT ── */
 .pf-city-select {
   width: 100%;
-  padding: 18px 20px;
-  background: rgba(255, 255, 255, 0.04);
+  padding: 14px 16px;
+  background: rgba(15, 23, 42, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  color: #000000;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 12px;
+  color: #f8fafc; /* FIXED: White text color */
+  font-size: 15px;
+  font-weight: 500;
   outline: none;
   cursor: pointer;
   appearance: none;
-  transition: all 0.3s;
+  transition: all 0.2s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
 }
 
 .pf-city-select:focus {
   border-color: #3b82f6;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.pf-city-select option {
+    background-color: #0f172a;
+    color: #f8fafc;
 }
 
 /* ── DAYS ROW ── */
 .pf-days-row {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .pf-day-btn {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.5);
-  font-family: 'Syne', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s;
 }
 
 .pf-day-btn:hover {
-  border-color: #3b82f6;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #f8fafc;
 }
 
 .pf-day-btn.active {
   background: #3b82f6;
   border-color: #3b82f6;
   color: #fff;
-  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
-  transform: translateY(-2px);
 }
 
 .pf-custom-days {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  padding: 0 20px;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0 12px;
 }
 
 .pf-days-input {
-  width: 44px;
+  width: 32px;
   background: transparent;
   border: none;
-  color: #fff;
-  font-family: 'Syne', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
+  color: #f8fafc;
+  font-size: 15px;
+  font-weight: 600;
   outline: none;
   text-align: center;
 }
 
 .pf-custom-days span {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+  color: #64748b;
   font-weight: 600;
 }
 
@@ -161,53 +172,50 @@
 .pf-traveler-grid, .pf-budget-grid, .pf-pace-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 12px;
 }
 
 .pf-traveler-card, .pf-budget-card, .pf-pace-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .pf-traveler-card:hover, .pf-budget-card:hover, .pf-pace-card:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(59, 130, 246, 0.5);
-  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
 }
 
 .pf-traveler-card.active, .pf-budget-card.active, .pf-pace-card.active {
-  background: rgba(59, 130, 246, 0.12);
+  background: rgba(59, 130, 246, 0.08);
   border-color: #3b82f6;
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
 }
 
 .pf-card-icon {
-  font-size: 28px;
-  margin-bottom: 16px;
+  font-size: 24px;
+  margin-bottom: 12px;
   display: block;
 }
 
 .pf-card-label {
   display: block;
-  font-weight: 800;
-  color: #fff;
-  font-size: 16px;
+  font-weight: 600;
+  color: #f1f5f9;
+  font-size: 15px;
   margin-bottom: 4px;
 }
 
 .pf-card-desc {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+  color: #64748b;
   line-height: 1.4;
 }
 
@@ -215,56 +223,61 @@
 .pf-interest-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
 
 .pf-interest-pill {
-  padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 100px;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 14px;
-  font-weight: 700;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .pf-interest-pill:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: #3b82f6;
-  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #f1f5f9;
 }
 
 .pf-interest-pill.active {
   background: #3b82f6;
   border-color: #3b82f6;
   color: #fff;
-  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+}
+
+.pf-pill-check {
+    font-size: 10px;
 }
 
 /* ── FOOTER ── */
 .pf-footer {
-  margin-top: auto;
-  padding-top: 48px;
+  margin-top: 32px;
   display: flex;
-  gap: 20px;
+  gap: 12px;
 }
 
 .pf-back-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
-  padding: 16px 32px;
-  border-radius: 16px;
-  font-weight: 700;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s;
 }
 
 .pf-back-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(-4px);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .pf-next-btn, .pf-gen-btn {
@@ -272,27 +285,48 @@
   background: #3b82f6;
   color: #fff;
   border: none;
-  padding: 16px 32px;
-  border-radius: 16px;
-  font-weight: 800;
-  font-size: 16px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 12px 24px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pf-next-btn:hover, .pf-gen-btn:hover {
-  transform: translateY(-4px);
-  filter: brightness(1.1);
-  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
+  background: #2563eb;
+  transform: translateY(-1px);
 }
 
 .pf-gen-btn.loading {
-  background: #1e40af;
+  background: #1d4ed8;
   cursor: not-allowed;
 }
 
-@media (max-width: 600px) {
+.pf-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.pf-error-msg {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 16px;
+    font-weight: 500;
+}
+
+@media (max-width: 480px) {
   .pf-traveler-grid, .pf-budget-grid, .pf-pace-grid {
     grid-template-columns: 1fr;
   }
