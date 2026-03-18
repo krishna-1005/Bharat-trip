@@ -41,7 +41,7 @@ export default function VotePoll() {
   }, [pollId]);
 
   const handleVote = async (optionName) => {
-    if (hasVoted || submitting) return;
+    if (hasVoted || submitting || poll?.isClosed) return;
 
     setSelectedOption(optionName);
     setSubmitting(true);
@@ -51,20 +51,18 @@ export default function VotePoll() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pollId, optionName }),
       });
+      const data = await res.json();
       if (res.ok) {
         setHasVoted(true);
-        setMessage("Vote recorded! ✨");
+        setMessage(data.poll.isClosed ? "Majority reached! Poll is now closed. ✨" : "Vote recorded! ✨");
         // Save to local storage to prevent duplicate voting
         const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "[]");
         votedPolls.push(pollId);
         localStorage.setItem("votedPolls", JSON.stringify(votedPolls));
         
-        // Instant update
-        const pollRes = await fetch(`${API}/api/polls/${pollId}`);
-        const pollData = await pollRes.json();
-        if (pollRes.ok) setPoll(pollData);
+        setPoll(data.poll);
       } else {
-        alert("Failed to record vote.");
+        alert(data.error || "Failed to record vote.");
       }
     } catch (err) {
       console.error(err);
@@ -93,10 +91,46 @@ export default function VotePoll() {
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: '32px'
       }}>
+        {/* Feature 4: Top Message */}
+        {!poll.isClosed && !hasVoted && (
+          <div style={{ 
+            background: 'rgba(59, 130, 246, 0.1)', 
+            border: '1px solid rgba(59, 130, 246, 0.2)', 
+            padding: '12px 16px', 
+            borderRadius: '12px', 
+            marginBottom: '24px',
+            color: '#60a5fa',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            textAlign: 'center'
+          }}>
+            Vote once — decision will be finalized automatically when majority is reached.
+          </div>
+        )}
+
         <h1 style={{ textAlign: 'center', fontSize: '2.2rem', fontWeight: '800', marginBottom: '10px', color: '#f8fafc', letterSpacing: '-1px' }}>{poll.tripName}</h1>
-        <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '32px' }}>
-          {hasVoted ? "You have already voted" : "Tap your favorite destination to vote"}
-        </p>
+        
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          {/* Feature 2: Closed Message */}
+          {poll.isClosed ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                <div style={{ display: 'inline-block', padding: '6px 16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '100px', color: '#ef4444', fontWeight: '800', fontSize: '12px' }}>
+                    VOTING CLOSED
+                </div>
+                <p style={{ color: '#ef4444', fontWeight: '700' }}>Decision Finalized</p>
+            </div>
+          ) : (
+            <div>
+                <p style={{ color: '#94a3b8', marginBottom: '8px' }}>
+                {hasVoted ? "You have already voted" : "Tap your favorite destination to vote"}
+                </p>
+                {/* Feature 6: Voting Progress */}
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>
+                    {poll.options.reduce((sum, o) => sum + o.votes, 0)} votes received so far
+                </span>
+            </div>
+          )}
+        </div>
 
         {message && (
           <div style={{ 
@@ -121,11 +155,11 @@ export default function VotePoll() {
               className={`premium-card ${selectedOption === opt.name ? 'active' : ''}`} 
               style={{ 
                 padding: '20px', 
-                cursor: (hasVoted || submitting) ? 'default' : 'pointer', 
+                cursor: (hasVoted || submitting || poll.isClosed) ? 'default' : 'pointer', 
                 background: selectedOption === opt.name ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.02)',
                 border: selectedOption === opt.name ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.05)',
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                opacity: (hasVoted && selectedOption !== opt.name) ? 0.6 : 1,
+                opacity: ( (hasVoted || poll.isClosed) && selectedOption !== opt.name) ? 0.6 : 1,
                 transform: selectedOption === opt.name ? 'scale(1.02)' : 'scale(1)'
               }}
               onClick={() => handleVote(opt.name)}
@@ -153,7 +187,7 @@ export default function VotePoll() {
           ))}
         </div>
 
-        {hasVoted && (
+        {(hasVoted || poll.isClosed) && (
           <div style={{ marginTop: '32px', textAlign: 'center', animation: 'fadeIn 0.8s ease' }}>
              <button 
                 className="btn-premium primary" 
@@ -167,7 +201,7 @@ export default function VotePoll() {
                     fontWeight: '700'
                 }}
              >
-                View Live Results 📊
+                {poll.isClosed ? "View Final Results 📊" : "View Live Results 📊"}
              </button>
           </div>
         )}

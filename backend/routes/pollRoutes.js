@@ -46,10 +46,27 @@ router.post("/vote", async (req, res) => {
     const poll = await Poll.findOne({ pollId });
     if (!poll) return res.status(404).json({ error: "Poll not found." });
 
+    if (poll.isClosed) {
+      return res.status(400).json({ error: "This poll is already closed." });
+    }
+
     const option = poll.options.find(opt => opt.name === optionName);
     if (!option) return res.status(400).json({ error: "Option not found." });
 
     option.votes += 1;
+
+    // Calculate majority logic
+    const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+    
+    // Check if any option has more than 50% of total votes
+    // We require at least 2 votes to avoid closing immediately on the first vote
+    const winnerOption = poll.options.find(opt => opt.votes > totalVotes / 2);
+    
+    if (winnerOption && totalVotes >= 2) {
+      poll.isClosed = true;
+      poll.winner = winnerOption.name;
+    }
+
     await poll.save();
 
     res.json({ message: "Vote recorded successfully", poll });

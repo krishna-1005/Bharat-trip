@@ -37,7 +37,7 @@ export default function PollResults() {
   const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
   const maxVotes = Math.max(...poll.options.map(o => o.votes));
   const winners = poll.options.filter(o => o.votes === maxVotes && o.votes > 0);
-  const finalDecision = winners.length === 1 ? winners[0].name : null;
+  const finalDecision = poll.winner || (winners.length === 1 ? winners[0].name : null);
 
   return (
     <div className="page" style={{ alignItems: 'center', justifyContent: 'center', background: '#030712' }}>
@@ -51,9 +51,9 @@ export default function PollResults() {
         borderRadius: '32px'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '100px', marginBottom: '20px' }}>
-                <span style={{ width: '6px', height: '6px', background: '#3b82f6', borderRadius: '50%', boxShadow: '0 0 10px #3b82f6' }}></span>
-                <span style={{ fontSize: '10px', fontWeight: '800', color: '#60a5fa', letterSpacing: '1px' }}>LIVE POLL RESULTS</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: poll.isClosed ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)', border: poll.isClosed ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '100px', marginBottom: '20px' }}>
+                <span style={{ width: '6px', height: '6px', background: poll.isClosed ? '#ef4444' : '#3b82f6', borderRadius: '50%', boxShadow: poll.isClosed ? '0 0 10px #ef4444' : '0 0 10px #3b82f6' }}></span>
+                <span style={{ fontSize: '10px', fontWeight: '800', color: poll.isClosed ? '#f87171' : '#60a5fa', letterSpacing: '1px' }}>{poll.isClosed ? "FINAL RESULTS — CLOSED" : "LIVE POLL RESULTS"}</span>
             </div>
             <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: '800', letterSpacing: '-1.5px', marginBottom: '10px', color: '#f8fafc' }}>{poll.tripName}</h1>
             <p style={{ color: '#94a3b8', fontSize: '1.1rem' }}>Total Votes Cast: <strong>{totalVotes}</strong></p>
@@ -72,8 +72,8 @@ export default function PollResults() {
                 animation: 'fadeIn 0.8s ease'
             }}>
                 <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '5rem', opacity: '0.1' }}>🎉</div>
-                <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 8px' }}>{finalDecision} Selected ✅</h2>
-                <p style={{ color: '#94a3b8', margin: 0, fontWeight: '700', fontSize: '1.2rem' }}>Trip Finalized 🎉</p>
+                <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 8px' }}>Final Decision: {finalDecision} ✅</h2>
+                <p style={{ color: '#60a5fa', margin: 0, fontWeight: '800', fontSize: '1.4rem', letterSpacing: '1px' }}>Trip Finalized 🎉</p>
             </div>
         )}
 
@@ -92,8 +92,7 @@ export default function PollResults() {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontWeight: '700', fontSize: '1.2rem', color: isWinner ? '#f8fafc' : '#cbd5e1' }}>{opt.name}</span>
-                    <span style={{ fontSize: '0.9rem', color: '#64748b' }}>— {opt.votes} {opt.votes === 1 ? 'vote' : 'votes'}</span>
+                    <span style={{ fontWeight: '700', fontSize: '1.2rem', color: isWinner ? '#f8fafc' : '#cbd5e1' }}>{opt.name}: {opt.votes} votes</span>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontWeight: '800', color: isWinner ? '#60a5fa' : '#94a3b8', fontSize: '1.1rem' }}>{percentage}%</div>

@@ -7,6 +7,8 @@ const pollSchema = new mongoose.Schema({
     name: { type: String, required: true },
     votes: { type: Number, default: 0 }
   }],
+  isClosed: { type: Boolean, default: false },
+  winner: { type: String, default: null },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now }
 });
