@@ -124,7 +124,10 @@ export default function VotePoll() {
           </button>
         ) : (
           <div style={{ marginTop: '30px', textAlign: 'center' }}>
-             <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Wait for your friends to finish voting!</p>
+             <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '20px' }}>Wait for your friends to finish voting!</p>
+             <button className="btn-premium outline" onClick={() => navigate(`/poll-results/${pollId}`)} style={{ width: '100%', justifyContent: 'center' }}>
+                View Live Results 📊
+             </button>
           </div>
         )}
 

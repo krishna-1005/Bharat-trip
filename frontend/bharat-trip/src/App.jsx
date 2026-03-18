@@ -32,6 +32,7 @@ import "./styles/global.css";
 
 import CreatePoll from "./pages/CreatePoll";
 import VotePoll from "./pages/VotePoll";
+import PollResults from "./pages/PollResults";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/create-poll" element={<CreatePoll />} />
           <Route path="/vote/:pollId" element={<VotePoll />} />
+          <Route path="/poll-results/:pollId" element={<PollResults />} />
 
           <Route
             path="/planner"

@@ -1,12 +1,20 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { generatePlan } from "../../services/api";
 import { useSettings } from "../../context/SettingsContext";
 import "../Planner/plannerForm.css";
 
 function PlannerForm({ onPlanGenerated }) {
   const { t, formatPrice } = useSettings();
+  const loc = useLocation();
   const [step, setStep] = useState(1);
   const [city, setCity] = useState("Bengaluru");
+
+  useEffect(() => {
+    if (loc.state?.prefilledCity) {
+      setCity(loc.state.prefilledCity);
+    }
+  }, [loc.state]);
   const [days, setDays] = useState(2);
   const [budget, setBudget] = useState("low");
   const [interests, setInterests] = useState([]);
