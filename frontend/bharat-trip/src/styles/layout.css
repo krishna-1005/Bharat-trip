@@ -14,8 +14,8 @@
 .page {
   width: 100%;
   min-height: 100vh;
-  /* padding-top accounts for the fixed 80px navbar + some breathing room */
-  padding: 120px 5% 60px; 
+  /* Increased padding-top for extra safety against overlap */
+  padding: 140px 5% 60px; 
   background: var(--bg-main);
   color: var(--text-main);
   display: flex;

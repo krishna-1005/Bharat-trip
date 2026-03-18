@@ -41,7 +41,7 @@ export default function Destinations() {
               <div style={{ padding: "24px", flex: 1, display: "flex", flexDirection: "column" }}>
                 <h3 style={{ margin: "0 0 12px", fontSize: "1.25rem", color: "var(--text-main)", fontWeight: "800" }}>{dest.name}</h3>
                 <p style={{ margin: "0 0 20px", color: "var(--text-dim)", fontSize: "0.95rem", lineHeight: "1.6", flex: 1 }}>{dest.desc}</p>
-                <button className="pro-btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={(e) => { e.stopPropagation(); navigate("/planner"); }}>
+                <button className="btn-premium primary" style={{ width: "100%", justifyContent: "center" }} onClick={(e) => { e.stopPropagation(); navigate("/planner"); }}>
                   Plan Trip
                 </button>
               </div>

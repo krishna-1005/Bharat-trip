@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PlannerForm from "../components/Planner/PlannerForm";
 import "./planner.css";
@@ -20,31 +20,55 @@ function Planner() {
     { name: "Church Street", type: "Urban", img: img4 },
   ];
 
+  useEffect(() => {
+      // Intersection Observer for reveal animations
+      const observerOptions = { threshold: 0.1 };
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("revealed");
+          }
+        });
+      }, observerOptions);
+  
+      document.querySelectorAll(".reveal-on-scroll").forEach(el => observer.observe(el));
+      return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="planner-page" style={{ background: '#020617' }}>
-      <div style={{ position: 'fixed', top: 0, left: 0, background: 'red', color: 'white', zIndex: 9999, padding: '5px', fontSize: '10px' }}>
-        v2.0 REDESIGN LOADED
+    <div className="planner-page">
+      {/* Cinematic Background */}
+      <div className="planner-hero-bg">
+          <div className="planner-bg-overlay"></div>
+          <img src={img3} alt="Background" className="planner-bg-img" />
       </div>
-      <div className="planner-bg-gradient"></div>
       
       <div className="planner-container">
-        {/* ── LEFT: CONTENT ── */}
-        <div className="planner-content">
-          <div className="planner-header animate-up">
-            <span className="premium-badge">✦ AI-POWERED TRAVEL</span>
-            <h1>Craft Your <span className="gradient-text">Perfect Story</span></h1>
-            <p>Our advanced AI analyzes your preferences to build a seamless, localized experience in Bengaluru.</p>
+        {/* ── LEFT: INTRO ── */}
+        <div className="planner-intro-section reveal-on-scroll">
+          <div className="planner-tagline">
+            <span className="pulse-dot"></span>
+            AI-DRIVEN EXPLORATION
           </div>
+          <h1 className="planner-main-title">
+            Your Journey, <br />
+            <span className="gradient-text">Intelligently</span> Crafted.
+          </h1>
+          <p className="planner-subtitle">
+            Skip the generic guides. Our neural engine synthesizes local secrets and iconic landmarks into a seamless, personalized itinerary for you.
+          </p>
 
-          <div className="planner-featured-list animate-up" style={{ animationDelay: '0.2s' }}>
-            <span className="featured-label">EXPLORE TOP SPOTS</span>
-            <div className="featured-mini-grid">
+          <div className="planner-featured-strip">
+            <span className="strip-label">MOST POPULAR THIS WEEK</span>
+            <div className="featured-mini-list">
               {featuredSpots.map((spot, i) => (
-                <div key={i} className="featured-mini-card">
-                  <img src={spot.img} alt={spot.name} />
-                  <div className="featured-mini-info">
-                    <span className="featured-mini-name">{spot.name}</span>
-                    <span className="featured-mini-type">{spot.type}</span>
+                <div key={i} className="mini-spot-card">
+                  <div className="mini-spot-img-wrap">
+                    <img src={spot.img} alt={spot.name} />
+                  </div>
+                  <div className="mini-spot-content">
+                    <span className="mini-spot-name">{spot.name}</span>
+                    <span className="mini-spot-type">{spot.type}</span>
                   </div>
                 </div>
               ))}
@@ -52,11 +76,26 @@ function Planner() {
           </div>
         </div>
 
-        {/* ── RIGHT: FORM ── */}
-        <div className="planner-card-wrap animate-up" style={{ animationDelay: '0.1s' }}>
-          <div className="planner-main-card">
-            <div className="card-glass-glow"></div>
+        {/* ── RIGHT: FORM CARD ── */}
+        <div className="planner-form-section reveal-on-scroll" style={{ animationDelay: "0.2s" }}>
+          <div className="planner-glass-card">
+            <div className="card-top-accent"></div>
+            <div className="planner-form-header">
+                <h3>Start Your Adventure</h3>
+                <p>Tell us your preferences to begin.</p>
+            </div>
             <PlannerForm onPlanGenerated={handlePlanGenerated} />
+          </div>
+          
+          <div className="planner-trust-badges">
+              <div className="trust-item">
+                  <span className="trust-icon">🔒</span>
+                  <span>Secure & Private</span>
+              </div>
+              <div className="trust-item">
+                  <span className="trust-icon">⚡</span>
+                  <span>Instant Generation</span>
+              </div>
           </div>
         </div>
       </div>

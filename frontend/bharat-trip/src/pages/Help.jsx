@@ -113,7 +113,7 @@ export default function Help() {
           </div>
         </div>
         <button 
-          className="pro-btn-primary" 
+          className="btn-premium primary" 
           style={{ marginTop: '50px', width: '240px', justifyContent: 'center' }}
           onClick={() => navigate("/contact")}
         >

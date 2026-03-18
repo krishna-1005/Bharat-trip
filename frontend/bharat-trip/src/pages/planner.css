@@ -1,111 +1,227 @@
 /* =============================================
-   PLANNER PAGE — planner.css (PREMIUM REDESIGN)
+   PLANNER PAGE — planner.css (OVERHAUL)
 ============================================= */
 
 .planner-page {
   min-height: 100vh;
-  background: var(--bg-main);
-  position: relative;
-  overflow: hidden;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 140px 20px 100px;
+  padding: 120px 8% 80px;
+  position: relative;
+  background: #020617;
+  overflow-x: hidden;
 }
 
-.planner-bg-gradient {
-  position: absolute;
-  top: -20%;
-  right: -10%;
-  width: 70%;
-  height: 90%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
-  pointer-events: none;
-  filter: blur(80px);
+/* Cinematic Background Overlay */
+.planner-hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.planner-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.4) saturate(0.8) blur(5px);
+    transform: scale(1.1);
+}
+
+.planner-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 70% 50%, rgba(2, 6, 23, 0.4), #020617 80%),
+                linear-gradient(to bottom, transparent, #020617);
+    z-index: 1;
 }
 
 .planner-container {
-  max-width: 1300px;
+  max-width: 1400px;
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: 100px;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 80px;
   align-items: center;
   position: relative;
-  z-index: 1;
+  z-index: 10;
 }
 
-/* ── LEFT CONTENT ── */
-.planner-content {
+/* ── LEFT: INTRO ── */
+.planner-intro-section {
   display: flex;
   flex-direction: column;
-  gap: 80px;
+  gap: 32px;
 }
 
-.planner-header h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(3rem, 6vw, 5rem);
+.planner-tagline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
   font-weight: 800;
-  line-height: 1;
-  margin: 24px 0;
-  color: #fff;
-  letter-spacing: -2px;
+  letter-spacing: 2px;
+  color: var(--accent-blue);
+  text-transform: uppercase;
 }
 
-.planner-header p {
+.planner-main-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(3.5rem, 7vw, 5.5rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -3px;
+  color: #fff;
+}
+
+.planner-subtitle {
   font-size: 1.25rem;
   color: var(--text-dim);
   line-height: 1.6;
-  max-width: 520px;
+  max-width: 580px;
 }
 
 /* Featured Mini List enhanced */
-.featured-mini-grid {
+.planner-featured-strip {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.strip-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-dim);
+    letter-spacing: 1.5px;
+    opacity: 0.6;
+}
+
+.featured-mini-list {
   display: flex;
-  gap: 20px;
+  gap: 24px;
 }
 
-.featured-mini-card {
-  position: relative;
-  width: 140px;
-  height: 180px;
-  border-radius: 24px;
-  overflow: hidden;
-  border: 1px solid var(--glass-border);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+.mini-spot-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 100px;
+  padding-right: 24px;
+  transition: all 0.3s ease;
+  cursor: default;
 }
 
-.featured-mini-card:hover {
-  transform: translateY(-10px) scale(1.05);
-  border-color: var(--accent-blue);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+.mini-spot-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--accent-blue);
+    transform: translateX(5px);
 }
 
-.featured-mini-info {
-  padding: 16px;
-  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+.mini-spot-img-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
 }
 
-.featured-mini-name {
-  font-size: 12px;
-  font-weight: 800;
-  margin-bottom: 2px;
+.mini-spot-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-/* ── RIGHT CARD ── */
-.planner-main-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-main);
+.mini-spot-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.mini-spot-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.mini-spot-type {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+}
+
+/* ── RIGHT: GLASS CARD ── */
+.planner-glass-card {
+  background: rgba(10, 17, 32, 0.7);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 40px;
-  padding: 56px;
+  padding: 48px;
   position: relative;
-  box-shadow: 0 50px 100px var(--shadow-main);
-  backdrop-filter: blur(20px);
+  box-shadow: 0 50px 100px rgba(0,0,0,0.5);
 }
 
+.card-top-accent {
+    position: absolute;
+    top: 0;
+    left: 40px;
+    right: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+    border-radius: 0 0 4px 4px;
+}
+
+.planner-form-header {
+    margin-bottom: 40px;
+}
+
+.planner-form-header h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.planner-form-header p {
+    font-size: 14px;
+    color: var(--text-dim);
+}
+
+.planner-trust-badges {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 32px;
+}
+
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 600;
+}
+
+/* Animation utilities for the whole project can go here or global.css */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── RESPONSIVE ── */
 @media (max-width: 1200px) {
   .planner-container { gap: 60px; }
-  .planner-main-card { padding: 40px; }
+  .planner-main-title { font-size: 4rem; }
 }
 
 @media (max-width: 1024px) {
@@ -115,52 +231,23 @@
     text-align: center;
   }
   
-  .planner-content {
+  .planner-intro-section {
     align-items: center;
-    gap: 60px;
   }
   
-  .planner-header p {
-    margin: 0 auto;
-  }
-  
-  .featured-mini-grid {
-    justify-content: center;
-  }
+  .planner-tagline { justify-content: center; }
+  .planner-subtitle { margin: 0 auto; }
+  .featured-mini-list { justify-content: center; flex-wrap: wrap; }
 }
 
 @media (max-width: 768px) {
-  .planner-page {
-    padding: 120px 20px 60px;
-  }
-  
-  .planner-header h1 {
-    font-size: 3rem;
-  }
-  
-  .planner-main-card {
-    padding: 32px 24px;
-    border-radius: 32px;
-  }
-  
-  .featured-mini-card {
-    width: 110px;
-    height: 150px;
-  }
+  .planner-page { padding-top: 100px; }
+  .planner-main-title { font-size: 3.5rem; }
+  .planner-glass-card { padding: 32px 24px; border-radius: 32px; }
 }
 
 @media (max-width: 480px) {
-  .planner-header h1 {
-    font-size: 2.5rem;
-  }
-  
-  .featured-mini-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    width: 100%;
-  }
-  
-  .featured-mini-card {
-    width: 100%;
-  }
+  .planner-main-title { font-size: 2.8rem; letter-spacing: -1px; }
+  .featured-mini-list { flex-direction: column; align-items: stretch; }
+  .planner-trust-badges { flex-direction: column; gap: 12px; }
 }

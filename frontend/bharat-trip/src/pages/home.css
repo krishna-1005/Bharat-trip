@@ -40,7 +40,7 @@
   min-height: 100vh;
   display: flex;
   align-items: center;
-  padding: 0 8%;
+  padding: 120px 8% 60px;
   position: relative;
   z-index: 1;
   gap: 80px;

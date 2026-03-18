@@ -46,7 +46,7 @@ export default function Contact() {
             <h4 style={{ marginBottom: "16px" }}>Follow Our Journey</h4>
             <div style={{ display: "flex", gap: "12px" }}>
               {["𝕏", "📸", "💼", "📘"].map((icon, i) => (
-                <div key={i} className="pro-btn-icon" style={{ cursor: "pointer" }}>{icon}</div>
+                <div key={i} className="btn-premium outline" style={{ cursor: "pointer", width: '44px', height: '44px', padding: 0 }}>{icon}</div>
               ))}
             </div>
           </div>
@@ -87,8 +87,8 @@ export default function Contact() {
               <textarea placeholder="Tell us more..." rows="4" required className="auth-input-styled" style={{ resize: "vertical" }} />
             </div>
 
-            <button type="submit" className="pro-btn-primary" style={{ marginTop: "10px", width: "100%", justifyContent: "center", height: "54px" }}>
-              Send Message →
+            <button type="submit" className="btn-premium primary" style={{ marginTop: "10px", width: "100%", justifyContent: "center", height: "54px" }}>
+              Send Message
             </button>
           </form>
         </div>

@@ -142,7 +142,7 @@ export default function MyTrips() {
   };
 
   return (
-    <div className="pro-page">
+    <div className="page pro-page">
       <div className="pro-body">
         <header className="pro-hero">
           <div className="pro-hero-inner">
@@ -150,7 +150,7 @@ export default function MyTrips() {
               <h1 className="pro-name">My Saved Trips</h1>
               <p className="pro-bio">Relive your past adventures and planned getaways.</p>
             </div>
-            <button className="pro-btn-primary" onClick={() => navigate("/planner")}>
+            <button className="btn-premium primary" onClick={() => navigate("/planner")}>
               + Plan New Adventure
             </button>
           </div>

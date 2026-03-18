@@ -119,7 +119,7 @@ export default function Profile() {
   ];
 
   return (
-    <div className="pro-page">
+    <div className="page pro-page">
       <div className="pro-body">
         <header className="pro-hero">
           <div className="pro-hero-inner">
@@ -129,10 +129,10 @@ export default function Profile() {
               <p className="pro-bio">Ready for your next adventure</p>
             </div>
             <div className="pro-actions">
-              <button className="pro-btn-primary" onClick={() => navigate("/planner")}>
+              <button className="btn-premium primary" onClick={() => navigate("/planner")}>
                 + New Trip
               </button>
-              <button className="pro-btn-icon" onClick={() => navigate("/settings")}>⚙️</button>
+              <button className="btn-premium outline" style={{ width: '44px', height: '44px', padding: 0 }} onClick={() => navigate("/settings")}>⚙️</button>
             </div>
           </div>
         </header>
