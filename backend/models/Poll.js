@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const pollSchema = new mongoose.Schema({
   pollId: { type: String, required: true, unique: true },
   tripName: { type: String, required: true },
-  groupSize: { type: Number, default: 3 },
+  groupSize: { type: Number },
   options: [{
     name: { type: String, required: true },
     votes: { type: Number, default: 0 }

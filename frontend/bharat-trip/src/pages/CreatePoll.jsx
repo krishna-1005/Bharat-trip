@@ -7,7 +7,7 @@ const API = import.meta.env.VITE_API_URL;
 
 export default function CreatePoll() {
   const [tripName, setTripName] = useState("");
-  const [groupSize, setGroupSize] = useState(3);
+  const [groupSize, setGroupSize] = useState(""); // Initialize as empty string
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -34,10 +34,16 @@ export default function CreatePoll() {
 
     setLoading(true);
     try {
+      const payload = { 
+        tripName, 
+        options, 
+        groupSize: groupSize === "" ? undefined : parseInt(groupSize) 
+      };
+      
       const res = await fetch(`${API}/api/polls/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tripName, options, groupSize }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (res.ok) {
@@ -115,16 +121,21 @@ export default function CreatePoll() {
         </div>
 
         <div className="pf-field">
-          <label className="pf-label">Total Team Size (People)</label>
+          <label className="pf-label">Expected number of voters (optional)</label>
           <input 
             type="number" 
             min="2"
             max="100"
+            placeholder="e.g. 5 (Leave blank for dynamic majority)"
             className="auth-input-styled"
             value={groupSize}
-            onChange={(e) => setGroupSize(parseInt(e.target.value) || 2)}
+            onChange={(e) => setGroupSize(e.target.value)}
           />
-          <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>Poll will close when more than half ({Math.floor(groupSize/2) + 1}) vote for one spot.</p>
+          <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+            {groupSize 
+              ? `Poll will close when more than half (${Math.floor(parseInt(groupSize)/2) + 1}) vote for one spot.` 
+              : "Poll will close when someone gets more than 50% of total votes cast."}
+          </p>
         </div>
 
         <div className="pf-field">

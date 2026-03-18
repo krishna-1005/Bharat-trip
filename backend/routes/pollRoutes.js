@@ -16,9 +16,8 @@ router.post("/create", async (req, res) => {
     const newPoll = new Poll({
       pollId,
       tripName,
-      groupSize: groupSize || 3,
+      groupSize: groupSize || undefined,
       options: options.map(opt => ({ name: opt, votes: 0 })),
-      // Optional: createdBy could be added if user is logged in
     });
 
     await newPoll.save();
@@ -56,13 +55,37 @@ router.post("/vote", async (req, res) => {
 
     option.votes += 1;
 
-    // Calculate majority logic based on total group size
-    // Majority is > 50% of the entire group size
-    const winnerOption = poll.options.find(opt => opt.votes > poll.groupSize / 2);
-    
-    if (winnerOption) {
+    const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+    const maxVotes = Math.max(...poll.options.map(o => o.votes));
+    const topOptions = poll.options.filter(o => o.votes === maxVotes);
+
+    let shouldClose = false;
+    let winner = null;
+
+    if (poll.groupSize) {
+      // Logic for fixed group size
+      const majorityWinner = poll.options.find(opt => opt.votes > poll.groupSize / 2);
+      if (majorityWinner) {
+        shouldClose = true;
+        winner = majorityWinner.name;
+      } else if (totalVotes >= poll.groupSize) {
+        shouldClose = true;
+        winner = topOptions.length > 1 ? "Tie" : topOptions[0].name;
+      }
+    } else {
+      // Hybrid Logic: No group size defined
+      if (totalVotes >= 3) {
+        if (topOptions.length === 1) {
+          shouldClose = true;
+          winner = topOptions[0].name;
+        }
+        // If tie (topOptions.length > 1), we don't close yet.
+      }
+    }
+
+    if (shouldClose) {
       poll.isClosed = true;
-      poll.winner = winnerOption.name;
+      poll.winner = winner;
     }
 
     await poll.save();
@@ -71,6 +94,36 @@ router.post("/vote", async (req, res) => {
   } catch (error) {
     console.error("Voting Error:", error);
     res.status(500).json({ error: "Server error recording vote." });
+  }
+});
+
+// Manual override to finalize poll
+router.post("/finalize-now", async (req, res) => {
+  try {
+    const { pollId } = req.body;
+    const poll = await Poll.findOne({ pollId });
+    if (!poll) return res.status(404).json({ error: "Poll not found." });
+
+    if (poll.isClosed) {
+      return res.status(400).json({ error: "Poll is already finalized." });
+    }
+
+    const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+    if (totalVotes < 2) {
+      return res.status(400).json({ error: "At least 2 votes are required to finalize." });
+    }
+
+    const maxVotes = Math.max(...poll.options.map(o => o.votes));
+    const topOptions = poll.options.filter(o => o.votes === maxVotes);
+
+    poll.isClosed = true;
+    poll.winner = topOptions.length > 1 ? "Tie" : topOptions[0].name;
+
+    await poll.save();
+    res.json({ message: "Poll finalized manually", poll });
+  } catch (error) {
+    console.error("Finalize Error:", error);
+    res.status(500).json({ error: "Server error finalizing poll." });
   }
 });
 

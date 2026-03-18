@@ -21,6 +21,9 @@ export default function VotePoll() {
         const data = await res.json();
         if (res.ok) {
           setPoll(data);
+          if (data.isClosed) {
+            setSelectedOption(data.winner);
+          }
           // Check if already voted in this session
           const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "[]");
           if (votedPolls.includes(pollId)) {
@@ -54,7 +57,7 @@ export default function VotePoll() {
       const data = await res.json();
       if (res.ok) {
         setHasVoted(true);
-        setMessage(data.poll.isClosed ? "Majority reached! Poll is now closed. ✨" : "Vote recorded! ✨");
+        setMessage(data.poll.isClosed ? "Decision finalized! ✨" : "Vote recorded! ✨");
         // Save to local storage to prevent duplicate voting
         const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "[]");
         votedPolls.push(pollId);
@@ -72,6 +75,31 @@ export default function VotePoll() {
     }
   };
 
+  const handleFinalizeNow = async () => {
+    if (submitting || poll?.isClosed) return;
+    
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API}/api/polls/finalize-now`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pollId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPoll(data.poll);
+        setMessage("Poll finalized manually! 🏁");
+      } else {
+        alert(data.error || "Failed to finalize poll.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(window.location.href);
     alert("Link copied! ✨");
@@ -79,6 +107,11 @@ export default function VotePoll() {
 
   if (loading) return <div className="page" style={{ justifyContent: 'center', alignItems: 'center' }}><h2>Loading Poll...</h2></div>;
   if (!poll) return <div className="page" style={{ justifyContent: 'center', alignItems: 'center' }}><h2>Poll not found.</h2></div>;
+
+  const totalVotes = poll.options.reduce((sum, o) => sum + o.votes, 0);
+  const maxVotes = Math.max(...poll.options.map(o => o.votes));
+  const topOptions = poll.options.filter(o => o.votes === maxVotes);
+  const isTie = topOptions.length > 1 && totalVotes >= 3;
 
   return (
     <div className="page" style={{ alignItems: 'center', justifyContent: 'center', background: '#030712' }}>
@@ -91,7 +124,7 @@ export default function VotePoll() {
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: '32px'
       }}>
-        {/* Feature 4: Top Message */}
+        {/* Feature 5: Top Message (Hybrid) */}
         {!poll.isClosed && !hasVoted && (
           <div style={{ 
             background: 'rgba(59, 130, 246, 0.1)', 
@@ -104,30 +137,46 @@ export default function VotePoll() {
             fontWeight: '600',
             textAlign: 'center'
           }}>
-            Vote once — decision will be finalized automatically when majority is reached.
+            {poll.groupSize 
+              ? "Decision will be finalized automatically when majority is reached."
+              : "Decision will be finalized after a few votes — no need to wait for everyone."}
           </div>
         )}
 
         <h1 style={{ textAlign: 'center', fontSize: '2.2rem', fontWeight: '800', marginBottom: '10px', color: '#f8fafc', letterSpacing: '-1px' }}>{poll.tripName}</h1>
         
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          {/* Feature 2: Closed Message */}
+          {/* Feature 3: Closed Message */}
           {poll.isClosed ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
-                <div style={{ display: 'inline-block', padding: '6px 16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '100px', color: '#ef4444', fontWeight: '800', fontSize: '12px' }}>
-                    VOTING CLOSED
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', animation: 'fadeIn 0.8s ease' }}>
+                <div style={{ padding: '20px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '20px', width: '100%' }}>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 5px' }}>
+                        {poll.winner === "Tie" ? "Final Decision: It's a Tie! 🤝" : `Final Decision: ${poll.winner} ✅`}
+                    </h2>
                 </div>
-                <p style={{ color: '#ef4444', fontWeight: '700' }}>Decision Finalized</p>
+                <div style={{ display: 'inline-block', padding: '6px 16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '100px', color: '#ef4444', fontWeight: '800', fontSize: '12px', letterSpacing: '1px' }}>
+                    VOTING CLOSED — DECISION FINALIZED
+                </div>
             </div>
           ) : (
             <div>
                 <p style={{ color: '#94a3b8', marginBottom: '8px' }}>
                 {hasVoted ? "You have already voted" : "Tap your favorite destination to vote"}
                 </p>
-                {/* Feature 6: Voting Progress */}
-                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>
-                    {poll.options.reduce((sum, o) => sum + o.votes, 0)} of {poll.groupSize} group members have voted
-                </span>
+                {/* Feature 6: Voting Progress (Hybrid) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>
+                        {poll.groupSize 
+                            ? `${totalVotes} of ${poll.groupSize} group members have voted`
+                            : `${totalVotes} votes received`}
+                    </span>
+                    {/* Tie message for dynamic polls */}
+                    {!poll.groupSize && isTie && (
+                        <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: '700' }}>
+                            It's a tie — one more vote needed ⚖️
+                        </span>
+                    )}
+                </div>
             </div>
           )}
         </div>
@@ -187,8 +236,28 @@ export default function VotePoll() {
           ))}
         </div>
 
+        {/* Feature 4: Manual Override Button */}
+        {!poll.isClosed && totalVotes >= 2 && (
+            <button 
+                className="btn-premium outline" 
+                onClick={handleFinalizeNow}
+                disabled={submitting}
+                style={{ 
+                    width: '100%', 
+                    justifyContent: 'center', 
+                    height: '48px', 
+                    borderRadius: '12px',
+                    marginTop: '20px',
+                    fontSize: '0.9rem',
+                    color: '#94a3b8'
+                }}
+            >
+                {submitting ? "Finalizing..." : "Finalize Decision Now 🏁"}
+            </button>
+        )}
+
         {(hasVoted || poll.isClosed) && (
-          <div style={{ marginTop: '32px', textAlign: 'center', animation: 'fadeIn 0.8s ease' }}>
+          <div style={{ marginTop: '24px', textAlign: 'center', animation: 'fadeIn 0.8s ease' }}>
              <button 
                 className="btn-premium primary" 
                 onClick={() => navigate(`/poll-results/${pollId}`)} 

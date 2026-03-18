@@ -71,9 +71,14 @@ export default function PollResults() {
                 overflow: 'hidden',
                 animation: 'fadeIn 0.8s ease'
             }}>
-                <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '5rem', opacity: '0.1' }}>🎉</div>
-                <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 8px' }}>Final Decision: {finalDecision} ✅</h2>
-                <p style={{ color: '#60a5fa', margin: 0, fontWeight: '800', fontSize: '1.4rem', letterSpacing: '1px' }}>Trip Finalized 🎉</p>
+                <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '5rem', opacity: '0.1' }}>{finalDecision === "Tie" ? "🤝" : "🎉"}</div>
+                <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 8px' }}>
+                    {finalDecision === "Tie" ? "Final Decision: It's a Tie! 🤝" : `Final Decision: ${finalDecision} ✅`}
+                </h2>
+                <p style={{ color: '#60a5fa', margin: 0, fontWeight: '800', fontSize: '1.4rem', letterSpacing: '1px' }}>
+                    {finalDecision === "Tie" ? "No Clear Majority" : "Trip Finalized 🎉"}
+                </p>
+                {finalDecision === "Tie" && <p style={{ color: '#94a3b8', marginTop: '10px', fontSize: '0.9rem' }}>The group is split! You might need to revote or pick manually.</p>}
             </div>
         )}
 
@@ -159,17 +164,19 @@ export default function PollResults() {
           </button>
           <button 
             className="btn-premium primary" 
+            disabled={finalDecision === "Tie"}
             style={{ 
                 justifyContent: 'center', 
                 height: '56px', 
                 borderRadius: '16px', 
                 fontWeight: '700',
-                background: '#3b82f6',
-                boxShadow: '0 10px 20px rgba(59, 130, 246, 0.2)'
+                background: finalDecision === "Tie" ? '#475569' : '#3b82f6',
+                boxShadow: finalDecision === "Tie" ? 'none' : '0 10px 20px rgba(59, 130, 246, 0.2)',
+                cursor: finalDecision === "Tie" ? 'not-allowed' : 'pointer'
             }}
             onClick={() => navigate("/planner", { state: { prefilledCity: finalDecision } })}
           >
-            Plan Trip Now ✨
+            {finalDecision === "Tie" ? "Manual Pick Required" : "Plan Trip Now ✨"}
           </button>
         </div>
       </div>
