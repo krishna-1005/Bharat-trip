@@ -95,7 +95,7 @@ export default function VotePoll() {
       }}>
         <h1 style={{ textAlign: 'center', fontSize: '2.2rem', fontWeight: '800', marginBottom: '10px', color: '#f8fafc', letterSpacing: '-1px' }}>{poll.tripName}</h1>
         <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '32px' }}>
-          {hasVoted ? "Thanks for your input!" : "Tap your favorite destination to vote"}
+          {hasVoted ? "You have already voted" : "Tap your favorite destination to vote"}
         </p>
 
         {message && (

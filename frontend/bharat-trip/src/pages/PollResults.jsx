@@ -72,13 +72,12 @@ export default function PollResults() {
                 animation: 'fadeIn 0.8s ease'
             }}>
                 <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '5rem', opacity: '0.1' }}>🎉</div>
-                <span style={{ fontSize: '12px', fontWeight: '800', color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '2px', display: 'block', marginBottom: '8px' }}>Winning Destination</span>
-                <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 8px' }}>{finalDecision}</h2>
-                <p style={{ color: '#94a3b8', margin: 0 }}>Pack your bags! This destination has been finalized by the group.</p>
+                <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 8px' }}>{finalDecision} Selected ✅</h2>
+                <p style={{ color: '#94a3b8', margin: 0, fontWeight: '700', fontSize: '1.2rem' }}>Trip Finalized 🎉</p>
             </div>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '40px' }}>
           {poll.options.sort((a, b) => b.votes - a.votes).map((opt, i) => {
             const percentage = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
             const isWinner = opt.name === finalDecision;
@@ -94,11 +93,10 @@ export default function PollResults() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <span style={{ fontWeight: '700', fontSize: '1.2rem', color: isWinner ? '#f8fafc' : '#cbd5e1' }}>{opt.name}</span>
-                    {isWinner && <span style={{ fontSize: '14px' }}>🥇</span>}
+                    <span style={{ fontSize: '0.9rem', color: '#64748b' }}>— {opt.votes} {opt.votes === 1 ? 'vote' : 'votes'}</span>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontWeight: '800', color: isWinner ? '#60a5fa' : '#94a3b8', fontSize: '1.1rem' }}>{percentage}%</div>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>{opt.votes} votes</div>
                   </div>
                 </div>
 
@@ -114,6 +112,32 @@ export default function PollResults() {
               </div>
             );
           })}
+        </div>
+
+        <div style={{ marginBottom: '40px', padding: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '12px', textAlign: 'center', fontWeight: '600' }}>Invite more friends to vote:</p>
+            <div style={{ position: 'relative' }}>
+                <input 
+                    readOnly 
+                    value={`${window.location.origin}/vote/${pollId}`} 
+                    className="auth-input-styled" 
+                    style={{ paddingRight: '100px', cursor: 'pointer', fontSize: '0.85rem' }}
+                    onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/vote/${pollId}`);
+                        alert("Vote link copied! ✨");
+                    }}
+                />
+                <button 
+                    className="btn-premium primary" 
+                    style={{ position: 'absolute', right: '5px', top: '5px', height: '44px', padding: '0 15px', fontSize: '0.8rem' }}
+                    onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/vote/${pollId}`);
+                        alert("Vote link copied! ✨");
+                    }}
+                >
+                    Copy
+                </button>
+            </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
