@@ -15,7 +15,7 @@ router.post("/generate", async (req, res) => {        // ✅ async added
     return res.status(400).json({ error: "Request body missing" });
   }
 
-  const { days, budget, interests } = req.body;
+  const { city, days, budget, interests } = req.body;
 
   if (!days || !budget) {
     return res.status(400).json({ error: "days and budget are required" });
@@ -41,7 +41,7 @@ router.post("/generate", async (req, res) => {        // ✅ async added
       await UsageLog.create({
         action: "generate_plan",
         userId: loggedUserId,
-        details: { days, budget, interests },
+        details: { city, days, budget, interests },
         ipAddress: ip,
         userAgent: req.headers['user-agent']
       });
@@ -50,6 +50,7 @@ router.post("/generate", async (req, res) => {        // ✅ async added
     }
 
     const plan = await generatePlan({                 // ✅ await added
+      city:      city || "Bengaluru",
       days:      parseInt(days),
       budget,
       interests: interests || []

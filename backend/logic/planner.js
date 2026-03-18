@@ -160,15 +160,47 @@ async function updateOSM() {
   } catch (e) {}
 }
 
-async function generatePlan({ days = 2, budget = "low", interests = [], travelerType = "solo", pace = "moderate" }) {
+const CITY_COORDINATES = {
+  "Bengaluru": { lat: 12.9716, lng: 77.5946 },
+  "Mumbai": { lat: 19.0760, lng: 72.8777 },
+  "Delhi": { lat: 28.6139, lng: 77.2090 },
+  "Jaipur": { lat: 26.9124, lng: 75.7873 },
+  "Goa": { lat: 15.2993, lng: 74.1240 },
+  "Hyderabad": { lat: 17.3850, lng: 78.4867 },
+  "Chennai": { lat: 13.0827, lng: 80.2707 },
+  "Kolkata": { lat: 22.5726, lng: 88.3639 },
+  "Agra": { lat: 27.1767, lng: 78.0081 },
+  "Udaipur": { lat: 24.5854, lng: 73.7125 }
+};
+
+async function generatePlan({ city = "Bengaluru", days = 2, budget = "low", interests = [], travelerType = "solo", pace = "moderate" }) {
   days = Math.min(Math.max(parseInt(days) || 2, 1), 30);
   
-  if (allPlacesPool.length < 10) {
-      loadData();
+  const coords = CITY_COORDINATES[city] || CITY_COORDINATES["Bengaluru"];
+  
+  // Filter local pool by city
+  let cityPool = allPlacesPool.filter(p => 
+    p.area?.toLowerCase() === city.toLowerCase() || 
+    p.name.toLowerCase().includes(city.toLowerCase())
+  );
+
+  // If pool for this city is small, try fetching from OSM
+  if (cityPool.length < 15) {
+    try {
+      const osmPlaces = await fetchOSMPlaces(coords.lat, coords.lng);
+      cityPool = [...cityPool, ...osmPlaces];
+    } catch (e) {
+      console.warn("OSM fetch failed for city", city);
+    }
   }
 
-  const finalPool = getPool(allPlacesPool, budget, interests);
-  console.log(`🎯 Generated pool of ${finalPool.length} places for ${days} days (${travelerType}, ${pace} pace)`);
+  // Final fallback if still empty
+  if (cityPool.length === 0) {
+    cityPool = [...EMERGENCY_POOL];
+  }
+
+  const finalPool = getPool(cityPool, budget, interests);
+  console.log(`🎯 Generated pool of ${finalPool.length} places for ${city} (${days} days)`);
 
   // Pace adjustments
   let placesPerDay = 3;
@@ -180,7 +212,7 @@ async function generatePlan({ days = 2, budget = "low", interests = [], traveler
   try {
     const candidates = finalPool.slice(0, 40);
     aiItineraryMap = await analyzeAndRefinePlan({
-      days, budget, interests, travelerType, pace, candidates
+      city, days, budget, interests, travelerType, pace, candidates
     });
   } catch (err) {
     console.error("AI Refinement failed, falling back to heuristics");
@@ -288,7 +320,7 @@ async function generatePlan({ days = 2, budget = "low", interests = [], traveler
   }
 
   return {
-    city:          "Bengaluru",
+    city,
     days,
     budget,
     interests,

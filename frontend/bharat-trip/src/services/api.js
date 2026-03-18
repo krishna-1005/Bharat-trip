@@ -20,7 +20,14 @@ export async function generatePlan(data) {
   const res = await fetch(`${PLAN_API_URL}/generate`, {
     method: "POST",
     headers,
-    body: JSON.stringify(data)
+    body: JSON.stringify({
+      city: data.city,
+      days: data.days,
+      budget: data.budget,
+      interests: data.interests,
+      travelerType: data.travelerType,
+      pace: data.pace
+    })
   });
 
   const json = await res.json();

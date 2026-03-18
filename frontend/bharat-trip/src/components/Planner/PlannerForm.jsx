@@ -6,6 +6,7 @@ import "../Planner/plannerForm.css";
 function PlannerForm({ onPlanGenerated }) {
   const { t, formatPrice } = useSettings();
   const [step, setStep] = useState(1);
+  const [city, setCity] = useState("Bengaluru");
   const [days, setDays] = useState(2);
   const [budget, setBudget] = useState("low");
   const [interests, setInterests] = useState([]);
@@ -25,6 +26,7 @@ function PlannerForm({ onPlanGenerated }) {
     setLoading(true);
     try {
       const result = await generatePlan({ 
+        city,
         days, 
         budget, 
         interests,
@@ -40,6 +42,11 @@ function PlannerForm({ onPlanGenerated }) {
       setLoading(false);
     }
   };
+
+  const cityOptions = [
+    "Bengaluru", "Mumbai", "Delhi", "Jaipur", "Goa", 
+    "Hyderabad", "Chennai", "Kolkata", "Agra", "Udaipur"
+  ];
 
   const toggleInterest = (value) => {
     setInterests(prev =>
@@ -95,6 +102,19 @@ function PlannerForm({ onPlanGenerated }) {
               <span className="pf-step-num">01</span>
               <h2>The Basics</h2>
               <p>How long is your journey and who's coming along?</p>
+            </div>
+
+            <div className="pf-field">
+              <label className="pf-label">Destination City</label>
+              <select 
+                className="pf-city-select"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              >
+                {cityOptions.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
             </div>
 
             <div className="pf-field">

@@ -67,6 +67,31 @@
   margin-bottom: 12px;
 }
 
+.pf-city-select {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  transition: all 0.2s;
+}
+
+.pf-city-select:focus {
+  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pf-city-select option {
+  background: #0f172a;
+  color: #fff;
+}
+
 /* ── DAYS ROW ── */
 .pf-days-row {
   display: flex;

@@ -40,16 +40,22 @@ const KNOWN_PLACES = [
   "Banashankari Temple", "St. Mary's Basilica",
 ];
 
-async function fetchOSMPlaces() {
+async function fetchOSMPlaces(lat, lng) {
+  const radius = 0.2; // roughly 20km box
+  const minLat = lat - radius;
+  const maxLat = lat + radius;
+  const minLng = lng - radius;
+  const maxLng = lng + radius;
+
   const query = `
   [out:json][timeout:25];
   (
-    node["tourism"="attraction"](12.8,77.4,13.3,77.9);
-    node["tourism"="museum"](12.8,77.4,13.3,77.9);
-    node["leisure"="park"]["name"](12.8,77.4,13.3,77.9);
-    node["historic"]["name"](12.8,77.4,13.3,77.9);
-    node["amenity"="place_of_worship"]["name"](12.8,77.4,13.3,77.9);
-    node["natural"="peak"]["name"](12.8,77.4,13.3,77.9);
+    node["tourism"="attraction"](${minLat},${minLng},${maxLat},${maxLng});
+    node["tourism"="museum"](${minLat},${minLng},${maxLat},${maxLng});
+    node["leisure"="park"]["name"](${minLat},${minLng},${maxLat},${maxLng});
+    node["historic"]["name"](${minLat},${minLng},${maxLat},${maxLng});
+    node["amenity"="place_of_worship"]["name"](${minLat},${minLng},${maxLat},${maxLng});
+    node["natural"="peak"]["name"](${minLat},${minLng},${maxLat},${maxLng});
   );
   out;
   `;

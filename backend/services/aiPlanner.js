@@ -2,7 +2,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-async function analyzeAndRefinePlan({ days, budget, interests, travelerType, pace, candidates }) {
+async function analyzeAndRefinePlan({ city, days, budget, interests, travelerType, pace, candidates }) {
   if (!process.env.GEMINI_API_KEY) {
     console.warn("⚠️ GEMINI_API_KEY missing, skipping AI refinement");
     return null;
@@ -11,7 +11,7 @@ async function analyzeAndRefinePlan({ days, budget, interests, travelerType, pac
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const systemPrompt = `
-You are an expert Bengaluru travel guide. Analyze the provided list of potential places and create a logical, high-quality itinerary.
+You are an expert ${city} travel guide. Analyze the provided list of potential places and create a logical, high-quality itinerary for ${city}.
 
 USER REQUIREMENTS:
 - Duration: ${days} days
