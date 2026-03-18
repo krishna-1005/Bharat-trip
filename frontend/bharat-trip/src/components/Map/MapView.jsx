@@ -15,6 +15,7 @@ import ResizeMap from "./ResizeMap";
 import { DAY_COLORS } from "../../constants/dayColors";
 import PlaceTooltip from "./PlaceTooltip";
 import HoverPlaceCard from "./HoverPlaceCard";
+import PlaceImage from "../PlaceImage";
 import L from "leaflet";
 
 // Create a special icon for user location
