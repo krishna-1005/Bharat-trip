@@ -132,9 +132,13 @@ function MapView({ plan, isTracking, onHover }) {
     };
   }, [isTracking]);
 
-  // Fetch road route whenever userLocation or firstTarget changes
+  // Memoize allPlaces so FitBounds doesn't re-trigger on every render (like hover)
+  const allPlaces = useMemo(() => {
+    const days = plan?.itinerary ? Object.keys(plan.itinerary) : [];
+    return days.flatMap(d => plan.itinerary[d]?.places || []);
+  }, [plan?.itinerary]);
+
   const days = plan?.itinerary ? Object.keys(plan.itinerary) : [];
-  const allPlaces = days.flatMap(d => plan.itinerary[d]?.places || []);
   const targetPlaces = activeDay === "all" 
     ? allPlaces 
     : (plan.itinerary[days[activeDay - 1]]?.places || []);
