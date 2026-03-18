@@ -37,6 +37,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
     if (!loc) return;
     const singlePlacePlan = {
       city: loc.city || "India",
+      coordinates: { lat: loc.lat, lng: loc.lng },
       days: 1,
       itinerary: {
         "Day 1": {
