@@ -36,7 +36,7 @@ function Planner() {
   }, []);
 
   return (
-    <div className="planner-page">
+    <div className="planner-onboarding-page">
       {/* Cinematic Background */}
       <div className="planner-hero-bg">
           <div className="planner-bg-overlay"></div>

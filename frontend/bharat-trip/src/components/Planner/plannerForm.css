@@ -1,147 +1,151 @@
 /* =============================================
-   PLANNER FORM — plannerForm.css (PREMIUM REDESIGN)
+   PLANNER FORM — plannerForm.css (REFINED)
 ============================================= */
 
 .pf-wrap {
   display: flex;
   flex-direction: column;
-  min-height: 500px;
+  min-height: 480px;
 }
 
 /* ── PROGRESS BAR ── */
 .pf-progress-bar {
-  height: 4px;
+  height: 6px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 2px;
-  margin-bottom: 40px;
+  border-radius: 10px;
+  margin-bottom: 48px;
   overflow: hidden;
+  position: relative;
 }
 
 .pf-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 10px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
 }
 
 /* ── STEP HEADER ── */
 .pf-step-header {
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+  text-align: left;
 }
 
 .pf-step-num {
   font-family: 'Syne', sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  color: var(--accent-blue);
+  color: #3b82f6;
   letter-spacing: 2px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   display: block;
 }
 
 .pf-step-header h2 {
   font-family: 'Syne', sans-serif;
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 800;
-  margin: 0 0 8px;
+  margin: 0 0 12px;
   color: #fff;
+  letter-spacing: -1px;
 }
 
 .pf-step-header p {
   font-size: 15px;
-  color: var(--text-dim);
+  color: rgba(255, 255, 255, 0.5);
   margin: 0;
 }
 
-/* ── FIELDS & GRIDS ── */
+/* ── FIELDS ── */
 .pf-field {
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 .pf-label {
   display: block;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-dim);
-  margin-bottom: 12px;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 16px;
 }
 
+/* ── CITY SELECT ── */
 .pf-city-select {
   width: 100%;
-  padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  padding: 18px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   color: #fff;
   font-size: 16px;
   font-weight: 600;
   outline: none;
   cursor: pointer;
   appearance: none;
-  transition: all 0.2s;
+  transition: all 0.3s;
 }
 
 .pf-city-select:focus {
-  border-color: var(--accent-blue);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.pf-city-select option {
-  background: #0f172a;
-  color: #fff;
+  border-color: #3b82f6;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 /* ── DAYS ROW ── */
 .pf-days-row {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .pf-day-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--text-dim);
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
   font-family: 'Syne', sans-serif;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pf-day-btn:hover {
-  border-color: var(--accent-blue);
+  border-color: #3b82f6;
   color: #fff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .pf-day-btn.active {
-  background: var(--accent-blue);
-  border-color: var(--accent-blue);
+  background: #3b82f6;
+  border-color: #3b82f6;
   color: #fff;
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
 }
 
 .pf-custom-days {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 0 16px;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 0 20px;
 }
 
 .pf-days-input {
-  width: 40px;
+  width: 44px;
   background: transparent;
   border: none;
   color: #fff;
   font-family: 'Syne', sans-serif;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   outline: none;
   text-align: center;
@@ -149,20 +153,21 @@
 
 .pf-custom-days span {
   font-size: 13px;
-  color: var(--text-dim);
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
 }
 
 /* ── GRID LAYOUTS ── */
 .pf-traveler-grid, .pf-budget-grid, .pf-pace-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
 .pf-traveler-card, .pf-budget-card, .pf-pace-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -171,188 +176,124 @@
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+  overflow: hidden;
 }
 
 .pf-traveler-card:hover, .pf-budget-card:hover, .pf-pace-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(59, 130, 246, 0.5);
   transform: translateY(-4px);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
 }
 
 .pf-traveler-card.active, .pf-budget-card.active, .pf-pace-card.active {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 0 1px var(--accent-blue), 0 10px 25px rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.12);
+  border-color: #3b82f6;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
 }
 
-.pf-traveler-card.active::after, .pf-budget-card.active::after, .pf-pace-card.active::after {
-  content: '✓';
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: var(--accent-blue);
-  color: white;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 800;
+.pf-card-icon {
+  font-size: 28px;
+  margin-bottom: 16px;
+  display: block;
 }
 
-@media (max-width: 600px) {
-  .pf-traveler-grid, .pf-budget-grid, .pf-pace-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .pf-traveler-card, .pf-budget-card, .pf-pace-card {
-    padding: 16px;
-  }
-
-  .pf-card-icon {
-    font-size: 20px;
-    margin-bottom: 8px;
-  }
-}
-
-@media (max-width: 400px) {
-  .pf-traveler-grid, .pf-budget-grid, .pf-pace-grid {
-    grid-template-columns: 1fr;
-  }
-}
 .pf-card-label {
   display: block;
-  font-weight: 700;
+  font-weight: 800;
   color: #fff;
-  font-size: 14px;
+  font-size: 16px;
   margin-bottom: 4px;
 }
 
 .pf-card-desc {
-  font-size: 12px;
-  color: var(--text-dim);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.4;
 }
 
 /* ── INTERESTS ── */
 .pf-interest-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
 }
 
 .pf-interest-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 100px;
-  color: var(--text-dim);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
 }
 
 .pf-interest-pill:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #3b82f6;
+  color: #fff;
 }
 
 .pf-interest-pill.active {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: var(--accent-blue);
+  background: #3b82f6;
+  border-color: #3b82f6;
   color: #fff;
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
 }
 
 /* ── FOOTER ── */
 .pf-footer {
   margin-top: auto;
-  padding-top: 40px;
+  padding-top: 48px;
   display: flex;
-  gap: 16px;
+  gap: 20px;
 }
 
 .pf-back-btn {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-dim);
-  padding: 14px 28px;
-  border-radius: 14px;
+  color: #fff;
+  padding: 16px 32px;
+  border-radius: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s;
 }
 
 .pf-back-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-4px);
 }
 
 .pf-next-btn, .pf-gen-btn {
   flex: 1;
-  background: var(--accent-blue);
+  background: #3b82f6;
   color: #fff;
   border: none;
-  padding: 14px 28px;
-  border-radius: 14px;
-  font-weight: 700;
-  font-size: 15px;
+  padding: 16px 32px;
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 12px 24px rgba(59, 130, 246, 0.3);
 }
 
 .pf-next-btn:hover, .pf-gen-btn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   filter: brightness(1.1);
-  box-shadow: 0 15px 30px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
 }
 
 .pf-gen-btn.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 0.8;
-}
-
-.pf-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: pf-spin 0.8s linear infinite;
-}
-
-@keyframes pf-spin {
-  to { transform: rotate(360deg); }
-}
-
-.pf-error-msg {
-  color: #f87171;
-  font-size: 13px;
-  margin-top: 20px;
-  text-align: center;
-}
-
-/* Animations */
-.animate-in {
-  animation: pf-fade-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes pf-fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  background: #1e40af;
+  cursor: not-allowed;
 }
 
 @media (max-width: 600px) {
   .pf-traveler-grid, .pf-budget-grid, .pf-pace-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 }
