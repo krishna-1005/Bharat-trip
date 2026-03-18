@@ -6,16 +6,21 @@ const generatePlan = require("../logic/planner");
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 router.post("/", async (req, res) => {
   const { message, history } = req.body;
   if (!message || typeof message !== "string") {
     return res.json({ type: "chat", reply: "Please type a message." });
   }
 
-  console.log(`💬 Chat request: "${message}"`);
+  // API Key Health Check (Internal log only)
+  console.log("🔑 API Status:", { 
+    hasGemini: !!process.env.GEMINI_API_KEY, 
+    hasGroq: !!process.env.GROQ_API_KEY 
+  });
 
   try {
+    // ... (rest of the Gemini logic)
+
     // 1. Prepare a single robust prompt for Gemini instead of startChat history
     // This avoids "alternating role" errors which often break Gemini chats
     const chatContext = (history || [])
@@ -104,9 +109,29 @@ Assistant Response:`;
         return res.json({ type: "chat", reply: groqChat.choices[0].message.content });
     } catch (e2) {
         console.error("❌ All AI models failed:", e2.message);
+        
+        // 3. FINAL FALLBACK: Local Intelligence (No API needed)
+        const msg = message.toLowerCase();
+        if (msg.includes("delhi") || msg.includes("plan") || msg.includes("trip")) {
+          const city = msg.includes("delhi") ? "Delhi" : (msg.includes("mumbai") ? "Mumbai" : "Bengaluru");
+          const plan = await generatePlan({ city, days: 2, budget: "medium", interests: ["Sightseeing"] });
+          return res.json({
+            type: "trip",
+            reply: `I'm currently in "Offline Mode" 🤖, but I can still help! I've generated a default 2-day plan for **${city}** for you.`,
+            plan
+          });
+        }
+
+        if (msg.includes("hi") || msg.includes("hello")) {
+          return res.json({ 
+            type: "chat", 
+            reply: "Hi there! 👋 I'm currently having trouble reaching my AI brain, but I can still generate quick plans if you mention a city like **Delhi** or **Mumbai**!" 
+          });
+        }
+
         res.status(200).json({ 
           type: "chat", 
-          reply: "I'm having a bit of trouble connecting to my AI brain right now. 🤖\n\nIt might be because my API keys have reached their limit. You can still use the **Planner** tab to build your trip manually!" 
+          reply: "I'm having a bit of trouble connecting to my AI brain right now. 🤖\n\nTry saying something like **'I want a Delhi plan'** - I can handle that even in offline mode!" 
         });
     }
   }
