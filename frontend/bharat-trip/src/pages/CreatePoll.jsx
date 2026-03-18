@@ -7,6 +7,7 @@ const API = import.meta.env.VITE_API_URL;
 
 export default function CreatePoll() {
   const [tripName, setTripName] = useState("");
+  const [groupSize, setGroupSize] = useState(3);
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -36,7 +37,7 @@ export default function CreatePoll() {
       const res = await fetch(`${API}/api/polls/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tripName, options }),
+        body: JSON.stringify({ tripName, options, groupSize }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -111,6 +112,19 @@ export default function CreatePoll() {
             value={tripName}
             onChange={(e) => setTripName(e.target.value)}
           />
+        </div>
+
+        <div className="pf-field">
+          <label className="pf-label">Total Team Size (People)</label>
+          <input 
+            type="number" 
+            min="2"
+            max="100"
+            className="auth-input-styled"
+            value={groupSize}
+            onChange={(e) => setGroupSize(parseInt(e.target.value) || 2)}
+          />
+          <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>Poll will close when more than half ({Math.floor(groupSize/2) + 1}) vote for one spot.</p>
         </div>
 
         <div className="pf-field">

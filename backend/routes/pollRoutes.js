@@ -7,7 +7,7 @@ const protect = require("../middleware/protect");
 // Create a new poll
 router.post("/create", async (req, res) => {
   try {
-    const { tripName, options } = req.body;
+    const { tripName, options, groupSize } = req.body;
     if (!tripName || !options || options.length < 2) {
       return res.status(400).json({ error: "Trip name and at least 2 options are required." });
     }
@@ -16,6 +16,7 @@ router.post("/create", async (req, res) => {
     const newPoll = new Poll({
       pollId,
       tripName,
+      groupSize: groupSize || 3,
       options: options.map(opt => ({ name: opt, votes: 0 })),
       // Optional: createdBy could be added if user is logged in
     });
@@ -55,14 +56,11 @@ router.post("/vote", async (req, res) => {
 
     option.votes += 1;
 
-    // Calculate majority logic
-    const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+    // Calculate majority logic based on total group size
+    // Majority is > 50% of the entire group size
+    const winnerOption = poll.options.find(opt => opt.votes > poll.groupSize / 2);
     
-    // Check if any option has more than 50% of total votes
-    // We require at least 2 votes to avoid closing immediately on the first vote
-    const winnerOption = poll.options.find(opt => opt.votes > totalVotes / 2);
-    
-    if (winnerOption && totalVotes >= 2) {
+    if (winnerOption) {
       poll.isClosed = true;
       poll.winner = winnerOption.name;
     }

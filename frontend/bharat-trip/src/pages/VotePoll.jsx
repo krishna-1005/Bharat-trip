@@ -126,7 +126,7 @@ export default function VotePoll() {
                 </p>
                 {/* Feature 6: Voting Progress */}
                 <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>
-                    {poll.options.reduce((sum, o) => sum + o.votes, 0)} votes received so far
+                    {poll.options.reduce((sum, o) => sum + o.votes, 0)} of {poll.groupSize} group members have voted
                 </span>
             </div>
           )}
