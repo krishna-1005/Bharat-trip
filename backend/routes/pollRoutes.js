@@ -39,4 +39,24 @@ router.get("/:pollId", async (req, res) => {
   }
 });
 
+// Submit a vote
+router.post("/vote", async (req, res) => {
+  try {
+    const { pollId, optionName } = req.body;
+    const poll = await Poll.findOne({ pollId });
+    if (!poll) return res.status(404).json({ error: "Poll not found." });
+
+    const option = poll.options.find(opt => opt.name === optionName);
+    if (!option) return res.status(400).json({ error: "Option not found." });
+
+    option.votes += 1;
+    await poll.save();
+
+    res.json({ message: "Vote recorded successfully", poll });
+  } catch (error) {
+    console.error("Voting Error:", error);
+    res.status(500).json({ error: "Server error recording vote." });
+  }
+});
+
 module.exports = router;
