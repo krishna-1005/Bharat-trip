@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import "../../utils/fixLeafletIcons";
+import "../utils/fixLeafletIcons";
 import PlaceImage from "../components/PlaceImage";
 import { useSettings } from "../context/SettingsContext";
 import "./results.css"; // Reuse some styles
