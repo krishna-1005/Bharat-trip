@@ -7,7 +7,7 @@ const protect = require("../middleware/protect");
 // Create a new poll
 router.post("/create", async (req, res) => {
   try {
-    const { tripName, options, groupSize } = req.body;
+    const { tripName, options, groupSize, userId } = req.body;
     if (!tripName || !options || options.length < 2) {
       return res.status(400).json({ error: "Trip name and at least 2 options are required." });
     }
@@ -16,8 +16,9 @@ router.post("/create", async (req, res) => {
     const newPoll = new Poll({
       pollId,
       tripName,
-      groupSize: groupSize || undefined,
+      groupSize: groupSize === "" ? undefined : groupSize,
       options: options.map(opt => ({ name: opt, votes: 0 })),
+      createdBy: userId || undefined
     });
 
     await newPoll.save();
@@ -62,25 +63,21 @@ router.post("/vote", async (req, res) => {
     let shouldClose = false;
     let winner = null;
 
-    if (poll.groupSize) {
-      // Logic for fixed group size
-      const majorityWinner = poll.options.find(opt => opt.votes > poll.groupSize / 2);
-      if (majorityWinner) {
-        shouldClose = true;
-        winner = majorityWinner.name;
-      } else if (totalVotes >= poll.groupSize) {
-        shouldClose = true;
-        winner = topOptions.length > 1 ? "Tie" : topOptions[0].name;
-      }
-    } else {
-      // Hybrid Logic: No group size defined
-      if (totalVotes >= 3) {
-        if (topOptions.length === 1) {
-          shouldClose = true;
-          winner = topOptions[0].name;
+    // RULE: NEVER close automatically on a tie
+    if (topOptions.length === 1) {
+        if (poll.groupSize) {
+            // Condition A: Fixed Group Size
+            if (maxVotes > poll.groupSize / 2 || totalVotes >= poll.groupSize) {
+                shouldClose = true;
+                winner = topOptions[0].name;
+            }
+        } else {
+            // Condition B: Dynamic logic (at least 3 votes)
+            if (totalVotes >= 3) {
+                shouldClose = true;
+                winner = topOptions[0].name;
+            }
         }
-        // If tie (topOptions.length > 1), we don't close yet.
-      }
     }
 
     if (shouldClose) {
@@ -116,8 +113,9 @@ router.post("/finalize-now", async (req, res) => {
     const maxVotes = Math.max(...poll.options.map(o => o.votes));
     const topOptions = poll.options.filter(o => o.votes === maxVotes);
 
+    // Pick the first highest voted option
     poll.isClosed = true;
-    poll.winner = topOptions.length > 1 ? "Tie" : topOptions[0].name;
+    poll.winner = topOptions[0].name;
 
     await poll.save();
     res.json({ message: "Poll finalized manually", poll });

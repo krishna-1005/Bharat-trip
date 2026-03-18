@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../styles/global.css";
 import "./planner.css"; // Reuse some planner styles
 
 const API = import.meta.env.VITE_API_URL;
 
 export default function CreatePoll() {
+  const { user } = useAuth();
   const [tripName, setTripName] = useState("");
   const [groupSize, setGroupSize] = useState(""); // Initialize as empty string
   const [option, setOption] = useState("");
@@ -37,7 +39,8 @@ export default function CreatePoll() {
       const payload = { 
         tripName, 
         options, 
-        groupSize: groupSize === "" ? undefined : parseInt(groupSize) 
+        groupSize: groupSize === "" ? undefined : parseInt(groupSize),
+        userId: user?.uid || user?.id // Try both for compatibility
       };
       
       const res = await fetch(`${API}/api/polls/create`, {

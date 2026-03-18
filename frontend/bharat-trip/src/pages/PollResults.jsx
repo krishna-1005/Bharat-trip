@@ -36,8 +36,9 @@ export default function PollResults() {
 
   const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
   const maxVotes = Math.max(...poll.options.map(o => o.votes));
-  const winners = poll.options.filter(o => o.votes === maxVotes && o.votes > 0);
-  const finalDecision = poll.winner || (winners.length === 1 ? winners[0].name : null);
+  const topOptions = poll.options.filter(o => o.votes === maxVotes && o.votes > 0);
+  const isTie = topOptions.length > 1;
+  const finalDecision = poll.winner;
 
   return (
     <div className="page" style={{ alignItems: 'center', justifyContent: 'center', background: '#030712' }}>
@@ -59,7 +60,8 @@ export default function PollResults() {
             <p style={{ color: '#94a3b8', fontSize: '1.1rem' }}>Total Votes Cast: <strong>{totalVotes}</strong></p>
         </div>
 
-        {finalDecision && (
+        {/* Closed State */}
+        {poll.isClosed && finalDecision && (
             <div style={{ 
                 background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15))', 
                 border: '1px solid rgba(59, 130, 246, 0.3)',
@@ -71,14 +73,40 @@ export default function PollResults() {
                 overflow: 'hidden',
                 animation: 'fadeIn 0.8s ease'
             }}>
-                <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '5rem', opacity: '0.1' }}>{finalDecision === "Tie" ? "🤝" : "🎉"}</div>
-                <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 8px' }}>
-                    {finalDecision === "Tie" ? "Final Decision: It's a Tie! 🤝" : `Final Decision: ${finalDecision} ✅`}
-                </h2>
-                <p style={{ color: '#60a5fa', margin: 0, fontWeight: '800', fontSize: '1.4rem', letterSpacing: '1px' }}>
-                    {finalDecision === "Tie" ? "No Clear Majority" : "Trip Finalized 🎉"}
-                </p>
-                {finalDecision === "Tie" && <p style={{ color: '#94a3b8', marginTop: '10px', fontSize: '0.9rem' }}>The group is split! You might need to revote or pick manually.</p>}
+                <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '5rem', opacity: '0.1' }}>🎉</div>
+                <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 8px' }}>Final Decision: {finalDecision} ✅</h2>
+                <p style={{ color: '#60a5fa', margin: 0, fontWeight: '800', fontSize: '1.4rem', letterSpacing: '1px' }}>Trip Finalized 🎉</p>
+            </div>
+        )}
+
+        {/* Tie State (Open) */}
+        {!poll.isClosed && isTie && (
+            <div style={{ 
+                background: 'rgba(245, 158, 11, 0.1)', 
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                padding: '32px',
+                borderRadius: '24px',
+                textAlign: 'center',
+                marginBottom: '40px'
+            }}>
+                <div style={{ fontSize: '3rem', marginBottom: '10px' }}>⚖️</div>
+                <h2 style={{ fontSize: '2rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 8px' }}>Tie — one more vote needed to finalize</h2>
+                <p style={{ color: '#f59e0b', margin: 0, fontWeight: '700' }}>Waiting for a tie-breaker...</p>
+            </div>
+        )}
+
+        {/* Progress State (Open, No Tie) */}
+        {!poll.isClosed && !isTie && (
+            <div style={{ 
+                background: 'rgba(59, 130, 246, 0.05)', 
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                padding: '32px',
+                borderRadius: '24px',
+                textAlign: 'center',
+                marginBottom: '40px'
+            }}>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#cbd5e1', margin: '0 0 8px' }}>Waiting for votes to finalize decision</h2>
+                <p style={{ color: '#64748b', margin: 0 }}>The poll is still collecting responses.</p>
             </div>
         )}
 
