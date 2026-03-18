@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "../styles/global.css";
 
 const API = import.meta.env.VITE_API_URL;
 
 export default function VotePoll() {
   const { pollId } = useParams();
+  const navigate = useNavigate();
   const [poll, setPoll] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -64,6 +65,11 @@ export default function VotePoll() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Link copied! ✨");
   };
 
   if (loading) return <div className="page" style={{ justifyContent: 'center', alignItems: 'center' }}><h2>Loading Poll...</h2></div>;
@@ -131,19 +137,24 @@ export default function VotePoll() {
           </div>
         )}
 
-        <div style={{ marginTop: '40px', textAlign: 'center', borderTop: '1px solid var(--border-main)', paddingTop: '20px' }}>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Share this link with more friends:</p>
-          <input 
-            readOnly 
-            value={window.location.href} 
-            className="auth-input-styled" 
-            style={{ textAlign: 'center', marginTop: '10px', cursor: 'pointer', fontSize: '0.8rem' }}
-            onClick={(e) => {
-              e.target.select();
-              navigator.clipboard.writeText(window.location.href);
-              alert("Link copied!");
-            }}
-          />
+        <div style={{ marginTop: '40px', borderTop: '1px solid var(--border-main)', paddingTop: '20px' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginBottom: '10px', textAlign: 'center' }}>Share this link with more friends:</p>
+          <div style={{ position: 'relative' }}>
+            <input 
+              readOnly 
+              value={window.location.href} 
+              className="auth-input-styled" 
+              style={{ paddingRight: '100px', cursor: 'pointer', fontSize: '0.8rem', textOverflow: 'ellipsis' }}
+              onClick={copyToClipboard}
+            />
+            <button 
+              className="btn-premium primary" 
+              onClick={copyToClipboard}
+              style={{ position: 'absolute', right: '5px', top: '5px', height: '44px', padding: '0 15px', fontSize: '0.8rem' }}
+            >
+              Copy
+            </button>
+          </div>
         </div>
       </div>
     </div>

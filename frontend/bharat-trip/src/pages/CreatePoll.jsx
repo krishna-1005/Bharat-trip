@@ -10,6 +10,8 @@ export default function CreatePoll() {
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pollCreated, setPollCreated] = useState(false);
+  const [createdPollId, setCreatedPollId] = useState("");
   const navigate = useNavigate();
 
   const addOption = () => {
@@ -38,7 +40,8 @@ export default function CreatePoll() {
       });
       const data = await res.json();
       if (res.ok) {
-        navigate(`/vote/${data.pollId}`);
+        setCreatedPollId(data.pollId);
+        setPollCreated(true);
       } else {
         alert(data.error || "Failed to create poll.");
       }
@@ -49,6 +52,49 @@ export default function CreatePoll() {
       setLoading(false);
     }
   };
+
+  const copyToClipboard = () => {
+    const url = `${window.location.origin}/vote/${createdPollId}`;
+    navigator.clipboard.writeText(url);
+    alert("Poll link copied to clipboard! ✨");
+  };
+
+  if (pollCreated) {
+    return (
+      <div className="page" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <div className="premium-card" style={{ maxWidth: '500px', width: '100%', padding: '40px', textAlign: 'center' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🎉</div>
+          <h1 style={{ fontSize: '2rem', marginBottom: '10px' }}>Poll <span className="gradient-text">Ready!</span></h1>
+          <p style={{ color: 'var(--text-dim)', marginBottom: '30px' }}>Your trip poll is live. Share it with your friends to start voting.</p>
+          
+          <div className="pf-field">
+            <label className="pf-label" style={{ textAlign: 'left' }}>Shareable Link</label>
+            <div style={{ position: 'relative' }}>
+              <input 
+                readOnly 
+                value={`${window.location.origin}/vote/${createdPollId}`} 
+                className="auth-input-styled" 
+                style={{ paddingRight: '100px', cursor: 'pointer', textOverflow: 'ellipsis' }}
+                onClick={copyToClipboard}
+              />
+              <button 
+                className="btn-premium primary" 
+                onClick={copyToClipboard}
+                style={{ position: 'absolute', right: '5px', top: '5px', height: '44px', padding: '0 15px', fontSize: '0.8rem' }}
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
+            <button className="btn-premium outline" onClick={() => setPollCreated(false)} style={{ flex: 1, justifyContent: 'center' }}>Create Another</button>
+            <button className="btn-premium primary" onClick={() => navigate(`/vote/${createdPollId}`)} style={{ flex: 1, justifyContent: 'center' }}>Go to Vote ➔</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page" style={{ alignItems: 'center', justifyContent: 'center' }}>
