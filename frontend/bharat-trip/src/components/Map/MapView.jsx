@@ -198,8 +198,16 @@ function MapView({ plan, isTracking, onHover }) {
                 iconSize: [8, 8]
               })}
             >
-              <Tooltip direction="top" offset={[0, -5]}>
-                <span style={{fontSize: '10px'}}>{spot.name} (${spot.category})</span>
+              <Tooltip direction="top" offset={[0, -5]} className="bg-spot-tooltip">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', padding: '5px' }}>
+                  <PlaceImage 
+                    placeName={spot.name} 
+                    city={plan.city} 
+                    style={{ width: '100px', height: '60px', borderRadius: '4px', objectFit: 'cover' }} 
+                  />
+                  <span style={{fontSize: '10px', fontWeight: 'bold'}}>{spot.name}</span>
+                  <span style={{fontSize: '8px', color: '#666'}}>{spot.category}</span>
+                </div>
               </Tooltip>
             </Marker>
           );
