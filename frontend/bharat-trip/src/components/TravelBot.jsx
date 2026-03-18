@@ -9,7 +9,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text: "Hi! I'm your personal Bengaluru travel assistant. 😊\n\nI specialize in creating **personalized itineraries** based on your interests and budget. Whether you're looking for hidden gems, local food, or off-the-beaten-path spots, I'm here to help!\n\nHow can I make your Bengaluru trip unforgettable today?"
+      text: "Hi! I'm BharatTrip AI, your personal travel assistant for India. 🇮🇳\n\nI can help you plan trips to **Bengaluru**, **Mumbai**, **Delhi**, **Jaipur**, **Goa**, and more! Just tell me where you want to go, for how long, and what you enjoy.\n\nWhere shall we plan your next adventure?"
     }
   ]);
 
@@ -36,7 +36,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
   const handleLocateOnMap = (loc) => {
     if (!loc) return;
     const singlePlacePlan = {
-      city: "Bengaluru",
+      city: loc.city || "India",
       days: 1,
       itinerary: {
         "Day 1": {
@@ -85,7 +85,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
 
       if (plan?.itinerary) {
         let botText = botReply ? `${botReply}\n\n` : "";
-        botText += `🗺️ I've crafted a ${plan.days}-day plan for you!\n\n`;
+        botText += `🗺️ I've crafted a ${plan.days}-day plan for **${plan.city}**!\n\n`;
         
         Object.keys(plan.itinerary).forEach(day => {
           const dayData = plan.itinerary[day];
@@ -97,11 +97,14 @@ export default function TravelBot({ isOpen, setIsOpen }) {
       } else if (botLocation) {
         setMessages(prev => [...prev, { sender: "bot", text: botReply, location: botLocation }]);
       } else {
-        setMessages(prev => [...prev, { sender: "bot", text: botReply || "I'm here to help with your Bangalore travels!" }]);
+        setMessages(prev => [...prev, { sender: "bot", text: botReply || "I'm here to help with your India travels!" }]);
       }
     } catch (err) {
       console.error("Chat Error:", err);
-      setMessages(prev => [...prev, { sender: "bot", text: "⚠️ Connection issue. Please try again." }]);
+      setMessages(prev => [...prev, { 
+        sender: "bot", 
+        text: "🤖 I'm having a bit of trouble connecting to my brain right now. Please try again in a moment!" 
+      }]);
     }
     setTyping(false);
   };

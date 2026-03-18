@@ -14,22 +14,24 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    const formattedHistory = (history || []).map(msg => ({
-      role: msg.sender === "bot" ? "model" : "user",
-      parts: [{ text: msg.text }]
-    }));
+    const formattedHistory = (history || [])
+      .filter(msg => msg.text && msg.sender)
+      .map(msg => ({
+        role: msg.sender === "bot" ? "model" : "user",
+        parts: [{ text: msg.text }]
+      }));
 
-    const systemInstruction = `You are BharatTrip AI, a friendly and expert travel assistant for Bengaluru, India. 
+    const systemInstruction = `You are BharatTrip AI, a world-class travel expert for India (including Bengaluru, Mumbai, Delhi, Jaipur, Goa, and more).
 
 FORMATTING RULES:
-1. Use **bold** for emphasis on place names or important terms.
-2. Use bullet points (•) or numbered lists for readability.
-3. Keep paragraphs short (1-2 sentences).
-4. Use emojis to make the conversation lively.
+1. Use **bold** for emphasis on place names.
+2. Use bullet points (•) for readability.
+3. Keep responses concise and friendly.
+4. Use emojis.
 
 CONVERSATION LOGIC:
-1. If planning a trip, you need: **Days**, **Budget**, and **Interests**.
-2. If info is missing, ask for it using a clear bulleted list of what you still need.
+1. If planning a trip, you need: **City**, **Days**, **Budget**, and **Interests**.
+2. If info is missing, ask for it clearly.
 3. Once you have all info, provide a summary and the JSON block below.
 
 JSON FORMATS:
@@ -37,6 +39,7 @@ JSON FORMATS:
 \`\`\`json
 {
   "generatePlan": true,
+  "city": "City Name",
   "days": number,
   "budget": "low" | "medium" | "high",
   "interests": ["Interest1", "Interest2"]
@@ -51,17 +54,6 @@ JSON FORMATS:
   "lat": latitude,
   "lng": longitude
 }
-\`\`\`
-
-Example Reply for a place:
-"The **Lalbagh Botanical Garden** is a stunning 240-acre park. It's famous for its glass house and annual flower shows."
-\`\`\`json
-{
-  "locatePlace": true,
-  "placeName": "Lalbagh Botanical Garden",
-  "lat": 12.9507,
-  "lng": 77.5848
-}
 \`\`\``;
 
     const model = genAI.getGenerativeModel({ 
@@ -69,10 +61,11 @@ Example Reply for a place:
       systemInstruction: systemInstruction 
     });
 
+    // We use a simplified chat approach to avoid history formatting issues
     const chat = model.startChat({
-      history: formattedHistory,
+      history: formattedHistory.length > 0 ? formattedHistory : [],
       generationConfig: {
-        maxOutputTokens: 500,
+        maxOutputTokens: 800,
       },
     });
 
@@ -86,7 +79,6 @@ Example Reply for a place:
     if (jsonMatch) {
       try {
         planData = JSON.parse(jsonMatch[1]);
-        // Remove the JSON block from the reply text so the user doesn't see raw JSON
         replyText = replyText.replace(/```json\s*[\s\S]*?\s*```/, "").trim();
       } catch (e) {
         console.error("Failed to parse AI JSON:", e);
@@ -94,8 +86,9 @@ Example Reply for a place:
     }
 
     if (planData && planData.generatePlan) {
-      const { days, budget, interests } = planData;
+      const { city, days, budget, interests } = planData;
       const plan = await generatePlan({ 
+        city: city || "Bengaluru",
         days: days || 2, 
         budget: budget || "medium", 
         interests: interests || ["Culture", "Food"] 
@@ -103,7 +96,7 @@ Example Reply for a place:
 
       return res.json({
         type: "trip",
-        reply: replyText || `Great! I've crafted a ${days}-day plan for you.`,
+        reply: replyText || `I've crafted a ${days}-day plan for ${city}!`,
         plan
       });
     }
@@ -120,25 +113,31 @@ Example Reply for a place:
       });
     }
 
-    // Regular chat response
     return res.json({ type: "chat", reply: replyText });
 
   } catch (error) {
-    console.error("Chat route error:", error);
+    console.error("Gemini Error:", error.message);
     
-    // Fallback to basic Groq if Gemini fails
+    // Fallback to basic Groq
     try {
         const groqChat = await groq.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "llama3-8b-8192",
             messages: [
-                { role: "system", content: "You are BharatTrip AI, a travel assistant for Bengaluru. Be helpful and ask for days, budget, and interests if the user wants a plan." },
-                ...(history || []).map(m => ({ role: m.sender === "bot" ? "assistant" : "user", content: m.text })),
+                { role: "system", content: "You are BharatTrip AI, an Indian travel assistant. Be helpful and concise." },
+                ...(history || []).slice(-5).map(m => ({ 
+                  role: m.sender === "bot" ? "assistant" : "user", 
+                  content: m.text 
+                })),
                 { role: "user", content: message }
             ]
         });
         return res.json({ type: "chat", reply: groqChat.choices[0].message.content });
     } catch (e2) {
-        res.status(500).json({ type: "chat", reply: "I'm having a bit of trouble connecting right now. Please try again in a moment!" });
+        console.error("Groq Fallback Error:", e2.message);
+        res.status(200).json({ 
+          type: "chat", 
+          reply: "I'm having a bit of trouble connecting to my AI brain right now. 🤖\n\nYou can still use the **Planner** tab to build your trip manually!" 
+        });
     }
   }
 });
