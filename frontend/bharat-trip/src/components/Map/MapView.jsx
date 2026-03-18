@@ -8,7 +8,7 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "../../utils/fixLeafletIcons";
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, useMemo, Fragment } from "react";
 import { createLocationIcon } from "./markerIcons";
 import MapLegend from "./MapLegend";
 import ResizeMap from "./ResizeMap";
