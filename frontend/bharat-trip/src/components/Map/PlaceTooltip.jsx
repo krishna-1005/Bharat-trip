@@ -1,7 +1,7 @@
 import { useSettings } from "../../context/SettingsContext";
 import PlaceImage from "../PlaceImage";
 
-function PlaceTooltip({ place }) {
+function PlaceTooltip({ place, city }) {
   const { formatPrice } = useSettings();
   const price = place.estimatedCost || place.avgCost || 0;
 
@@ -9,7 +9,7 @@ function PlaceTooltip({ place }) {
     <div className="tooltip-card">
       <PlaceImage 
         placeName={place.name} 
-        city="Bengaluru" 
+        city={city || "Bengaluru"} 
         className="tooltip-img"
       />
 

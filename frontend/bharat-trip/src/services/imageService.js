@@ -12,10 +12,12 @@ export async function getPlaceImage(placeName, city) {
 
   // Try strict first, then broader
   const queries = [
-    `"${placeName}" ${city} india`,
+    `"${placeName}" ${city} landmark`,
+    `"${placeName}" ${city} tourist place`,
+    `${placeName} ${city} india`,
     `${placeName} ${city}`,
-    `${placeName} india`,
-    `${city} india tourism`
+    `${placeName} tourist attraction`,
+    `${city} india tourism landmark`
   ];
 
   for (const query of queries) {

@@ -301,7 +301,7 @@ function MapView({ plan, isTracking, onHover }) {
                     sticky
                     className="location-tooltip"
                   >
-                    <PlaceTooltip place={p} />
+                    <PlaceTooltip place={p} city={plan.city} />
                   </Tooltip>
                 </Marker>
               ))}
