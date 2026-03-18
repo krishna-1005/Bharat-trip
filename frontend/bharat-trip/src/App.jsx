@@ -30,12 +30,17 @@ import TravelBot from "./components/TravelBot";
 import "./styles/layout.css";
 import "./styles/global.css";
 
+import CreatePoll from "./pages/CreatePoll";
+import VotePoll from "./pages/VotePoll";
+
 function App() {
   return (
     <>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/create-poll" element={<CreatePoll />} />
+          <Route path="/vote/:pollId" element={<VotePoll />} />
 
           <Route
             path="/planner"

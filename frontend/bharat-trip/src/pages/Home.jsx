@@ -111,7 +111,7 @@ function Home() {
               <button className="btn-premium primary" onClick={() => navigate("/planner")}>
                 Start AI Planner →
               </button>
-              <button className="btn-premium outline" onClick={() => navigate("/planner")}>
+              <button className="btn-premium outline" onClick={() => navigate("/create-poll")}>
                 Decide Trip with Friends
               </button>
               <Link to="/sample-plan" className="btn-premium outline">
