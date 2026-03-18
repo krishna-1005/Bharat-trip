@@ -196,6 +196,7 @@ async function generatePlan({ city = "Bengaluru", days = 2, budget = "low", inte
 
   // Final fallback if still empty
   if (cityPool.length === 0) {
+    console.warn(`⚠️ No places found for ${city}, falling back to EMERGENCY_POOL`);
     cityPool = [...EMERGENCY_POOL];
   }
 
@@ -237,7 +238,8 @@ async function generatePlan({ city = "Bengaluru", days = 2, budget = "low", inte
     const suggestedNames = aiItineraryMap ? (aiItineraryMap[d] || aiItineraryMap[String(d)] || []) : [];
     
     suggestedNames.forEach(name => {
-      const place = allPlacesPool.find(p => p.name === name);
+      // Lookup in finalPool which contains both local and OSM candidates
+      const place = finalPool.find(p => p.name.toLowerCase() === name.toLowerCase());
       if (place && !usedNames.has(place.name)) {
         let placeCost = calculateDynamicPrice(place, budget) * tMult;
         dayPlaces.push({
@@ -245,8 +247,8 @@ async function generatePlan({ city = "Bengaluru", days = 2, budget = "low", inte
           estimatedCost: placeCost,
           avgCost:       placeCost,
           timeHours:     Number(place.timeHours) || 2,
-          lat:           Number(place.lat) || 12.9716,
-          lng:           Number(place.lng) || 77.5946,
+          lat:           Number(place.lat),
+          lng:           Number(place.lng),
           category:      place.category,
           tags:          place.tags || [],
           source:        place.source

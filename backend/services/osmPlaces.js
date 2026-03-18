@@ -41,41 +41,44 @@ const KNOWN_PLACES = [
 ];
 
 async function fetchOSMPlaces(lat, lng) {
-  const radius = 0.2; // roughly 20km box
+  const radius = 0.15; // roughly 15km box
   const minLat = lat - radius;
   const maxLat = lat + radius;
   const minLng = lng - radius;
   const maxLng = lng + radius;
 
   const query = `
-  [out:json][timeout:25];
+  [out:json][timeout:30];
   (
-    node["tourism"="attraction"](${minLat},${minLng},${maxLat},${maxLng});
-    node["tourism"="museum"](${minLat},${minLng},${maxLat},${maxLng});
+    node["tourism"~"attraction|museum|viewpoint"](${minLat},${minLng},${maxLat},${maxLng});
+    way["tourism"~"attraction|museum|viewpoint"](${minLat},${minLng},${maxLat},${maxLng});
     node["leisure"="park"]["name"](${minLat},${minLng},${maxLat},${maxLng});
+    way["leisure"="park"]["name"](${minLat},${minLng},${maxLat},${maxLng});
     node["historic"]["name"](${minLat},${minLng},${maxLat},${maxLng});
+    way["historic"]["name"](${minLat},${minLng},${maxLat},${maxLng});
     node["amenity"="place_of_worship"]["name"](${minLat},${minLng},${maxLat},${maxLng});
-    node["natural"="peak"]["name"](${minLat},${minLng},${maxLat},${maxLng});
+    node["natural"~"peak|hill"]["name"](${minLat},${minLng},${maxLat},${maxLng});
   );
-  out;
+  out center;
   `;
 
   try {
     const response = await axios.post(
       "https://overpass-api.de/api/interpreter",
       query,
-      { headers: { "Content-Type": "text/plain" }, timeout: 30000 }
+      { headers: { "Content-Type": "text/plain" }, timeout: 35000 }
     );
 
     const places = response.data.elements
       .filter(p => p.tags?.name && !isJunk(p.tags.name))
       .map(p => ({
         name:     p.tags.name,
-        lat:      p.lat,
-        lng:      p.lon,
+        lat:      p.lat || p.center?.lat,
+        lng:      p.lon || p.center?.lon,
         category: mapCategory(p.tags),
         source:   "osm",
-      }));
+      }))
+      .filter(p => p.lat && p.lng);
 
     console.log(`✅ OSM fetched ${places.length} quality places`);
     return places;

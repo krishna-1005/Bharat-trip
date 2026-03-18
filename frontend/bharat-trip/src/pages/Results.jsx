@@ -43,6 +43,7 @@ function Results() {
         if (res.ok) {
           const formattedPlan = {
             city: data.destination || "Bangalore",
+            coordinates: data.coordinates, // Use coordinates from DB if available
             days: data.days,
             itinerary: data.itinerary,
             isShared: true,
