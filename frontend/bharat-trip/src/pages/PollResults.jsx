@@ -40,45 +40,75 @@ export default function PollResults() {
   const finalDecision = winners.length === 1 ? winners[0].name : null;
 
   return (
-    <div className="page" style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <div className="premium-card" style={{ maxWidth: '600px', width: '100%', padding: '40px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '10px' }}>{poll.tripName}</h1>
-            <div className="premium-badge" style={{ margin: '0 auto' }}>
-                <span className="pulse-dot"></span> POLL RESULTS
+    <div className="page" style={{ alignItems: 'center', justifyContent: 'center', background: '#030712' }}>
+      <div className="premium-card" style={{ 
+        maxWidth: '700px', 
+        width: '100%', 
+        padding: '60px 40px', 
+        background: 'rgba(15, 23, 42, 0.6)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '32px'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '100px', marginBottom: '20px' }}>
+                <span style={{ width: '6px', height: '6px', background: '#3b82f6', borderRadius: '50%', boxShadow: '0 0 10px #3b82f6' }}></span>
+                <span style={{ fontSize: '10px', fontWeight: '800', color: '#60a5fa', letterSpacing: '1px' }}>LIVE POLL RESULTS</span>
             </div>
+            <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: '800', letterSpacing: '-1.5px', marginBottom: '10px', color: '#f8fafc' }}>{poll.tripName}</h1>
+            <p style={{ color: '#94a3b8', fontSize: '1.1rem' }}>Total Votes Cast: <strong>{totalVotes}</strong></p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '40px' }}>
+        {finalDecision && (
+            <div style={{ 
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15))', 
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                padding: '32px',
+                borderRadius: '24px',
+                textAlign: 'center',
+                marginBottom: '40px',
+                position: 'relative',
+                overflow: 'hidden',
+                animation: 'fadeIn 0.8s ease'
+            }}>
+                <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '5rem', opacity: '0.1' }}>🎉</div>
+                <span style={{ fontSize: '12px', fontWeight: '800', color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '2px', display: 'block', marginBottom: '8px' }}>Winning Destination</span>
+                <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 8px' }}>{finalDecision}</h2>
+                <p style={{ color: '#94a3b8', margin: 0 }}>Pack your bags! This destination has been finalized by the group.</p>
+            </div>
+        )}
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px' }}>
           {poll.options.sort((a, b) => b.votes - a.votes).map((opt, i) => {
             const percentage = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
             const isWinner = opt.name === finalDecision;
 
             return (
-              <div key={i} className={`premium-card ${isWinner ? 'winner' : ''}`} style={{ 
-                padding: '20px', 
-                background: isWinner ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.03)',
-                border: isWinner ? '2px solid var(--accent-blue)' : '1px solid var(--border-main)',
-                position: 'relative',
-                overflow: 'hidden'
+              <div key={i} style={{ 
+                padding: '24px', 
+                background: isWinner ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+                border: isWinner ? '1px solid rgba(59, 130, 246, 0.4)' : '1px solid rgba(255,255,255,0.05)',
+                borderRadius: '20px',
+                transition: 'all 0.3s ease'
               }}>
-                {isWinner && (
-                    <div style={{ position: 'absolute', top: '10px', right: '20px', background: 'var(--accent-blue)', color: 'white', fontSize: '10px', fontWeight: '800', padding: '4px 10px', borderRadius: '100px' }}>
-                        FINAL DECISION
-                    </div>
-                )}
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', position: 'relative', zIndex: 2 }}>
-                  <span style={{ fontWeight: '800', fontSize: '1.2rem' }}>{opt.name}</span>
-                  <span style={{ fontWeight: '700', color: isWinner ? 'var(--accent-blue)' : 'var(--text-dim)' }}>{opt.votes} votes ({percentage}%)</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontWeight: '700', fontSize: '1.2rem', color: isWinner ? '#f8fafc' : '#cbd5e1' }}>{opt.name}</span>
+                    {isWinner && <span style={{ fontSize: '14px' }}>🥇</span>}
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: '800', color: isWinner ? '#60a5fa' : '#94a3b8', fontSize: '1.1rem' }}>{percentage}%</div>
+                    <div style={{ fontSize: '11px', color: '#64748b' }}>{opt.votes} votes</div>
+                  </div>
                 </div>
 
-                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden', position: 'relative', zIndex: 2 }}>
+                <div style={{ height: '6px', background: 'rgba(255,255,255,0.03)', borderRadius: '100px', overflow: 'hidden' }}>
                   <div style={{ 
                     height: '100%', 
                     width: `${percentage}%`, 
-                    background: isWinner ? 'linear-gradient(90deg, var(--accent-blue), var(--accent-purple))' : 'var(--text-dim)',
-                    transition: 'width 1s ease-out'
+                    background: isWinner ? 'linear-gradient(90deg, #3b82f6, #8b5cf6)' : '#475569',
+                    borderRadius: '100px',
+                    transition: 'width 1.5s cubic-bezier(0.16, 1, 0.3, 1)'
                   }}></div>
                 </div>
               </div>
@@ -86,30 +116,37 @@ export default function PollResults() {
           })}
         </div>
 
-        {finalDecision && (
-            <div style={{ textAlign: 'center', marginBottom: '40px', animation: 'fadeIn 1s ease' }}>
-                <h2 style={{ fontSize: '1.8rem' }}>Trip Finalized 🎉</h2>
-                <p style={{ color: 'var(--text-dim)' }}>Pack your bags for <strong>{finalDecision}</strong>!</p>
-            </div>
-        )}
-
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <button 
             className="btn-premium outline" 
-            style={{ justifyContent: 'center' }}
+            style={{ 
+                justifyContent: 'center', 
+                height: '56px', 
+                borderRadius: '16px', 
+                fontWeight: '700',
+                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(255,255,255,0.02)'
+            }}
             onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
-                alert("Results link copied!");
+                alert("Results link copied! ✨");
             }}
           >
             Share Result 🔗
           </button>
           <button 
             className="btn-premium primary" 
-            style={{ justifyContent: 'center' }}
+            style={{ 
+                justifyContent: 'center', 
+                height: '56px', 
+                borderRadius: '16px', 
+                fontWeight: '700',
+                background: '#3b82f6',
+                boxShadow: '0 10px 20px rgba(59, 130, 246, 0.2)'
+            }}
             onClick={() => navigate("/planner", { state: { prefilledCity: finalDecision } })}
           >
-            Plan This Trip ✨
+            Plan Trip Now ✨
           </button>
         </div>
       </div>
