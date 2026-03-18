@@ -34,6 +34,10 @@ export default function VotePoll() {
       }
     };
     fetchPoll();
+    
+    // Refresh every 5 seconds for live feel
+    const interval = setInterval(fetchPoll, 5000);
+    return () => clearInterval(interval);
   }, [pollId]);
 
   const handleVote = async (optionName) => {
@@ -54,6 +58,11 @@ export default function VotePoll() {
         const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "[]");
         votedPolls.push(pollId);
         localStorage.setItem("votedPolls", JSON.stringify(votedPolls));
+        
+        // Instant update
+        const pollRes = await fetch(`${API}/api/polls/${pollId}`);
+        const pollData = await pollRes.json();
+        if (pollRes.ok) setPoll(pollData);
       } else {
         alert("Failed to record vote.");
       }
@@ -122,7 +131,10 @@ export default function VotePoll() {
               onClick={() => handleVote(opt.name)}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: '700', fontSize: '1.1rem', color: selectedOption === opt.name ? '#f8fafc' : '#cbd5e1' }}>{opt.name}</span>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontWeight: '700', fontSize: '1.1rem', color: selectedOption === opt.name ? '#f8fafc' : '#cbd5e1' }}>{opt.name}</span>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{opt.votes} {opt.votes === 1 ? 'vote' : 'votes'}</span>
+                </div>
                 <div style={{ 
                   width: '20px', 
                   height: '20px', 
