@@ -175,6 +175,7 @@ function MapView({ plan, isTracking, onHover }) {
   return (
     <div className="map-container">
       <MapContainer
+        key={`${plan.city}-${plan.coordinates?.lat}-${plan.coordinates?.lng}`}
         center={initialCenter}
         zoom={11}
         zoomControl={false}
