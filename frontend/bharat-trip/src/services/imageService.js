@@ -20,7 +20,11 @@ export async function getPlaceImage(placeName, city) {
     `${city} india tourism landmark`
   ];
 
+  let isBlocked = false;
+
   for (const query of queries) {
+    if (isBlocked) break;
+
     try {
       const res = await fetch(
         `https://api.unsplash.com/search/photos?query=${encodeURIComponent(
@@ -32,6 +36,12 @@ export async function getPlaceImage(placeName, city) {
           }
         }
       );
+
+      if (res.status === 403 || res.status === 401) {
+        console.warn("Unsplash API access denied or limit reached. Using fallbacks.");
+        isBlocked = true;
+        break;
+      }
 
       if (!res.ok) continue;
 
