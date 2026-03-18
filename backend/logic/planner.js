@@ -321,6 +321,7 @@ async function generatePlan({ city = "Bengaluru", days = 2, budget = "low", inte
 
   return {
     city,
+    coordinates: coords,
     days,
     budget,
     interests,

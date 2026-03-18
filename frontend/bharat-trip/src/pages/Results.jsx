@@ -76,8 +76,10 @@ function Results() {
 
   useEffect(() => {
     const fetchWeather = async () => {
+      if (!plan?.coordinates) return;
+      const { lat, lng } = plan.coordinates;
       try {
-        const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=12.9716&longitude=77.5946&current_weather=true");
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
         const data = await res.json();
         const code = data.current_weather.weathercode;
         
@@ -97,7 +99,7 @@ function Results() {
       }
     };
     fetchWeather();
-  }, []);
+  }, [plan?.coordinates]);
 
   if (loading) {
     return <div className="res-empty"><h2>Loading Trip...</h2></div>;

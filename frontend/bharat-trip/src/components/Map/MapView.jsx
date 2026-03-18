@@ -79,6 +79,16 @@ function FollowUser({ location }) {
   return null;
 }
 
+function ChangeView({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, map.getZoom());
+    }
+  }, [center, map]);
+  return null;
+}
+
 function MapView({ plan, isTracking, onHover }) {
   const [activeDay, setActiveDay] = useState("all");
   const [userLocation, setUserLocation] = useState(null);
@@ -151,15 +161,18 @@ function MapView({ plan, isTracking, onHover }) {
 
   if (!plan || !plan.itinerary) return null;
 
+  const initialCenter = plan.coordinates ? [plan.coordinates.lat, plan.coordinates.lng] : [12.9716, 77.5946];
+
   return (
     <div className="map-container">
       <MapContainer
-        center={[12.9716, 77.5946]}
+        center={initialCenter}
         zoom={11}
         zoomControl={false}
         scrollWheelZoom
         style={{ height: "100%", width: "100%" }}
       >
+        <ChangeView center={initialCenter} />
         {isTracking && userLocation && <FollowUser location={userLocation} />}
         {!isTracking && <FitBounds places={allPlaces} userLocation={userLocation} />}
 
