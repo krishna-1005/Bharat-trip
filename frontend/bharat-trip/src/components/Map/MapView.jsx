@@ -162,7 +162,11 @@ function MapView({ plan, isTracking, onHover }) {
 
   if (!plan || !plan.itinerary) return null;
 
-  const initialCenter = plan.coordinates ? [plan.coordinates.lat, plan.coordinates.lng] : [12.9716, 77.5946];
+  const initialCenter = useMemo(() => {
+    return plan.coordinates 
+      ? [plan.coordinates.lat, plan.coordinates.lng] 
+      : [12.9716, 77.5946];
+  }, [plan.city, plan.coordinates?.lat, plan.coordinates?.lng]);
 
   return (
     <div className="map-container">
