@@ -119,7 +119,7 @@ function Home() {
         </div>
 
         <div className="hero-visual">
-          <ThreeScene />
+          <ThreeScene images={[img6, img1, img2, img3, img5]} />
         </div>
       </section>
 

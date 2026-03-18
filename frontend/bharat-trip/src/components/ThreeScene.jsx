@@ -1,56 +1,47 @@
 import React, { useRef, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Float, PerspectiveCamera, MeshDistortMaterial } from '@react-three/drei';
+import { Float, PerspectiveCamera, useTexture, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
-function InteractiveShape() {
+function ImageCard({ url, position, rotation, scale = 1 }) {
   const meshRef = useRef();
-  const { viewport, mouse } = useThree();
+  const texture = useTexture(url);
+  const { mouse } = useThree();
   const [hovered, setHover] = useState(false);
 
   useFrame((state) => {
     if (!meshRef.current) return;
     
-    // Smooth follow mouse (lerping for premium feel)
-    const targetX = mouse.x * (viewport.width / 4);
-    const targetY = mouse.y * (viewport.height / 4);
+    // Subtle tilt based on mouse
+    const targetRotateX = rotation[0] - mouse.y * 0.2;
+    const targetRotateY = rotation[1] + mouse.x * 0.2;
     
-    meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.05);
-    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.05);
+    meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, targetRotateX, 0.05);
+    meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, targetRotateY, 0.05);
     
-    // Rotation subtly influenced by mouse
-    meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -mouse.y * 0.5, 0.1);
-    meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, mouse.x * 0.5, 0.1);
-    
-    // Continuous slow spin
-    meshRef.current.rotation.z += 0.005;
+    // Floating movement
+    const time = state.clock.getElapsedTime();
+    meshRef.current.position.y = position[1] + Math.sin(time + position[0]) * 0.2;
   });
 
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
       <mesh 
         ref={meshRef} 
+        position={position} 
+        rotation={rotation}
         onPointerOver={() => setHover(true)}
         onPointerOut={() => setHover(false)}
-        scale={hovered ? 1.1 : 1}
+        scale={hovered ? scale * 1.05 : scale}
       >
-        <torusKnotGeometry args={[3, 1, 128, 32]} />
-        <MeshDistortMaterial 
-          speed={3} 
-          distort={0.4} 
-          radius={1}
-          color="#3b82f6"
-          emissive="#1d4ed8"
-          emissiveIntensity={0.2}
-          metalness={0.9}
-          roughness={0.1}
-        />
+        <planeGeometry args={[4, 5.5]} />
+        <meshBasicMaterial map={texture} side={THREE.DoubleSide} transparent opacity={0.9} />
       </mesh>
     </Float>
   );
 }
 
-function Particles({ count = 100 }) {
+function Particles({ count = 80 }) {
   const { viewport } = useThree();
   const points = useMemo(() => {
     const p = new Float32Array(count * 3);
@@ -65,7 +56,7 @@ function Particles({ count = 100 }) {
   const pointsRef = useRef();
   useFrame((state) => {
     if (!pointsRef.current) return;
-    pointsRef.current.rotation.y = state.clock.getElapsedTime() * 0.05;
+    pointsRef.current.rotation.y = state.clock.getElapsedTime() * 0.02;
   });
 
   return (
@@ -79,17 +70,27 @@ function Particles({ count = 100 }) {
         />
       </bufferGeometry>
       <pointsMaterial 
-        size={0.1} 
+        size={0.08} 
         color="#ffffff" 
         transparent 
-        opacity={0.3} 
+        opacity={0.2} 
         sizeAttenuation 
       />
     </points>
   );
 }
 
-export default function ThreeScene() {
+export default function ThreeScene({ images = [] }) {
+  // If no images provided, we'll use empty array
+  // Position cards in a premium gallery layout
+  const layout = [
+    { pos: [0, 0, 0], rot: [0, 0, 0], scale: 1.2 },        // Main Center
+    { pos: [-4.5, 1, -2], rot: [0, 0.3, 0], scale: 0.8 },  // Left Top
+    { pos: [4.5, 1, -2], rot: [0, -0.3, 0], scale: 0.8 },  // Right Top
+    { pos: [-3.5, -3, -1], rot: [0, 0.2, 0], scale: 0.7 }, // Left Bottom
+    { pos: [3.5, -3, -1], rot: [0, -0.2, 0], scale: 0.7 }, // Right Bottom
+  ];
+
   return (
     <div style={{
       width: '100%',
@@ -98,13 +99,23 @@ export default function ThreeScene() {
       zIndex: 1,
       pointerEvents: 'auto'
     }}>
-      <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 15], fov: 50 }}>
-        <ambientLight intensity={0.5} />
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
-        <pointLight position={[-10, -10, -10]} color="#3b82f6" intensity={1} />
+      <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 12], fov: 50 }}>
+        <ambientLight intensity={0.7} />
+        <pointLight position={[10, 10, 10]} intensity={1} />
         
-        <InteractiveShape />
-        <Particles count={120} />
+        <React.Suspense fallback={null}>
+          {images.slice(0, 5).map((url, i) => (
+            <ImageCard 
+              key={url} 
+              url={url} 
+              position={layout[i].pos} 
+              rotation={layout[i].rot} 
+              scale={layout[i].scale}
+            />
+          ))}
+        </React.Suspense>
+
+        <Particles count={100} />
         
         <fog attach="fog" args={['#020617', 5, 25]} />
       </Canvas>
