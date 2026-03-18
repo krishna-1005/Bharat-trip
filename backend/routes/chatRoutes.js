@@ -13,29 +13,28 @@ router.post("/", async (req, res) => {
     return res.json({ type: "chat", reply: "Please type a message." });
   }
 
+  console.log(`💬 Chat request: "${message}"`);
+
   try {
-    const formattedHistory = (history || [])
-      .filter(msg => msg.text && msg.sender)
-      .map(msg => ({
-        role: msg.sender === "bot" ? "model" : "user",
-        parts: [{ text: msg.text }]
-      }));
+    // 1. Prepare a single robust prompt for Gemini instead of startChat history
+    // This avoids "alternating role" errors which often break Gemini chats
+    const chatContext = (history || [])
+      .slice(-6) // last 6 messages
+      .map(m => `${m.sender === "bot" ? "Assistant" : "User"}: ${m.text}`)
+      .join("\n");
 
-    const systemInstruction = `You are BharatTrip AI, a world-class travel expert for India (including Bengaluru, Mumbai, Delhi, Jaipur, Goa, and more).
+    const fullPrompt = `You are BharatTrip AI, an expert travel guide for India.
+Current Context:
+${chatContext}
 
-FORMATTING RULES:
-1. Use **bold** for emphasis on place names.
-2. Use bullet points (•) for readability.
-3. Keep responses concise and friendly.
-4. Use emojis.
+User Message: ${message}
 
-CONVERSATION LOGIC:
-1. If planning a trip, you need: **City**, **Days**, **Budget**, and **Interests**.
-2. If info is missing, ask for it clearly.
-3. Once you have all info, provide a summary and the JSON block below.
+RULES:
+- If the user wants a trip plan, you need: City, Days, Budget (low/medium/high), and Interests.
+- Ask for missing info nicely.
+- Once you have all info, provide a short summary and EXACTLY one JSON block at the end.
 
-JSON FORMATS:
-1. For full plans:
+JSON FORMAT:
 \`\`\`json
 {
   "generatePlan": true,
@@ -46,31 +45,13 @@ JSON FORMATS:
 }
 \`\`\`
 
-2. For locating a specific place:
-\`\`\`json
-{
-  "locatePlace": true,
-  "placeName": "Name of the place",
-  "lat": latitude,
-  "lng": longitude
-}
-\`\`\``;
+Assistant Response:`;
 
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      systemInstruction: systemInstruction 
-    });
-
-    // We use a simplified chat approach to avoid history formatting issues
-    const chat = model.startChat({
-      history: formattedHistory.length > 0 ? formattedHistory : [],
-      generationConfig: {
-        maxOutputTokens: 800,
-      },
-    });
-
-    const result = await chat.sendMessage(message);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(fullPrompt);
     let replyText = result.response.text();
+
+    console.log("✅ Gemini response received");
 
     // Check for JSON block
     const jsonMatch = replyText.match(/```json\s*([\s\S]*?)\s*```/);
@@ -81,62 +62,51 @@ JSON FORMATS:
         planData = JSON.parse(jsonMatch[1]);
         replyText = replyText.replace(/```json\s*[\s\S]*?\s*```/, "").trim();
       } catch (e) {
-        console.error("Failed to parse AI JSON:", e);
+        console.error("❌ Failed to parse AI JSON:", e.message);
       }
     }
 
     if (planData && planData.generatePlan) {
-      const { city, days, budget, interests } = planData;
+      const city = planData.city || "Delhi";
       const plan = await generatePlan({ 
-        city: city || "Bengaluru",
-        days: days || 2, 
-        budget: budget || "medium", 
-        interests: interests || ["Culture", "Food"] 
+        city: city,
+        days: planData.days || 2, 
+        budget: planData.budget || "medium", 
+        interests: planData.interests || ["Sightseeing"] 
       });
 
       return res.json({
         type: "trip",
-        reply: replyText || `I've crafted a ${days}-day plan for ${city}!`,
+        reply: replyText || `Perfect! I've crafted your ${city} itinerary.`,
         plan
-      });
-    }
-
-    if (planData && planData.locatePlace) {
-      return res.json({
-        type: "location",
-        reply: replyText,
-        location: {
-          name: planData.placeName,
-          lat: planData.lat,
-          lng: planData.lng
-        }
       });
     }
 
     return res.json({ type: "chat", reply: replyText });
 
   } catch (error) {
-    console.error("Gemini Error:", error.message);
+    console.error("⚠️ Gemini primary failed:", error.message);
     
-    // Fallback to basic Groq
+    // 2. Fallback to Groq with a robust model ID
     try {
         const groqChat = await groq.chat.completions.create({
-            model: "llama3-8b-8192",
+            model: "llama-3.3-70b-versatile",
             messages: [
-                { role: "system", content: "You are BharatTrip AI, an Indian travel assistant. Be helpful and concise." },
-                ...(history || []).slice(-5).map(m => ({ 
+                { role: "system", content: "You are BharatTrip AI, an expert Indian travel guide. Be helpful and concise." },
+                ...(history || []).slice(-4).map(m => ({ 
                   role: m.sender === "bot" ? "assistant" : "user", 
                   content: m.text 
                 })),
                 { role: "user", content: message }
             ]
         });
+        console.log("✅ Groq fallback succeeded");
         return res.json({ type: "chat", reply: groqChat.choices[0].message.content });
     } catch (e2) {
-        console.error("Groq Fallback Error:", e2.message);
+        console.error("❌ All AI models failed:", e2.message);
         res.status(200).json({ 
           type: "chat", 
-          reply: "I'm having a bit of trouble connecting to my AI brain right now. 🤖\n\nYou can still use the **Planner** tab to build your trip manually!" 
+          reply: "I'm having a bit of trouble connecting to my AI brain right now. 🤖\n\nIt might be because my API keys have reached their limit. You can still use the **Planner** tab to build your trip manually!" 
         });
     }
   }
