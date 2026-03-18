@@ -1,7 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { useSettings } from "../context/SettingsContext";
-import NewReviewSection from "../components/NewReviewSection";
+import MinimalReviewSection from "../components/MinimalReviewSection";
 import "./home.css";
 import img1 from "../assets/images/img1.webp";
 import img2 from "../assets/images/img2.webp";
@@ -265,7 +265,7 @@ function Home() {
         </div>
       </section>
 
-      <NewReviewSection />
+      <MinimalReviewSection />
 
     </div>
   );
