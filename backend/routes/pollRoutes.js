@@ -25,7 +25,7 @@ router.post("/create", async (req, res) => {
     res.status(201).json({ pollId });
   } catch (error) {
     console.error("Poll Creation Error:", error);
-    res.status(500).json({ error: "Server error creating poll." });
+    res.status(500).json({ error: error.message || "Server error creating poll." });
   }
 });
 
@@ -36,7 +36,7 @@ router.get("/:pollId", async (req, res) => {
     if (!poll) return res.status(404).json({ error: "Poll not found." });
     res.json(poll);
   } catch (error) {
-    res.status(500).json({ error: "Server error fetching poll." });
+    res.status(500).json({ error: error.message || "Server error fetching poll." });
   }
 });
 
@@ -90,7 +90,7 @@ router.post("/vote", async (req, res) => {
     res.json({ message: "Vote recorded successfully", poll });
   } catch (error) {
     console.error("Voting Error:", error);
-    res.status(500).json({ error: "Server error recording vote." });
+    res.status(500).json({ error: error.message || "Server error recording vote." });
   }
 });
 
@@ -121,7 +121,7 @@ router.post("/finalize-now", async (req, res) => {
     res.json({ message: "Poll finalized manually", poll });
   } catch (error) {
     console.error("Finalize Error:", error);
-    res.status(500).json({ error: "Server error finalizing poll." });
+    res.status(500).json({ error: error.message || "Server error finalizing poll." });
   }
 });
 

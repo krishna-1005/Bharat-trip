@@ -111,7 +111,7 @@ export default function PollResults() {
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '40px' }}>
-          {poll.options.sort((a, b) => b.votes - a.votes).map((opt, i) => {
+          {[...poll.options].sort((a, b) => b.votes - a.votes).map((opt, i) => {
             const percentage = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
             const isWinner = opt.name === finalDecision;
 
