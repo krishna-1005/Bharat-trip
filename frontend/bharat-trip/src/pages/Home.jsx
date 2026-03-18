@@ -2,6 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { useSettings } from "../context/SettingsContext";
 import MinimalReviewSection from "../components/MinimalReviewSection";
+import ThreeScene from "../components/ThreeScene";
 import "./home.css";
 import img1 from "../assets/images/img1.webp";
 import img2 from "../assets/images/img2.webp";
@@ -118,29 +119,7 @@ function Home() {
         </div>
 
         <div className="hero-visual">
-          <div className="gallery-container" ref={galleryRef}>
-            <div 
-              className={`gallery-card main-feat ${hoveredCard === 'main' ? 'active' : ''}`}
-              onMouseEnter={() => setHoveredCard('main')}
-              onMouseLeave={() => setHoveredCard(null)}
-            >
-              <img src={img6} alt="Vibrant India" />
-              <div className="card-overlay" style={{
-                position: 'absolute', bottom: '0', left: '0', width: '100%', padding: '40px',
-                background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)'
-              }}>
-                <h4 style={{fontSize: '24px', fontWeight: '800', margin: 0}}>Bengaluru Spirit</h4>
-                <p style={{fontSize: '14px', color: '#ccc', margin: '8px 0 0'}}>The Garden City Awaits</p>
-              </div>
-            </div>
-
-            <div className="floating-elements">
-              <div className="float-card c1"><img src={img1} alt="Heritage" /></div>
-              <div className="float-card c2"><img src={img2} alt="Spiritual" /></div>
-              <div className="float-card c3"><img src={img3} alt="Nature" /></div>
-              <div className="float-card c4"><img src={img5} alt="Modern" /></div>
-            </div>
-          </div>
+          <ThreeScene />
         </div>
       </section>
 
