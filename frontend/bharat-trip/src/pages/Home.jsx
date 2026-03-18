@@ -126,14 +126,19 @@ function Home() {
       {/* ── LIVE TICKER ── */}
       <div className="live-index-marquee">
         <div className="marquee-content">
-          {[...Array(2)].map((_, j) => (
-            <div key={j} style={{ display: "flex", gap: "40px" }}>
-              <div className="marquee-item"><span className="pulse-dot" style={{width:6, height:6}}></span> BENGALURU: 24°C • PERFECT FOR PARKS</div>
-              <div className="marquee-item"><span className="pulse-dot" style={{width:6, height:6}}></span> GOA: 28°C • PEAK BEACH VIBES</div>
-              <div className="marquee-item"><span className="pulse-dot" style={{width:6, height:6}}></span> JAIPUR: 22°C • ROYAL HERITAGE SEASON</div>
-              <div className="marquee-item"><span className="pulse-dot" style={{width:6, height:6}}></span> MANALI: 12°C • SNOW TREK WINDOW OPEN</div>
-            </div>
-          ))}
+          <div className="marquee-group">
+            <div className="marquee-item"><span className="pulse-dot"></span> BENGALURU: 24°C • PERFECT FOR PARKS</div>
+            <div className="marquee-item"><span className="pulse-dot"></span> GOA: 28°C • PEAK BEACH VIBES</div>
+            <div className="marquee-item"><span className="pulse-dot"></span> JAIPUR: 22°C • ROYAL HERITAGE SEASON</div>
+            <div className="marquee-item"><span className="pulse-dot"></span> MANALI: 12°C • SNOW TREK WINDOW OPEN</div>
+          </div>
+          {/* Duplicate for infinite effect */}
+          <div className="marquee-group">
+            <div className="marquee-item"><span className="pulse-dot"></span> BENGALURU: 24°C • PERFECT FOR PARKS</div>
+            <div className="marquee-item"><span className="pulse-dot"></span> GOA: 28°C • PEAK BEACH VIBES</div>
+            <div className="marquee-item"><span className="pulse-dot"></span> JAIPUR: 22°C • ROYAL HERITAGE SEASON</div>
+            <div className="marquee-item"><span className="pulse-dot"></span> MANALI: 12°C • SNOW TREK WINDOW OPEN</div>
+          </div>
         </div>
       </div>
 
