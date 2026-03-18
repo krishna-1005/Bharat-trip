@@ -324,6 +324,12 @@ async function generatePlan({ city = "Bengaluru", days = 2, budget = "low", inte
   return {
     city,
     coordinates: coords,
+    allDiscoveredPlaces: cityPool.map(p => ({
+      name: p.name,
+      lat: p.lat,
+      lng: p.lng,
+      category: p.category
+    })),
     days,
     budget,
     interests,

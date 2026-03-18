@@ -184,6 +184,27 @@ function MapView({ plan, isTracking, onHover }) {
 
         <ZoomControls />
 
+        {/* ── Background Tourist Spots (All Discovered) ── */}
+        {plan.allDiscoveredPlaces?.map((spot, i) => {
+          // Don't show if already in itinerary
+          if (allPlaces.some(p => p.name === spot.name)) return null;
+          return (
+            <Marker
+              key={`spot-${i}`}
+              position={[spot.lat, spot.lng]}
+              icon={L.divIcon({
+                className: "bg-spot-pin",
+                html: `<div style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.5); border-radius: 50%;"></div>`,
+                iconSize: [8, 8]
+              })}
+            >
+              <Tooltip direction="top" offset={[0, -5]}>
+                <span style={{fontSize: '10px'}}>{spot.name} (${spot.category})</span>
+              </Tooltip>
+            </Marker>
+          );
+        })}
+
         <MapLegend
           days={days}
           activeDay={activeDay}
