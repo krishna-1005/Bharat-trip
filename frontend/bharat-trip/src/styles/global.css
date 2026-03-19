@@ -90,6 +90,26 @@ body {
   gap: 10px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   letter-spacing: -0.2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-premium::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120%;
+  height: 120%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 50%;
+  transition: transform 0.5s ease;
+}
+
+.btn-premium:active::after {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
 }
 
 .btn-premium.primary {
@@ -106,13 +126,48 @@ body {
 }
 
 .btn-premium:hover {
-  transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.02);
   filter: brightness(1.1);
   box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4);
 }
 
 .btn-premium:active {
-  transform: translateY(-1px) scale(0.98);
+  transform: translateY(-1px) scale(0.96);
+}
+
+/* ── INTERACTIVE ELEMENTS ── */
+.interactive-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interactive-hover:hover {
+  transform: translateY(-5px);
+  filter: brightness(1.2);
+}
+
+/* Custom Cursor (Desktop Only) */
+@media (min-width: 1025px) {
+  body {
+    cursor: default;
+  }
+  
+  .custom-cursor {
+    width: 20px;
+    height: 20px;
+    background: var(--accent-blue);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: difference;
+    transition: transform 0.1s ease, background 0.3s ease;
+    transform: translate(-50%, -50%);
+  }
+  
+  .custom-cursor.hovering {
+    transform: translate(-50%, -50%) scale(3);
+    background: var(--accent-purple);
+  }
 }
 
 /* ── SCROLLBAR ── */

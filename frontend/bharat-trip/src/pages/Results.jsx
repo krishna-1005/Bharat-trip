@@ -202,9 +202,23 @@ function Results() {
         </div>
       )}
 
+      {/* MOBILE HEADER (Always Visible) */}
+      <div className="res-mobile-header">
+        <button className="mobile-back-btn" onClick={() => navigate("/planner")}>←</button>
+        <div className="mobile-header-center">
+          <h3>{tripTitle || "Your Trip"}</h3>
+          <span>{plan.city || "Bengaluru"} • {totalDays} Days</span>
+        </div>
+        <button className="mobile-share-btn" onClick={handleShare}>🔗</button>
+      </div>
+
       <div className="res-mobile-toggle">
-        <button className={!showMap ? "active" : ""} onClick={() => setShowMap(false)}>List</button>
-        <button className={showMap ? "active" : ""} onClick={() => setShowMap(true)}>Map</button>
+        <button className={!showMap ? "active" : ""} onClick={() => setShowMap(false)}>
+          <span className="toggle-icon">📋</span> List
+        </button>
+        <button className={showMap ? "active" : ""} onClick={() => setShowMap(true)}>
+          <span className="toggle-icon">🗺️</span> Map
+        </button>
       </div>
 
       {windowWidth > 900 && (

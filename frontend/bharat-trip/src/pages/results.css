@@ -13,11 +13,65 @@
   padding-top: 80px;
 }
 
+/* ── MOBILE HEADER (Always Visible) ── */
+.res-mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: var(--bg-panel);
+  backdrop-filter: blur(20px);
+  z-index: 2500;
+  padding: 0 16px;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-main);
+}
+
+.mobile-back-btn, .mobile-share-btn {
+  width: 40px;
+  height: 40px;
+  background: var(--glass);
+  border: 1px solid var(--border-main);
+  border-radius: 12px;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.mobile-header-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-header-center h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.mobile-header-center span {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 /* ── MOBILE TOGGLE ── */
 .res-mobile-toggle {
   display: none;
   position: fixed;
-  bottom: 20px;
+  bottom: 90px; /* Above BottomNav */
   left: 50%;
   transform: translateX(-50%);
   z-index: 2000;
@@ -25,11 +79,13 @@
   border: 1px solid var(--border-main);
   padding: 6px;
   border-radius: 100px;
-  box-shadow: 0 10px 30px var(--shadow-main);
+  box-shadow: 0 10px 40px var(--shadow-main);
+  display: flex;
+  gap: 4px;
 }
 
 .res-mobile-toggle button {
-  padding: 8px 20px;
+  padding: 10px 24px;
   border-radius: 100px;
   border: none;
   background: transparent;
@@ -37,12 +93,19 @@
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
+.toggle-icon { font-size: 16px; }
 
 .res-mobile-toggle button.active {
   background: var(--accent-blue);
   color: #fff;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  transform: scale(1.05);
 }
 
 /* ── LEFT: MAP SECTION ── */
