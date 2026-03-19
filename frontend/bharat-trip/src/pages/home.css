@@ -128,22 +128,72 @@ h1, h2, h3 {
   color: var(--text-main);
 }
 
-.hero-preview {
+.hero-preview-container {
   position: relative;
-  background: var(--bg-card);
-  border: 1px solid var(--border-main);
-  border-radius: 32px;
-  overflow: hidden;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.5);
-  aspect-ratio: 16/10;
+  height: 500px;
+  width: 100%;
+  perspective: 1000px;
 }
 
-.hero-preview img {
+.hero-interactive-images {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.floating-image-card {
+  position: absolute;
+  width: 220px;
+  height: 280px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border-main);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  background: var(--bg-dark);
+}
+
+.floating-image-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.8;
 }
+
+.image-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+}
+
+.card-0 { top: 10%; left: 10%; z-index: 10; }
+.card-1 { top: 5%; right: 10%; z-index: 5; }
+.card-2 { bottom: 10%; left: 15%; z-index: 8; }
+.card-3 { bottom: 5%; right: 15%; z-index: 12; }
+
+.hero-mini-poll {
+  position: absolute;
+  top: 40%;
+  left: 35%;
+  background: rgba(3, 7, 18, 0.9);
+  padding: 20px;
+  borderRadius: 20px;
+  border: 1px solid var(--accent-blue);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  width: 240px;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+}
+
+.hero-mini-poll h4 { margin: 0 0 12px 0; font-size: 14px; }
+.mini-poll-progress { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+.mini-poll-bar { height: 100%; background: var(--accent-blue); }
+.hero-mini-poll p { margin: 8px 0 0 0; font-size: 12px; color: var(--text-dim); }
 
 /* ── QUICK ACTION PANEL ── */
 .quick-actions {

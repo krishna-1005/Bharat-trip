@@ -1,7 +1,90 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import MinimalReviewSection from "../components/MinimalReviewSection";
 import "./home.css";
+
+const InteractiveHeroImages = () => {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { damping: 25, stiffness: 150 };
+  const sx = useSpring(mouseX, springConfig);
+  const sy = useSpring(mouseY, springConfig);
+
+  const handleMouseMove = (e) => {
+    const { clientX, clientY } = e;
+    const { innerWidth, innerHeight } = window;
+    mouseX.set((clientX - innerWidth / 2) / 25);
+    mouseY.set((clientY - innerHeight / 2) / 25);
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  const famousPlaces = [
+    {
+      name: "Taj Mahal",
+      img: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80",
+      x: -20, y: -20, rotate: -5, scale: 1.1
+    },
+    {
+      name: "Varanasi",
+      img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80",
+      x: 40, y: -40, rotate: 8, scale: 0.9
+    },
+    {
+      name: "Hawa Mahal",
+      img: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
+      x: -30, y: 50, rotate: -10, scale: 1.0
+    },
+    {
+      name: "Hampi",
+      img: "https://images.unsplash.com/photo-1524492707941-5f397224bc0b?auto=format&fit=crop&w=800&q=80",
+      x: 50, y: 30, rotate: 5, scale: 1.05
+    }
+  ];
+
+  return (
+    <div className="hero-interactive-images">
+      {famousPlaces.map((place, index) => (
+        <motion.div
+          key={index}
+          className={`floating-image-card card-${index}`}
+          style={{
+            x: useTransform(sx, (val) => val * (index + 1) * 0.5),
+            y: useTransform(sy, (val) => val * (index + 1) * 0.5),
+            rotate: place.rotate,
+          }}
+          whileHover={{ scale: place.scale * 1.1, zIndex: 50, rotate: 0 }}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: place.scale }}
+          transition={{ duration: 0.8, delay: index * 0.1 }}
+        >
+          <img src={place.img} alt={place.name} />
+          <div className="image-caption">{place.name}</div>
+        </motion.div>
+      ))}
+      
+      {/* Mini Poll Card Overlay */}
+      <motion.div 
+        className="hero-mini-poll"
+        style={{
+          x: useTransform(sx, (val) => val * 3),
+          y: useTransform(sy, (val) => val * 3),
+        }}
+      >
+        <h4>Group Vote: Goa Trip</h4>
+        <div className="mini-poll-progress">
+          <div className="mini-poll-bar" style={{ width: '73%' }}></div>
+        </div>
+        <p>Beach Resort (3 votes)</p>
+      </motion.div>
+    </div>
+  );
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -41,29 +124,8 @@ const Home = () => {
               </button>
             </div>
           </div>
-          <div className="hero-preview">
-            <img 
-              src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200" 
-              alt="Travel Planning Preview" 
-            />
-            {/* Minimal Overlay to show Poll UI concept as requested */}
-            <div style={{
-              position: 'absolute',
-              top: '20%',
-              right: '10%',
-              background: 'rgba(3, 7, 18, 0.9)',
-              padding: '20px',
-              borderRadius: '20px',
-              border: '1px solid var(--accent-blue)',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-              width: '240px'
-            }}>
-              <h4 style={{ margin: '0 0 12px 0', fontSize: '14px' }}>Group Vote: Goa Trip</h4>
-              <div style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: '73%', height: '100%', background: 'var(--accent-blue)' }}></div>
-              </div>
-              <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: 'var(--text-dim)' }}>Beach Resort (3 votes)</p>
-            </div>
+          <div className="hero-preview-container">
+            <InteractiveHeroImages />
           </div>
         </div>
       </section>
