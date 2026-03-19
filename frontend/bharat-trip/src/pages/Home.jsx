@@ -14,7 +14,24 @@ function Home() {
   const navigate = useNavigate();
   const { t } = useSettings();
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [heroImages, setHeroImages] = useState([img6, img1, img2, img3, img5]);
   const galleryRef = useRef(null);
+
+  useEffect(() => {
+    // Fetch Dynamic Site Config
+    const fetchConfig = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/config/public`);
+        const config = await res.json();
+        if (config.homepage_images && config.homepage_images.length > 0) {
+          setHeroImages(config.homepage_images);
+        }
+      } catch (err) {
+        console.log(\"Using default local assets\");
+      }
+    };
+    fetchConfig();
+  }, []);
 
   useEffect(() => {
     // Parallax logic
@@ -122,7 +139,7 @@ function Home() {
         </div>
 
         <div className="hero-visual">
-          <ThreeScene images={[img6, img1, img2, img3, img5]} />
+          <ThreeScene images={heroImages} />
         </div>
       </section>
 

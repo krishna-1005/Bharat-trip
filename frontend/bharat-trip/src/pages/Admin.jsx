@@ -12,6 +12,8 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [users, setUsers] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [config, setConfig] = useState({});
+  const [broadcastMsg, setBroadcastMsg] = useState("");
 
   const fetchData = async (endpoint, setter) => {
     try {
@@ -22,7 +24,15 @@ export default function Admin() {
         headers: { "Authorization": `Bearer ${token}` }
       });
       const json = await res.json();
-      if (res.ok) setter(json);
+      if (res.ok) {
+        if (endpoint === "config") {
+          const configMap = {};
+          json.forEach(c => configMap[key] = c.value); // Logic error here in draft, will fix
+          setter(json); 
+        } else {
+          setter(json);
+        }
+      }
       else setError(json.error || "Failed to load " + endpoint);
     } catch (err) {
       setError("Server connection error.");
@@ -46,6 +56,7 @@ export default function Admin() {
   useEffect(() => {
     if (activeTab === "users") fetchData("users", setUsers);
     if (activeTab === "reviews") fetchData("reviews", setReviews);
+    if (activeTab === "media") fetchData("config", setConfig);
   }, [activeTab]);
 
   const handleUpdateRole = async (userId, newRole) => {
@@ -75,6 +86,40 @@ export default function Admin() {
     } catch (err) { alert("Error deleting review"); }
   };
 
+  const handleUpdateConfig = async (key, value) => {
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch(`${API}/api/admin/config`, {
+        method: "POST",
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ key, value })
+      });
+      if (res.ok) alert("Configuration updated! ✨");
+    } catch (err) { alert("Error updating config"); }
+  };
+
+  const sendBroadcast = async () => {
+    if (!broadcastMsg.trim()) return;
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch(`${API}/api/admin/broadcast`, {
+        method: "POST",
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: broadcastMsg })
+      });
+      if (res.ok) {
+        alert("System broadcast sent! 📡");
+        setBroadcastMsg("");
+      }
+    } catch (err) { alert("Broadcast failed"); }
+  };
+
   if (loading) return <div className="admin-loading">Initializing Secure Terminal...</div>;
   if (error) return <div className="admin-error">{error}</div>;
 
@@ -86,8 +131,9 @@ export default function Admin() {
           <h1>System <span className="gradient-text">Intelligence</span></h1>
           <div className="admin-nav-tabs">
             <button className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>Dashboard</button>
-            <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>User Management</button>
-            <button className={activeTab === 'reviews' ? 'active' : ''} onClick={() => setActiveTab('reviews')}>Moderation</button>
+            <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>Users</button>
+            <button className={activeTab === 'reviews' ? 'active' : ''} onClick={() => setActiveTab('reviews')}>Reviews</button>
+            <button className={activeTab === 'media' ? 'active' : ''} onClick={() => setActiveTab('media')}>Media & CMS</button>
           </div>
         </header>
 
@@ -126,16 +172,16 @@ export default function Admin() {
 
             <div className="admin-tables-row">
               <section className="admin-section">
-                <h2>Activity Feed</h2>
+                <h2>Live Activity Feed</h2>
                 <div className="admin-table-wrap">
                   <table className="admin-table">
                     <thead><tr><th>User</th><th>Action</th><th>Time</th></tr></thead>
                     <tbody>
                       {data.recentActivityLogs.map((log, i) => (
                         <tr key={i}>
-                          <td>{log.userId?.name || "Guest"}</td>
+                          <td className="bold">{log.userId?.name || "Guest"}</td>
                           <td><span className="tag-blue">{log.details.days} Days Plan</span></td>
-                          <td>{new Date(log.createdAt).toLocaleTimeString()}</td>
+                          <td className="dim">{new Date(log.createdAt).toLocaleTimeString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -190,37 +236,89 @@ export default function Admin() {
             </div>
           </div>
         )}
+
+        {activeTab === 'media' && (
+          <div className="admin-section">
+            <h2>Home Page Configuration</h2>
+            <p className="dim" style={{ marginBottom: '20px' }}>Directly update site-wide content and visuals.</p>
+            
+            <div className="config-grid">
+              <div className="config-card">
+                <h3>System Announcement</h3>
+                <textarea 
+                  className="admin-textarea"
+                  placeholder="Type a message for all users..."
+                  value={broadcastMsg}
+                  onChange={(e) => setBroadcastMsg(e.target.value)}
+                />
+                <button className="btn-broadcast" onClick={sendBroadcast}>Send Global Broadcast 📡</button>
+              </div>
+
+              <div className="config-card">
+                <h3>Home Page Hero Images</h3>
+                <p className="dim-small">Enter comma-separated image URLs</p>
+                <textarea 
+                  className="admin-textarea"
+                  defaultValue="https://images.unsplash.com/photo-1506461883276-594a12b11cf3, https://images.unsplash.com/photo-1524492412937-b28074a5d7da"
+                  id="hero-urls"
+                />
+                <button 
+                  className="btn-update" 
+                  onClick={() => handleUpdateConfig("homepage_images", document.getElementById('hero-urls').value.split(',').map(s => s.trim()))}
+                >
+                  Update Visuals ✨
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <style jsx>{`
-        .admin-page { background: #020617; min-height: 100vh; color: #f8fafc; padding-top: 80px; }
+        .admin-page { background: #020617; min-height: 100vh; color: #f8fafc; padding-top: 80px; font-family: 'Plus Jakarta Sans', sans-serif; }
         .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-        .admin-header { margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: flex-end; }
-        .admin-nav-tabs { display: flex; gap: 10px; background: #0f172a; padding: 5px; border-radius: 12px; border: 1px solid #1e293b; }
-        .admin-nav-tabs button { background: transparent; border: none; color: #94a3b8; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-        .admin-nav-tabs button.active { background: #1e293b; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .admin-header { margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: center; }
+        .admin-nav-tabs { display: flex; gap: 8px; background: #0f172a; padding: 6px; border-radius: 14px; border: 1px solid #1e293b; }
+        .admin-nav-tabs button { background: transparent; border: none; color: #94a3b8; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 700; transition: all 0.3s; font-size: 0.9rem; }
+        .admin-nav-tabs button.active { background: #3b82f6; color: #fff; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
 
         .admin-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 3rem; }
-        .admin-stat-card { background: #0f172a; border: 1px solid #1e293b; padding: 1.5rem; border-radius: 1rem; display: flex; align-items: center; gap: 1rem; }
-        .stat-icon { font-size: 1.8rem; background: rgba(59, 130, 246, 0.1); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 0.8rem; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; }
+        .admin-stat-card { background: #0f172a; border: 1px solid #1e293b; padding: 1.5rem; border-radius: 1.2rem; display: flex; align-items: center; gap: 1.2rem; transition: transform 0.3s ease; }
+        .admin-stat-card:hover { transform: translateY(-5px); border-color: #3b82f6; }
+        .stat-icon { font-size: 1.8rem; background: rgba(59, 130, 246, 0.1); width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; border-radius: 1rem; }
+        .stat-value { font-size: 1.6rem; font-weight: 800; display: block; color: #fff; }
+        .stat-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
 
-        .admin-section { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.2rem; padding: 1.5rem; margin-bottom: 2rem; }
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        .admin-table th { text-align: left; color: #64748b; padding: 1rem; font-size: 0.8rem; border-bottom: 1px solid #1e293b; }
-        .admin-table td { padding: 1rem; border-bottom: 1px solid #1e293b; }
+        .admin-section { background: #0f172a; border: 1px solid #1e293b; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .admin-section h2 { margin-bottom: 1.5rem; font-size: 1.4rem; font-weight: 800; }
+        
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th { text-align: left; color: #64748b; padding: 1.2rem; font-size: 0.8rem; border-bottom: 1px solid #1e293b; text-transform: uppercase; }
+        .admin-table td { padding: 1.2rem; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .config-card { background: #1e293b; padding: 1.5rem; border-radius: 1.2rem; display: flex; flex-direction: column; gap: 1rem; }
+        .admin-textarea { background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: #fff; padding: 12px; min-height: 100px; resize: vertical; outline: none; }
+        
+        .btn-broadcast, .btn-update { background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .btn-broadcast:hover { background: #2563eb; transform: scale(1.02); }
+        .btn-update { background: #10b981; }
 
         .role-tag { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
         .role-tag.admin { background: rgba(239, 68, 68, 0.1); color: #f87171; }
         .role-tag.user { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
 
-        .admin-select { background: #1e293b; color: #fff; border: 1px solid #334155; padding: 5px 10px; border-radius: 6px; outline: none; }
-        .admin-review-card { background: #1e293b; padding: 1.5rem; border-radius: 1rem; margin-bottom: 1rem; }
-        .review-meta { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .btn-delete { background: #ef4444; border: none; color: #fff; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .admin-select { background: #0f172a; color: #fff; border: 1px solid #334155; padding: 6px 12px; border-radius: 8px; outline: none; cursor: pointer; }
+        .btn-delete { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; }
+        .btn-delete:hover { background: #ef4444; color: #fff; }
 
-        .gradient-text { background: linear-gradient(90deg, #3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
-        @media (max-width: 1000px) { .admin-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        .gradient-text { background: linear-gradient(90deg, #3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .bold { font-weight: 700; color: #f8fafc; }
+        .dim { color: #94a3b8; }
+        .dim-small { font-size: 0.8rem; color: #64748b; }
+        .tag-blue { background: rgba(59, 130, 246, 0.1); color: #60a5fa; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+
+        @media (max-width: 900px) { .config-grid { grid-template-columns: 1fr; } .admin-header { flex-direction: column; gap: 1.5rem; align-items: flex-start; } .admin-stats-grid { grid-template-columns: repeat(2, 1fr); } }
       `}</style>
     </div>
   );

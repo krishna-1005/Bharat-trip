@@ -28,6 +28,58 @@ router.get("/whoami", protect, (req, res) => {
   res.json({ email: req.user?.email, role: req.user?.role });
 });
 
+const SystemConfig = require("../models/SystemConfig");
+
+/* GET /api/admin/config/public - Publicly accessible site config */
+router.get("/config/public", async (req, res) => {
+  try {
+    const configs = await SystemConfig.find();
+    // Convert array to a simple object for easier frontend use
+    const configMap = {};
+    configs.forEach(c => configMap[c.key] = c.value);
+    res.json(configMap);
+  } catch (err) {
+    res.status(500).json({ error: "Error fetching public config" });
+  }
+});
+
+/* GET /api/admin/config - Get site-wide config (Admin Only) */
+router.get("/config", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const configs = await SystemConfig.find();
+    res.json(configs);
+  } catch (err) {
+    res.status(500).json({ error: "Error fetching config" });
+  }
+});
+
+/* POST /api/admin/config - Update specific config (e.g., homepage_images) */
+router.post("/config", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const { key, value } = req.body;
+    const config = await SystemConfig.findOneAndUpdate(
+      { key },
+      { value, updatedBy: req.user._id },
+      { upsert: true, new: true }
+    );
+    res.json(config);
+  } catch (err) {
+    res.status(500).json({ error: "Error updating config" });
+  }
+});
+
+/* POST /api/admin/broadcast - Simulate a global system broadcast */
+router.post("/broadcast", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const { message } = req.body;
+    // In a real app, this might send a socket.io event or email
+    console.log(`[GLOBAL BROADCAST] ${message}`);
+    res.json({ message: "Broadcast signal sent successfully!" });
+  } catch (err) {
+    res.status(500).json({ error: "Broadcast failure" });
+  }
+});
+
 /* GET /api/admin/stats - Summary of all activity */
 router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
   try {
