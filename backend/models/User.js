@@ -29,6 +29,17 @@ const userSchema = new mongoose.Schema(
     default: null
   },
 
+  photo: {
+    type: String,
+    default: ""
+  },
+
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user"
+  },
+
   /* NOTIFICATION SETTINGS */
   preferences: {
     emailAlerts: { type: Boolean, default: true },

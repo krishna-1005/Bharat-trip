@@ -67,6 +67,8 @@ function Navbar() {
     navigate("/");
   };
 
+  const ADMIN_EMAIL = "krishkulkarni2005@gmail.com";
+
   const navLinks = [
     { label: t("nav_home"),         id: "home",         path: "/"         },
     { label: "How It Works",        id: "how-it-works", path: "/#how-it-works" },
@@ -75,7 +77,7 @@ function Navbar() {
   ];
 
   // ONLY SHOW ADMIN TO YOU
-  if (user?.email === "krishkulkarni2005@gmail.com") {
+  if (user?.email === ADMIN_EMAIL) {
     navLinks.push({ label: "🛡️ Admin", id: "admin", path: "/admin" });
   }
 
