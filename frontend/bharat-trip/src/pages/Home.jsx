@@ -23,12 +23,12 @@ function Home() {
           <div className="hero-content">
             <h1>Plan Trips Without Confusion</h1>
             <p>Intelligent itineraries, real-time guidance, and seamless discovery for your next Indian adventure.</p>
-            <div className="hero-actions">
+            <div className="hero-actions-stack">
               <button className="btn-primary" onClick={() => navigate("/planner")}>
                 Start Planning
               </button>
-              <button className="btn-secondary" onClick={() => navigate("/about")}>
-                Learn More
+              <button className="btn-secondary" onClick={() => navigate("/create-poll")}>
+                Create Poll
               </button>
             </div>
           </div>

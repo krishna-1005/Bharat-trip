@@ -73,9 +73,17 @@ h1, h2, h3 {
   line-height: 1.6;
 }
 
-.hero-actions {
+.hero-actions-stack {
   display: flex;
+  flex-direction: column;
   gap: 16px;
+  align-items: flex-start;
+}
+
+.hero-actions-stack .btn-primary,
+.hero-actions-stack .btn-secondary {
+  width: auto;
+  min-width: 200px;
 }
 
 .btn-primary {
@@ -86,6 +94,8 @@ h1, h2, h3 {
   font-weight: 600;
   font-size: 1rem;
   transition: all 0.2s;
+  border: none;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -102,6 +112,7 @@ h1, h2, h3 {
   font-weight: 600;
   font-size: 1rem;
   transition: all 0.2s;
+  cursor: pointer;
 }
 
 .btn-secondary:hover {
