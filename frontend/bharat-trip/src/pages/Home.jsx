@@ -14,12 +14,11 @@ import img6 from "../assets/images/img6.png";
 function Home() {
   const navigate = useNavigate();
   const [heroImages, setHeroImages] = useState([img6, img1, img2, img3, img5]);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrollStep, setScrollStep] = useState(0);
+  const splitRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-
+    // Reveal on scroll
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -31,6 +30,19 @@ function Home() {
       { threshold: 0.1 }
     );
     document.querySelectorAll(".reveal-on-scroll").forEach((el) => observer.observe(el));
+
+    // Split Scroll Logic
+    const handleScroll = () => {
+      if (!splitRef.current) return;
+      const rect = splitRef.current.getBoundingClientRect();
+      const progress = Math.min(Math.max(-rect.top / rect.height, 0), 1);
+      
+      if (progress < 0.33) setScrollStep(0);
+      else if (progress < 0.66) setScrollStep(1);
+      else setScrollStep(2);
+    };
+
+    window.addEventListener("scroll", handleScroll);
 
     // Fetch config
     const fetchConfig = async () => {
@@ -45,135 +57,175 @@ function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const bentoFeatures = [
-    { title: "AI Neural Planning", desc: "Complex itineraries solved in milliseconds.", icon: "🧠", size: "large", color: "blue" },
-    { title: "One-Tap Voting", desc: "consensus without the chaos.", icon: "🗳️", size: "small", color: "purple" },
-    { title: "Live Guidance", desc: "Your personal concierge on the map.", icon: "📍", size: "small", color: "emerald" },
-    { title: "Curated India", desc: "Handpicked hidden gems across the subcontinent.", icon: "🇮🇳", size: "medium", color: "gold" },
-  ];
-
   const destinations = [
-    { name: "Ladakh", tag: "Adventure", img: "https://images.unsplash.com/photo-1581791534721-e599df4417f7?auto=format&fit=crop&w=800&q=80" },
-    { name: "Varanasi", tag: "Spiritual", img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80" },
-    { name: "Goa", tag: "Coastal", img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80" },
-    { name: "Kerala", tag: "Nature", img: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80" },
+    { name: "Goa", img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80", tag: "Tropical" },
+    { name: "Ladakh", img: "https://images.unsplash.com/photo-1581791534721-e599df4417f7?auto=format&fit=crop&w=800&q=80", tag: "Adventure" },
+    { name: "Kerala", img: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80", tag: "Nature" },
+    { name: "Varanasi", img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80", tag: "Spiritual" },
+    { name: "Manali", img: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80", tag: "Mountains" },
   ];
 
   return (
-    <div className={`home-luxury ${scrolled ? 'is-scrolled' : ''}`}>
+    <div className="home-saas-premium">
       
-      {/* ── CINEMATIC HERO ── */}
-      <section className="lux-hero">
-        <div className="lux-hero-bg">
+      {/* ── 1) HERO SECTION (CENTERED) ── */}
+      <section className="saas-hero">
+        <div className="saas-hero-bg">
           <ThreeScene images={heroImages} />
+          <div className="saas-hero-overlay"></div>
         </div>
         
-        <div className="lux-hero-content container">
+        <div className="container saas-hero-content">
           <div className="reveal-on-scroll">
-            <span className="lux-badge">The Future of Exploration</span>
-            <h1 className="lux-title">Crafting <span className="gradient-gold">Memories</span> <br/>Through Intelligence.</h1>
-            <p className="lux-subtitle">Experience India's first AI-powered travel ecosystem designed for groups who value time and clarity.</p>
+            <span className="saas-badge">✨ NEW: AI-POWERED GROUP DECISIONS</span>
+            <h1 className="saas-title">Decide Trips <br/><span className="gradient-blue">in Seconds</span></h1>
+            <p className="saas-subtitle">No more group chaos. Vote, finalize, and follow your trip smoothly with India's most advanced travel planner.</p>
             
-            <div className="lux-hero-actions">
-              <button className="btn-lux primary" onClick={() => navigate("/planner")}>
-                Begin Your Journey
+            <div className="saas-hero-actions">
+              <button className="btn-saas primary" onClick={() => navigate("/planner")}>
+                Start Planning →
               </button>
-              <button className="btn-lux secondary" onClick={() => navigate("/create-poll")}>
-                Decide with Friends
+              <button className="btn-saas ghost" onClick={() => navigate("/create-poll")}>
+                Create Poll
               </button>
             </div>
           </div>
-        </div>
 
-        <div className="lux-scroll-indicator">
-          <div className="mouse"></div>
-          <span>Discover More</span>
+          {/* Floating UI Elements */}
+          <div className="saas-floating-elements">
+            <div className="saas-float-card poll-card glass reveal-on-scroll">
+              <div className="float-icon">🗳️</div>
+              <div className="float-text">
+                <span className="label">Poll Active</span>
+                <span className="val">Goa winning 70%</span>
+              </div>
+            </div>
+            <div className="saas-float-card map-card glass reveal-on-scroll">
+              <div className="float-icon">📍</div>
+              <div className="float-text">
+                <span className="label">Route Optmized</span>
+                <span className="val">Baga → Anjuna</span>
+              </div>
+            </div>
+            <div className="saas-float-card step-card glass reveal-on-scroll">
+              <div className="float-icon">✨</div>
+              <div className="float-text">
+                <span className="label">Next Step</span>
+                <span className="val">Check-in at 2 PM</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── BENTO FEATURES ── */}
-      <section className="lux-bento reveal-on-scroll">
+      {/* ── 2) FLOATING FEATURE STRIP ── */}
+      <section className="saas-feature-strip">
         <div className="container">
-          <div className="section-head-lux">
-            <h2>Superior <span className="gradient-gold">Intelligence</span></h2>
-            <p>Every detail of your trip is optimized by our neural engine.</p>
+          <div className="strip-panel glass reveal-on-scroll">
+            <div className="strip-item">
+              <span className="icon">🗳️</span>
+              <span className="text">Vote → Decision Done</span>
+            </div>
+            <div className="strip-sep"></div>
+            <div className="strip-item">
+              <span className="icon">🤖</span>
+              <span className="text">AI builds your plan</span>
+            </div>
+            <div className="strip-sep"></div>
+            <div className="strip-item">
+              <span className="icon">🧭</span>
+              <span className="text">Follow step-by-step</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 4) SPLIT SCROLL SECTION ── */}
+      <section ref={splitRef} className="saas-split-scroll">
+        <div className="container split-wrapper">
+          <div className="split-left">
+            <div className="sticky-content">
+              <div className={`split-text-block ${scrollStep === 0 ? 'active' : ''}`}>
+                <span className="step-num">01</span>
+                <h2>Create a poll</h2>
+                <p>Start by asking your group where they want to go. No more endless WhatsApp debates.</p>
+              </div>
+              <div className={`split-text-block ${scrollStep === 1 ? 'active' : ''}`}>
+                <span className="step-num">02</span>
+                <h2>Decision gets finalized</h2>
+                <p>Votes are locked and the winner is chosen automatically. Moving you to the next phase instantly.</p>
+              </div>
+              <div className={`split-text-block ${scrollStep === 2 ? 'active' : ''}`}>
+                <span className="step-num">03</span>
+                <h2>Follow your trip</h2>
+                <p>A live, step-by-step map guide ensures everyone knows the plan. Real-time movement tracking.</p>
+              </div>
+            </div>
           </div>
           
-          <div className="bento-grid">
-            {bentoFeatures.map((f, i) => (
-              <div key={i} className={`bento-card ${f.size} ${f.color} glass`}>
-                <div className="bento-icon">{f.icon}</div>
-                <div className="bento-text">
-                  <h3>{f.title}</h3>
-                  <p>{f.desc}</p>
+          <div className="split-right">
+            <div className="visual-stack">
+              <div className={`visual-frame glass ${scrollStep === 0 ? 'visible' : ''}`}>
+                <div className="mock-poll-ui">
+                  <div className="mock-title">Select Destination</div>
+                  <div className="mock-row active"><div className="bar" style={{width: '80%'}}></div><span>Goa</span></div>
+                  <div className="mock-row"><div className="bar" style={{width: '40%'}}></div><span>Manali</span></div>
                 </div>
-                <div className="bento-glow"></div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── INTERACTIVE STEP FLOW ── */}
-      <section className="lux-flow reveal-on-scroll">
-        <div className="container">
-          <div className="flow-wrapper">
-            <div className="flow-line"></div>
-            {[
-              { t: "Dream", d: "Start a group poll in seconds" },
-              { t: "Decide", d: "Automatic consensus reached" },
-              { t: "Design", d: "AI crafts the perfect route" },
-              { t: "Discover", d: "Follow the live guided map" }
-            ].map((step, i) => (
-              <div key={i} className="flow-step">
-                <div className="flow-dot"><span>{i+1}</span></div>
-                <h4>{step.t}</h4>
-                <p>{step.d}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── LUXURY DESTINATIONS ── */}
-      <section className="lux-destinations reveal-on-scroll">
-        <div className="container">
-          <div className="section-head-lux">
-            <h2>The <span className="gradient-gold">Collection</span></h2>
-            <p>Signature destinations curated for the modern traveler.</p>
-          </div>
-        </div>
-        
-        <div className="lux-gallery">
-          {destinations.map((d, i) => (
-            <div 
-              key={i} 
-              className="lux-gallery-card"
-              onClick={() => navigate("/planner", { state: { city: d.name } })}
-            >
-              <img src={d.img} alt={d.name} />
-              <div className="lux-overlay">
-                <div className="lux-overlay-top">
-                  <span>{d.tag}</span>
+              <div className={`visual-frame glass ${scrollStep === 1 ? 'visible' : ''}`}>
+                <div className="mock-result-ui">
+                  <div className="check-circle">✓</div>
+                  <h3>Decision Locked</h3>
+                  <p>Destination: Goa</p>
                 </div>
-                <div className="lux-overlay-bottom">
-                  <h3>{d.name}</h3>
-                  <p>Explore Itinerary ›</p>
+              </div>
+              <div className={`visual-frame glass ${scrollStep === 2 ? 'visible' : ''}`}>
+                <div className="mock-map-ui">
+                  <div className="map-line"></div>
+                  <div className="map-pin"></div>
+                  <p>Arriving at Baga in 10m</p>
                 </div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </section>
 
-      {/* ── SIGNATURE CTA ── */}
-      <section className="lux-cta reveal-on-scroll">
+      {/* ── 5) DESTINATION SHOWCASE ── */}
+      <section className="saas-destinations reveal-on-scroll">
         <div className="container">
-          <div className="cta-signature glass">
-            <h2>Ready for the extraordinary?</h2>
-            <p>Join 10,000+ explorers who planned their dream trip today.</p>
-            <button className="btn-lux primary lg" onClick={() => navigate("/planner")}>
-              Plan Your Trip Now
+          <div className="section-head-saas">
+            <h2>Handpicked <span className="gradient-blue">Odysseys</span></h2>
+            <p>High-end curated destinations ready for your next decision.</p>
+          </div>
+        </div>
+        
+        <div className="saas-carousel-wrapper">
+          <div className="saas-carousel-track">
+            {destinations.map((d, i) => (
+              <div 
+                key={i} 
+                className="saas-dest-card"
+                onClick={() => navigate("/planner", { state: { city: d.name } })}
+              >
+                <img src={d.img} alt={d.name} />
+                <div className="dest-overlay">
+                  <span className="tag">{d.tag}</span>
+                  <h3>{d.name}</h3>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6) CLEAN CTA ── */}
+      <section className="saas-final-cta reveal-on-scroll">
+        <div className="container">
+          <div className="cta-saas-box glass">
+            <h2>Ready to stop overthinking trips?</h2>
+            <button className="btn-saas primary lg" onClick={() => navigate("/planner")}>
+              Start Now →
             </button>
           </div>
         </div>
