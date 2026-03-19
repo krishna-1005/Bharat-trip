@@ -32,7 +32,7 @@ const InteractiveHeroImages = () => {
     },
     {
       name: "Varanasi",
-      img: "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?auto=format&fit=crop&w=800&q=80",
+      img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80",
       x: 40, y: -40, rotate: 8, scale: 0.9
     },
     {
@@ -42,7 +42,7 @@ const InteractiveHeroImages = () => {
     },
     {
       name: "Hampi",
-      img: "https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?auto=format&fit=crop&w=800&q=80",
+      img: "https://images.unsplash.com/photo-1524492707941-5f397224bc0b?auto=format&fit=crop&w=800&q=80",
       x: 50, y: 30, rotate: 5, scale: 1.05
     }
   ];

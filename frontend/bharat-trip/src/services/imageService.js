@@ -24,14 +24,16 @@ export async function getPlaceImage(placeName, city) {
     "https://images.unsplash.com/photo-1477584264176-507e81e7f4f5?q=80&w=600", // Jaipur
     "https://images.unsplash.com/photo-1587474260584-1f3c8b4a339a?q=80&w=600", // Delhi
     "https://images.unsplash.com/photo-1548013146-72479768bbfd?q=80&w=600", // Varanasi
-    "https://images.unsplash.com/photo-1506461883276-594a12b11cf3?q=80&w=600"  // Hill Station
+    "https://images.unsplash.com/photo-1506461883276-594a12b11cf3?q=80&w=600", // Hill Station
+    "https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?q=80&w=600", // Udaipur
+    "https://images.unsplash.com/photo-1598970605070-a38a6ccd3a2d?q=80&w=600"  // Rishikesh
   ];
 
   // Try strict first, then broader
   const queries = [
-    `"${placeName}" ${city}`,
-    `${placeName} landmark`,
-    `${placeName} india`
+    `"${placeName}" ${city} landmark`,
+    `${placeName} ${city} tourist place`,
+    `${placeName} india architecture`
   ];
 
   for (const query of queries) {
@@ -39,7 +41,7 @@ export async function getPlaceImage(placeName, city) {
       const res = await fetch(
         `https://api.unsplash.com/search/photos?query=${encodeURIComponent(
           query
-        )}&per_page=10&orientation=landscape`,
+        )}&per_page=5&orientation=landscape&content_filter=high`,
         {
           headers: {
             Authorization: `Client-ID ${UNSPLASH_KEY}`
@@ -54,13 +56,14 @@ export async function getPlaceImage(placeName, city) {
       const results = data?.results || [];
 
       if (results.length > 0) {
-        // Use a hash of the placeName to pick a unique result from the page
+        // Find the most relevant result - usually the first one for specific queries
+        // But we'll use a hash to stay consistent for the same place
         const hash = stringHash(placeName);
-        const index = hash % results.length;
+        const index = hash % Math.min(results.length, 3); // Pick from top 3 for quality
         const imageUrl = results[index]?.urls?.small;
 
         if (imageUrl) {
-          console.log(`[ImageService] Matched ${placeName} -> Result #${index}`);
+          console.log(`[ImageService] Matched ${placeName} in ${city} -> Result #${index}`);
           imageCache[cacheKey] = imageUrl;
           return imageUrl;
         }

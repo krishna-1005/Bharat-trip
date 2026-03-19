@@ -332,7 +332,7 @@ async function generatePlan({ city = "Bengaluru", days = 2, budget = "low", inte
 
     // 3. Generate reviews for each place in the day
     await Promise.all(dayPlaces.map(async (p) => {
-      p.reviews = await generateReviews(p.name, p.category);
+      p.reviews = await generateReviews(p.name, p.type || p.category, city);
     }));
 
     // Meal cost adjusted for traveler count and budget

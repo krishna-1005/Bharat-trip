@@ -76,6 +76,7 @@ async function fetchOSMPlaces(lat, lng) {
         lat:      p.lat || p.center?.lat,
         lng:      p.lon || p.center?.lon,
         category: mapCategory(p.tags),
+        type:     p.tags.tourism || p.tags.historic || p.tags.amenity || p.tags.leisure || p.tags.natural || "landmark",
         source:   "osm",
       }))
       .filter(p => p.lat && p.lng);

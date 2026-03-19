@@ -6,10 +6,10 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  * Generates realistic reviews for a place using Gemini AI.
  * If API key is missing or fails, returns stable mock reviews.
  */
-async function generateReviews(placeName, category) {
+async function generateReviews(placeName, category, city = "India") {
   // If no key at all, immediate fallback
   if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-    return getMockReviews(placeName);
+    return getMockReviews(placeName, city);
   }
 
   try {
@@ -17,7 +17,7 @@ async function generateReviews(placeName, category) {
     
     // Set a short timeout for the AI generation so it doesn't hang
     const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: `Generate 3 original user reviews for ${placeName} (${category}) in Bengaluru. Return ONLY JSON: [{"author": "Name", "rating": 5, "comment": "Text"}]` }] }],
+      contents: [{ role: 'user', parts: [{ text: `Generate 3 original user reviews for ${placeName} (${category}) in ${city}. The reviews should be specific to this location and feel authentic. Return ONLY JSON: [{"author": "Name", "rating": 5, "comment": "Text"}]` }] }],
       generationConfig: { maxOutputTokens: 200 }
     });
 
@@ -27,19 +27,27 @@ async function generateReviews(placeName, category) {
     // This is where the "API key expired" error is caught
     // We log it but return the mock reviews so the UI stays functional
     console.log(`Note: Using fallback reviews for ${placeName} (AI Key issue: ${error.message.substring(0, 50)}...)`);
-    return getMockReviews(placeName);
+    return getMockReviews(placeName, city);
   }
 }
 
-function getMockReviews(name) {
-  // Stable pseudo-random reviews based on name
-  const reviewers = ["Arjun Mehta", "Priya Sharma", "Rohan Das", "Ananya Iyer", "Vikram Singh"];
-  const comments = [
+function getMockReviews(name, city) {
+  // Stable pseudo-random reviews based on name and city
+  const reviewers = ["Arjun Mehta", "Priya Sharma", "Rohan Das", "Ananya Iyer", "Vikram Singh", "Sneha Kapoor", "Rahul Verma"];
+  const genericComments = [
     "Amazing experience! Highly recommend visiting this place.",
     "Decent spot, but it gets a bit crowded on weekends.",
-    "A must-visit in Bengaluru. The atmosphere is wonderful.",
+    "A must-visit. The atmosphere is wonderful.",
     "Good value for money and very well maintained.",
     "Loved the vibe here! Perfect for a quick outing."
+  ];
+
+  const cityComments = [
+    `Definitely one of the highlights of my trip to ${city}!`,
+    `If you are in ${city}, you cannot miss this location.`,
+    `A beautiful part of ${city}. Great for photos.`,
+    `Really captures the essence of ${city}.`,
+    `Such a peaceful spot in the heart of ${city}.`
   ];
 
   let hash = 0;
@@ -52,12 +60,12 @@ function getMockReviews(name) {
     {
       author: reviewers[absHash % reviewers.length],
       rating: 4 + (absHash % 2),
-      comment: comments[absHash % comments.length]
+      comment: cityComments[absHash % cityComments.length]
     },
     {
       author: reviewers[(absHash + 1) % reviewers.length],
       rating: 3 + (absHash % 3),
-      comment: comments[(absHash + 1) % comments.length]
+      comment: genericComments[(absHash + 1) % genericComments.length]
     }
   ];
 }
