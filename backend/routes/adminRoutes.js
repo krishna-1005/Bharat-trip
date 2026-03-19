@@ -13,11 +13,21 @@ const ADMIN_EMAIL = "krishkulkarni1005@gmail.com";
 
 // Middleware to double check admin email
 const verifyAdminEmail = (req, res, next) => {
-  if (req.user.email !== ADMIN_EMAIL) {
+  const userEmail = req.user?.email?.toLowerCase();
+  const targetEmail = ADMIN_EMAIL.toLowerCase();
+  
+  console.log(`Admin Access Attempt by: ${userEmail}`);
+  if (userEmail !== targetEmail) {
+    console.log(`Access Denied: ${userEmail} does not match ${targetEmail}`);
     return res.status(403).json({ error: "Access denied. Extreme security active." });
   }
   next();
 };
+
+/* GET /api/admin/whoami - Debug identity */
+router.get("/whoami", protect, (req, res) => {
+  res.json({ email: req.user?.email, role: req.user?.role });
+});
 
 /* GET /api/admin/stats - Summary of all activity */
 router.get("/stats", protect, verifyAdminEmail, async (req, res) => {

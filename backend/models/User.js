@@ -68,6 +68,7 @@ userSchema.pre("save", async function(){
 
 /* Compare password */
 userSchema.methods.comparePassword = async function(password){
+  if (!this.password) return false; // Account might be Google/Firebase only
   return bcrypt.compare(password, this.password);
 };
 
