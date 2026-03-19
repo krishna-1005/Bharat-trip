@@ -67,7 +67,7 @@ function Navbar() {
     navigate("/");
   };
 
-  const ADMIN_EMAIL = "krishnapramodkulkarni23aiml@rnsit.ac.in";
+  const ADMIN_EMAILS = ["bharattrip0@gmail.com", "krishnapramodkulkarni23aiml@rnsit.ac.in"];
 
   const navLinks = [
     { label: t("nav_home"),         id: "home",         path: "/"         },
@@ -76,8 +76,8 @@ function Navbar() {
     { label: t("nav_about"),        id: "footer",       path: "/about"     },
   ];
 
-  // ONLY SHOW ADMIN TO YOU
-  if (user?.email === ADMIN_EMAIL) {
+  // ONLY SHOW ADMIN TO AUTHORIZED USERS
+  if (user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
     navLinks.push({ label: "🛡️ Admin", id: "admin", path: "/admin" });
   }
 

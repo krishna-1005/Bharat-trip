@@ -9,16 +9,15 @@ const { protect, adminOnly } = require("../middleware/protect");
 const router = express.Router();
 
 // Only you can access this - Hardcoded for maximum security
-const ADMIN_EMAIL = "krishnapramodkulkarni23aiml@rnsit.ac.in";
+const ADMIN_EMAILS = ["bharattrip0@gmail.com", "krishnapramodkulkarni23aiml@rnsit.ac.in"];
 
 // Middleware to double check admin email
 const verifyAdminEmail = (req, res, next) => {
   const userEmail = req.user?.email?.toLowerCase();
-  const targetEmail = ADMIN_EMAIL.toLowerCase();
   
   console.log(`Admin Access Attempt by: ${userEmail}`);
-  if (userEmail !== targetEmail) {
-    console.log(`Access Denied: ${userEmail} does not match ${targetEmail}`);
+  if (!ADMIN_EMAILS.map(e => e.toLowerCase()).includes(userEmail)) {
+    console.log(`Access Denied: ${userEmail} is not in the authorized list.`);
     return res.status(403).json({ error: "Access denied. Extreme security active." });
   }
   next();
