@@ -21,7 +21,7 @@ export default function MinimalReviewSection() {
       const data = await fetchReviews();
       setReviews(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error(\"Error loading reviews:\", err);
+      console.error("Error loading reviews:", err);
       setReviews([]); // Fallback to empty array
     } finally {
       setIsLoading(false);
