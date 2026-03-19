@@ -1,7 +1,7 @@
 const express = require("express");
 const User    = require("../models/User");
 const Trip    = require("../models/Trip");
-const protect = require("../middleware/protect");
+const { protect } = require("../middleware/protect");
 
 const router = express.Router();
 

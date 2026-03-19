@@ -1,6 +1,6 @@
 const express      = require("express");
 const generatePlan = require("../logic/planner");
-const protect      = require("../middleware/protect");
+const { protect } = require("../middleware/protect");
 const Trip         = require("../models/Trip");
 const UsageLog     = require("../models/UsageLog");
 const admin        = require("../firebaseAdmin");

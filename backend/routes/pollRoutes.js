@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Poll = require("../models/Poll");
 const { v4: uuidv4 } = require("uuid");
-const protect = require("../middleware/protect");
+const { protect } = require("../middleware/protect");
 
 // Create a new poll
 router.post("/create", async (req, res) => {

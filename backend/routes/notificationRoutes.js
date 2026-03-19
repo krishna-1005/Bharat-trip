@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const { sendUpdateEmail } = require("../services/emailService");
-const protect = require("../middleware/protect");
+const { protect } = require("../middleware/protect");
 
 // Admin route to trigger a website update notification
 // In a real app, this should be restricted to admin users only
