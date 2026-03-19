@@ -1,6 +1,6 @@
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Float, PerspectiveCamera, useTexture, MeshDistortMaterial } from '@react-three/drei';
+import { Float, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 
 function ImageCard({ url, position, rotation, scale = 1 }) {
@@ -8,6 +8,13 @@ function ImageCard({ url, position, rotation, scale = 1 }) {
   const texture = useTexture(url);
   const { mouse } = useThree();
   const [hovered, setHover] = useState(false);
+
+  // Ensure texture is properly disposed when component unmounts
+  useEffect(() => {
+    return () => {
+      if (texture) texture.dispose();
+    };
+  }, [texture]);
 
   useFrame((state) => {
     if (!meshRef.current) return;
@@ -81,8 +88,6 @@ function Particles({ count = 80 }) {
 }
 
 export default function ThreeScene({ images = [] }) {
-  // If no images provided, we'll use empty array
-  // Position cards in a premium gallery layout
   const layout = [
     { pos: [0, 0, 0], rot: [0, 0, 0], scale: 1.2 },        // Main Center
     { pos: [-4.5, 1, -2], rot: [0, 0.3, 0], scale: 0.8 },  // Left Top
@@ -99,12 +104,21 @@ export default function ThreeScene({ images = [] }) {
       zIndex: 1,
       pointerEvents: 'auto'
     }}>
-      <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 12], fov: 50 }}>
+      <Canvas 
+        dpr={[1, 2]} 
+        camera={{ position: [0, 0, 12], fov: 50 }}
+        gl={{ 
+          antialias: true, 
+          alpha: true,
+          powerPreference: "high-performance",
+          preserveDrawingBuffer: false
+        }}
+      >
         <ambientLight intensity={0.7} />
         <pointLight position={[10, 10, 10]} intensity={1} />
         
         <React.Suspense fallback={null}>
-          {images.slice(0, 5).map((url, i) => (
+          {images && images.length > 0 && images.slice(0, 5).map((url, i) => (
             <ImageCard 
               key={url} 
               url={url} 
@@ -115,7 +129,7 @@ export default function ThreeScene({ images = [] }) {
           ))}
         </React.Suspense>
 
-        <Particles count={100} />
+        <Particles count={80} />
         
         <fog attach="fog" args={['#020617', 5, 25]} />
       </Canvas>
