@@ -69,6 +69,39 @@ const destinationData = {
       "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=600&q=80"
     ],
     spots: ["Laxman Jhula", "Triveni Ghat", "Beatles Ashram"]
+  },
+  Varanasi: {
+    tagline: "The Spiritual Capital of India",
+    desc: "One of the world's oldest living cities, where the Ganges flows with spiritual energy, ancient rituals, and timeless traditions.",
+    heroImg: "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?auto=format&fit=crop&w=600&q=80"
+    ],
+    spots: ["Dashashwamedh Ghat", "Kashi Vishwanath Temple", "Sarnath"]
+  },
+  Udaipur: {
+    tagline: "The Venice of the East",
+    desc: "A city of shimmering lakes, magnificent palaces, and romantic sunsets set against the backdrop of the Aravalli Hills.",
+    heroImg: "https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=600&q=80"
+    ],
+    spots: ["City Palace", "Lake Pichola", "Jag Mandir"]
+  },
+  Agra: {
+    tagline: "City of Eternal Love",
+    desc: "Home to the world-renowned Taj Mahal, Agra is a treasure trove of Mughal architecture and historical splendor.",
+    heroImg: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1524492707941-5f397224bc0b?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=600&q=80"
+    ],
+    spots: ["Taj Mahal", "Agra Fort", "Fatehpur Sikri"]
   }
 };
 

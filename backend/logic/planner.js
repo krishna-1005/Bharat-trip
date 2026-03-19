@@ -170,13 +170,41 @@ const CITY_COORDINATES = {
   "Chennai": { lat: 13.0827, lng: 80.2707 },
   "Kolkata": { lat: 22.5726, lng: 88.3639 },
   "Agra": { lat: 27.1767, lng: 78.0081 },
-  "Udaipur": { lat: 24.5854, lng: 73.7125 }
+  "Udaipur": { lat: 24.5854, lng: 73.7125 },
+  "Varanasi": { lat: 25.3176, lng: 82.9739 },
+  "Kochi": { lat: 9.9312, lng: 76.2673 },
+  "Shimla": { lat: 31.1048, lng: 77.1734 },
+  "Manali": { lat: 32.2432, lng: 77.1892 },
+  "Rishikesh": { lat: 30.0869, lng: 78.2676 },
+  "Amritsar": { lat: 31.6340, lng: 74.8723 },
+  "Pune": { lat: 18.5204, lng: 73.8567 },
+  "Ahmedabad": { lat: 23.0225, lng: 72.5714 },
+  "Darjeeling": { lat: 27.0410, lng: 88.2663 },
+  "Pondicherry": { lat: 11.9416, lng: 79.8083 }
 };
+
+async function getCityCoords(cityName) {
+  if (CITY_COORDINATES[cityName]) return CITY_COORDINATES[cityName];
+  
+  try {
+    const axios = require("axios");
+    const response = await axios.get(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityName + ", India")}&limit=1`,
+      { headers: { "User-Agent": "BharatTrip/1.0" } }
+    );
+    if (response.data && response.data[0]) {
+      return { lat: Number(response.data[0].lat), lng: Number(response.data[0].lon) };
+    }
+  } catch (e) {
+    console.error("Geocoding failed for", cityName);
+  }
+  return CITY_COORDINATES["Bengaluru"];
+}
 
 async function generatePlan({ city = "Bengaluru", days = 2, budget = "low", interests = [], travelerType = "solo", pace = "moderate" }) {
   days = Math.min(Math.max(parseInt(days) || 2, 1), 30);
   
-  const coords = CITY_COORDINATES[city] || CITY_COORDINATES["Bengaluru"];
+  const coords = await getCityCoords(city);
   
   // Filter local pool by city
   let cityPool = allPlacesPool.filter(p => 

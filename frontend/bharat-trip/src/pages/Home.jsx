@@ -97,6 +97,9 @@ const Home = () => {
     { name: "Jaipur", tagline: "Royal Forts & Culture", img: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80" },
     { name: "Ladakh", tagline: "Mountains & Monasteries", img: "https://images.unsplash.com/photo-1581791534721-e599df4417f7?auto=format&fit=crop&w=800&q=80" },
     { name: "Rishikesh", tagline: "Ganga & Yoga", img: "https://images.unsplash.com/photo-1598970605070-a38a6ccd3a2d?auto=format&fit=crop&w=800&q=80" },
+    { name: "Varanasi", tagline: "Spiritual Eternity", img: "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?auto=format&fit=crop&w=800&q=80" },
+    { name: "Udaipur", tagline: "The City of Lakes", img: "https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=800&q=80" },
+    { name: "Agra", tagline: "Home of Taj Mahal", img: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80" },
   ];
 
   const scrollToDestinations = () => {

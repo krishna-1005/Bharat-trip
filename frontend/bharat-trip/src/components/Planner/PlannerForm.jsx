@@ -119,15 +119,16 @@ function PlannerForm({ onPlanGenerated }) {
 
             <div className="pf-field">
               <label className="pf-label">Destination City</label>
-              <select 
-                className="pf-city-select"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              >
-                {cityOptions.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+              <div className="pf-search-wrap">
+                <input 
+                  type="text"
+                  className="pf-city-input"
+                  placeholder="Search any city in India (e.g. Mumbai, Shimla...)"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+                <span className="pf-search-hint">Works for any location in India</span>
+              </div>
             </div>
 
             <div className="pf-field">
