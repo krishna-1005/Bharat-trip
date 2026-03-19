@@ -67,7 +67,7 @@ function Navbar() {
     navigate("/");
   };
 
-  const ADMIN_EMAIL = "bharattrip0@gmail.com";
+  const ADMIN_EMAIL = "krishnapramodkulkarni23aiml@rnsit.ac.in";
 
   const navLinks = [
     { label: t("nav_home"),         id: "home",         path: "/"         },

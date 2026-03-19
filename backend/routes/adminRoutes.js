@@ -9,7 +9,7 @@ const { protect, adminOnly } = require("../middleware/protect");
 const router = express.Router();
 
 // Only you can access this - Hardcoded for maximum security
-const ADMIN_EMAIL = "bharattrip0@gmail.com";
+const ADMIN_EMAIL = "krishnapramodkulkarni23aiml@rnsit.ac.in";
 
 // Middleware to double check admin email
 const verifyAdminEmail = (req, res, next) => {
