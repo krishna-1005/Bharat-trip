@@ -12,19 +12,9 @@ function Navbar() {
   const [open, setOpen]           = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled]   = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef(null);
 
   const username = user?.name || user?.email || "";
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery("");
-      setMobileMenuOpen(false);
-    }
-  };
 
   /* scroll shadow */
   useEffect(() => {
@@ -44,22 +34,6 @@ function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const scrollToSection = (id) => {
-    setOpen(false);
-    setMobileMenuOpen(false);
-
-    if (location.pathname !== "/") {
-      navigate("/");
-      setTimeout(() => {
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    } else {
-      const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   const handleLogout = () => {
     logout();
     setOpen(false);
@@ -70,16 +44,10 @@ function Navbar() {
   const ADMIN_EMAILS = ["bharattrip0@gmail.com", "krishnapramodkulkarni23aiml@rnsit.ac.in"];
 
   const navLinks = [
-    { label: t("nav_home"),         id: "home",         path: "/"         },
-    { label: "How It Works",        id: "how-it-works", path: "/#how-it-works" },
-    { label: "AI Planner",          id: "planner",      path: "/planner"   },
-    { label: t("nav_about"),        id: "footer",       path: "/about"     },
+    { label: "Poll",    id: "poll",    path: "/create-poll" },
+    { label: "Planner", id: "planner", path: "/planner"     },
+    { label: "Map",     id: "map",     path: "/results"     },
   ];
-
-  // ONLY SHOW ADMIN TO AUTHORIZED USERS
-  if (user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
-    navLinks.push({ label: "🛡️ Admin", id: "admin", path: "/admin" });
-  }
 
   const menuItems = [
     { icon: "👤", label: t("nav_profile"), sub: "View your account",   path: "/profile"  },
@@ -93,28 +61,9 @@ function Navbar() {
       <div className="nb-logo" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}>
         <span className="nb-logo-flag">🇮🇳</span>
         <span className="nb-logo-text">
-          <span className="nb-logo-in">IN</span> Bharat Trip
+          Bharat Trip
         </span>
       </div>
-
-      {/* ── SEARCH BAR (Home Page Only) ── */}
-      {(location.pathname === "/" || location.pathname === "") && (
-        <div className="nb-search-container">
-          <form className="nb-search-form" onSubmit={handleSearch}>
-            <div className="nb-search-field">
-              <span className="nb-search-icon-left">🔍</span>
-              <input 
-                type="text" 
-                placeholder="Search places..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="nb-search-input"
-              />
-              <button type="submit" className="nb-search-submit">Search</button>
-            </div>
-          </form>
-        </div>
-      )}
 
       {/* ── DESKTOP NAV LINKS ── */}
       <ul className="nb-links">
@@ -123,12 +72,8 @@ function Navbar() {
             key={link.id}
             className={`nb-link-item ${location.pathname === link.path ? "nb-active" : ""}`}
             onClick={() => {
-              if (link.path.startsWith("/#")) {
-                scrollToSection(link.id);
-              } else {
-                navigate(link.path);
-                setMobileMenuOpen(false);
-              }
+              navigate(link.path);
+              setMobileMenuOpen(false);
             }}
           >
             {link.label}
@@ -221,7 +166,7 @@ function Navbar() {
         <div className="nb-mobile-menu">
           <ul className="nb-mobile-links">
             {navLinks.map(link => (
-              <li key={link.id} className="nb-mobile-item" onClick={() => scrollToSection(link.id)}>
+              <li key={link.id} className="nb-mobile-item" onClick={() => { navigate(link.path); setMobileMenuOpen(false); }}>
                 {link.label}
               </li>
             ))}
