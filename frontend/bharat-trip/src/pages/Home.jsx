@@ -32,7 +32,7 @@ const InteractiveHeroImages = () => {
     },
     {
       name: "Varanasi",
-      img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80",
+      img: "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?auto=format&fit=crop&w=800&q=80",
       x: 40, y: -40, rotate: 8, scale: 0.9
     },
     {
@@ -42,7 +42,7 @@ const InteractiveHeroImages = () => {
     },
     {
       name: "Hampi",
-      img: "https://images.unsplash.com/photo-1524492707941-5f397224bc0b?auto=format&fit=crop&w=800&q=80",
+      img: "https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?auto=format&fit=crop&w=800&q=80",
       x: 50, y: 30, rotate: 5, scale: 1.05
     }
   ];
@@ -96,7 +96,7 @@ const Home = () => {
     { name: "Kerala", tagline: "Backwaters & Bliss", img: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80" },
     { name: "Jaipur", tagline: "Royal Forts & Culture", img: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80" },
     { name: "Ladakh", tagline: "Mountains & Monasteries", img: "https://images.unsplash.com/photo-1581791534721-e599df4417f7?auto=format&fit=crop&w=800&q=80" },
-    { name: "Rishikesh", tagline: "Ganga & Yoga", img: "https://images.unsplash.com/photo-1584126307041-659f77626966?auto=format&fit=crop&w=800&q=80" },
+    { name: "Rishikesh", tagline: "Ganga & Yoga", img: "https://images.unsplash.com/photo-1598970605070-a38a6ccd3a2d?auto=format&fit=crop&w=800&q=80" },
   ];
 
   const scrollToDestinations = () => {
