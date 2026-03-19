@@ -251,35 +251,6 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode 
           />
         )}
 
-        {/* ── Background Tourist Spots (All Discovered) ── */}
-        {!isGuidanceMode && plan.allDiscoveredPlaces?.map((spot, i) => {
-          // Don't show if already in itinerary
-          if (allPlaces.some(p => p.name === spot.name)) return null;
-          return (
-            <Marker
-              key={`spot-${i}`}
-              position={[spot.lat, spot.lng]}
-              icon={L.divIcon({
-                className: "bg-spot-pin",
-                html: `<div style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.5); border-radius: 50%;"></div>`,
-                iconSize: [8, 8]
-              })}
-            >
-              <Tooltip direction="top" offset={[0, -5]} className="bg-spot-tooltip">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', padding: '5px' }}>
-                  <PlaceImage 
-                    placeName={spot.name} 
-                    city={plan.city} 
-                    style={{ width: '100px', height: '60px', borderRadius: '4px', objectFit: 'cover' }} 
-                  />
-                  <span style={{fontSize: '10px', fontWeight: 'bold'}}>{spot.name}</span>
-                  <span style={{fontSize: '8px', color: '#666'}}>{spot.category}</span>
-                </div>
-              </Tooltip>
-            </Marker>
-          );
-        })}
-
         {!isGuidanceMode && (
           <MapLegend
             days={days}
@@ -374,13 +345,16 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode 
         {isGuidanceMode && (
           <>
             {allPlaces.map((p, i) => {
-              let color = "#94a3b8"; // Gray
+              // Only keep: Current location marker, Next location marker, Remaining itinerary markers
+              if (i < currentIndex) return null;
+
+              let color = "#94a3b8"; // Gray for remaining
               let isActive = false;
               if (i === currentIndex) {
-                color = "#3b82f6"; // Blue
+                color = "#3b82f6"; // Blue for current
                 isActive = true;
               } else if (i === currentIndex + 1) {
-                color = "#10b981"; // Green
+                color = "#10b981"; // Green for next
               }
 
               return (

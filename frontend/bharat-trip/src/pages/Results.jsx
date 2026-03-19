@@ -212,14 +212,17 @@ function Results() {
         <button className="mobile-share-btn" onClick={handleShare}>🔗</button>
       </div>
 
-      <div className="res-mobile-toggle">
-        <button className={!showMap ? "active" : ""} onClick={() => setShowMap(false)}>
-          <span className="toggle-icon">📋</span> List
-        </button>
-        <button className={showMap ? "active" : ""} onClick={() => setShowMap(true)}>
-          <span className="toggle-icon">🗺️</span> Map
-        </button>
-      </div>
+      {/* MOBILE TOGGLE (Mobile Only: <= 768px) */}
+      {windowWidth <= 768 && (
+        <div className="res-mobile-toggle">
+          <button className={!showMap ? "active" : ""} onClick={() => setShowMap(false)}>
+            <span className="toggle-icon">📋</span> List
+          </button>
+          <button className={showMap ? "active" : ""} onClick={() => setShowMap(true)}>
+            <span className="toggle-icon">🗺️</span> Map
+          </button>
+        </div>
+      )}
 
       {windowWidth > 900 && (
         <aside className="res-details-panel">
