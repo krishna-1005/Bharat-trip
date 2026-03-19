@@ -94,10 +94,32 @@
   color: var(--accent-blue);
 }
 
+.place-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
 .place-meta {
   font-size: 11px;
   color: var(--text-dim);
-  margin-top: 4px;
+}
+
+.place-distance, .place-distance-next {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-blue);
+  background: rgba(59, 130, 246, 0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.place-distance-next {
+  color: var(--accent-green);
+  background: rgba(16, 185, 129, 0.08);
+  margin-top: 6px;
 }
 
 .guidance-next-btn {

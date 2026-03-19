@@ -248,6 +248,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode 
             onNext={handleNextLocation}
             onClose={() => setIsGuidanceMode(false)}
             isLast={currentIndex >= allPlaces.length - 1}
+            userLocation={userLocation}
           />
         )}
 
