@@ -67,7 +67,7 @@ function Navbar() {
     navigate("/");
   };
 
-  const ADMIN_EMAIL = "krishkulkarni1005@gmail.com";
+  const ADMIN_EMAIL = "bharattrip0@gmail.com";
 
   const navLinks = [
     { label: t("nav_home"),         id: "home",         path: "/"         },
