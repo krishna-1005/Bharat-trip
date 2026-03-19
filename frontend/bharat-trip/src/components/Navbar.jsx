@@ -44,9 +44,10 @@ function Navbar() {
   const ADMIN_EMAILS = ["bharattrip0@gmail.com", "krishnapramodkulkarni23aiml@rnsit.ac.in"];
 
   const navLinks = [
+    { label: "Home",    id: "home",    path: "/"            },
     { label: "Poll",    id: "poll",    path: "/create-poll" },
     { label: "Planner", id: "planner", path: "/planner"     },
-    { label: "Map",     id: "map",     path: "/results"     },
+    { label: "Map",     id: "map",     path: "/map"         },
   ];
 
   const menuItems = [

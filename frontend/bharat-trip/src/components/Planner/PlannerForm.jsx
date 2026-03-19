@@ -11,10 +11,15 @@ function PlannerForm({ onPlanGenerated }) {
   const [city, setCity] = useState("Bengaluru");
 
   useEffect(() => {
-    if (loc.state?.prefilledCity) {
+    const params = new URLSearchParams(loc.search);
+    const destParam = params.get("destination");
+    
+    if (destParam) {
+      setCity(decodeURIComponent(destParam));
+    } else if (loc.state?.prefilledCity) {
       setCity(loc.state.prefilledCity);
     }
-  }, [loc.state]);
+  }, [loc.state, loc.search]);
   const [days, setDays] = useState(2);
   const [budget, setBudget] = useState("low");
   const [interests, setInterests] = useState([]);
