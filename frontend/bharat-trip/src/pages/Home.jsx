@@ -227,7 +227,7 @@ const Home = () => {
             <div 
               key={i} 
               className="dest-card"
-              onClick={() => navigate(`/planner?destination=${encodeURIComponent(d.name)}`, { state: { prefilledCity: d.name } })}
+              onClick={() => navigate(`/explore/${d.name}`)}
             >
               <img src={d.img} alt={d.name} />
               <div className="dest-overlay">

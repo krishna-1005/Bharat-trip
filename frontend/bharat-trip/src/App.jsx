@@ -24,6 +24,7 @@ import SamplePlan from "./pages/SamplePlan";
 import NearbyPlaces from "./components/NearbyPlaces";
 import PlaceDetails from "./pages/PlaceDetails";
 import SearchResults from "./pages/SearchResults";
+import DestinationDetails from "./pages/DestinationDetails";
 
 import TravelBot from "./components/TravelBot";
 
@@ -67,6 +68,7 @@ function App() {
           <Route path="/results" element={<Results />} />
           <Route path="/map" element={<Results />} />
           <Route path="/sample-plan" element={<SamplePlan />} />
+          <Route path="/explore/:city" element={<DestinationDetails />} />
           <Route path="/nearby" element={<NearbyPlaces />} />
           <Route path="/place/:id" element={<PlaceDetails />} />
           <Route path="/search" element={<SearchResults />} />
