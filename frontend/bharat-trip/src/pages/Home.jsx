@@ -69,7 +69,7 @@ const InteractiveHeroImages = () => {
       ))}
       
       {/* Mini Poll Card Overlay */}
-      <motion.div 
+      {/* <motion.div 
         className="hero-mini-poll"
         style={{
           x: useTransform(sx, (val) => val * 3),
@@ -81,7 +81,7 @@ const InteractiveHeroImages = () => {
           <div className="mini-poll-bar" style={{ width: '73%' }}></div>
         </div>
         <p>Beach Resort (3 votes)</p>
-      </motion.div>
+      </motion.div> */}
     </div>
   );
 };
