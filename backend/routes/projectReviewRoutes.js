@@ -7,11 +7,11 @@ const admin = require("../firebaseAdmin");
 // Public route to get all project reviews
 router.get("/", async (req, res) => {
   try {
-    const reviews = await ProjectReview.find().sort({ createdAt: -1 });
-    res.json(reviews);
+    const reviews = await ProjectReview.find().sort({ createdAt: -1 }) || [];
+    res.json(Array.isArray(reviews) ? reviews : []);
   } catch (err) {
     console.error("Error fetching project reviews:", err);
-    res.status(500).json({ error: "Failed to fetch reviews" });
+    res.json([]); // Return empty array on error to prevent frontend crash
   }
 });
 
