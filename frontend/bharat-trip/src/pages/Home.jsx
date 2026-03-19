@@ -33,13 +33,12 @@ function Home() {
             </div>
           </div>
           <div className="hero-preview">
-            <div className="preview-box">
-              <div className="preview-placeholder">
-                <div className="mock-ui-line" style={{ width: '60%' }}></div>
-                <div className="mock-ui-line" style={{ width: '40%' }}></div>
-                <div className="mock-ui-line" style={{ width: '80%' }}></div>
-                <div className="mock-ui-btn"></div>
-              </div>
+            <div className="hero-image-grid">
+              {destinations.slice(0, 4).map((d, i) => (
+                <div key={i} className="hero-img-card">
+                  <img src={d.img} alt={d.name} />
+                </div>
+              ))}
             </div>
           </div>
         </div>

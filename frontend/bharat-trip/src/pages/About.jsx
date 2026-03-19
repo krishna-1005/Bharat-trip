@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
-import "../styles/global.css";
+import "./home.css";
 
 export default function About() {
   const navigate = useNavigate();
@@ -12,6 +11,13 @@ export default function About() {
     { label: "AI Plans Generated", value: "120,000+" },
     { label: "Destinations Covered", value: "450+" },
     { label: "Customer Rating", value: "4.9/5" },
+  ];
+
+  const cityImages = [
+    "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80"
   ];
 
   const faqs = [
@@ -30,108 +36,83 @@ export default function About() {
   ];
 
   return (
-    <div className="page about-page">
+    <div className="home-redesign">
       
       {/* ── HERO SECTION ── */}
-      <section className="about-hero">
-        <div className="premium-badge">OUR STORY</div>
-        <h1>Redefining Travel through <span className="highlight-blue">Intelligence</span></h1>
-        <p className="large-text">
-          Bharat Trip was born from a simple idea: that planning a journey should be as 
-          exciting as the journey itself. We combine deep local insights with 
-          cutting-edge AI to help you discover the true soul of India.
-        </p>
-      </section>
-
-      {/* ── STATS SECTION ── */}
-      <section className="about-stats-grid">
-        {stats.map((s, i) => (
-          <div key={i} className="about-stat-card">
-            <span className="stat-value">{s.value}</span>
-            <span className="stat-label">{s.label}</span>
+      <section className="about-hero-section">
+        <div className="container about-hero-grid">
+          <div className="hero-content">
+            <span className="section-label">Our Story</span>
+            <h1>Redefining Travel through Intelligence</h1>
+            <p>
+              Bharat Trip was born from a simple idea: that planning a journey should be as 
+              exciting as the journey itself. We combine deep local insights with 
+              cutting-edge AI.
+            </p>
           </div>
-        ))}
-      </section>
-
-      {/* ── BENEFITS SECTION ── */}
-      <section className="about-section">
-        <h2 className="section-title">The Benefits of Choosing Me</h2>
-        <div className="page-grid">
-          <div className="page-card interactive">
-            <div className="card-icon">🧘</div>
-            <h3>Stress-free planning</h3>
-            <p>Let me handle the planning, and you can focus on enjoying your trip.</p>
-          </div>
-          <div className="page-card interactive">
-            <div className="card-icon">🗺️</div>
-            <h3>Tailored experiences</h3>
-            <p>Get customized recommendations that cater to your interests and preferences.</p>
-          </div>
-          <div className="page-card interactive">
-            <div className="card-icon">⚡</div>
-            <h3>Increased efficiency</h3>
-            <p>Save time and effort in researching and planning your trip. I'll do the heavy lifting!</p>
-          </div>
-          <div className="page-card interactive">
-            <div className="card-icon">💡</div>
-            <h3>Improved decision-making</h3>
-            <p>Make informed decisions with my expert guidance and local Bengaluru insights.</p>
+          <div className="hero-preview">
+            <div className="hero-image-grid">
+              {cityImages.map((img, i) => (
+                <div key={i} className="hero-img-card">
+                  <img src={img} alt="City" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── COMPARISON SECTION ── */}
-      <section className="about-section comparison-section" style={{ background: 'var(--bg-panel)', borderRadius: '30px', padding: '60px 40px', marginTop: '40px' }}>
-        <h2 className="section-title">Why choose me over generic AI tools?</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '800px', margin: '0 auto' }}>
-          <div className="comparison-item">
-            <strong>Contextual Understanding:</strong> I understand the nuances of travel planning and provide context-specific advice.
-          </div>
-          <div className="comparison-item">
-            <strong>Human Touch:</strong> I offer a personalized, human-like experience to make planning enjoyable.
-          </div>
-          <div className="comparison-item">
-            <strong>Accurate Information:</strong> I strive to provide reliable data, reducing the risk of misinformation.
+      {/* ── STATS SECTION ── */}
+      <section style={{ padding: '60px 0', background: 'var(--bg-card)' }}>
+        <div className="container">
+          <div className="features-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+            {stats.map((s, i) => (
+              <div key={i} className="feature-card" style={{ textAlign: 'center' }}>
+                <h3 style={{ fontSize: '2.5rem', color: 'var(--accent-blue)', marginBottom: '8px' }}>{s.value}</h3>
+                <p style={{ fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>{s.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── FAQ SECTION ── */}
-      <section className="about-section faq-section">
-        <h2 className="section-title">Frequently Asked Questions</h2>
-        <div className="faq-list">
-          {faqs.map((faq, i) => (
-            <div 
-              key={i} 
-              className={`faq-item ${activeFaq === i ? 'active' : ''}`}
-              onClick={() => setActiveFaq(activeFaq === i ? null : i)}
-            >
-              <div className="faq-question">
-                <span>{faq.q}</span>
-                <span className="faq-icon">{activeFaq === i ? "−" : "+"}</span>
-              </div>
-              {activeFaq === i && (
-                <div className="faq-answer">
-                  <p>{faq.a}</p>
+      <section className="features-section">
+        <div className="container" style={{ maxWidth: '800px' }}>
+          <span className="section-label">Questions?</span>
+          <h2>Frequently Asked Questions</h2>
+          <div className="how-steps" style={{ textAlign: 'left', marginTop: '60px' }}>
+            {faqs.map((faq, i) => (
+              <div 
+                key={i} 
+                className="feature-card"
+                style={{ cursor: 'pointer', marginBottom: '16px' }}
+                onClick={() => setActiveFaq(activeFaq === i ? null : i)}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ margin: 0 }}>{faq.q}</h3>
+                  <span style={{ fontSize: '1.5rem', color: 'var(--accent-blue)' }}>{activeFaq === i ? "−" : "+"}</span>
                 </div>
-              )}
-            </div>
-          ))}
+                {activeFaq === i && (
+                  <p style={{ marginTop: '16px', borderTop: '1px solid var(--border-main)', paddingTop: '16px' }}>{faq.a}</p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── JOIN US SECTION ── */}
-      <section className="about-cta">
-        <h2>Ready to start your adventure?</h2>
-        <p>Join thousands of travelers who plan their trips with Bharat Trip.</p>
-        <div className="cta-buttons">
-          <button className="btn-premium primary" onClick={() => navigate("/planner")}>Start Planning</button>
-          <button className="btn-premium outline" onClick={() => navigate("/signup")}>Create Account</button>
+      <section className="final-cta">
+        <div className="container cta-container">
+          <h2>Ready to start your adventure?</h2>
+          <div className="hero-actions" style={{ marginTop: '40px' }}>
+            <button className="btn-primary" onClick={() => navigate("/planner")}>Start Planning</button>
+            <button className="btn-secondary" onClick={() => navigate("/signup")}>Create Account</button>
+          </div>
         </div>
       </section>
 
-      {/* ── FOOTER SPACING ── */}
-      <div style={{ height: '80px' }}></div>
     </div>
   );
 }
