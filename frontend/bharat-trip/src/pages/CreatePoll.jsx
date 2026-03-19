@@ -73,9 +73,19 @@ export default function CreatePoll() {
     return (
       <div className="page" style={{ alignItems: 'center', justifyContent: 'center' }}>
         <div className="premium-card" style={{ maxWidth: '500px', width: '100%', padding: '40px', textAlign: 'center' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🎉</div>
+          <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🚀</div>
           <h1 style={{ fontSize: '2rem', marginBottom: '10px' }}>Poll <span className="gradient-text">Ready!</span></h1>
-          <p style={{ color: 'var(--text-dim)', marginBottom: '30px' }}>Your trip poll is live. Share it with your friends to start voting.</p>
+          <div style={{ 
+            background: 'rgba(59, 130, 246, 0.1)', 
+            padding: '16px', 
+            borderRadius: '16px', 
+            marginBottom: '24px',
+            border: '1px solid rgba(59, 130, 246, 0.2)'
+          }}>
+            <p style={{ color: '#60a5fa', fontWeight: '800', margin: 0 }}>
+              Send this link in your group to finalize quickly
+            </p>
+          </div>
           
           <div className="pf-field">
             <label className="pf-label" style={{ textAlign: 'left' }}>Shareable Link</label>
@@ -92,7 +102,7 @@ export default function CreatePoll() {
                 onClick={copyToClipboard}
                 style={{ position: 'absolute', right: '5px', top: '5px', height: '44px', padding: '0 15px', fontSize: '0.8rem' }}
               >
-                Copy
+                Copy Link
               </button>
             </div>
           </div>

@@ -63,9 +63,9 @@ export default function PollResults() {
         {/* Closed State */}
         {poll.isClosed && finalDecision && (
             <div style={{ 
-                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15))', 
-                border: '1px solid rgba(59, 130, 246, 0.3)',
-                padding: '32px',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15))', 
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                padding: '40px 32px',
                 borderRadius: '24px',
                 textAlign: 'center',
                 marginBottom: '40px',
@@ -73,9 +73,22 @@ export default function PollResults() {
                 overflow: 'hidden',
                 animation: 'fadeIn 0.8s ease'
             }}>
-                <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '5rem', opacity: '0.1' }}>🎉</div>
-                <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 8px' }}>Final Decision: {finalDecision} ✅</h2>
-                <p style={{ color: '#60a5fa', margin: 0, fontWeight: '800', fontSize: '1.4rem', letterSpacing: '1px' }}>Trip Finalized 🎉</p>
+                <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '5rem', opacity: '0.1' }}>✅</div>
+                <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 12px' }}>Final Decision: {finalDecision}</h2>
+                <div style={{ 
+                    display: 'inline-block', 
+                    padding: '8px 24px', 
+                    background: '#10b981', 
+                    color: 'white', 
+                    borderRadius: '100px', 
+                    fontWeight: '800', 
+                    fontSize: '1.2rem', 
+                    letterSpacing: '1px',
+                    boxShadow: '0 10px 20px rgba(16, 185, 129, 0.3)'
+                }}>
+                    DECISION FINALIZED
+                </div>
+                <p style={{ color: '#6ee7b7', marginTop: '16px', fontWeight: '700', fontSize: '1rem' }}>No more discussion needed — Proceed to planning</p>
             </div>
         )}
 

@@ -126,22 +126,55 @@ export default function VotePoll() {
   const isCreator = user && (poll.createdBy === user.uid || poll.createdBy === user.id);
 
   // Guidance Banner Selection
-  let guidanceText = "Vote once — decision will be finalized automatically";
-  let guidanceColor = "rgba(59, 130, 246, 0.1)";
-  let textColor = "#60a5fa";
+  let topBannerText = "Stop discussing — vote once and decision will be finalized automatically";
+  let lockSubtext = poll.groupSize 
+    ? "Decision will lock as soon as majority is reached" 
+    : "Decision will lock after a few votes";
 
-  if (isTie) {
-    guidanceText = "Waiting for 1 more vote to break tie ⚖️";
-    guidanceColor = "rgba(245, 158, 11, 0.1)";
-    textColor = "#f59e0b";
-  } else if (poll.groupSize && totalVotes === poll.groupSize - 1) {
-    guidanceText = "Almost done — one more vote can finalize 🚀";
-    guidanceColor = "rgba(16, 185, 129, 0.1)";
-    textColor = "#10b981";
+  let urgencyText = "";
+  if (!poll.isClosed) {
+    if (poll.groupSize) {
+      const majority = Math.floor(poll.groupSize / 2) + 1;
+      const remaining = majority - maxVotes;
+      if (remaining > 0) {
+        urgencyText = `${maxVotes} people voted — ${remaining} more can finalize`;
+      } else {
+        urgencyText = `${totalVotes} votes received — finalizing...`;
+      }
+    } else {
+      if (totalVotes < 3) {
+        urgencyText = `${totalVotes} votes — ${3 - totalVotes} more to finalize`;
+      } else {
+        urgencyText = "Decision will finalize now";
+      }
+    }
   }
 
   return (
     <div className="page" style={{ alignItems: 'center', justifyContent: 'center', background: '#030712' }}>
+      
+      {/* ── STRONG ENTRY BANNER ── */}
+      {!poll.isClosed && (
+        <div style={{ 
+          position: 'fixed', 
+          top: '80px', 
+          left: 0, 
+          right: 0, 
+          background: 'linear-gradient(90deg, #ef4444, #f59e0b)', 
+          color: 'white', 
+          padding: '12px', 
+          textAlign: 'center', 
+          zIndex: 1000,
+          fontWeight: '800',
+          fontSize: '0.9rem',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          textTransform: 'uppercase',
+          letterSpacing: '1px'
+        }}>
+          {topBannerText}
+        </div>
+      )}
+
       <div className="premium-card" style={{ 
         maxWidth: '500px', 
         width: '100%', 
@@ -149,22 +182,25 @@ export default function VotePoll() {
         background: 'rgba(15, 23, 42, 0.6)',
         backdropFilter: 'blur(20px)',
         border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '32px'
+        borderRadius: '32px',
+        marginTop: poll.isClosed ? '0' : '60px'
       }}>
         
         {!poll.isClosed && (
           <div style={{ 
-            background: guidanceColor, 
-            border: `1px solid ${textColor}33`, 
-            padding: '12px 16px', 
-            borderRadius: '12px', 
-            marginBottom: '24px',
-            color: textColor,
-            fontSize: '0.85rem',
-            fontWeight: '600',
+            background: 'rgba(59, 130, 246, 0.1)', 
+            border: '1px solid rgba(59, 130, 246, 0.2)', 
+            padding: '16px', 
+            borderRadius: '16px', 
+            marginBottom: '32px',
             textAlign: 'center'
           }}>
-            {guidanceText}
+            <div style={{ color: '#60a5fa', fontSize: '0.9rem', fontWeight: '800', marginBottom: '4px' }}>
+              {lockSubtext}
+            </div>
+            <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: '600' }}>
+              {urgencyText}
+            </div>
           </div>
         )}
 
@@ -172,28 +208,22 @@ export default function VotePoll() {
         
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           {poll.isClosed ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', animation: 'fadeIn 0.8s ease' }}>
-                <div style={{ padding: '20px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '20px', width: '100%' }}>
-                    <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#f8fafc', margin: '0 0 5px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', animation: 'fadeIn 0.8s ease' }}>
+                <div style={{ padding: '24px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '24px', width: '100%' }}>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#10b981', margin: '0 0 8px' }}>
                         Final Decision: {poll.winner} ✅
                     </h2>
+                    <p style={{ color: '#10b981', margin: 0, fontWeight: '700', fontSize: '0.9rem' }}>No more discussion needed</p>
                 </div>
                 <div style={{ display: 'inline-block', padding: '6px 16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '100px', color: '#ef4444', fontWeight: '800', fontSize: '12px', letterSpacing: '1px' }}>
-                    VOTING CLOSED — DECISION FINALIZED
+                    DECISION LOCKED
                 </div>
             </div>
           ) : (
             <div>
-                <p style={{ color: '#94a3b8', marginBottom: '8px' }}>
-                {hasVoted ? "You have already voted" : "Tap your favorite destination to vote"}
+                <p style={{ color: '#94a3b8', marginBottom: '0' }}>
+                {hasVoted ? "Your vote is recorded" : "Quick tap to finalize destination"}
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>
-                        {poll.groupSize 
-                            ? `${totalVotes} of ${poll.groupSize} members voted`
-                            : `${totalVotes} votes received`}
-                    </span>
-                </div>
             </div>
           )}
         </div>
@@ -298,6 +328,44 @@ export default function VotePoll() {
              >
                 {poll.isClosed ? "View Final Results 📊" : "View Live Results 📊"}
              </button>
+
+             {/* ── MICRO FEEDBACK ── */}
+             {!poll.isClosed && (
+               <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '24px' }}>
+                 {['👍', '🔥', '💸'].map(emoji => (
+                   <button 
+                    key={emoji}
+                    style={{ 
+                      background: 'none', 
+                      border: 'none', 
+                      fontSize: '1.5rem', 
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.3)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                    onClick={() => {
+                      const btn = document.createElement('div');
+                      btn.innerText = emoji;
+                      btn.style.position = 'fixed';
+                      btn.style.left = `${Math.random() * 80 + 10}%`;
+                      btn.style.bottom = '0';
+                      btn.style.fontSize = '2rem';
+                      btn.style.zIndex = '2000';
+                      btn.style.transition = 'all 2s ease-out';
+                      document.body.appendChild(btn);
+                      setTimeout(() => {
+                        btn.style.transform = 'translateY(-100vh) rotate(360deg)';
+                        btn.style.opacity = '0';
+                      }, 10);
+                      setTimeout(() => document.body.removeChild(btn), 2000);
+                    }}
+                   >
+                     {emoji}
+                   </button>
+                 ))}
+               </div>
+             )}
           </div>
         )}
 
