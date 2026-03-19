@@ -1,45 +1,17 @@
-:root {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  body {
+    @apply bg-[#020617] text-white selection:bg-accent-blue/30;
+  }
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
+.glass {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10;
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  /* Removed overflow-x: hidden from here, handled in global/layout if needed safely */
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-h1, h2, h3, h4, h5, h6, p {
-  margin: 0;
-}
-
-button {
-  border: none;
-  background: none;
-  font-family: inherit;
-  cursor: pointer;
-  padding: 0;
-}
-
-ul, ol {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.gradient-bg {
+  background: radial-gradient(circle at top right, #0a192f, #020617);
 }
