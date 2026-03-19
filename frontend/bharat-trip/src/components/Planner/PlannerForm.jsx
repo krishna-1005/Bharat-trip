@@ -9,6 +9,18 @@ function PlannerForm({ onPlanGenerated }) {
   const loc = useLocation();
   const [step, setStep] = useState(1);
   const [city, setCity] = useState("Bengaluru");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const indianCities = [
+    "Bengaluru", "Mumbai", "Delhi", "Jaipur", "Goa", "Hyderabad", "Chennai", "Kolkata", 
+    "Agra", "Udaipur", "Varanasi", "Kochi", "Shimla", "Manali", "Rishikesh", "Amritsar", 
+    "Pune", "Ahmedabad", "Darjeeling", "Pondicherry", "Mysuru", "Chandigarh", "Lucknow",
+    "Indore", "Guwahati", "Bhubaneswar", "Dehradun", "Jodhpur", "Jaisalmer", "Leh", "Srinagar"
+  ];
+
+  const filteredCities = indianCities.filter(c => 
+    c.toLowerCase().includes(city.toLowerCase()) && c.toLowerCase() !== city.toLowerCase()
+  );
 
   useEffect(() => {
     const params = new URLSearchParams(loc.search);
@@ -125,8 +137,25 @@ function PlannerForm({ onPlanGenerated }) {
                   className="pf-city-input"
                   placeholder="Search any city in India (e.g. Mumbai, Shimla...)"
                   value={city}
-                  onChange={(e) => setCity(e.target.value)}
+                  onChange={(e) => {
+                    setCity(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 />
+                {showSuggestions && filteredCities.length > 0 && (
+                  <ul className="pf-suggestions">
+                    {filteredCities.map(c => (
+                      <li key={c} onClick={() => {
+                        setCity(c);
+                        setShowSuggestions(false);
+                      }}>
+                        {c}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <span className="pf-search-hint">Works for any location in India</span>
               </div>
             </div>
