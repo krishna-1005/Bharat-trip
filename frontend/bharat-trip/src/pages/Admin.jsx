@@ -27,8 +27,12 @@ export default function Admin() {
       if (res.ok) {
         if (endpoint === "config") {
           const configMap = {};
-          json.forEach(c => configMap[key] = c.value); // Logic error here in draft, will fix
-          setter(json); 
+          if (Array.isArray(json)) {
+            json.forEach(c => {
+              if (c.key) configMap[c.key] = c.value;
+            });
+          }
+          setter(configMap); 
         } else {
           setter(json);
         }

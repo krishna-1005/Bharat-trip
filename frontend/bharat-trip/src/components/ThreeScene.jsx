@@ -88,6 +88,9 @@ function Particles({ count = 80 }) {
 }
 
 export default function ThreeScene({ images = [] }) {
+  // Ensure images is always an array
+  const safeImages = Array.isArray(images) ? images : [];
+  
   const layout = [
     { pos: [0, 0, 0], rot: [0, 0, 0], scale: 1.2 },        // Main Center
     { pos: [-4.5, 1, -2], rot: [0, 0.3, 0], scale: 0.8 },  // Left Top
@@ -118,7 +121,7 @@ export default function ThreeScene({ images = [] }) {
         <pointLight position={[10, 10, 10]} intensity={1} />
         
         <React.Suspense fallback={null}>
-          {images && images.length > 0 && images.slice(0, 5).map((url, i) => (
+          {safeImages.length > 0 && safeImages.slice(0, 5).map((url, i) => (
             <ImageCard 
               key={url} 
               url={url} 

@@ -33,13 +33,19 @@ const SystemConfig = require("../models/SystemConfig");
 /* GET /api/admin/config/public - Publicly accessible site config */
 router.get("/config/public", async (req, res) => {
   try {
-    const configs = await SystemConfig.find();
+    const configs = await SystemConfig.find() || [];
     // Convert array to a simple object for easier frontend use
     const configMap = {};
-    configs.forEach(c => configMap[c.key] = c.value);
+    if (Array.isArray(configs)) {
+      configs.forEach(c => {
+        if (c && c.key) configMap[c.key] = c.value;
+      });
+    }
     res.json(configMap);
   } catch (err) {
-    res.status(500).json({ error: "Error fetching public config" });
+    console.error("Public config fetch error:", err);
+    // Return empty object instead of 500 to prevent frontend crashes
+    res.json({});
   }
 });
 

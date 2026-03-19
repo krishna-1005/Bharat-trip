@@ -22,8 +22,9 @@ function Home() {
     const fetchConfig = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/config/public`);
+        if (!res.ok) throw new Error(\"API Error\");
         const config = await res.json();
-        if (config.homepage_images && config.homepage_images.length > 0) {
+        if (config && config.homepage_images && Array.isArray(config.homepage_images) && config.homepage_images.length > 0) {
           setHeroImages(config.homepage_images);
         }
       } catch (err) {
