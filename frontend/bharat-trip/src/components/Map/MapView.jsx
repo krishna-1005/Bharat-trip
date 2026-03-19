@@ -17,6 +17,7 @@ import PlaceTooltip from "./PlaceTooltip";
 import HoverPlaceCard from "./HoverPlaceCard";
 import PlaceImage from "../PlaceImage";
 import L from "leaflet";
+import GuidancePanel from "./GuidancePanel";
 
 // Create a special icon for user location
 const userIcon = L.divIcon({
@@ -34,21 +35,34 @@ const userIcon = L.divIcon({
 });
 
 /* ---------- ZOOM CONTROLS ---------- */
-function ZoomControls() {
+function ZoomControls({ onToggleGuidance, isGuidanceMode }) {
   const map = useMap();
 
   return (
     <div className="map-zoom-controls">
-      <button onClick={() => map.zoomIn()}>+</button>
-      <button onClick={() => map.zoomOut()}>−</button>
+      <button onClick={() => map.zoomIn()} title="Zoom In">+</button>
+      <button onClick={() => map.zoomOut()} title="Zoom Out">−</button>
+      <button 
+        onClick={onToggleGuidance} 
+        className={isGuidanceMode ? "active" : ""}
+        title={isGuidanceMode ? "Exit Guidance" : "Start Guidance"}
+        style={{ marginTop: '8px', fontSize: '18px' }}
+      >
+        {isGuidanceMode ? "⏹️" : "🧭"}
+      </button>
     </div>
   );
 }
 
-function FitBounds({ places, userLocation }) {
+function FitBounds({ places, userLocation, activePlace }) {
   const map = useMap();
 
   useEffect(() => {
+    if (activePlace) {
+      map.setView([activePlace.lat, activePlace.lng], 15, { animate: true });
+      return;
+    }
+
     if (!places.length && !userLocation) return;
 
     const bounds = [];
@@ -65,7 +79,7 @@ function FitBounds({ places, userLocation }) {
       map.fitBounds(bounds, { padding: [80, 80] });
     }
 
-  }, [places, userLocation, map]);
+  }, [places, userLocation, map, activePlace]);
 
   return null;
 }
@@ -90,11 +104,21 @@ function ChangeView({ center }) {
   return null;
 }
 
-function MapView({ plan, isTracking, onHover }) {
+function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode }) {
   const [activeDay, setActiveDay] = useState("all");
   const [userLocation, setUserLocation] = useState(null);
   const [pathHistory, setPathHistory] = useState([]);
   const [roadRoute, setRoadRoute] = useState([]);
+  
+  // Guidance State (kept internal for now as it's map-specific navigation)
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    // Reset index when guidance mode is turned off/on
+    if (!isGuidanceMode) {
+      setCurrentIndex(0);
+    }
+  }, [isGuidanceMode]);
 
   useEffect(() => {
     let watchId = null;
@@ -172,6 +196,18 @@ function MapView({ plan, isTracking, onHover }) {
       : [12.9716, 77.5946];
   }, [plan.city, plan.coordinates?.lat, plan.coordinates?.lng]);
 
+  const handleNextLocation = () => {
+    if (currentIndex < allPlaces.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    } else {
+      setCurrentIndex(allPlaces.length); // Completion state
+    }
+  };
+
+  const currentPlace = allPlaces[currentIndex];
+  const nextPlace = allPlaces[currentIndex + 1];
+  const thenPlace = allPlaces[currentIndex + 2];
+
   return (
     <div className="map-container">
       <MapContainer
@@ -184,7 +220,13 @@ function MapView({ plan, isTracking, onHover }) {
       >
         <ChangeView center={initialCenter} />
         {isTracking && userLocation && <FollowUser location={userLocation} />}
-        {!isTracking && <FitBounds places={allPlaces} userLocation={userLocation} />}
+        {!isTracking && (
+          <FitBounds 
+            places={isGuidanceMode ? [] : allPlaces} 
+            userLocation={userLocation} 
+            activePlace={isGuidanceMode ? allPlaces[currentIndex] : null}
+          />
+        )}
 
         <ResizeMap trigger={plan} />
 
@@ -192,10 +234,25 @@ function MapView({ plan, isTracking, onHover }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <ZoomControls />
+        <ZoomControls 
+          onToggleGuidance={() => setIsGuidanceMode(!isGuidanceMode)} 
+          isGuidanceMode={isGuidanceMode} 
+        />
+
+        {/* ── Guidance Overlay ── */}
+        {isGuidanceMode && allPlaces.length > 0 && (
+          <GuidancePanel 
+            currentPlace={allPlaces[currentIndex] || allPlaces[allPlaces.length - 1]}
+            nextPlace={nextPlace}
+            thenPlace={thenPlace}
+            onNext={handleNextLocation}
+            onClose={() => setIsGuidanceMode(false)}
+            isLast={currentIndex >= allPlaces.length - 1}
+          />
+        )}
 
         {/* ── Background Tourist Spots (All Discovered) ── */}
-        {plan.allDiscoveredPlaces?.map((spot, i) => {
+        {!isGuidanceMode && plan.allDiscoveredPlaces?.map((spot, i) => {
           // Don't show if already in itinerary
           if (allPlaces.some(p => p.name === spot.name)) return null;
           return (
@@ -223,11 +280,13 @@ function MapView({ plan, isTracking, onHover }) {
           );
         })}
 
-        <MapLegend
-          days={days}
-          activeDay={activeDay}
-          setActiveDay={setActiveDay}
-        />
+        {!isGuidanceMode && (
+          <MapLegend
+            days={days}
+            activeDay={activeDay}
+            setActiveDay={setActiveDay}
+          />
+        )}
 
         {/* Live Tracking Routes */}
         {isTracking && userLocation && (
@@ -262,7 +321,8 @@ function MapView({ plan, isTracking, onHover }) {
           </>
         )}
 
-        {days.map((day, idx) => {
+        {/* Standard Mode Rendering */}
+        {!isGuidanceMode && days.map((day, idx) => {
           if (activeDay !== "all" && activeDay !== idx + 1) return null;
 
           const places = plan.itinerary[day]?.places || [];
@@ -309,6 +369,54 @@ function MapView({ plan, isTracking, onHover }) {
             </Fragment>
           );
         })}
+
+        {/* Guidance Mode Rendering */}
+        {isGuidanceMode && (
+          <>
+            {allPlaces.map((p, i) => {
+              let color = "#94a3b8"; // Gray
+              let isActive = false;
+              if (i === currentIndex) {
+                color = "#3b82f6"; // Blue
+                isActive = true;
+              } else if (i === currentIndex + 1) {
+                color = "#10b981"; // Green
+              }
+
+              return (
+                <Marker
+                  key={`guidance-${i}`}
+                  position={[p.lat, p.lng]}
+                  icon={createLocationIcon(color, isActive)}
+                >
+                  <Tooltip
+                    direction="top"
+                    offset={[0, -14]}
+                    opacity={1}
+                    className="location-tooltip"
+                  >
+                    <PlaceTooltip place={p} city={plan.city} />
+                  </Tooltip>
+                </Marker>
+              );
+            })}
+
+            {currentIndex < allPlaces.length - 1 && (
+              <Polyline
+                positions={[
+                  [allPlaces[currentIndex].lat, allPlaces[currentIndex].lng],
+                  [allPlaces[currentIndex + 1].lat, allPlaces[currentIndex + 1].lng]
+                ]}
+                pathOptions={{
+                  color: "#3b82f6",
+                  weight: 5,
+                  opacity: 0.8,
+                  dashArray: "10, 10"
+                }}
+              />
+            )}
+          </>
+        )}
 
         {userLocation && (
           <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>

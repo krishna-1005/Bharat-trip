@@ -22,6 +22,7 @@ function Results() {
   const [saved, setSaved] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
+  const [isGuidanceMode, setIsGuidanceMode] = useState(false);
   const [hoveredPlace, setHoveredPlace] = useState(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [weather, setWeather] = useState({ temp: "--", desc: "Loading...", icon: "☁️" });
@@ -222,9 +223,26 @@ function Results() {
 
       <div className="res-map-section">
         <div className="map-inner-container">
-          <MapView plan={plan} isTracking={isTracking} onHover={setHoveredPlace} />
+          <MapView 
+            plan={plan} 
+            isTracking={isTracking} 
+            onHover={setHoveredPlace} 
+            isGuidanceMode={isGuidanceMode}
+            setIsGuidanceMode={setIsGuidanceMode}
+          />
         </div>
         <div className="res-floating-stats">
+          <button 
+            className={`res-stat-pill tracking-btn ${isGuidanceMode ? "active" : ""}`}
+            onClick={() => setIsGuidanceMode(!isGuidanceMode)}
+            title={isGuidanceMode ? "Stop Guidance" : "Start Step-by-Step Guidance"}
+          >
+            <span className="pill-icon">{isGuidanceMode ? "⏹️" : "🧭"}</span>
+            <div className="pill-texts">
+              <span className="pill-val">{isGuidanceMode ? "Guidance ON" : "Guide Me"}</span>
+              <span className="pill-label">{isGuidanceMode ? "ACTIVE" : "STEP-BY-STEP"}</span>
+            </div>
+          </button>
           <button 
             className={`res-stat-pill tracking-btn ${isTracking ? "active" : ""}`}
             onClick={() => setIsTracking(!isTracking)}

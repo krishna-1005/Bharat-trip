@@ -129,6 +129,13 @@
   transform: scale(1.05);
 }
 
+.map-zoom-controls button.active {
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
 .map-info-bar {
   position: absolute;
   bottom: 30px;
