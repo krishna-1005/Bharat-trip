@@ -258,54 +258,60 @@ h1, h2, h3 {
   line-height: 1.6;
 }
 
-/* ── 4) HOW IT WORKS ── */
-.how-section {
+/* ── WHY CHOOSE BHARAT TRIP ── */
+.why-choose-section {
   padding: 120px 0;
+  background: var(--bg-card);
 }
 
-.how-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 100px;
-  align-items: center;
-}
-
-.how-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
-}
-
-.step-item {
-  display: flex;
-  gap: 24px;
-}
-
-.step-num {
-  width: 40px;
-  height: 40px;
-  background: var(--accent-soft-blue);
-  border: 1px solid var(--accent-blue);
-  color: var(--accent-blue);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.step-content h3 {
-  font-size: 1.5rem;
-  margin-bottom: 8px;
-}
-
-.step-content p {
+.section-desc {
+  font-size: 1.25rem;
   color: var(--text-dim);
+  max-width: 800px;
+  margin: 0 auto 60px;
+  text-align: center;
   line-height: 1.6;
 }
 
-/* ── 5) DESTINATIONS GRID ── */
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+}
+
+.why-card {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-main);
+  border-radius: 24px;
+  padding: 48px;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+.why-card:hover {
+  border-color: var(--accent-blue);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.why-card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 32px;
+}
+
+.why-card h3 {
+  font-size: 1.75rem;
+  margin-bottom: 20px;
+  color: var(--text-main);
+}
+
+.why-card p {
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* ── DESTINATIONS GRID ── */
 .dest-section h2 {
   text-align: center;
   font-size: 2.5rem;
