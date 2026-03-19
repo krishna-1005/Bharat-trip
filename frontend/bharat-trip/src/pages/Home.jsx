@@ -22,13 +22,13 @@ function Home() {
         <div className="container hero-grid">
           <div className="hero-content">
             <h1>Plan Trips Without Confusion</h1>
-            <p>Vote with friends, finalize decisions quickly, and follow a clear trip plan.</p>
+            <p>Intelligent itineraries, real-time guidance, and seamless discovery for your next Indian adventure.</p>
             <div className="hero-actions">
               <button className="btn-primary" onClick={() => navigate("/planner")}>
                 Start Planning
               </button>
-              <button className="btn-secondary" onClick={() => navigate("/create-poll")}>
-                Create Poll
+              <button className="btn-secondary" onClick={() => navigate("/about")}>
+                Learn More
               </button>
             </div>
           </div>
@@ -48,13 +48,13 @@ function Home() {
       <div className="value-bar">
         <div className="container value-grid">
           <div className="value-item">
-            <div className="dot"></div> No long discussions
+            <div className="dot"></div> Effortless Planning
           </div>
           <div className="value-item">
-            <div className="dot"></div> Instant decisions
+            <div className="dot"></div> Accurate Estimates
           </div>
           <div className="value-item">
-            <div className="dot"></div> Step-by-step trip guidance
+            <div className="dot"></div> Real-time Map Guidance
           </div>
         </div>
       </div>
@@ -66,9 +66,9 @@ function Home() {
           <h2>Travel smarter together</h2>
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">🗳️</div>
-              <h3>Voting</h3>
-              <p>Decide quickly with your group without the endless chat loops.</p>
+              <div className="feature-icon">🎯</div>
+              <h3>Precision</h3>
+              <p>Every minute of your trip is optimized for the best possible travel experience.</p>
             </div>
             <div className="feature-card">
               <div className="feature-icon">🤖</div>
@@ -89,46 +89,35 @@ function Home() {
         </div>
       </section>
 
-      {/* 4) HOW IT WORKS */}
-      <section className="how-section">
-        <div className="container how-grid">
-          <div className="how-visual">
-             <div className="preview-box">
-               <div className="preview-placeholder">
-                 <div className="mock-ui-line" style={{ width: '70%' }}></div>
-                 <div className="mock-ui-line" style={{ width: '30%' }}></div>
-                 <div className="mock-ui-btn" style={{ background: '#10b981' }}></div>
-               </div>
-             </div>
+      {/* 4) WHY CHOOSE BHARAT TRIP */}
+      <section className="why-choose-section">
+        <div className="container">
+          <div className="section-head-redesign">
+            <span className="section-label">The Bharat Trip Advantage</span>
+            <h2>Why choose Bharat Trip?</h2>
+            <p className="section-desc">We combine data-driven insights with a passion for discovery to give you the ultimate travel companion.</p>
           </div>
-          <div className="how-steps">
-            <div className="step-item">
-              <div className="step-num">1</div>
-              <div className="step-content">
-                <h3>Create poll</h3>
-                <p>Pick a few options and invite your friends to vote.</p>
-              </div>
+          
+          <div className="why-grid">
+            <div className="why-card">
+              <div className="why-card-icon">🚀</div>
+              <h3>AI-Powered Intelligence</h3>
+              <p>Our advanced algorithms analyze thousands of locations, traffic patterns, and opening hours to build the most efficient route for your journey.</p>
             </div>
-            <div className="step-item">
-              <div className="step-num">2</div>
-              <div className="step-content">
-                <h3>Friends vote</h3>
-                <p>Everyone picks their favorite spot in one simple interface.</p>
-              </div>
+            <div className="why-card">
+              <div className="why-card-icon">💎</div>
+              <h3>Verified Local Data</h3>
+              <p>We don't just guess. Our direct integration with local databases ensures you have the most accurate timing and cost estimates for every attraction.</p>
             </div>
-            <div className="step-item">
-              <div className="step-num">3</div>
-              <div className="step-content">
-                <h3>Decision finalized</h3>
-                <p>The winner is automatically selected based on majority.</p>
-              </div>
+            <div className="why-card">
+              <div className="why-card-icon">🧭</div>
+              <h3>Live Map Guidance</h3>
+              <p>Don't just plan—follow. Our unique live guidance mode keeps you on track, helping you navigate between stops without ever losing your way.</p>
             </div>
-            <div className="step-item">
-              <div className="step-num">4</div>
-              <div className="step-content">
-                <h3>Follow the plan</h3>
-                <p>Follow the AI-generated itinerary on a live map.</p>
-              </div>
+            <div className="why-card">
+              <div className="why-card-icon">🛡️</div>
+              <h3>Reliable & Secure</h3>
+              <p>Your data and trip plans are securely stored and accessible whenever you need them, ensuring a worry-free exploration experience.</p>
             </div>
           </div>
         </div>
@@ -137,7 +126,9 @@ function Home() {
       {/* 5) DESTINATIONS */}
       <section className="dest-section">
         <div className="container">
-          <h2>Popular Destinations</h2>
+          <div className="section-head-redesign">
+            <h2>Popular Destinations</h2>
+          </div>
           <div className="dest-grid">
             {destinations.map((d, i) => (
               <div 

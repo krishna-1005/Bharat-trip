@@ -113,32 +113,6 @@ h1, h2, h3 {
   position: relative;
 }
 
-.preview-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border-main);
-  border-radius: 24px;
-  aspect-ratio: 4/3;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-}
-
-.preview-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  display: flex;
-  flex-direction: column;
-  padding: 24px;
-  gap: 16px;
-}
-
-.mock-ui-line { height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; }
-.mock-ui-btn { width: 80px; height: 32px; background: var(--accent-blue); border-radius: 6px; margin-top: auto; }
-
 /* ── HERO IMAGE GRID ── */
 .hero-image-grid {
   display: grid;
@@ -264,63 +238,66 @@ h1, h2, h3 {
   background: var(--bg-card);
 }
 
+.section-head-redesign {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
 .section-desc {
   font-size: 1.25rem;
   color: var(--text-dim);
   max-width: 800px;
-  margin: 0 auto 60px;
-  text-align: center;
+  margin: 16px auto 0;
   line-height: 1.6;
 }
 
 .why-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
 }
 
 .why-card {
   background: var(--bg-dark);
   border: 1px solid var(--border-main);
   border-radius: 24px;
-  padding: 48px;
-  text-align: left;
-  transition: all 0.3s ease;
+  padding: 40px;
+  transition: all 0.3s;
 }
 
 .why-card:hover {
   border-color: var(--accent-blue);
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .why-card-icon {
   font-size: 2.5rem;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .why-card h3 {
-  font-size: 1.75rem;
-  margin-bottom: 20px;
-  color: var(--text-main);
+  font-size: 1.5rem;
+  margin-bottom: 16px;
 }
 
 .why-card p {
   color: var(--text-dim);
-  font-size: 1.1rem;
   line-height: 1.6;
 }
 
-/* ── DESTINATIONS GRID ── */
+/* ── 5) DESTINATIONS GRID ── */
+.dest-section {
+  padding: 120px 0;
+}
+
 .dest-section h2 {
-  text-align: center;
   font-size: 2.5rem;
   margin-bottom: 60px;
 }
 
 .dest-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
 }
 
@@ -359,7 +336,7 @@ h1, h2, h3 {
 
 /* ── 6) FINAL CTA ── */
 .final-cta {
-  padding: 150px 0;
+  padding-bottom: 150px;
   text-align: center;
 }
 
@@ -377,9 +354,9 @@ h1, h2, h3 {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 1024px) {
-  .hero-grid, .how-grid { grid-template-columns: 1fr; text-align: center; }
+  .hero-grid, .about-hero-grid { grid-template-columns: 1fr; text-align: center; }
   .hero-content { display: flex; flex-direction: column; align-items: center; }
   .hero-actions { justify-content: center; }
-  .value-grid, .dest-grid { grid-template-columns: 1fr; }
   .hero-content h1 { font-size: 3rem; }
+  .why-grid { grid-template-columns: 1fr; }
 }
