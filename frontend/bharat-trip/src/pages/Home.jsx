@@ -204,87 +204,99 @@ const Home = () => {
       </motion.div>
 
       {/* 3) VALUE SECTION */}
-      <section id="why-us" className="value-section container">
-        <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >Why use this?</motion.h2>
-        <div className="value-grid">
-          {[
-            { title: "Smart AI Planning", icon: "🤖" },
-            { title: "Personalized Routes", icon: "🗺️" },
-            { title: "Clear trip guidance", icon: "🧭" },
-          ].map((v, i) => (
-            <motion.div 
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              viewport={{ once: true }}
-              className="value-item"
-            >
-              <div className="action-icon">{v.icon}</div>
-              <div className="value-point">{v.title}</div>
-            </motion.div>
-          ))}
+      <section id="why-us" className="value-section">
+        <div className="container">
+          <motion.h2
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >Why use this?</motion.h2>
+          <div className="value-grid">
+            {[
+              { title: "Smart AI Planning", icon: "🤖" },
+              { title: "Personalized Routes", icon: "🗺️" },
+              { title: "Clear trip guidance", icon: "🧭" },
+            ].map((v, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true }}
+                className="value-item"
+              >
+                <div className="action-icon">{v.icon}</div>
+                <div className="value-point">{v.title}</div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* 4) FEATURES SECTION */}
-      <section id="features" className="container">
-        <div className="features-grid">
-          <FeatureCard 
-            title="Easy Planning" 
-            icon="✨"
-            desc="Answer a few quick questions and get a fully personalized trip in seconds." 
-          />
-          <FeatureCard 
-            title="AI Planner" 
-            icon="🤖"
-            desc="Generate your trip plan instantly with smart logic and local data." 
-          />
-          <FeatureCard 
-            title="Guided Map" 
-            icon="🗺️"
-            desc="Follow your trip step-by-step with real-time navigation and routing." 
-          />
-          <FeatureCard 
-            title="Smart Flow" 
-            icon="⚡"
-            desc="Know exactly what to do next with seamless transition from idea to reality." 
-          />
+      <section id="features" className="features-section">
+        <div className="container">
+          <motion.h2
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            style={{ textAlign: 'center', marginBottom: '60px' }}
+          >Features</motion.h2>
+          <div className="features-grid">
+            <FeatureCard 
+              title="Easy Planning" 
+              icon="✨"
+              desc="Answer a few quick questions and get a fully personalized trip in seconds." 
+            />
+            <FeatureCard 
+              title="AI Planner" 
+              icon="🤖"
+              desc="Generate your trip plan instantly with smart logic and local data." 
+            />
+            <FeatureCard 
+              title="Guided Map" 
+              icon="🗺️"
+              desc="Follow your trip step-by-step with real-time navigation and routing." 
+            />
+            <FeatureCard 
+              title="Smart Flow" 
+              icon="⚡"
+              desc="Know exactly what to do next with seamless transition from idea to reality." 
+            />
+          </div>
         </div>
       </section>
 
       {/* 5) HOW IT WORKS */}
-      <section id="how-it-works" className="how-it-works container">
-        <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >How it works</motion.h2>
-        <div className="flow-grid">
-          {[
-            { label: "Choose destination", icon: "📍" },
-            { label: "Set preferences", icon: "⚙️" },
-            { label: "AI generates plan", icon: "🤖" },
-            { label: "Explore & enjoy", icon: "🗺️" },
-          ].map((step, i) => (
-            <React.Fragment key={i}>
-              <motion.div 
-                className="flow-step"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <div className="step-icon">{step.icon}</div>
-                <h3>{step.label}</h3>
-              </motion.div>
-              {i < 3 && <div className="step-arrow">→</div>}
-            </React.Fragment>
-          ))}
+      <section id="how-it-works" className="how-it-works">
+        <div className="container">
+          <motion.h2
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >How it works</motion.h2>
+          <div className="flow-grid">
+            {[
+              { label: "Choose destination", icon: "📍" },
+              { label: "Set preferences", icon: "⚙️" },
+              { label: "AI generates plan", icon: "🤖" },
+              { label: "Explore & enjoy", icon: "🗺️" },
+            ].map((step, i) => (
+              <React.Fragment key={i}>
+                <motion.div 
+                  className="flow-step"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="step-icon">{step.icon}</div>
+                  <h3>{step.label}</h3>
+                </motion.div>
+                {i < 3 && <div className="step-arrow">→</div>}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       </section>
 
