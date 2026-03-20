@@ -73,6 +73,13 @@ function Results() {
     }
   };
 
+  const resetProgress = () => {
+    if (window.confirm("Are you sure you want to reset your trip progress?")) {
+      setCurrentIndex(0);
+      setIsGuidanceMode(false);
+    }
+  };
+
   const allPlaces = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
     const days = Object.keys(plan.itinerary);
@@ -553,6 +560,10 @@ function Results() {
                 disabled={saving || saved}
               >
                 {saved ? "✓ Trip Saved" : saving ? "Saving..." : "Confirm & Save Plan"}
+              </button>
+              
+              <button className="reset-trip-btn" onClick={resetProgress}>
+                ↺ Reset All Progress
               </button>
             </div>
           )}
