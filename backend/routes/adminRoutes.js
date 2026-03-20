@@ -12,14 +12,24 @@ const router = express.Router();
 const ADMIN_EMAILS = ["bharattrip@gmail.com"];
 
 // Middleware to double check admin email
-const verifyAdminEmail = (req, res, next) => {
+const verifyAdminEmail = async (req, res, next) => {
   const userEmail = req.user?.email?.toLowerCase();
+  const authorized = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(userEmail);
   
   console.log(`Admin Access Attempt by: ${userEmail}`);
-  if (!ADMIN_EMAILS.map(e => e.toLowerCase()).includes(userEmail)) {
+  
+  if (!authorized) {
     console.log(`Access Denied: ${userEmail} is not in the authorized list.`);
     return res.status(403).json({ error: "Access denied. Extreme security active." });
   }
+
+  // Ensure user also has admin role in DB for other middleware (adminOnly)
+  if (req.user && req.user.role !== "admin") {
+    req.user.role = "admin";
+    await req.user.save();
+    console.log(`Auto-promoted ${userEmail} to admin role in database.`);
+  }
+
   next();
 };
 
