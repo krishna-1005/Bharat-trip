@@ -1,14 +1,29 @@
-/* ── TRAVELBOT PREMIUM UI ── */
+/* ── TRAVELBOT THEME-AWARE UI ── */
 
 :root {
-  --cb-bg: rgba(255, 255, 255, 0.9);
-  --cb-glass: rgba(255, 255, 255, 0.7);
   --cb-accent: #3b82f6;
   --cb-accent-dark: #2563eb;
-  --cb-text: #1f2937;
-  --cb-text-dim: #6b7280;
+  --cb-shadow: 0 20px 50px var(--shadow-main);
+}
+
+.dark-theme {
+  --cb-window-bg: #0f172a;
+  --cb-header-bg: rgba(30, 41, 59, 0.8);
+  --cb-text: #f8fafc;
+  --cb-text-dim: #94a3b8;
+  --cb-border: rgba(255, 255, 255, 0.08);
+  --cb-bubble-bot: #1e293b;
+  --cb-input-bg: #1e293b;
+}
+
+.light-theme {
+  --cb-window-bg: #ffffff;
+  --cb-header-bg: rgba(248, 250, 252, 0.8);
+  --cb-text: #0f172a;
+  --cb-text-dim: #64748b;
   --cb-border: rgba(0, 0, 0, 0.08);
-  --cb-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  --cb-bubble-bot: #f1f5f9;
+  --cb-input-bg: #ffffff;
 }
 
 /* ── FLOATING BUTTON (FAB) ── */
@@ -57,8 +72,9 @@
   right: 30px;
   width: 400px;
   height: 600px;
-  background: var(--cb-bg);
+  background: var(--cb-window-bg);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
   display: flex;
   flex-direction: column;
@@ -68,6 +84,7 @@
   overflow: hidden;
   animation: slideIn 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   transform-origin: bottom right;
+  transition: background 0.3s ease, border 0.3s ease;
 }
 
 @keyframes slideIn {
@@ -77,8 +94,8 @@
 
 /* ── HEADER ── */
 .cb-header {
-  padding: 24px;
-  background: var(--cb-glass);
+  padding: 20px 24px;
+  background: var(--cb-header-bg);
   border-bottom: 1px solid var(--cb-border);
   display: flex;
   justify-content: space-between;
@@ -172,7 +189,7 @@
 
 .cb-bubble.bot {
   align-self: flex-start;
-  background: white;
+  background: var(--cb-bubble-bot);
   color: var(--cb-text);
   border-bottom-left-radius: 4px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
@@ -217,7 +234,7 @@
 /* ── INPUT AREA ── */
 .cb-input-area {
   padding: 20px;
-  background: var(--cb-glass);
+  background: var(--cb-header-bg);
   border-top: 1px solid var(--cb-border);
   display: flex;
   gap: 12px;
@@ -226,7 +243,7 @@
 
 .cb-input {
   flex: 1;
-  background: white;
+  background: var(--cb-input-bg);
   border: 1px solid var(--cb-border);
   padding: 12px 18px;
   border-radius: 14px;
