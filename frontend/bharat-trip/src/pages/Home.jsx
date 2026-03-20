@@ -41,8 +41,8 @@ const InteractiveHeroImages = () => {
       x: -30, y: 50, rotate: -10, scale: 1.0
     },
     {
-      name: "Hampi",
-      img: "https://images.unsplash.com/photo-1524492707941-5f397224bc0b?auto=format&fit=crop&w=800&q=80",
+      name: "Jaipur",
+      img: "https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=800&q=80",
       x: 50, y: 30, rotate: 5, scale: 1.05
     }
   ];
@@ -158,8 +158,8 @@ const Home = () => {
               >
                 Create Poll
               </motion.button>
-              <button className="btn-tertiary" onClick={() => navigate('/map')}>
-                <span>📍</span> View Map
+              <button className="btn-tertiary" onClick={() => navigate('/frontend/bharat-trip/src/pages/SamplePlan.jsx')}>
+                <span>📍</span> View Sample Plans
               </button>
             </div>
           </motion.div>
