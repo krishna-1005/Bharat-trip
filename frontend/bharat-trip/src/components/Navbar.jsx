@@ -118,7 +118,8 @@ function Navbar() {
           onClick={toggleTheme}
           title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         >
-          {theme === 'dark' ? "☀️" : "🌙"}
+          <span>☀️</span>
+          <span>🌙</span>
         </button>
 
         {user ? (

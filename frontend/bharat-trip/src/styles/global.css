@@ -27,12 +27,13 @@
   --bg-main: #f8fafc;
   --bg-panel: #ffffff;
   --bg-card: #ffffff;
-  --glass: rgba(0, 0, 0, 0.02);
-  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(59, 130, 246, 0.15);
   --text-main: #0f172a;
-  --text-dim: #64748b;
-  --border-main: rgba(0, 0, 0, 0.08);
-  --shadow-main: rgba(0, 0, 0, 0.1);
+  --text-dim: #475569;
+  --border-main: #e2e8f0;
+  --shadow-main: rgba(15, 23, 42, 0.08);
+  --accent-blue: #2563eb;
 }
 
 body {
