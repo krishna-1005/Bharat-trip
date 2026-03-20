@@ -250,12 +250,12 @@ h1, h2, h3 {
 .mini-poll-bar { height: 100%; background: var(--accent-blue); }
 .hero-mini-poll p { margin: 8px 0 0 0; font-size: 12px; color: var(--text-dim); }
 
-/* ── QUICK ACTION PANEL ── */
+/* ── QUICK ACTION PANEL (MENU) ── */
 .quick-actions {
-  padding: 40px 0;
-  border-top: 1px solid var(--border-main);
-  border-bottom: 1px solid var(--border-main);
-  background: rgba(59, 130, 246, 0.02);
+  padding: 60px 0;
+  position: relative;
+  z-index: 10;
+  margin-top: -40px; /* Slight overlap with hero */
 }
 
 .actions-grid {
@@ -265,38 +265,84 @@ h1, h2, h3 {
 }
 
 .action-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-main);
-  border-radius: 20px;
-  padding: 32px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  padding: 40px 32px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.2, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s;
 }
 
 .action-card:hover {
-  border-color: var(--accent-blue);
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  transform: translateY(-12px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.action-card:hover::before {
+  opacity: 1;
 }
 
 .action-icon {
-  font-size: 2rem;
-  width: 56px;
-  height: 56px;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 14px;
+  font-size: 2.5rem;
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.05));
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.action-card:hover .action-icon {
+  transform: scale(1.15) rotate(5deg);
+  background: linear-gradient(135deg, var(--accent-blue), #2563eb);
 }
 
 .action-card h3 {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
+  font-weight: 700;
   margin: 0;
+  background: linear-gradient(to bottom, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.action-card:hover h3 {
+  -webkit-text-fill-color: #fff;
+}
+
+.action-card p {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  margin: 0;
+  line-height: 1.5;
+  transition: color 0.3s;
+}
+
+.action-card:hover p {
+  color: #fff;
 }
 
 /* ── VALUE SECTION ── */

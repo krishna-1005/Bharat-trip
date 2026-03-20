@@ -185,19 +185,20 @@ const Home = () => {
       >
         <div className="container actions-grid">
           {[
-            { label: "Create Poll", icon: "🗳️", path: "/create-poll" },
-            { label: "Plan Trip with AI", icon: "🤖", path: "/planner" },
-            { label: "Open Map", icon: "🗺️", path: "/map" },
-            { label: "Explore Destinations", icon: "✨", action: scrollToDestinations },
+            { label: "Create Poll", icon: "🗳️", path: "/create-poll", desc: "Start a group vote for your next destination." },
+            { label: "AI Trip Planner", icon: "🤖", path: "/planner", desc: "Let AI craft your perfect custom itinerary." },
+            { label: "Interactive Map", icon: "🗺️", path: "/map", desc: "Explore routes and hidden gems visually." },
+            { label: "Explore India", icon: "✨", action: scrollToDestinations, desc: "Browse our hand-picked top destinations." },
           ].map((action, i) => (
             <motion.div 
               key={i}
-              whileHover={{ y: -8, backgroundColor: 'rgba(255,255,255,0.08)' }}
+              whileHover={{ y: -8 }}
               className="action-card" 
               onClick={() => action.path ? navigate(action.path) : action.action()}
             >
               <div className="action-icon">{action.icon}</div>
               <h3>{action.label}</h3>
+              <p>{action.desc}</p>
             </motion.div>
           ))}
         </div>
