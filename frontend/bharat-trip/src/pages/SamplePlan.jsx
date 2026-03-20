@@ -4,11 +4,6 @@ import Navbar from "../components/Navbar";
 import { useSettings } from "../context/SettingsContext";
 import "./samplePlan.css";
 
-import img2 from "../assets/images/img2.webp";
-import img5 from "../assets/images/img5.webp";
-import img1 from "../assets/images/img1.webp";
-import img3 from "../assets/images/img3.webp";
-
 export default function SamplePlan() {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("All Plans");
@@ -16,107 +11,103 @@ export default function SamplePlan() {
 
   const sampleTrips = [
     {
-      title: "Bangalore Spiritual Journey",
+      title: "Royal Rajasthan Explorer",
       category: "Heritage",
       rating: 4.9,
       popular: true,
-      image: img5,
+      image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
+      city: "Jaipur",
       days: [
         { 
           day: "Day 1", 
           places: [
-            { name: "ISKCON Temple", cost: 0 }, 
-            { name: "Bull Temple", cost: 50 }, 
-            { name: "Someshwara Temple", cost: 20 }
+            { name: "Hawa Mahal", cost: 50 }, 
+            { name: "City Palace", cost: 300 }, 
+            { name: "Jantar Mantar", cost: 200 }
           ], 
-          dayMealCost: 300 
+          dayMealCost: 800 
         },
         { 
           day: "Day 2", 
           places: [
-            { name: "St. Mary's Basilica", cost: 0 }, 
-            { name: "Jamia Masjid", cost: 0 }, 
-            { name: "Gavi Gangadhareshwara Temple", cost: 30 }
+            { name: "Amer Fort", cost: 500 }, 
+            { name: "Nahargarh Fort", cost: 200 }, 
+            { name: "Jal Mahal", cost: 0 }
           ], 
-          dayMealCost: 350 
+          dayMealCost: 1000 
         },
       ],
     },
     {
-      title: "Pub Capital Experience",
-      category: "Nightlife",
-      rating: 4.8,
+      title: "Agra Heritage Trail",
+      category: "Heritage",
+      rating: 5.0,
       popular: true,
-      image: img2,
+      image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80",
+      city: "Agra",
       days: [
         { 
           day: "Day 1", 
           places: [
-            { name: "MG Road", cost: 200 }, 
-            { name: "Church Street", cost: 300 }, 
-            { name: "Brigade Road", cost: 200 }
+            { name: "Taj Mahal", cost: 1100 }, 
+            { name: "Agra Fort", cost: 600 }, 
+            { name: "Mehtab Bagh", cost: 200 }
+          ], 
+          dayMealCost: 1200 
+        }
+      ],
+    },
+    {
+      title: "Kerala Backwaters & Tea",
+      category: "Nature",
+      rating: 4.8,
+      popular: true,
+      image: "https://images.unsplash.com/photo-1593179241557-bce1eb92e47e?auto=format&fit=crop&w=800&q=80",
+      city: "Munnar",
+      days: [
+        { 
+          day: "Day 1", 
+          places: [
+            { name: "Mattupetty Dam", cost: 50 }, 
+            { name: "Echo Point", cost: 20 }, 
+            { name: "Tea Museum", cost: 100 }
+          ], 
+          dayMealCost: 600 
+        },
+        { 
+          day: "Day 2", 
+          places: [
+            { name: "Eravikulam National Park", cost: 200 }, 
+            { name: "Attukad Waterfalls", cost: 0 }
+          ], 
+          dayMealCost: 700 
+        },
+      ],
+    },
+    {
+      title: "Goa Beach Bliss",
+      category: "Adventure",
+      rating: 4.7,
+      popular: false,
+      image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80",
+      city: "Goa",
+      days: [
+        { 
+          day: "Day 1", 
+          places: [
+            { name: "Baga Beach", cost: 0 }, 
+            { name: "Aguada Fort", cost: 0 }, 
+            { name: "Calangute Beach", cost: 0 }
           ], 
           dayMealCost: 1500 
         },
         { 
           day: "Day 2", 
           places: [
-            { name: "Indiranagar 100ft Road", cost: 500 }, 
-            { name: "Koramangala 5th Block", cost: 400 }
+            { name: "Dudhsagar Falls", cost: 1000 }, 
+            { name: "Anjuna Flea Market", cost: 0 }
           ], 
-          dayMealCost: 2000 
-        },
-      ],
-    },
-    {
-      title: "Silicon Valley Explorer",
-      category: "Adventure",
-      rating: 4.7,
-      popular: false,
-      image: img3,
-      days: [
-        { 
-          day: "Day 1", 
-          places: [
-            { name: "Visvesvaraya Museum", cost: 100 }, 
-            { name: "HAL Aerospace Museum", cost: 50 }, 
-            { name: "Jawaharlal Nehru Planetarium", cost: 60 }
-          ], 
-          dayMealCost: 500 
-        },
-        { 
-          day: "Day 2", 
-          places: [
-            { name: "Electronic City", cost: 0 }, 
-            { name: "Bannerghatta Bio Park", cost: 400 }
-          ], 
-          dayMealCost: 600 
-        },
-      ],
-    },
-    {
-      title: "The Green Circuit",
-      category: "Nature",
-      rating: 4.6,
-      popular: false,
-      image: img1,
-      days: [
-        { 
-          day: "Day 1", 
-          places: [
-            { name: "Cubbon Park", cost: 0 }, 
-            { name: "Lalbagh Botanical Garden", cost: 50 }, 
-            { name: "Freedom Park", cost: 0 }
-          ], 
-          dayMealCost: 400 
-        },
-        { 
-          day: "Day 2", 
-          places: [
-            { name: "Turahalli Forest", cost: 0 }, 
-            { name: "Hesaraghatta Lake", cost: 0 }
-          ], 
-          dayMealCost: 500 
+          dayMealCost: 1200 
         },
       ],
     },
@@ -133,27 +124,29 @@ export default function SamplePlan() {
 
   const handleViewOnMap = (trip) => {
     const placeCoords = {
-      "ISKCON Temple": { lat: 13.0098, lng: 77.5511 },
-      "Bull Temple": { lat: 12.9424, lng: 77.5681 },
-      "Someshwara Temple": { lat: 12.9711, lng: 77.6231 },
-      "St. Mary's Basilica": { lat: 12.9841, lng: 77.6056 },
-      "Jamia Masjid": { lat: 12.9621, lng: 77.5811 },
-      "Gavi Gangadhareshwara Temple": { lat: 12.9411, lng: 77.5611 },
-      "MG Road": { lat: 12.9756, lng: 77.6067 },
-      "Church Street": { lat: 12.9751, lng: 77.6041 },
-      "Brigade Road": { lat: 12.9731, lng: 77.6071 },
-      "Indiranagar 100ft Road": { lat: 12.9711, lng: 77.6411 },
-      "Koramangala 5th Block": { lat: 12.9341, lng: 77.6211 },
-      "Visvesvaraya Museum": { lat: 12.9751, lng: 77.5961 },
-      "HAL Aerospace Museum": { lat: 12.9541, lng: 77.6881 },
-      "Jawaharlal Nehru Planetarium": { lat: 12.9841, lng: 77.5891 },
-      "Electronic City": { lat: 12.8441, lng: 77.6611 },
-      "Bannerghatta Bio Park": { lat: 12.7624, lng: 77.5751 },
-      "Cubbon Park": { lat: 12.9763, lng: 77.5929 },
-      "Lalbagh Botanical Garden": { lat: 12.9507, lng: 77.5848 },
-      "Freedom Park": { lat: 12.9771, lng: 77.5811 },
-      "Turahalli Forest": { lat: 12.8811, lng: 77.5211 },
-      "Hesaraghatta Lake": { lat: 13.1411, lng: 77.4811 }
+      // Jaipur
+      "Hawa Mahal": { lat: 26.9239, lng: 75.8267 },
+      "City Palace": { lat: 26.9258, lng: 75.8237 },
+      "Jantar Mantar": { lat: 26.9248, lng: 75.8246 },
+      "Amer Fort": { lat: 26.9855, lng: 75.8513 },
+      "Nahargarh Fort": { lat: 26.9374, lng: 75.8155 },
+      "Jal Mahal": { lat: 26.9535, lng: 75.8462 },
+      // Agra
+      "Taj Mahal": { lat: 27.1751, lng: 78.0421 },
+      "Agra Fort": { lat: 27.1795, lng: 78.0213 },
+      "Mehtab Bagh": { lat: 27.1843, lng: 78.0421 },
+      // Kerala (Munnar)
+      "Mattupetty Dam": { lat: 10.1062, lng: 77.1245 },
+      "Echo Point": { lat: 10.1245, lng: 77.1643 },
+      "Tea Museum": { lat: 10.0921, lng: 77.0543 },
+      "Eravikulam National Park": { lat: 10.1512, lng: 77.0612 },
+      "Attukad Waterfalls": { lat: 10.0543, lng: 77.0421 },
+      // Goa
+      "Baga Beach": { lat: 15.5523, lng: 73.7516 },
+      "Aguada Fort": { lat: 15.4921, lng: 73.7731 },
+      "Calangute Beach": { lat: 15.5443, lng: 73.7554 },
+      "Dudhsagar Falls": { lat: 15.3134, lng: 74.3142 },
+      "Anjuna Flea Market": { lat: 15.5798, lng: 73.7389 }
     };
 
     const formattedItinerary = {};
@@ -183,7 +176,7 @@ export default function SamplePlan() {
     });
 
     const planData = {
-      city: "Bangalore",
+      city: trip.city,
       days: trip.days.length,
       budget: trip.category.toLowerCase().includes("nightlife") ? "high" : "medium",
       interests: [trip.category],
