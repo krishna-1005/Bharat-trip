@@ -4,7 +4,7 @@ import HoverPlaceCard from "../components/Map/HoverPlaceCard";
 import { DAY_COLORS } from "../constants/dayColors";
 import PlaceImage from "../components/PlaceImage";
 import "./results.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getAuth } from "firebase/auth";
 import { useSettings } from "../context/SettingsContext";
 const API = import.meta.env.VITE_API_URL;
