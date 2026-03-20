@@ -139,8 +139,8 @@ const Home = () => {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h1>Plan Trips Without Confusion</h1>
-            <p>Tell us your preferences and let our AI craft a personalized, step-by-step itinerary for your next adventure.</p>
+            <h1>Your Indian Odyssey, <br /> Perfected by AI.</h1>
+            <p>From hidden Himalayan trails to the vibrant heart of the Pink City—get a bespoke, high-precision itinerary that captures the true soul of your journey.</p>
             <div className="hero-actions">
               <motion.button 
                 whileHover={{ scale: 1.05 }}
