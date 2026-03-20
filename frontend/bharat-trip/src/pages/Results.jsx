@@ -3,6 +3,7 @@ import MapView from "../components/Map/MapView";
 import HoverPlaceCard from "../components/Map/HoverPlaceCard";
 import { DAY_COLORS } from "../constants/dayColors";
 import PlaceImage from "../components/PlaceImage";
+import GuidancePanel from "../components/Map/GuidancePanel";
 import "./results.css";
 import { useState, useEffect, useMemo } from "react";
 import { getAuth } from "firebase/auth";
@@ -30,6 +31,37 @@ function Results() {
     const saved = localStorage.getItem("tripCurrentIndex");
     return saved ? parseInt(saved, 10) : 0;
   });
+  const [userLocation, setUserLocation] = useState(null);
+
+  useEffect(() => {
+    let watchId = null;
+    if (isTracking) {
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => console.log("Tracking error:", error),
+        { enableHighAccuracy: true }
+      );
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => console.log("Location error:", error),
+        { enableHighAccuracy: true }
+      );
+    }
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [isTracking]);
 
   useEffect(() => {
     localStorage.setItem("tripCurrentIndex", currentIndex);
@@ -246,7 +278,25 @@ function Results() {
 
       {windowWidth > 900 && (
         <aside className="res-details-panel">
-          {hoveredPlace ? (
+          {isGuidanceMode && allPlaces.length > 0 ? (
+            <div className="guidance-sidebar-container">
+              <GuidancePanel 
+                currentPlace={allPlaces[currentIndex] || allPlaces[allPlaces.length - 1]}
+                nextPlace={allPlaces[currentIndex + 1]}
+                thenPlace={allPlaces[currentIndex + 2]}
+                onNext={() => setCurrentIndex(prev => prev + 1)}
+                onClose={() => setIsGuidanceMode(false)}
+                isLast={currentIndex >= allPlaces.length - 1}
+                userLocation={userLocation}
+              />
+              {hoveredPlace && (
+                <div className="guidance-hover-preview">
+                  <div className="preview-divider">Review Detail</div>
+                  <HoverPlaceCard place={hoveredPlace} city={plan.city} />
+                </div>
+              )}
+            </div>
+          ) : hoveredPlace ? (
             <HoverPlaceCard place={hoveredPlace} city={plan.city} />
           ) : (
             <div className="details-placeholder">
@@ -268,6 +318,7 @@ function Results() {
             setIsGuidanceMode={setIsGuidanceMode}
             currentIndex={currentIndex}
             setCurrentIndex={setCurrentIndex}
+            userLocation={userLocation}
           />
         </div>
         <div className="res-floating-stats">

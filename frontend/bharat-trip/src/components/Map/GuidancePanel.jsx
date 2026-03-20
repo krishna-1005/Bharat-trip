@@ -6,12 +6,9 @@ const GuidancePanel = ({
   nextPlace, 
   thenPlace, 
   onNext, 
-  onClose,
   isLast,
   userLocation
 }) => {
-  if (!currentPlace) return null;
-
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     if (!lat1 || !lon1 || !lat2 || !lon2) return null;
     const R = 6371; // Radius of the earth in km
@@ -41,12 +38,10 @@ const GuidancePanel = ({
   return (
     <div className="guidance-overlay">
       <div className="guidance-top-instruction">
-        Follow this plan step-by-step for a smooth trip
+        Follow your Itinerary
       </div>
 
       <div className="guidance-panel">
-        <button className="guidance-close" onClick={onClose}>×</button>        
-
         {isLast ? (
           <div className="guidance-completion">
             <span className="completion-emoji">🎉</span>

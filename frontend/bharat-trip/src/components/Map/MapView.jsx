@@ -17,7 +17,6 @@ import PlaceTooltip from "./PlaceTooltip";
 import HoverPlaceCard from "./HoverPlaceCard";
 import PlaceImage from "../PlaceImage";
 import L from "leaflet";
-import GuidancePanel from "./GuidancePanel";
 
 // Create a special icon for user location
 const userIcon = L.divIcon({
@@ -104,49 +103,20 @@ function ChangeView({ center }) {
   return null;
 }
 
-function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode, currentIndex, setCurrentIndex }) {
+function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode, currentIndex, setCurrentIndex, userLocation }) {
   const [activeDay, setActiveDay] = useState("all");
-  const [userLocation, setUserLocation] = useState(null);
   const [pathHistory, setPathHistory] = useState([]);
   const [roadRoute, setRoadRoute] = useState([]);
   
-  // Guidance State is now controlled from parent Results.jsx
-
+  // pathHistory logic needs userLocation
   useEffect(() => {
-    let watchId = null;
-
-    if (isTracking) {
-      watchId = navigator.geolocation.watchPosition(
-        (position) => {
-          const loc = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          setUserLocation(loc);
-          setPathHistory(prev => [...prev, [loc.lat, loc.lng]]);
-        },
-        (error) => console.log("Tracking error:", error),
-        { enableHighAccuracy: true }
-      );
-    } else {
+    if (isTracking && userLocation) {
+      setPathHistory(prev => [...prev, [userLocation.lat, userLocation.lng]]);
+    } else if (!isTracking) {
       setPathHistory([]);
       setRoadRoute([]);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error) => console.log("Location error:", error),
-        { enableHighAccuracy: true }
-      );
     }
-
-    return () => {
-      if (watchId) navigator.geolocation.clearWatch(watchId);
-    };
-  }, [isTracking]);
+  }, [isTracking, userLocation]);
 
   // Memoize allPlaces so FitBounds doesn't re-trigger on every render (like hover)
   const allPlaces = useMemo(() => {
@@ -230,19 +200,6 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
           onToggleGuidance={() => setIsGuidanceMode(!isGuidanceMode)} 
           isGuidanceMode={isGuidanceMode} 
         />
-
-        {/* ── Guidance Overlay ── */}
-        {isGuidanceMode && allPlaces.length > 0 && (
-          <GuidancePanel 
-            currentPlace={allPlaces[currentIndex] || allPlaces[allPlaces.length - 1]}
-            nextPlace={nextPlace}
-            thenPlace={thenPlace}
-            onNext={handleNextLocation}
-            onClose={() => setIsGuidanceMode(false)}
-            isLast={currentIndex >= allPlaces.length - 1}
-            userLocation={userLocation}
-          />
-        )}
 
         {!isGuidanceMode && (
           <MapLegend
