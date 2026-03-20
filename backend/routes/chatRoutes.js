@@ -118,23 +118,24 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
     if (cityInMsg) city = cityInMsg[0];
     else if (cityInHistory) city = cityInHistory[0];
 
-    // 2. Check for Pace
-    let pace = null;
+    // 2. Build consistent history text for subsequent checks
     const historyText = (history || []).map(h => h.text.toLowerCase()).join(" ");
+
+    // 3. Check for Pace
+    let pace = null;
     if (msg.includes("relaxed") || historyText.includes("relaxed")) pace = "relaxed";
     else if (msg.includes("fast") || historyText.includes("fast")) pace = "fast";
 
-    // 3. Check for Budget
+    // 4. Check for Budget
     let budget = null;
     if (msg.includes("luxury") || msg.includes("comfort") || historyText.includes("luxury") || historyText.includes("comfort")) budget = "high";
     else if (msg.includes("budget") || msg.includes("hidden gem") || historyText.includes("budget") || historyText.includes("hidden gem")) budget = "low";
 
-    // 4. Check for Duration (Days)
+    // 5. Check for Duration (Days)
     let days = null;
-    // Look for "X days" or just a standalone number in a context where we asked for days
+    // Look for standalone number or "X days"
     const daysRegex = /\b(\d+)\b(?:\s*day)?/i;
     const currentDaysMatch = msg.match(daysRegex);
-    const historyText = (history || []).map(h => h.text.toLowerCase()).join(" ");
     
     if (currentDaysMatch) {
       days = parseInt(currentDaysMatch[1]);
@@ -143,13 +144,13 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
       if (daysMatch) days = parseInt(daysMatch[1]);
     }
 
-    // 5. Check for Interests
+    // 6. Check for Interests
     let interests = null;
     const interestKeywords = ["beach", "temple", "history", "nature", "nightlife", "food", "adventure", "culture", "shopping", "sightseeing"];
     const foundInterests = interestKeywords.filter(i => msg.includes(i) || historyText.includes(i));
     if (foundInterests.length > 0) interests = foundInterests;
 
-    // 6. State-based response (Strict flow: City -> Pace -> Budget -> Days -> Interests)
+    // 7. State-based response (Strict flow: City -> Pace -> Budget -> Days -> Interests)
     if (!city) {
       if (/\b(hi|hello|hey|greetings|namaste)\b/.test(msg)) {
         return res.json({ 
@@ -197,7 +198,7 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
       });
     }
 
-    // 7. If we have everything, generate a plan!
+    // 8. If we have everything, generate a plan!
     try {
       const finalDays = days > 10 ? 10 : days; // Safety limit
       const planData = {
