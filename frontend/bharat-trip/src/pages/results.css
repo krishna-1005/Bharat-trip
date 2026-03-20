@@ -390,6 +390,75 @@
 
 .place-cost-mini { font-size: 12px; font-weight: 700; color: var(--accent-green); }
 
+/* VISITED STATUS STYLES */
+.place-actions-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.visited-tick {
+  background: transparent;
+  border: 1px solid var(--border-main);
+  color: var(--text-dim);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.visited-tick:hover {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.visited-tick.active {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: white;
+  cursor: default;
+}
+
+.visited-tick.next-up {
+  width: auto;
+  padding: 0 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.visited-tick.next-up:hover {
+  background: var(--accent-blue);
+  color: white;
+}
+
+.timeline-item.visited .marker-dot {
+  background: var(--text-dim) !important;
+  opacity: 0.5;
+}
+
+.timeline-item.visited .marker-line {
+  background: var(--accent-green);
+  opacity: 0.6;
+}
+
+.timeline-item.current .marker-dot {
+  transform: scale(1.5);
+  box-shadow: 0 0 10px var(--day-accent);
+  z-index: 2;
+}
+
 /* COMPACT SAVE BUTTON */
 .res-inventory-actions {
   margin-top: 10px;

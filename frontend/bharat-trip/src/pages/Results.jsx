@@ -26,6 +26,13 @@ function Results() {
   const [hoveredPlace, setHoveredPlace] = useState(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [weather, setWeather] = useState({ temp: "--", desc: "Loading...", icon: "☁️" });
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const allPlaces = useMemo(() => {
+    if (!plan || !plan.itinerary) return [];
+    const days = Object.keys(plan.itinerary);
+    return days.flatMap(d => plan.itinerary[d]?.places || []);
+  }, [plan?.itinerary]);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -246,6 +253,8 @@ function Results() {
             onHover={setHoveredPlace} 
             isGuidanceMode={isGuidanceMode}
             setIsGuidanceMode={setIsGuidanceMode}
+            currentIndex={currentIndex}
+            setCurrentIndex={setCurrentIndex}
           />
         </div>
         <div className="res-floating-stats">
@@ -330,82 +339,104 @@ function Results() {
             <span className="weather-icon">{weather.icon}</span>
           </div>
 
-          {daysKeys.map((day, idx) => {
-            const dayData = plan.itinerary[day];
-            const placesCost = dayData.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0);
-            const mealCost = dayData.dayMealCost || 0;
+          {(() => {
+            let globalPlaceIdx = 0;
+            return daysKeys.map((day, idx) => {
+              const dayData = plan.itinerary[day];
+              const placesCost = dayData.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0);
+              const mealCost = dayData.dayMealCost || 0;
 
-            return (
-              <div key={day} className="premium-day-card" style={{ "--day-accent": DAY_COLORS[idx % DAY_COLORS.length] }}>
-                <div className="day-header">
-                  <div className="day-info">
-                    <span className="day-badge">{day}</span>
-                    <h3 className="day-title">Exploration Day</h3>
+              return (
+                <div key={day} className="premium-day-card" style={{ "--day-accent": DAY_COLORS[idx % DAY_COLORS.length] }}>
+                  <div className="day-header">
+                    <div className="day-info">
+                      <span className="day-badge">{day}</span>
+                      <h3 className="day-title">Exploration Day</h3>
+                    </div>
+                    <div className="day-meta">
+                      <span>⏱️ {dayData.estimatedHours}h</span>
+                      <span>💰 {formatPrice(placesCost + mealCost)}</span>
+                    </div>
                   </div>
-                  <div className="day-meta">
-                    <span>⏱️ {dayData.estimatedHours}h</span>
-                    <span>💰 {formatPrice(placesCost + mealCost)}</span>
-                  </div>
-                </div>
 
-                <div className="place-timeline">
-                  {dayData.places.map((place, pIdx) => {
-                    const prevPlace = pIdx > 0 ? dayData.places[pIdx - 1] : null;
-                    const distance = prevPlace ? getDistance(prevPlace.lat, prevPlace.lng, place.lat, place.lng) : 0;
-                    const travelTime = prevPlace ? getTravelTime(distance) : null;
+                  <div className="place-timeline">
+                    {dayData.places.map((place, pIdx) => {
+                      const pGlobalIdx = globalPlaceIdx++;
+                      const isVisited = pGlobalIdx < currentIndex;
+                      const isCurrent = pGlobalIdx === currentIndex;
+                      
+                      const prevPlace = pIdx > 0 ? dayData.places[pIdx - 1] : null;
+                      const distance = prevPlace ? getDistance(prevPlace.lat, prevPlace.lng, place.lat, place.lng) : 0;
+                      const travelTime = prevPlace ? getTravelTime(distance) : null;
 
-                    return (
-                      <div key={pIdx} className="timeline-item">
-                        <div className="timeline-marker">
-                          <span className="marker-dot"></span>
-                          {pIdx < dayData.places.length - 1 && <span className="marker-line"></span>}
-                        </div>
-                        <div className="timeline-content">
-                          <div className="place-card-mini">
-                            <PlaceImage 
-                              placeName={place.name} 
-                              city={plan.city || "Bengaluru"} 
-                              className="mini-card-img" 
-                            />
-                            <div className="place-info-main">
-                              <h4>{place.name}</h4>
-                              <div className="place-badge-row">
-                                <span className="place-tag">{place.category || "Sightseeing"}</span>
-                                {travelTime && (
-                                  <span className="travel-time-badge">
-                                    {travelMode === "Bike" ? "🏍️" : travelMode === "Car" ? "🚗" : "🚌"} {travelTime}
-                                  </span>
+                      return (
+                        <div key={pIdx} className={`timeline-item ${isVisited ? "visited" : ""} ${isCurrent ? "current" : ""}`}>
+                          <div className="timeline-marker">
+                            <span className="marker-dot"></span>
+                            {pIdx < dayData.places.length - 1 && <span className="marker-line"></span>}
+                          </div>
+                          <div className="timeline-content">
+                            <div className="place-card-mini">
+                              <PlaceImage 
+                                placeName={place.name} 
+                                city={plan.city || "Bengaluru"} 
+                                className="mini-card-img" 
+                              />
+                              <div className="place-info-main">
+                                <h4 style={{ textDecoration: isVisited ? 'line-through' : 'none', opacity: isVisited ? 0.6 : 1 }}>
+                                  {place.name}
+                                </h4>
+                                <div className="place-badge-row">
+                                  <span className="place-tag">{place.category || "Sightseeing"}</span>
+                                  {travelTime && (
+                                    <span className="travel-time-badge">
+                                      {travelMode === "Bike" ? "🏍️" : travelMode === "Car" ? "🚗" : "🚌"} {travelTime}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="place-actions-mini">
+                                {isVisited ? (
+                                  <button className="visited-tick active" title="Visited">✓</button>
+                                ) : (
+                                  <button 
+                                    className={`visited-tick ${isCurrent ? "next-up" : ""}`} 
+                                    onClick={() => setCurrentIndex(pGlobalIdx + 1)}
+                                    title="Mark as visited"
+                                  >
+                                    {isCurrent ? "Mark Visited" : "○"}
+                                  </button>
                                 )}
+                                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', marginTop: '4px' }}>
+                                  <span className="place-cost-mini">{place.estimatedCost > 0 ? formatPrice(place.estimatedCost) : 'Free'}</span>
+                                  <span style={{ fontSize: '8px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>{place.estimatedCost > 0 ? 'Est.' : ''}</span>
+                                </div>
                               </div>
                             </div>
-                            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
-                              <span className="place-cost-mini">{place.estimatedCost > 0 ? formatPrice(place.estimatedCost) : 'Free'}</span>
-                              <span style={{ fontSize: '8px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>{place.estimatedCost > 0 ? 'Est. Total' : ''}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {mealCost > 0 && (
+                      <div className="timeline-item" style={{ opacity: 0.8, marginTop: '8px' }}>
+                        <div className="timeline-marker"><span className="marker-dot" style={{ background: '#94a3b8' }}></span></div>
+                        <div className="timeline-content">
+                          <div className="place-card-mini" style={{ borderStyle: 'dashed', background: 'transparent' }}>
+                            <div style={{ fontSize: '20px', padding: '0 10px' }}>🍴</div>
+                            <div className="place-info-main">
+                              <h4>Estimated Meals</h4>
+                              <span className="place-tag">Food & Dining</span>
                             </div>
+                            <span className="place-cost-mini">{formatPrice(mealCost)}</span>
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
-                  {mealCost > 0 && (
-                    <div className="timeline-item" style={{ opacity: 0.8, marginTop: '8px' }}>
-                      <div className="timeline-marker"><span className="marker-dot" style={{ background: '#94a3b8' }}></span></div>
-                      <div className="timeline-content">
-                        <div className="place-card-mini" style={{ borderStyle: 'dashed', background: 'transparent' }}>
-                          <div style={{ fontSize: '20px', padding: '0 10px' }}>🍴</div>
-                          <div className="place-info-main">
-                            <h4>Estimated Meals</h4>
-                            <span className="place-tag">Food & Dining</span>
-                          </div>
-                          <span className="place-cost-mini">{formatPrice(mealCost)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            });
+          })()}
 
           {!plan.isShared && (
             <div className="res-inventory-actions">

@@ -104,21 +104,13 @@ function ChangeView({ center }) {
   return null;
 }
 
-function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode }) {
+function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode, currentIndex, setCurrentIndex }) {
   const [activeDay, setActiveDay] = useState("all");
   const [userLocation, setUserLocation] = useState(null);
   const [pathHistory, setPathHistory] = useState([]);
   const [roadRoute, setRoadRoute] = useState([]);
   
-  // Guidance State (kept internal for now as it's map-specific navigation)
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    // Reset index when guidance mode is turned off/on
-    if (!isGuidanceMode) {
-      setCurrentIndex(0);
-    }
-  }, [isGuidanceMode]);
+  // Guidance State is now controlled from parent Results.jsx
 
   useEffect(() => {
     let watchId = null;
@@ -294,53 +286,69 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode 
         )}
 
         {/* Standard Mode Rendering */}
-        {!isGuidanceMode && days.map((day, idx) => {
-          if (activeDay !== "all" && activeDay !== idx + 1) return null;
+        {!isGuidanceMode && (() => {
+          let globalIdxCounter = 0;
+          return days.map((day, idx) => {
+            if (activeDay !== "all" && activeDay !== idx + 1) {
+              // We still need to increment the counter for skipped days to keep it in sync
+              const skippedPlacesCount = plan.itinerary[day]?.places?.length || 0;
+              globalIdxCounter += skippedPlacesCount;
+              return null;
+            }
 
-          const places = plan.itinerary[day]?.places || [];
-          const positions = places.map(p => [p.lat, p.lng]);
+            const places = plan.itinerary[day]?.places || [];
+            const positions = places.map(p => [p.lat, p.lng]);
 
-          return (
-            <Fragment key={`day-${idx}`}>
-              {positions.length > 1 && (
-                <Polyline
-                  positions={positions}
-                  pathOptions={{
-                    color: DAY_COLORS[idx],
-                    weight: 4,
-                    opacity: 0.7
-                  }}
-                />
-              )}
+            return (
+              <Fragment key={`day-${idx}`}>
+                {positions.length > 1 && (
+                  <Polyline
+                    positions={positions}
+                    pathOptions={{
+                      color: DAY_COLORS[idx],
+                      weight: 4,
+                      opacity: 0.7
+                    }}
+                  />
+                )}
 
-              {places.map((p, i) => (
-                <Marker
-                  key={`${day}-${i}`}
-                  position={[p.lat, p.lng]}
-                  icon={createLocationIcon(
-                    DAY_COLORS[idx],
-                    activeDay === idx + 1
-                  )}
-                  eventHandlers={{
-                    mouseover: () => onHover(p),
-                    mouseout: () => onHover(null),
-                  }}
-                >
-                  <Tooltip
-                    direction="top"
-                    offset={[0, -14]}
-                    opacity={1}
-                    interactive
-                    sticky
-                    className="location-tooltip"
-                  >
-                    <PlaceTooltip place={p} city={plan.city} />
-                  </Tooltip>
-                </Marker>
-              ))}
-            </Fragment>
-          );
-        })}
+                {places.map((p, i) => {
+                  const pGlobalIdx = globalIdxCounter++;
+                  const isVisited = pGlobalIdx < currentIndex;
+                  const isCurrent = pGlobalIdx === currentIndex;
+
+                  if (isVisited) return null; // Hide visited markers as requested
+
+                  return (
+                    <Marker
+                      key={`${day}-${i}`}
+                      position={[p.lat, p.lng]}
+                      icon={createLocationIcon(
+                        isCurrent ? "#3b82f6" : DAY_COLORS[idx],
+                        isCurrent || activeDay === idx + 1
+                      )}
+                      eventHandlers={{
+                        mouseover: () => onHover(p),
+                        mouseout: () => onHover(null),
+                      }}
+                    >
+                      <Tooltip
+                        direction="top"
+                        offset={[0, -14]}
+                        opacity={1}
+                        interactive
+                        sticky
+                        className="location-tooltip"
+                      >
+                        <PlaceTooltip place={p} city={plan.city} />
+                      </Tooltip>
+                    </Marker>
+                  );
+                })}
+              </Fragment>
+            );
+          });
+        })()}
 
         {/* Guidance Mode Rendering */}
         {isGuidanceMode && (
