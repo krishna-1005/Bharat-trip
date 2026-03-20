@@ -110,11 +110,44 @@ function PlannerForm({ onPlanGenerated }) {
     { value: "fast", label: "Fast", icon: "🏃", desc: "Cover everything" },
   ];
 
+  const applyTheme = (tName) => {
+    const themes = {
+      spiritual: { days: 3, budget: "low", interests: ["Culture"], travelerType: "solo", pace: "relaxed" },
+      foodie: { days: 2, budget: "medium", interests: ["Food", "Nightlife"], travelerType: "friends", pace: "moderate" },
+      adventure: { days: 5, budget: "medium", interests: ["Adventure", "Nature"], travelerType: "friends", pace: "fast" },
+      heritage: { days: 3, budget: "high", interests: ["Culture", "History"], travelerType: "family", pace: "relaxed" }
+    };
+    const tData = themes[tName];
+    if (tData) {
+      setDays(tData.days);
+      setBudget(tData.budget);
+      setInterests(tData.interests);
+      setTravelerType(tData.travelerType);
+      setPace(tData.pace);
+      setStep(1);
+    }
+  };
+
+  const getEstimate = () => {
+    const dailyBase = budget === 'low' ? 1500 : budget === 'medium' ? 4000 : 10000;
+    const total = dailyBase * days;
+    return `~ ${formatPrice(total * 0.8)} - ${formatPrice(total * 1.2)}`;
+  };
+
   return (
     <div className="pf-wrap" style={{ position: 'relative' }}>
       <div style={{ position: 'absolute', top: '-25px', right: 0, color: 'var(--accent-blue)', fontSize: '10px', fontWeight: '800' }}>
-        STEPS ENABLED
+        AI ENHANCED
       </div>
+
+      {/* QUICK THEMES */}
+      <div className="pf-themes-row">
+        <button onClick={() => applyTheme('spiritual')} className="pf-theme-chip">🧘 Spiritual</button>
+        <button onClick={() => applyTheme('foodie')} className="pf-theme-chip">🍜 Foodie</button>
+        <button onClick={() => applyTheme('adventure')} className="pf-theme-chip">🏔️ Adventure</button>
+        <button onClick={() => applyTheme('heritage')} className="pf-theme-chip">🏛️ Heritage</button>
+      </div>
+
       <div className="pf-progress-bar">
         <div className="pf-progress-fill" style={{ width: `${(step / totalSteps) * 100}%` }}></div>
       </div>
@@ -285,25 +318,31 @@ function PlannerForm({ onPlanGenerated }) {
       </div>
 
       <div className="pf-footer">
-        {step > 1 && (
-          <button className="pf-back-btn" onClick={prevStep} disabled={loading}>
-            Back
-          </button>
-        )}
-        
-        {step < totalSteps ? (
-          <button className="pf-next-btn" onClick={nextStep}>
-            Continue
-          </button>
-        ) : (
-          <button 
-            className={`pf-gen-btn ${loading ? 'loading' : ''}`} 
-            onClick={handleSubmit} 
-            disabled={loading}
-          >
-            {loading ? <span className="pf-spinner"></span> : "Generate Itinerary"}
-          </button>
-        )}
+        <div className="pf-live-estimate">
+          <span className="est-label">Est. Budget</span>
+          <span className="est-value">{getEstimate()}</span>
+        </div>
+        <div className="pf-footer-btns">
+          {step > 1 && (
+            <button className="pf-back-btn" onClick={prevStep} disabled={loading}>
+              Back
+            </button>
+          )}
+          
+          {step < totalSteps ? (
+            <button className="pf-next-btn" onClick={nextStep}>
+              Continue
+            </button>
+          ) : (
+            <button 
+              className={`pf-gen-btn ${loading ? 'loading' : ''}`} 
+              onClick={handleSubmit} 
+              disabled={loading}
+            >
+              {loading ? <span className="pf-spinner"></span> : "Generate Itinerary"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
