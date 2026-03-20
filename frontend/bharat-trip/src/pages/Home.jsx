@@ -140,7 +140,7 @@ const Home = () => {
             viewport={{ once: true }}
           >
             <h1>Plan Trips Without Confusion</h1>
-            <p>Vote with friends, finalize decisions instantly, and follow a clear step-by-step trip plan.</p>
+            <p>Tell us your preferences and let our AI craft a personalized, step-by-step itinerary for your next adventure.</p>
             <div className="hero-actions">
               <motion.button 
                 whileHover={{ scale: 1.05 }}
@@ -206,8 +206,8 @@ const Home = () => {
         >Why use this?</motion.h2>
         <div className="value-grid">
           {[
-            { title: "No long discussions", icon: "💬" },
-            { title: "Instant decisions", icon: "⚡" },
+            { title: "Smart AI Planning", icon: "🤖" },
+            { title: "Personalized Routes", icon: "🗺️" },
             { title: "Clear trip guidance", icon: "🧭" },
           ].map((v, i) => (
             <motion.div 
@@ -229,9 +229,9 @@ const Home = () => {
       <section className="container">
         <div className="features-grid">
           <FeatureCard 
-            title="Voting" 
-            icon="🗳️"
-            desc="Quick group decisions without confusion through intuitive polls." 
+            title="Easy Planning" 
+            icon="✨"
+            desc="Answer a few quick questions and get a fully personalized trip in seconds." 
           />
           <FeatureCard 
             title="AI Planner" 
@@ -245,7 +245,7 @@ const Home = () => {
           />
           <FeatureCard 
             title="Smart Flow" 
-            icon="✨"
+            icon="⚡"
             desc="Know exactly what to do next with seamless transition from idea to reality." 
           />
         </div>
@@ -260,10 +260,10 @@ const Home = () => {
         >How it works</motion.h2>
         <div className="flow-grid">
           {[
-            { label: "Create poll", icon: "✍️" },
-            { label: "Friends vote", icon: "👥" },
-            { label: "Decision finalized", icon: "✅" },
-            { label: "Follow your trip", icon: "🗺️" },
+            { label: "Choose destination", icon: "📍" },
+            { label: "Set preferences", icon: "⚙️" },
+            { label: "AI generates plan", icon: "🤖" },
+            { label: "Explore & enjoy", icon: "🗺️" },
           ].map((step, i) => (
             <React.Fragment key={i}>
               <motion.div 
