@@ -125,6 +125,9 @@ function Results() {
       fetchSharedTrip(sharedTripId);
     } else if (loc.state?.plan) {
       setPlan(loc.state.plan);
+      // Reset progress for a brand new plan from the planner
+      setCurrentIndex(0);
+      localStorage.setItem("tripCurrentIndex", 0);
       setLoading(false);
     } else {
       const savedPlan = localStorage.getItem("tripPlan");
