@@ -90,6 +90,38 @@ const Home = () => {
   const destRef = useRef(null);
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [heroText, setHeroText] = useState({
+    h: "Your Indian Odyssey, <br /> Perfected by AI.",
+    p: "From hidden Himalayan trails to the vibrant heart of the Pink City—get a bespoke, high-precision itinerary."
+  });
+
+  const heroOptions = [
+    {
+      h: "Your Indian Odyssey, <br /> Perfected by AI.",
+      p: "From hidden Himalayan trails to the vibrant heart of the Pink City—get a bespoke, high-precision itinerary that captures the true soul of your journey."
+    },
+    {
+      h: "Don't Just Travel, <br /> Experience with AI.",
+      p: "Skip the hours of research. Our intelligent planner crafts the ultimate route based on your unique travel style and budget."
+    },
+    {
+      h: "Every Detail Handpicked <br /> by Intelligence.",
+      p: "Whether it's a weekend getaway or a month-long expedition, get a step-by-step plan that optimizes your time and budget."
+    },
+    {
+      h: "The Smartest Way <br /> to Discover India.",
+      p: "Let our AI navigate the complexities of planning. You just focus on the memories while we handle the perfect itinerary."
+    },
+    {
+      h: "Bespoke Itineraries <br /> in Seconds.",
+      p: "Enter your dreams, get a roadmap. Experience India exactly how you want to, with precision-engineered travel plans."
+    }
+  ];
+
+  useEffect(() => {
+    const randomIdx = Math.floor(Math.random() * heroOptions.length);
+    setHeroText(heroOptions[randomIdx]);
+  }, []);
 
   useEffect(() => {
     const handleGlobalMouse = (e) => {
@@ -135,12 +167,12 @@ const Home = () => {
           <motion.div 
             className="hero-content"
             initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+            key={heroText.h}
           >
-            <h1>Your Indian Odyssey, <br /> Perfected by AI.</h1>
-            <p>From hidden Himalayan trails to the vibrant heart of the Pink City—get a bespoke, high-precision itinerary that captures the true soul of your journey.</p>
+            <h1 dangerouslySetInnerHTML={{ __html: heroText.h }}></h1>
+            <p>{heroText.p}</p>
             <div className="hero-actions">
               <motion.button 
                 whileHover={{ scale: 1.05 }}
