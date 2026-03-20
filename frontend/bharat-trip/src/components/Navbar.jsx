@@ -204,7 +204,7 @@ function Navbar() {
             {isAdmin && (
               <li className="nb-mobile-item" onClick={() => { navigate("/admin"); setMobileMenuOpen(false); }}>
                 🛡️ Admin Panel
-              </li
+              </li>
             )}
             {!user && (
               <>
