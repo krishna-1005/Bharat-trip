@@ -26,7 +26,20 @@ function Results() {
   const [hoveredPlace, setHoveredPlace] = useState(null);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [weather, setWeather] = useState({ temp: "--", desc: "Loading...", icon: "☁️" });
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const saved = localStorage.getItem("tripCurrentIndex");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("tripCurrentIndex", currentIndex);
+  }, [currentIndex]);
+
+  const handleUndo = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+    }
+  };
 
   const allPlaces = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
@@ -331,6 +344,49 @@ function Results() {
         </div>
 
         <div className="res-itinerary-scroll">
+          {/* CURRENT DESTINATION FOCUS CARD */}
+          {currentIndex < allPlaces.length ? (
+            <div className="current-dest-focus-card">
+              <div className="focus-label">NEXT STOP</div>
+              <div className="focus-card-body">
+                <PlaceImage 
+                  placeName={allPlaces[currentIndex].name} 
+                  city={plan.city || "Bengaluru"} 
+                  className="focus-card-img" 
+                />
+                <div className="focus-card-info">
+                  <h3>{allPlaces[currentIndex].name}</h3>
+                  <p>{allPlaces[currentIndex].category || "Sightseeing"}</p>
+                  <div className="focus-card-actions">
+                    <button 
+                      className="focus-btn mark-visited"
+                      onClick={() => setCurrentIndex(prev => prev + 1)}
+                    >
+                      ✓ Mark Visited
+                    </button>
+                    {currentIndex > 0 && (
+                      <button 
+                        className="focus-btn undo-visited"
+                        onClick={handleUndo}
+                      >
+                        ↩ Undo Last
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="trip-completion-card">
+              <span className="completion-emoji">🎉</span>
+              <h3>Trip Completed!</h3>
+              <p>You've visited all planned locations.</p>
+              <button className="focus-btn undo-visited" onClick={handleUndo}>
+                ↩ Undo Last Stop
+              </button>
+            </div>
+          )}
+
           <div className="weather-preview-card">
             <div className="weather-info">
               <span className="weather-temp">{weather.temp}</span>

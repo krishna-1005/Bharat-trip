@@ -334,6 +334,105 @@
 .day-meta { text-align: right; display: flex; flex-direction: column; }
 .day-meta span { font-size: 11px; color: var(--text-dim); }
 
+/* CURRENT DESTINATION FOCUS CARD */
+.current-dest-focus-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--accent-blue);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.focus-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+}
+
+.focus-card-body {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.focus-card-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.focus-card-info {
+  flex: 1;
+}
+
+.focus-card-info h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.focus-card-info p {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  margin: 0 0 16px 0;
+}
+
+.focus-card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.focus-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.mark-visited {
+  background: var(--accent-blue);
+  color: white;
+  flex: 2;
+}
+
+.undo-visited {
+  background: var(--glass);
+  color: var(--text-main);
+  border: 1px solid var(--border-main);
+  flex: 1;
+}
+
+.focus-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.trip-completion-card {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(16, 185, 129, 0.05);
+  border: 2px dashed var(--accent-green);
+  border-radius: 24px;
+  margin-bottom: 24px;
+}
+
+.completion-emoji {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 16px;
+}
+
 /* Timeline */
 .timeline-item { display: flex; gap: 12px; }
 .marker-dot { width: 8px; height: 8px; background: var(--day-accent); border-radius: 50%; }
