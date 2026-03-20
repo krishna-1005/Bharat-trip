@@ -41,7 +41,7 @@ function Navbar() {
     navigate("/");
   };
 
-  const ADMIN_EMAILS = ["bharattrip@gmail.com"];
+  const ADMIN_EMAILS = ["bharattrip@gmail.com", "krishkulkarni1005@gmail.com"];
 
   const isHomePage = location.pathname === "/";
   const isAdmin = user && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email?.toLowerCase());
@@ -144,7 +144,7 @@ function Navbar() {
                   </div>
                   <div className="nb-dd-user-info">
                     <span className="nb-dd-name">{username}</span>
-                    <span className="nb-dd-tag">✦ Explorer</span>
+                    <span className="nb-dd-tag" style={{ fontSize: '10px', opacity: 0.7 }}>{user.email}</span>
                   </div>
                 </div>
                 <div className="nb-dd-divider" />
