@@ -285,33 +285,42 @@ function Results() {
 
       {windowWidth > 900 && (
         <aside className="res-details-panel">
-          {isGuidanceMode && allPlaces.length > 0 ? (
-            <div className="guidance-sidebar-container">
-              <GuidancePanel 
-                currentPlace={allPlaces[currentIndex] || allPlaces[allPlaces.length - 1]}
-                nextPlace={allPlaces[currentIndex + 1]}
-                thenPlace={allPlaces[currentIndex + 2]}
-                onNext={() => setCurrentIndex(prev => prev + 1)}
-                onClose={() => setIsGuidanceMode(false)}
-                isLast={currentIndex >= allPlaces.length - 1}
-                userLocation={userLocation}
-              />
-              {hoveredPlace && (
-                <div className="guidance-hover-preview">
-                  <div className="preview-divider">Review Detail</div>
-                  <HoverPlaceCard place={hoveredPlace} city={plan.city} />
-                </div>
-              )}
-            </div>
-          ) : hoveredPlace ? (
-            <HoverPlaceCard place={hoveredPlace} city={plan.city} />
-          ) : (
-            <div className="details-placeholder">
-              <div className="placeholder-icon">📍</div>
-              <h3>Location Details</h3>
-              <p>Hover over a marker on the map to see original reviews and details.</p>
-            </div>
-          )}
+          <div className="details-panel-header">
+            <span className="panel-dot"></span>
+            <h3>{isGuidanceMode ? "Your Travel Assistant" : "Location Intelligence"}</h3>
+          </div>
+          
+          <div className="details-panel-content">
+            {hoveredPlace && (
+              <div className="panel-hover-section animated-fade-in">
+                <div className="context-label">📍 Hovered Location</div>
+                <HoverPlaceCard place={hoveredPlace} city={plan.city} />
+                {!isGuidanceMode && <div className="panel-divider"></div>}
+              </div>
+            )}
+
+            {isGuidanceMode && allPlaces.length > 0 && (
+              <div className="panel-guidance-section">
+                <div className="context-label">🧭 Navigation Guide</div>
+                <GuidancePanel 
+                  currentPlace={allPlaces[currentIndex] || allPlaces[allPlaces.length - 1]}
+                  nextPlace={allPlaces[currentIndex + 1]}
+                  thenPlace={allPlaces[currentIndex + 2]}
+                  onNext={() => setCurrentIndex(prev => prev + 1)}
+                  isLast={currentIndex >= allPlaces.length - 1}
+                  userLocation={userLocation}
+                />
+              </div>
+            )}
+
+            {!hoveredPlace && !isGuidanceMode && (
+              <div className="details-placeholder">
+                <div className="placeholder-icon">🗺️</div>
+                <h3>Explore the Map</h3>
+                <p>Hover over markers to see reviews, or start "Guide Me" for turn-by-turn itinerary tracking.</p>
+              </div>
+            )}
+          </div>
         </aside>
       )}
 
