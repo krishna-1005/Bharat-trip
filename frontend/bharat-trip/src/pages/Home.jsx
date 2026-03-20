@@ -158,9 +158,15 @@ const Home = () => {
               >
                 Create Poll
               </motion.button>
-              <button className="btn-tertiary" onClick={() => navigate('/frontend/bharat-trip/src/pages/SamplePlan.jsx')}>
-                <span>📍</span> View Sample Plans
-              </button>
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="btn-sample" 
+                onClick={() => navigate('/sample-plan')}
+              >
+                <div className="icon-circle">✨</div>
+                <span>Sample Plans</span>
+              </motion.button>
             </div>
           </motion.div>
           <div className="hero-preview-container">
