@@ -242,7 +242,16 @@ export const SettingsProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem("settings_theme", theme);
-    document.body.className = theme === 'dark' ? 'dark-theme' : 'light-theme';
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark-theme');
+      root.classList.remove('light-theme');
+      document.body.className = 'dark-theme';
+    } else {
+      root.classList.add('light-theme');
+      root.classList.remove('dark-theme');
+      document.body.className = 'light-theme';
+    }
   }, [theme]);
 
   const toggleTheme = () => {
