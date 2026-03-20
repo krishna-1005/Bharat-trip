@@ -41,14 +41,10 @@ function Navbar() {
     navigate("/");
   };
 
-  const ADMIN_EMAILS = ["bharattrip0@gmail.com", "krishnapramodkulkarni23aiml@rnsit.ac.in"];
+  const ADMIN_EMAILS = ["bharattrip@gmail.com"];
 
-  const defaultLinks = [
-    { label: "Home",    id: "home",    path: "/"            },
-    { label: "Poll",    id: "poll",    path: "/create-poll" },
-    { label: "Planner", id: "planner", path: "/planner"     },
-    { label: "Map",     id: "map",     path: "/map"         },
-  ];
+  const isHomePage = location.pathname === "/";
+  const isAdmin = user && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email?.toLowerCase());
 
   const homeLinks = [
     { label: "Why Us",       id: "why-us"       },
@@ -57,11 +53,21 @@ function Navbar() {
     { label: "Destinations", id: "destinations" },
   ];
 
-  const isHomePage = location.pathname === "/";
+  if (isAdmin) {
+    homeLinks.push({ label: "Admin", id: "admin", path: "/admin" });
+  }
+
+  const defaultLinks = [
+    { label: "Home",    id: "home",    path: "/"            },
+    { label: "Poll",    id: "poll",    path: "/create-poll" },
+    { label: "Planner", id: "planner", path: "/planner"     },
+    { label: "Map",     id: "map",     path: "/map"         },
+  ];
+
   const navLinks = isHomePage ? homeLinks : defaultLinks;
 
   const handleNavClick = (link) => {
-    if (isHomePage && link.id !== "home") {
+    if (isHomePage && link.id !== "home" && link.id !== "admin") {
       const element = document.getElementById(link.id);
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
@@ -78,7 +84,6 @@ function Navbar() {
     { icon: "⚙️", label: t("nav_settings"),   sub: "Preferences & privacy", path: "/settings" },
   ];
 
-  const isAdmin = user && ADMIN_EMAILS.includes(user.email);
   if (isAdmin) {
     menuItems.unshift({ icon: "🛡️", label: "Admin", sub: "Control Panel", path: "/admin" });
   }
