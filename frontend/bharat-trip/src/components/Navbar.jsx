@@ -78,6 +78,11 @@ function Navbar() {
     { icon: "⚙️", label: t("nav_settings"),   sub: "Preferences & privacy", path: "/settings" },
   ];
 
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email);
+  if (isAdmin) {
+    menuItems.unshift({ icon: "🛡️", label: "Admin", sub: "Control Panel", path: "/admin" });
+  }
+
   return (
     <nav className={`nb-nav ${scrolled ? "nb-scrolled" : ""} ${mobileMenuOpen ? "nb-mobile-active" : ""}`}>
       {/* ── LOGO ── */}
@@ -186,10 +191,15 @@ function Navbar() {
         <div className="nb-mobile-menu">
           <ul className="nb-mobile-links">
             {navLinks.map(link => (
-              <li key={link.id} className="nb-mobile-item" onClick={() => { navigate(link.path); setMobileMenuOpen(false); }}>
+              <li key={link.id} className="nb-mobile-item" onClick={() => handleNavClick(link)}>
                 {link.label}
               </li>
             ))}
+            {isAdmin && (
+              <li className="nb-mobile-item" onClick={() => { navigate("/admin"); setMobileMenuOpen(false); }}>
+                🛡️ Admin Panel
+              </li>
+            )}
             {!user && (
               <>
                 <li className="nb-mobile-item" onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}>Login</li>
