@@ -131,18 +131,25 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
 
     // 4. Check for Duration (Days)
     let days = null;
-    const daysMatch = historyText.match(/(\d+)\s*day/);
-    const currentDaysMatch = msg.match(/(\d+)\s*day/);
-    if (currentDaysMatch) days = parseInt(currentDaysMatch[1]);
-    else if (daysMatch) days = parseInt(daysMatch[1]);
+    // Look for "X days" or just a standalone number in a context where we asked for days
+    const daysRegex = /\b(\d+)\b(?:\s*day)?/i;
+    const currentDaysMatch = msg.match(daysRegex);
+    const historyText = (history || []).map(h => h.text.toLowerCase()).join(" ");
+    
+    if (currentDaysMatch) {
+      days = parseInt(currentDaysMatch[1]);
+    } else {
+      const daysMatch = historyText.match(/(\d+)\s*day/i);
+      if (daysMatch) days = parseInt(daysMatch[1]);
+    }
 
     // 5. Check for Interests
     let interests = null;
-    const interestKeywords = ["beach", "temple", "history", "nature", "nightlife", "food", "adventure", "culture", "shopping"];
+    const interestKeywords = ["beach", "temple", "history", "nature", "nightlife", "food", "adventure", "culture", "shopping", "sightseeing"];
     const foundInterests = interestKeywords.filter(i => msg.includes(i) || historyText.includes(i));
     if (foundInterests.length > 0) interests = foundInterests;
 
-    // 6. State-based response
+    // 6. State-based response (Strict flow: City -> Pace -> Budget -> Days -> Interests)
     if (!city) {
       if (/\b(hi|hello|hey|greetings|namaste)\b/.test(msg)) {
         return res.json({ 
@@ -172,10 +179,14 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
       });
     }
 
-    if (!days) {
+    // Check if the user is currently answering the "days" question
+    const lastBotMsg = history && history.length > 0 ? history[history.length - 1].text.toLowerCase() : "";
+    const isAnsweringDays = lastBotMsg.includes("how many days");
+
+    if (!days || (isAnsweringDays && isNaN(parseInt(msg)))) {
       return res.json({
         type: "chat",
-        reply: `Perfect. And how many days will you be staying in **${cityCap}**? (e.g., '3 days') 📅`
+        reply: `Perfect. And how many days will you be staying in **${cityCap}**? (e.g., '4') 📅`
       });
     }
 
@@ -188,9 +199,10 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
 
     // 7. If we have everything, generate a plan!
     try {
+      const finalDays = days > 10 ? 10 : days; // Safety limit
       const planData = {
         city: cityCap,
-        days: days > 7 ? 7 : days, // Limit fallback to 7 days for safety
+        days: finalDays,
         budget: budget,
         interests: interests,
         pace: pace
@@ -198,7 +210,7 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
       const plan = await generatePlan(planData);
       return res.json({ 
         type: "trip", 
-        reply: `Excellent! I've crafted a perfect **${days}-day**, **${pace}**, **${budget === "high" ? "luxury" : "budget"}** itinerary for your **${cityCap}** adventure focusing on **${interests.join(", ")}**. Check it out below! 🗺️`, 
+        reply: `Excellent! I've crafted a perfect **${finalDays}-day**, **${pace}**, **${budget === "high" ? "luxury" : "budget"}** itinerary for your **${cityCap}** adventure focusing on **${interests.join(", ")}**. Check it out below! 🗺️`, 
         plan 
       });
     } catch (e) {
