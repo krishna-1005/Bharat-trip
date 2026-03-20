@@ -201,6 +201,20 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
           isGuidanceMode={isGuidanceMode} 
         />
 
+        {/* Guidance Overlay */}
+        {isGuidanceMode && allPlaces.length > 0 && (
+          <div className="map-guidance-overlay-container">
+            <GuidancePanel 
+              currentPlace={allPlaces[currentIndex] || allPlaces[allPlaces.length - 1]}
+              nextPlace={allPlaces[currentIndex + 1]}
+              thenPlace={allPlaces[currentIndex + 2]}
+              onNext={handleNextLocation}
+              isLast={currentIndex >= allPlaces.length - 1}
+              userLocation={userLocation}
+            />
+          </div>
+        )}
+
         {!isGuidanceMode && (
           <MapLegend
             days={days}

@@ -1,33 +1,40 @@
+.map-guidance-overlay-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1100;
+  pointer-events: none;
+  width: 380px;
+}
+
 .guidance-overlay {
-  position: relative;
-  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 24px 20px;
-  background: linear-gradient(to bottom, rgba(59, 130, 246, 0.05), transparent);
+  gap: 12px;
+  width: 100%;
 }
 
 .guidance-top-instruction {
   background: var(--accent-blue);
   color: white;
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-  text-align: center;
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+  pointer-events: auto;
+  width: fit-content;
+  align-self: center;
 }
 
 .guidance-panel {
   background: var(--bg-panel);
   border: 1px solid var(--border-main);
   border-radius: 20px;
-  padding: 20px;
+  padding: 24px;
   width: 100%;
-  box-shadow: 0 10px 30px var(--shadow-main);
+  box-shadow: 0 20px 50px var(--shadow-main);
+  pointer-events: auto;
   position: relative;
   backdrop-filter: blur(16px);
 }

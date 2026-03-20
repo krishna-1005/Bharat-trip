@@ -940,82 +940,15 @@
 
 /* ── DETAILS SIDE PANEL ── */
 .res-details-panel {
-  width: 380px;
+  width: 350px;
   background: var(--bg-panel);
   border-right: 1px solid var(--border-main);
   display: flex;
   flex-direction: column;
   z-index: 15;
   box-shadow: 10px 0 40px var(--shadow-main);
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.details-panel-header {
-  padding: 24px 20px;
-  border-bottom: 1px solid var(--border-main);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: linear-gradient(to right, rgba(59, 130, 246, 0.05), transparent);
-}
-
-.panel-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--accent-blue);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--accent-blue);
-}
-
-.details-panel-header h3 {
-  font-size: 1.1rem;
-  font-weight: 800;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-main);
-}
-
-.details-panel-content {
-  flex: 1;
   overflow-y: auto;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.context-label {
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--accent-blue);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  padding: 16px 20px 8px;
-  background: var(--bg-panel);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.panel-hover-section {
-  border-bottom: 2px dashed var(--border-main);
-  background: rgba(59, 130, 246, 0.02);
-}
-
-.panel-divider {
-  height: 1px;
-  background: var(--border-main);
-  margin: 20px;
-}
-
-.animated-fade-in {
-  animation: fadeInDown 0.4s ease-out;
-}
-
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  transition: all 0.3s ease;
 }
 
 .details-placeholder {
@@ -1024,26 +957,26 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  padding: 60px 40px;
+  padding: 40px;
   text-align: center;
   color: var(--text-dim);
 }
 
 .placeholder-icon {
-  font-size: 64px;
-  margin-bottom: 24px;
-  opacity: 0.2;
+  font-size: 48px;
+  margin-bottom: 20px;
+  opacity: 0.3;
 }
 
 .details-placeholder h3 {
-  font-size: 1.25rem;
-  margin-bottom: 12px;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
   color: var(--text-main);
 }
 
 .details-placeholder p {
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .hover-place-card {
@@ -1052,6 +985,7 @@
   box-shadow: none;
   overflow: visible;
   border: none;
+  height: 100%;
 }
 
 .hover-card-header {
