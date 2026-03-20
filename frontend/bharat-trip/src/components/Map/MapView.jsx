@@ -17,6 +17,7 @@ import PlaceTooltip from "./PlaceTooltip";
 import HoverPlaceCard from "./HoverPlaceCard";
 import PlaceImage from "../PlaceImage";
 import L from "leaflet";
+import GuidancePanel from "./GuidancePanel";
 
 // Create a special icon for user location
 const userIcon = L.divIcon({
