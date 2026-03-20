@@ -333,6 +333,70 @@ const Home = () => {
         </div>
       </section>
 
+      {/* NEW: AI TRAVEL MATCHMAKER */}
+      <section className="matchmaker-section">
+        <div className="container">
+          <div className="matchmaker-card">
+            <div className="mm-content">
+              <div className="mm-badge">New Feature</div>
+              <h2>Find Your Soul Destination</h2>
+              <p>Can't decide? Let our AI Matchmaker pick the perfect spot based on your current vibe.</p>
+              
+              <div className="mm-controls">
+                <div className="mm-group">
+                  <label>What's your mood?</label>
+                  <div className="mm-options">
+                    {['🏔️ Adventure', '🏖️ Relaxed', '🛕 Heritage', '🎭 Culture', '💖 Romantic'].map(m => (
+                      <button 
+                        key={m} 
+                        className={`mm-opt ${selectedMood === m ? 'active' : ''}`}
+                        onClick={() => setSelectedMood(m)}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mm-group">
+                  <label>Budget Level</label>
+                  <div className="mm-options">
+                    {['Budget', 'Comfort', 'Luxury'].map(b => (
+                      <button 
+                        key={b} 
+                        className={`mm-opt ${selectedBudget === b ? 'active' : ''}`}
+                        onClick={() => setSelectedBudget(b)}
+                      >
+                        {b}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <motion.div 
+              className="mm-result"
+              key={selectedMood + selectedBudget}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+            >
+              <div className="mm-result-card">
+                <img src={matchData[selectedMood]?.img} alt="Match" />
+                <div className="mm-result-info">
+                  <span className="mm-match-tag">Your Perfect Match</span>
+                  <h3>{matchData[selectedMood]?.name}</h3>
+                  <p>{matchData[selectedMood]?.desc}</p>
+                  <button className="btn-primary" onClick={() => navigate('/planner', { state: { city: matchData[selectedMood]?.name } })}>
+                    Plan This Trip →
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* 6) DESTINATIONS SECTION */}
       <section id="destinations" className="container" ref={destRef}>
         <motion.h2
