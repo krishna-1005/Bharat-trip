@@ -104,19 +104,23 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
     
     // SMART INTERACTIVE FALLBACK (No API needed)
     const msg = message.toLowerCase();
-    const historyText = (history || []).map(h => h.text.toLowerCase()).join(" ");
     
-    // 1. Check for City
+    // 1. Check for City (Ignore the first intro message from history)
     let city = null;
     const cities = ["delhi", "mumbai", "jaipur", "goa", "bangalore", "bengaluru", "agra", "udaipur"];
+    
+    // Only check city in history IF it's not the very first intro message
+    const userHistory = (history || []).filter(h => h.sender === "user").map(h => h.text.toLowerCase()).join(" ");
+    
     const cityInMsg = msg.match(new RegExp(`\\b(${cities.join("|")})\\b`));
-    const cityInHistory = historyText.match(new RegExp(`\\b(${cities.join("|")})\\b`));
+    const cityInHistory = userHistory.match(new RegExp(`\\b(${cities.join("|")})\\b`));
     
     if (cityInMsg) city = cityInMsg[0];
     else if (cityInHistory) city = cityInHistory[0];
 
     // 2. Check for Pace
     let pace = null;
+    const historyText = (history || []).map(h => h.text.toLowerCase()).join(" ");
     if (msg.includes("relaxed") || historyText.includes("relaxed")) pace = "relaxed";
     else if (msg.includes("fast") || historyText.includes("fast")) pace = "fast";
 
@@ -127,10 +131,10 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
 
     // 4. State-based response
     if (!city) {
-      if (/\b(hi|hello|hey)\b/.test(msg)) {
+      if (/\b(hi|hello|hey|greetings|namaste)\b/.test(msg)) {
         return res.json({ 
           type: "chat", 
-          reply: "Hello! I'm your BharatTrip AI concierge. 🇮🇳 Which beautiful city in India are we planning to explore today?" 
+          reply: "Hello! I'm your BharatTrip AI concierge. 🇮🇳 Which beautiful city in India are we planning to explore today? (Delhi, Mumbai, Jaipur, Goa, or Bengaluru?)" 
         });
       }
       return res.json({ 
