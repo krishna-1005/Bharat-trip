@@ -43,12 +43,34 @@ function Navbar() {
 
   const ADMIN_EMAILS = ["bharattrip0@gmail.com", "krishnapramodkulkarni23aiml@rnsit.ac.in"];
 
-  const navLinks = [
+  const defaultLinks = [
     { label: "Home",    id: "home",    path: "/"            },
     { label: "Poll",    id: "poll",    path: "/create-poll" },
     { label: "Planner", id: "planner", path: "/planner"     },
     { label: "Map",     id: "map",     path: "/map"         },
   ];
+
+  const homeLinks = [
+    { label: "Why Us",       id: "why-us"       },
+    { label: "Features",     id: "features"     },
+    { label: "How it Works", id: "how-it-works" },
+    { label: "Destinations", id: "destinations" },
+  ];
+
+  const isHomePage = location.pathname === "/";
+  const navLinks = isHomePage ? homeLinks : defaultLinks;
+
+  const handleNavClick = (link) => {
+    if (isHomePage && link.id !== "home") {
+      const element = document.getElementById(link.id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      navigate(link.path);
+    }
+    setMobileMenuOpen(false);
+  };
 
   const menuItems = [
     { icon: "👤", label: t("nav_profile"), sub: "View your account",   path: "/profile"  },
@@ -59,7 +81,7 @@ function Navbar() {
   return (
     <nav className={`nb-nav ${scrolled ? "nb-scrolled" : ""} ${mobileMenuOpen ? "nb-mobile-active" : ""}`}>
       {/* ── LOGO ── */}
-      <div className="nb-logo" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}>
+      <div className="nb-logo" onClick={() => { navigate("/"); setMobileMenuOpen(false); window.scrollTo({top:0, behavior:'smooth'}); }}>
         <span className="nb-logo-flag">🇮🇳</span>
         <span className="nb-logo-text">
           Bharat Trip
@@ -71,11 +93,8 @@ function Navbar() {
         {navLinks.map(link => (
           <li
             key={link.id}
-            className={`nb-link-item ${location.pathname === link.path ? "nb-active" : ""}`}
-            onClick={() => {
-              navigate(link.path);
-              setMobileMenuOpen(false);
-            }}
+            className={`nb-link-item ${!isHomePage && location.pathname === link.path ? "nb-active" : ""}`}
+            onClick={() => handleNavClick(link)}
           >
             {link.label}
           </li>

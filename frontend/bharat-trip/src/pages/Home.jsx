@@ -204,7 +204,7 @@ const Home = () => {
       </motion.div>
 
       {/* 3) VALUE SECTION */}
-      <section className="value-section container">
+      <section id="why-us" className="value-section container">
         <motion.h2
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -232,7 +232,7 @@ const Home = () => {
       </section>
 
       {/* 4) FEATURES SECTION */}
-      <section className="container">
+      <section id="features" className="container">
         <div className="features-grid">
           <FeatureCard 
             title="Easy Planning" 
@@ -258,7 +258,7 @@ const Home = () => {
       </section>
 
       {/* 5) HOW IT WORKS */}
-      <section className="how-it-works container">
+      <section id="how-it-works" className="how-it-works container">
         <motion.h2
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -289,7 +289,7 @@ const Home = () => {
       </section>
 
       {/* 6) DESTINATIONS SECTION */}
-      <section className="container" ref={destRef}>
+      <section id="destinations" className="container" ref={destRef}>
         <motion.h2
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
