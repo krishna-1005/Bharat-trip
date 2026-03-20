@@ -129,7 +129,20 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
     if (msg.includes("luxury") || msg.includes("comfort") || historyText.includes("luxury") || historyText.includes("comfort")) budget = "high";
     else if (msg.includes("budget") || msg.includes("hidden gem") || historyText.includes("budget") || historyText.includes("hidden gem")) budget = "low";
 
-    // 4. State-based response
+    // 4. Check for Duration (Days)
+    let days = null;
+    const daysMatch = historyText.match(/(\d+)\s*day/);
+    const currentDaysMatch = msg.match(/(\d+)\s*day/);
+    if (currentDaysMatch) days = parseInt(currentDaysMatch[1]);
+    else if (daysMatch) days = parseInt(daysMatch[1]);
+
+    // 5. Check for Interests
+    let interests = null;
+    const interestKeywords = ["beach", "temple", "history", "nature", "nightlife", "food", "adventure", "culture", "shopping"];
+    const foundInterests = interestKeywords.filter(i => msg.includes(i) || historyText.includes(i));
+    if (foundInterests.length > 0) interests = foundInterests;
+
+    // 6. State-based response
     if (!city) {
       if (/\b(hi|hello|hey|greetings|namaste)\b/.test(msg)) {
         return res.json({ 
@@ -159,25 +172,39 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
       });
     }
 
-    // 5. If we have everything, generate a plan!
+    if (!days) {
+      return res.json({
+        type: "chat",
+        reply: `Perfect. And how many days will you be staying in **${cityCap}**? (e.g., '3 days') 📅`
+      });
+    }
+
+    if (!interests) {
+      return res.json({
+        type: "chat",
+        reply: `Almost there! What are you most interested in exploring in **${cityCap}**? (Beaches, Temples, History, Nightlife, or Nature?) 🌴`
+      });
+    }
+
+    // 7. If we have everything, generate a plan!
     try {
       const planData = {
         city: cityCap,
-        days: 3,
+        days: days > 7 ? 7 : days, // Limit fallback to 7 days for safety
         budget: budget,
-        interests: ["culture", "food", "sightseeing"],
+        interests: interests,
         pace: pace
       };
       const plan = await generatePlan(planData);
       return res.json({ 
         type: "trip", 
-        reply: `Excellent! I've crafted a perfect **${pace}**, **${budget === "high" ? "luxury" : "budget"}** itinerary for your **${cityCap}** adventure. Check it out below! 🗺️`, 
+        reply: `Excellent! I've crafted a perfect **${days}-day**, **${pace}**, **${budget === "high" ? "luxury" : "budget"}** itinerary for your **${cityCap}** adventure focusing on **${interests.join(", ")}**. Check it out below! 🗺️`, 
         plan 
       });
     } catch (e) {
       return res.json({ 
         type: "chat", 
-        reply: `I'm having a little trouble generating the full map right now, but for **${cityCap}**, I highly recommend visiting the local landmarks! How many days are you staying?` 
+        reply: `I'm having a little trouble generating the full map right now, but for **${cityCap}**, I highly recommend visiting the local landmarks! Enjoy your ${days} day stay!` 
       });
     }
   }
