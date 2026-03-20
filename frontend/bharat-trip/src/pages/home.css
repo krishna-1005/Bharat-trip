@@ -786,6 +786,52 @@ h1, h2, h3 {
   }
 }
 
+/* ── 3D DISCOVERY GALLERY ── */
+.three-discovery {
+  padding: 100px 0;
+  text-align: center;
+}
+
+.discovery-header {
+  margin-bottom: 60px;
+}
+
+.discovery-header h2 {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.discovery-header p {
+  color: var(--text-dim);
+  font-size: 1.2rem;
+}
+
+.three-container {
+  height: 700px;
+  width: 100%;
+  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+  border-radius: 40px;
+  border: 1px solid var(--glass-border);
+  overflow: hidden;
+  position: relative;
+  cursor: grab;
+}
+
+.three-container:active {
+  cursor: grabbing;
+}
+
+/* Desktop Only Utility */
+.desktop-only {
+  display: block;
+}
+
+@media (max-width: 1024px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
 /* ── ADDITIONAL INTERACTIVE POLISH ── */
 .home-redesign * {
   -webkit-tap-highlight-color: transparent;

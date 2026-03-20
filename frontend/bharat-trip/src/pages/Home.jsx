@@ -4,6 +4,8 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import MinimalReviewSection from "../components/MinimalReviewSection";
 import "./home.css";
 
+import ThreeScene from "../components/ThreeScene";
+
 const InteractiveHeroImages = () => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -116,6 +118,25 @@ const Home = () => {
       h: "Bespoke Itineraries <br /> in Seconds.",
       p: "Enter your dreams, get a roadmap. Experience India exactly how you want to, with precision-engineered travel plans."
     }
+  ];
+
+  const [selectedMood, setSelectedMood] = useState('🏖️ Relaxed');
+  const [selectedBudget, setSelectedBudget] = useState('Comfort');
+
+  const matchData = {
+    '🏔️ Adventure': { name: 'Manali', desc: 'Snow-capped peaks and thrilling paragliding.', img: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80' },
+    '🏖️ Relaxed': { name: 'Goa', desc: 'Golden sands and soulful sunsets.', img: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80' },
+    '🛕 Heritage': { name: 'Hampi', desc: 'Ancient ruins and architectural marvels.', img: 'https://images.unsplash.com/photo-1600100397608-f010e4aa0984?auto=format&fit=crop&w=800&q=80' },
+    '🎭 Culture': { name: 'Varanasi', desc: 'The spiritual heart of timeless India.', img: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80' },
+    '💖 Romantic': { name: 'Udaipur', desc: 'Palaces, lakes, and royal romance.', img: 'https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=800&q=80' },
+  };
+
+  const galleryImages = [
+    "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1593179241557-bce1eb92e47e?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1581791534721-e599df4417f7?auto=format&fit=crop&w=800&q=80"
   ];
 
   useEffect(() => {
@@ -396,6 +417,22 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* NEW: 3D DISCOVERY GALLERY (Desktop Only) */}
+      <motion.section 
+        className="three-discovery container desktop-only"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+      >
+        <div className="discovery-header">
+          <h2>Immersive India</h2>
+          <p>Experience the grandeur of India in a high-fidelity 3D space. Drag to explore.</p>
+        </div>
+        <div className="three-container">
+          <ThreeScene images={galleryImages} />
+        </div>
+      </motion.section>
 
       {/* 6) DESTINATIONS SECTION */}
       <section id="destinations" className="container" ref={destRef}>
