@@ -47,7 +47,7 @@ function Navbar() {
   const isAdmin = user && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email?.toLowerCase());
 
   const homeLinks = [
-    { label: "Why Us",       id: "why-us"       },
+    { label: "Why choose us",       id: "why-us"       },
     { label: "Features",     id: "features"     },
     { label: "How it Works", id: "how-it-works" },
     { label: "Destinations", id: "destinations" },
@@ -204,7 +204,7 @@ function Navbar() {
             {isAdmin && (
               <li className="nb-mobile-item" onClick={() => { navigate("/admin"); setMobileMenuOpen(false); }}>
                 🛡️ Admin Panel
-              </li>
+              </li
             )}
             {!user && (
               <>

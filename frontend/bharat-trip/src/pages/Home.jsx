@@ -243,7 +243,7 @@ const Home = () => {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-          >Why use this?</motion.h2>
+          >Why choose Bharat Trip</motion.h2>
           <div className="value-grid">
             {[
               { title: "Smart AI Planning", icon: "🤖" },
