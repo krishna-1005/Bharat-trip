@@ -408,7 +408,7 @@ const Home = () => {
                   <span className="mm-match-tag">Your Perfect Match</span>
                   <h3>{matchData[selectedMood]?.name}</h3>
                   <p>{matchData[selectedMood]?.desc}</p>
-                  <button className="btn-primary" onClick={() => navigate('/planner', { state: { city: matchData[selectedMood]?.name } })}>
+                  <button className="btn-primary" onClick={() => navigate('/planner', { state: { prefilledCity: matchData[selectedMood]?.name } })}>
                     Plan This Trip →
                   </button>
                 </div>
