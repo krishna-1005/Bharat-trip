@@ -45,9 +45,11 @@ function calculateScore(place, interests, coords, budget) {
 
 /* ── PRICE ── */
 function calculateDynamicPrice(place, budget) {
-  if (place.avgCost === 0) return 0;
+  let base = place.avgCost;
 
-  const base = place.avgCost ?? 200;
+  if (base == null || base === 0) {
+    base = 200; // fallback realistic price
+  }
 
   const mult = {
     low: 0.7,
@@ -55,9 +57,7 @@ function calculateDynamicPrice(place, budget) {
     high: 2
   }[budget] || 1;
 
-  const price = Math.round(base * mult);
-
-  return Math.max(50, price);
+  return Math.round(base * mult);
 }
 
 /* ── LOAD DATA ── */
