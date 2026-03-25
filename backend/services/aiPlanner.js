@@ -1,6 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Explicitly use v1 API version as gemini-1.5-flash might not be found in some v1beta configurations
+// Use GoogleGenerativeAI with explicit v1 API version
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: "v1" });
 
 async function analyzeAndRefinePlan({ city, days, budget, interests, travelerType, pace, candidates }) {
@@ -9,10 +9,10 @@ async function analyzeAndRefinePlan({ city, days, budget, interests, travelerTyp
     return null;
   }
 
-  // Use gemini-1.5-flash which is a more stable and faster model
+  // Use gemini-1.5-flash which is the recommended stable model
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.0-flash"
-  });
+    model: "gemini-1.5-flash"
+  }, { apiVersion: "v1" });
 
   const systemPrompt = `
 You are a world-class ${city} travel expert. Design a premium, realistic itinerary based on the user's needs.
