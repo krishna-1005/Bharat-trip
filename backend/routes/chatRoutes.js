@@ -57,15 +57,8 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
     // 1. TRY GEMINI FIRST
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: systemInstruction + "\n\nUser: " + message }
-            ]
-          }
-        ]
+        model: "gemini-2.0-flash",
+        contents: systemInstruction + "\n\nUser: " + message
       });
 
       replyText = response.text;
