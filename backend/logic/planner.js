@@ -1,6 +1,5 @@
 const path = require("path");
 const fetchOSMPlaces = require("../services/osmPlaces");
-const analyzeAndRefinePlan = require("../services/aiPlanner");
 
 /* ── CONFIG ── */
 const MAX_HOURS_PER_DAY = 8;
@@ -46,7 +45,7 @@ function calculateScore(place, interests, coords, budget) {
 
 /* ── PRICE ── */
 function calculateDynamicPrice(place, budget) {
-  if (place.avgCost === 0) return 0; // free places
+  if (place.avgCost === 0) return 0;
 
   const base = place.avgCost ?? 200;
 
@@ -58,7 +57,7 @@ function calculateDynamicPrice(place, budget) {
 
   const price = Math.round(base * mult);
 
-  return Math.max(50, price); // minimum realistic cost
+  return Math.max(50, price);
 }
 
 /* ── LOAD DATA ── */
@@ -92,17 +91,16 @@ async function generatePlan({
   days,
   budget,
   interests,
-  travelerType,
-  pace
+  travelerType
 }) {
   const coords = await getCityCoords(city);
 
-  /* 🔥 STEP 1: GEO FILTER */
+  /* STEP 1: GEO FILTER */
   let cityPool = allPlacesPool.filter(p =>
     getDistance(coords.lat, coords.lng, p.lat, p.lng) <= 50
   );
 
-  /* 🔥 STEP 2: OSM */
+  /* STEP 2: OSM fallback */
   if (cityPool.length < 10) {
     const osm = await fetchOSMPlaces(coords.lat, coords.lng);
 
@@ -120,7 +118,7 @@ async function generatePlan({
     );
   }
 
-  /* 🔥 STEP 3: INTEREST FILTER */
+  /* STEP 3: INTEREST FILTER */
   const interestSet = new Set(interests.map(i => i.toLowerCase()));
 
   let finalPool = cityPool.filter(p =>
@@ -131,7 +129,7 @@ async function generatePlan({
 
   if (finalPool.length === 0) finalPool = cityPool;
 
-  /* 🔥 STEP 4: SCORING (IMPORTANT) */
+  /* STEP 4: SCORING */
   finalPool = finalPool
     .map(p => ({
       ...p,
@@ -139,94 +137,40 @@ async function generatePlan({
     }))
     .sort((a, b) => b.score - a.score);
 
-  /* 🔥 STEP 5: AI (optional) */
-  let aiMap = null;
-  try {
-    aiMap = await analyzeAndRefinePlan({
-      city, days, budget, interests, travelerType, pace, 
-      candidates: finalPool.slice(0, 15) // Limit to top candidates
-    });
-  } catch {}
-
-  /* 🔥 STEP 6: DISTRIBUTION */
+  /* STEP 5: DISTRIBUTION (FIXED) */
   const itinerary = {};
-  const used = new Set();
-  let poolIndex = 0;
+  const perDay = Math.ceil(finalPool.length / days);
 
   const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
 
-  for (let d = 1; d <= days; d++) {
-    let dayPlaces = [];
-    let dayHours = 0;
-    let dayCost = 0;
+  for (let day = 1; day <= days; day++) {
+    const start = (day - 1) * perDay;
+    const end = start + perDay;
 
-    const remainingPlaces = finalPool.length - used.size;
-    const remainingDays = days - d + 1;
-    const limit = Math.ceil(remainingPlaces / remainingDays);
+    const selected = finalPool.slice(start, end);
 
-    /* 🔥 AI suggestions */
-    const suggestions = aiMap?.[d] || [];
+    let hours = 0;
+    let cost = 0;
 
-    let aiCount = 0;
-    const MAX_AI_PER_DAY = Math.ceil(limit / 2); // 🔥 only 50%
+    const validPlaces = [];
 
-    for (let s of suggestions) {
-      if (aiCount >= MAX_AI_PER_DAY) break;
+    for (let p of selected) {
+      const t = p.timeHours || 2;
 
-      const name = typeof s === "string" ? s : s.name;
-      const found = finalPool.find(p => p.name.toLowerCase() === name.toLowerCase());
+      if (hours + t > MAX_HOURS_PER_DAY) continue;
 
-      if (!found || used.has(name.toLowerCase())) continue;
+      hours += t;
+      cost += calculateDynamicPrice(p, budget) * tMult;
 
-        const t = found.timeHours || 2;
-        if (dayHours + t > MAX_HOURS_PER_DAY) continue;
-
-        dayPlaces.push(found);
-        dayHours += t;
-        dayCost += calculateDynamicPrice(found, budget) * tMult;
-
-        used.add(name.toLowerCase());
-        aiCount++; // 🔥 control AI
-        if (dayPlaces.length >= Math.floor(limit / 2)) break;
-      }
-
-    /* 🔥 Fill remaining */
-    const remainingSlots = Math.max(0, limit - dayPlaces.length);
-
-    let added = 0;
-
-    while (
-      added < remainingSlots &&
-      poolIndex < finalPool.length
-    ) for (let p of finalPool) {
-        if (added >= remainingSlots) break;
-
-        if (used.has(p.name.toLowerCase())) continue;
-
-        const t = p.timeHours || 2;
-        if (dayHours + t > MAX_HOURS_PER_DAY) continue;
-
-        dayPlaces.push(p);
-        dayHours += t;
-        dayCost += calculateDynamicPrice(p, budget) * tMult;
-
-        used.add(p.name.toLowerCase());
-        added++;
-      }
-
-    /* fallback */
-    if (dayPlaces.length === 0 && finalPool.length > 0) {
-      const f = finalPool[0];
-      dayPlaces.push(f);
-      dayHours += 2;
+      validPlaces.push(p);
     }
 
     const meal = (MEAL_COST[budget] || 500) * tMult;
 
-    itinerary[`Day ${d}`] = {
-      places: dayPlaces,
-      estimatedHours: dayHours,
-      estimatedCost: dayCost + meal
+    itinerary[`Day ${day}`] = {
+      places: validPlaces,
+      estimatedHours: hours,
+      estimatedCost: cost + meal
     };
   }
 
