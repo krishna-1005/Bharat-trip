@@ -1,11 +1,14 @@
 const express = require("express");
 const router  = express.Router();
 const Groq    = require("groq-sdk");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY
+});
 const generatePlan = require("../logic/planner");
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: "v1" });
 router.post("/", async (req, res) => {
   const { message, history } = req.body;
   if (!message || typeof message !== "string") {
@@ -51,17 +54,24 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
     }
 
     // 1. TRY GEMINI FIRST
+    // 1. TRY GEMINI FIRST
     try {
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash-latest",
-        systemInstruction: systemInstruction
-      }, { apiVersion: "v1" });
+      const response = await ai.models.generateContent({
+        model: "gemini-1.5-flash",
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: systemInstruction + "\n\nUser: " + message }
+            ]
+          }
+        ]
+      });
 
-      const chat = model.startChat({ history: formattedHistory });
-      const result = await chat.sendMessage(message);
-      replyText = result.response.text();
+      replyText = response.text;
+
     } catch (geminiError) {
-      console.warn("Gemini Error, falling back to Groq/Rule-based:", geminiError.message);
+      console.warn("Gemini Error, falling back to Groq:", geminiError.message);
       
       // 2. TRY GROQ IF GEMINI FAILS
       if (process.env.GROQ_API_KEY) {
