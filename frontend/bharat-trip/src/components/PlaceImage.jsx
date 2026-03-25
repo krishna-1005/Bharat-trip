@@ -1,0 +1,40 @@
+import { useEffect, useState } from "react";
+import { getPlaceImage } from "../services/imageService";
+
+export default function PlaceImage({ placeName, city, className, style }) {
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchImg = async () => {
+      setLoading(true);
+      const img = await getPlaceImage(placeName, city);
+      if (mounted) {
+        setImage(img);
+        setLoading(false);
+      }
+    };
+    fetchImg();
+
+    return () => {
+      mounted = false;
+    };
+  }, [placeName, city]);
+
+  if (loading) return <div className={`image-skeleton ${className}`} style={style}></div>;
+
+  return (
+    <img 
+      src={image} 
+      alt={placeName} 
+      className={className}
+      style={style}
+      onError={(e) => {
+        // This shouldn't happen much as imageService now always returns a fallback URL string
+        e.target.style.display = 'none';
+      }}
+    />
+  );
+}

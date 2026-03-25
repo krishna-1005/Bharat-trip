@@ -1,0 +1,128 @@
+const express = require("express");
+const router = express.Router();
+const Poll = require("../models/Poll");
+const { v4: uuidv4 } = require("uuid");
+const { protect } = require("../middleware/protect");
+
+// Create a new poll
+router.post("/create", async (req, res) => {
+  try {
+    const { tripName, options, groupSize, userId } = req.body;
+    if (!tripName || !options || options.length < 2) {
+      return res.status(400).json({ error: "Trip name and at least 2 options are required." });
+    }
+
+    const pollId = uuidv4().substring(0, 8);
+    const newPoll = new Poll({
+      pollId,
+      tripName,
+      groupSize: groupSize === "" ? undefined : groupSize,
+      options: options.map(opt => ({ name: opt, votes: 0 })),
+      createdBy: userId || undefined
+    });
+
+    await newPoll.save();
+    res.status(201).json({ pollId });
+  } catch (error) {
+    console.error("Poll Creation Error:", error);
+    res.status(500).json({ error: error.message || "Server error creating poll." });
+  }
+});
+
+// Get poll details
+router.get("/:pollId", async (req, res) => {
+  try {
+    const poll = await Poll.findOne({ pollId: req.params.pollId });
+    if (!poll) return res.status(404).json({ error: "Poll not found." });
+    res.json(poll);
+  } catch (error) {
+    res.status(500).json({ error: error.message || "Server error fetching poll." });
+  }
+});
+
+// Submit a vote
+router.post("/vote", async (req, res) => {
+  try {
+    const { pollId, optionName } = req.body;
+    const poll = await Poll.findOne({ pollId });
+    if (!poll) return res.status(404).json({ error: "Poll not found." });
+
+    if (poll.isClosed) {
+      return res.status(400).json({ error: "This poll is already closed." });
+    }
+
+    const option = poll.options.find(opt => opt.name === optionName);
+    if (!option) return res.status(400).json({ error: "Option not found." });
+
+    option.votes += 1;
+
+    const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+    const maxVotes = Math.max(...poll.options.map(o => o.votes));
+    const topOptions = poll.options.filter(o => o.votes === maxVotes);
+
+    let shouldClose = false;
+    let winner = null;
+
+    // RULE: NEVER close automatically on a tie
+    if (topOptions.length === 1) {
+        if (poll.groupSize) {
+            // Condition A: Fixed Group Size
+            if (maxVotes > poll.groupSize / 2 || totalVotes >= poll.groupSize) {
+                shouldClose = true;
+                winner = topOptions[0].name;
+            }
+        } else {
+            // Condition B: Dynamic logic (at least 3 votes)
+            if (totalVotes >= 3) {
+                shouldClose = true;
+                winner = topOptions[0].name;
+            }
+        }
+    }
+
+    if (shouldClose) {
+      poll.isClosed = true;
+      poll.winner = winner;
+    }
+
+    await poll.save();
+
+    res.json({ message: "Vote recorded successfully", poll });
+  } catch (error) {
+    console.error("Voting Error:", error);
+    res.status(500).json({ error: error.message || "Server error recording vote." });
+  }
+});
+
+// Manual override to finalize poll
+router.post("/finalize-now", async (req, res) => {
+  try {
+    const { pollId } = req.body;
+    const poll = await Poll.findOne({ pollId });
+    if (!poll) return res.status(404).json({ error: "Poll not found." });
+
+    if (poll.isClosed) {
+      return res.status(400).json({ error: "Poll is already finalized." });
+    }
+
+    const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+    if (totalVotes < 2) {
+      return res.status(400).json({ error: "At least 2 votes are required to finalize." });
+    }
+
+    const maxVotes = Math.max(...poll.options.map(o => o.votes));
+    const topOptions = poll.options.filter(o => o.votes === maxVotes);
+
+    // Pick the first highest voted option
+    poll.isClosed = true;
+    poll.winner = topOptions[0].name;
+
+    await poll.save();
+    res.json({ message: "Poll finalized manually", poll });
+  } catch (error) {
+    console.error("Finalize Error:", error);
+    res.status(500).json({ error: error.message || "Server error finalizing poll." });
+  }
+});
+
+module.exports = router;
