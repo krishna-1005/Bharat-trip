@@ -10,9 +10,11 @@ async function analyzeAndRefinePlan({ city, days, budget, interests, travelerTyp
   }
 
   // Use gemini-1.5-flash which is the recommended stable model
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash"
-  }, { apiVersion: "v1" });
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.0-pro"
+    });
 
   const systemPrompt = `
 You are a world-class ${city} travel expert. Design a premium, realistic itinerary based on the user's needs.
