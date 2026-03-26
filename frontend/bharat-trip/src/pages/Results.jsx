@@ -484,6 +484,14 @@ function Results() {
                                 <h4 style={{ textDecoration: isVisited ? 'line-through' : 'none', opacity: isVisited ? 0.6 : 1 }}>
                                   {place.name}
                                 </h4>
+                                <p style={{
+                                  fontSize: "11px",
+                                  color: "var(--text-dim)",
+                                  marginTop: "4px",
+                                  fontStyle: "italic"
+                                }}>
+                                  {place.reason}
+                                </p>
                                 <div className="place-badge-row">
                                   <span className="place-tag">{place.category || "Sightseeing"}</span>
                                   {travelTime && (

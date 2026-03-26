@@ -166,7 +166,8 @@ async function generatePlan({
 
       validPlaces.push({
         ...p,
-        estimatedCost: placeCost
+        estimatedCost: placeCost,
+        reason: generateReason(p, interests, budget)
       });
     }
 
@@ -190,6 +191,65 @@ async function getCityCoords(city) {
   };
 
   return map[city] || map["Bengaluru"];
+}
+
+function generateReason(place, interests, budget, index) {
+  const category = (place.category || "").toLowerCase();
+  const interestSet = new Set(interests.map(i => i.toLowerCase()));
+
+  const reasons = [];
+
+  // 🎯 Category-based variety
+  const categoryReasons = {
+    nature: [
+      "perfect for a peaceful escape",
+      "offers a refreshing natural environment",
+      "great spot to relax and enjoy greenery"
+    ],
+    food: [
+      "a must-visit for local food lovers",
+      "popular for authentic cuisine",
+      "great place to explore local flavors"
+    ],
+    culture: [
+      "rich in history and cultural significance",
+      "gives you a glimpse of local heritage",
+      "a must-see cultural landmark"
+    ],
+    shopping: [
+      "ideal for shopping and exploring markets",
+      "great place to buy local items",
+      "popular shopping destination"
+    ]
+  };
+
+  // 🎯 Add category-based reason
+  if (interestSet.has(category) && categoryReasons[category]) {
+    const arr = categoryReasons[category];
+    reasons.push(arr[index % arr.length]); // 👈 rotates reasons
+  }
+
+  // 🎯 Budget-based variation
+  if ((place.avgCost || 200) < 200 && budget === "low") {
+    reasons.push("budget-friendly option");
+  }
+
+  // 🎯 Time-based variation
+  if ((place.timeHours || 2) <= 2) {
+    reasons.push("fits perfectly in your schedule");
+  }
+
+  // 🎯 Fallback
+  if (reasons.length === 0) {
+    const fallback = [
+      "one of the top-rated places in the city",
+      "highly recommended for travelers",
+      "a popular attraction worth visiting"
+    ];
+    reasons.push(fallback[index % fallback.length]);
+  }
+
+  return "Recommended because it " + reasons.join(" and ");
 }
 
 module.exports = generatePlan;
