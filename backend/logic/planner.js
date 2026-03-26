@@ -1,5 +1,6 @@
 const path = require("path");
 const fetchOSMPlaces = require("../services/osmPlaces");
+const { generateReviews } = require("../services/reviewService");
 
 /* ── CONFIG ── */
 const MAX_HOURS_PER_DAY = 8;
@@ -67,8 +68,13 @@ function loadData() {
   try {
     const curated = require(path.join(__dirname, "../data/bengaluruPlaces.json"));
     const bulk = require(path.join(__dirname, "../data/bangalorePlaces.json"));
+    const indiaPlaces = require(path.join(__dirname, "../data/indiaPlaces.json"));
 
-    allPlacesPool = [...curated.flat(), ...bulk].map(p => ({
+    const flatIndia = indiaPlaces.flatMap(cityData => 
+      cityData.places.map(p => ({ ...p, area: cityData.city }))
+    );
+
+    allPlacesPool = [...curated.flat(), ...bulk, ...flatIndia].map(p => ({
       name: p.name,
       lat: Number(p.lat),
       lng: Number(p.lng),
@@ -76,9 +82,11 @@ function loadData() {
       tags: (p.tags || []).map(t => t.toLowerCase()),
       timeHours: p.timeHours || 2,
       avgCost: p.avgCost ?? null,
-      source: "dataset"
+      source: "dataset",
+      area: p.area
     }));
-  } catch {
+  } catch (err) {
+    console.error("Error loading data:", err);
     allPlacesPool = [];
   }
 }
@@ -94,14 +102,20 @@ async function generatePlan({
   travelerType
 }) {
   const coords = await getCityCoords(city);
+  const cleanCity = city.trim().toLowerCase();
 
-  /* STEP 1: GEO FILTER */
-  let cityPool = allPlacesPool.filter(p =>
-    getDistance(coords.lat, coords.lng, p.lat, p.lng) <= 50
-  );
+  /* STEP 1: GEO FILTER (STRICT) */
+  let cityPool = allPlacesPool.filter(p => {
+    // 1. Check for explicit area match (e.g., area: "Agra")
+    if (p.area && p.area.toLowerCase() === cleanCity) return true;
+    
+    // 2. Or check for distance within a strict 50km radius
+    const dist = getDistance(coords.lat, coords.lng, p.lat, p.lng);
+    return dist <= 50;
+  });
 
-  /* STEP 2: OSM fallback */
-  if (cityPool.length < 10) {
+  /* STEP 2: OSM fallback if pool is too small for this city */
+  if (cityPool.length < 8) {
     const osm = await fetchOSMPlaces(coords.lat, coords.lng);
 
     cityPool.push(
@@ -113,7 +127,8 @@ async function generatePlan({
         tags: [],
         timeHours: 1.5,
         avgCost: 100,
-        source: "osm"
+        source: "osm",
+        area: city // Mark these as belonging to the requested city
       }))
     );
   }
@@ -121,60 +136,77 @@ async function generatePlan({
   /* STEP 3: INTEREST FILTER */
   const interestSet = new Set(interests.map(i => i.toLowerCase()));
 
-  let finalPool = cityPool.filter(p =>
+  // Filter the city-specific pool by interests
+  let filteredPool = cityPool.filter(p =>
     interestSet.size === 0 ||
     interestSet.has(p.category.toLowerCase()) ||
     (p.tags || []).some(t => interestSet.has(t))
   );
 
-  if (finalPool.length === 0) finalPool = cityPool;
+  // If no interest match, use the whole city pool instead of the global pool
+  if (filteredPool.length === 0) filteredPool = cityPool;
 
-  /* STEP 4: SCORING */
-  finalPool = finalPool
+  /* STEP 4: SCORING & TRUNCATING */
+  let prioritizedPool = filteredPool
     .map(p => ({
       ...p,
       score: calculateScore(p, interests, coords, budget)
     }))
     .sort((a, b) => b.score - a.score);
 
-  /* STEP 5: DISTRIBUTION (FIXED) */
-  const itinerary = {};
-  const perDay = Math.ceil(finalPool.length / days);
+  // Take a reasonable number of top places (e.g., 4-5 per day max)
+  const maxPlacesNeeded = days * 5;
+  prioritizedPool = prioritizedPool.slice(0, maxPlacesNeeded);
 
+  /* STEP 5: BALANCED DISTRIBUTION */
+  const itinerary = {};
   const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
 
+  // Track used places to avoid duplicates
+  const usedPlaceNames = new Set();
+  
   for (let day = 1; day <= days; day++) {
-    const start = (day - 1) * perDay;
-    const end = start + perDay;
-
-    const selected = finalPool.slice(start, end);
-
     let hours = 0;
     let cost = 0;
-
     const validPlaces = [];
 
-    for (let p of selected) {
+    // Calculate how many places we should target for this day to keep it even
+    // Remaining places / remaining days
+    const remainingDays = (days - day) + 1;
+    const remainingPool = prioritizedPool.filter(p => !usedPlaceNames.has(p.name));
+    const targetCount = Math.ceil(remainingPool.length / remainingDays);
+
+    let count = 0;
+    for (const p of remainingPool) {
+      if (count >= targetCount) break;
+      
       const t = p.timeHours || 2;
+      if (hours + t <= MAX_HOURS_PER_DAY) {
+        hours += t;
+        const placeCost = calculateDynamicPrice(p, budget) * tMult;
+        cost += placeCost;
 
-      if (hours + t > MAX_HOURS_PER_DAY) continue;
-
-      hours += t;
-
-      const placeCost = calculateDynamicPrice(p, budget) * tMult;
-      cost += placeCost;
-
-      validPlaces.push({
-        ...p,
-        estimatedCost: placeCost,
-        reason: generateReason(p, interests, budget)
-      });
+        validPlaces.push({
+          ...p,
+          estimatedCost: placeCost,
+          reason: generateReason(p, interests, budget, count)
+        });
+        
+        usedPlaceNames.add(p.name);
+        count++;
+      }
     }
 
     const meal = (MEAL_COST[budget] || 500) * tMult;
 
+    // Enriched data with reviews
+    const enrichedPlaces = await Promise.all(validPlaces.map(async (p) => {
+      const reviews = await generateReviews(p.name, p.category, city);
+      return { ...p, reviews };
+    }));
+
     itinerary[`Day ${day}`] = {
-      places: validPlaces,
+      places: enrichedPlaces,
       estimatedHours: hours,
       estimatedCost: cost + meal
     };
@@ -183,73 +215,135 @@ async function generatePlan({
   return { city, itinerary, coordinates: coords };
 }
 
+const axios = require("axios");
+
 /* ── CITY COORDS ── */
 async function getCityCoords(city) {
   const map = {
-    Bengaluru: { lat: 12.9716, lng: 77.5946 },
-    Mumbai: { lat: 19.076, lng: 72.8777 }
+    "bengaluru": { lat: 12.9716, lng: 77.5946 },
+    "bangalore": { lat: 12.9716, lng: 77.5946 },
+    "mumbai": { lat: 19.076, lng: 72.8777 },
+    "agra": { lat: 27.1767, lng: 78.0081 },
+    "delhi": { lat: 28.6139, lng: 77.2090 },
+    "new delhi": { lat: 28.6139, lng: 77.2090 }
   };
 
-  return map[city] || map["Bengaluru"];
+  const cleanCity = city.trim().toLowerCase();
+  if (map[cleanCity]) return map[cleanCity];
+
+  // Try curated dataset first (case-insensitive)
+  try {
+    const indiaPlaces = require("../data/indiaPlaces.json");
+    const found = indiaPlaces.find(c => c.city.toLowerCase() === cleanCity);
+    if (found) return found.coordinates;
+  } catch (e) {}
+
+  // External Geocoder Fallback (Nominatim)
+  try {
+    const res = await axios.get(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanCity)}&limit=1`,
+      { headers: { "User-Agent": "BharatTrip/1.0" } }
+    );
+    if (res.data && res.data.length > 0) {
+      return {
+        lat: Number(res.data[0].lat),
+        lng: Number(res.data[0].lon)
+      };
+    }
+  } catch (err) {
+    console.error("Geocoding failed for:", cleanCity, err.message);
+  }
+
+  // Final fallback to Bengaluru
+  return map["bengaluru"];
 }
 
 function generateReason(place, interests, budget, index) {
   const category = (place.category || "").toLowerCase();
   const interestSet = new Set(interests.map(i => i.toLowerCase()));
 
-  const reasons = [];
+  const parts = [];
 
-  // 🎯 Category-based variety
-  const categoryReasons = {
-    nature: [
-      "perfect for a peaceful escape",
-      "offers a refreshing natural environment",
-      "great spot to relax and enjoy greenery"
-    ],
-    food: [
-      "a must-visit for local food lovers",
-      "popular for authentic cuisine",
-      "great place to explore local flavors"
-    ],
-    culture: [
-      "rich in history and cultural significance",
-      "gives you a glimpse of local heritage",
-      "a must-see cultural landmark"
-    ],
-    shopping: [
-      "ideal for shopping and exploring markets",
-      "great place to buy local items",
-      "popular shopping destination"
-    ]
+  // 🎯 Category personality (VERY IMPORTANT)
+  const categoryLine = {
+    nature: "offers a refreshing natural experience",
+    food: "is great for exploring local food",
+    culture: "has strong cultural significance",
+    shopping: "is perfect for shopping lovers"
   };
 
-  // 🎯 Add category-based reason
-  if (interestSet.has(category) && categoryReasons[category]) {
-    const arr = categoryReasons[category];
-    reasons.push(arr[index % arr.length]); // 👈 rotates reasons
+  if (categoryLine[category]) {
+    parts.push(categoryLine[category]);
   }
 
-  // 🎯 Budget-based variation
+  // 🎯 Interest match
+  if (interestSet.has(category)) {
+    parts.push("matches your interests");
+  }
+
+  // 🎯 Time-based
+  const timeTag = getTimeOfDayTag(place, index);
+  if (timeTag) parts.push(timeTag);
+
+  // 🎯 Budget
   if ((place.avgCost || 200) < 200 && budget === "low") {
-    reasons.push("budget-friendly option");
+    parts.push("budget-friendly");
   }
 
-  // 🎯 Time-based variation
-  if ((place.timeHours || 2) <= 2) {
-    reasons.push("fits perfectly in your schedule");
+  // 🎯 Crowd
+  parts.push(getCrowdTag(index));
+
+  // 🎯 Trending (not always)
+  if (index % 2 === 0) {
+    parts.push(getTrendingTag(index));
   }
 
-  // 🎯 Fallback
-  if (reasons.length === 0) {
-    const fallback = [
-      "one of the top-rated places in the city",
-      "highly recommended for travelers",
-      "a popular attraction worth visiting"
-    ];
-    reasons.push(fallback[index % fallback.length]);
+  return parts.join(", ") + ".";
+}
+
+// scsewfwefw
+function getTimeOfDayTag(place, index) {
+  const morning = ["park", "nature"];
+  const evening = ["food", "shopping"];
+  const flexible = ["culture"];
+
+  const category = (place.category || "").toLowerCase();
+
+  if (morning.includes(category)) {
+    return index % 2 === 0 ? "best visited in the morning" : "perfect for early hours";
   }
 
-  return "Recommended because it " + reasons.join(" and ");
+  if (evening.includes(category)) {
+    return index % 2 === 0 ? "ideal for evening time" : "great for sunset or night vibe";
+  }
+
+  if (flexible.includes(category)) {
+    return "can be explored anytime during the day";
+  }
+
+  return null;
+}
+
+function getCrowdTag(index) {
+  const crowdTypes = [
+    "usually less crowded",
+    "popular among travelers",
+    "a well-known busy spot",
+    "relatively शांत and peaceful"
+  ];
+
+  return crowdTypes[index % crowdTypes.length];
+}
+
+function getTrendingTag(index) {
+  const trending = [
+    "currently trending among tourists",
+    "a must-visit spot right now",
+    "one of the top-rated places recently",
+    "frequently recommended by travelers"
+  ];
+
+  return trending[index % trending.length];
 }
 
 module.exports = generatePlan;

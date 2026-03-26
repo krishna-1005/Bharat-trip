@@ -1,0 +1,90 @@
+/* Premium Marker Design */
+
+.custom-pin-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pin-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pin-wrapper.active {
+  transform: scale(1.3);
+  z-index: 1000;
+}
+
+.pin-main {
+  width: 22px;
+  height: 22px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+}
+
+.pin-inner-dot {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  transform: rotate(45deg);
+}
+
+.pin-drop-shadow {
+  width: 12px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  margin-top: 4px;
+  filter: blur(1px);
+}
+
+/* Pulsing effect for active marker */
+.pin-wrapper.active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: currentColor;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: marker-pulse 2s infinite;
+  opacity: 0.5;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes marker-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* Hover effects */
+.custom-pin-container:hover .pin-wrapper {
+  transform: scale(1.4) translateY(-5px);
+  z-index: 1001;
+}
+
+.custom-pin-container:hover .pin-main {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}

@@ -7,6 +7,7 @@ import {
   useMap
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import "./markerIcons.css";
 import "../../utils/fixLeafletIcons";
 import { useState, useEffect, useMemo, Fragment } from "react";
 import { createLocationIcon } from "./markerIcons";
@@ -23,15 +24,15 @@ import GuidancePanel from "./GuidancePanel";
 const userIcon = L.divIcon({
   className: "custom-pin-container",
   html: `
-    <div class="pin-wrapper">
+    <div class="pin-wrapper active" style="color: #3b82f6;">
       <div class="pin-main" style="background-color: #3b82f6; border-color: #fff;">
         <div class="pin-inner-dot" style="background-color: #fff;"></div>
       </div>
       <div class="pin-drop-shadow"></div>
     </div>
   `,
-  iconSize: [22, 30],
-  iconAnchor: [11, 30]
+  iconSize: [30, 42],
+  iconAnchor: [15, 42]
 });
 
 /* ---------- ZOOM CONTROLS ---------- */
@@ -314,18 +315,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
                         mouseover: () => onHover(p),
                         mouseout: () => onHover(null),
                       }}
-                    >
-                      <Tooltip
-                        direction="top"
-                        offset={[0, -14]}
-                        opacity={1}
-                        interactive
-                        sticky
-                        className="location-tooltip"
-                      >
-                        <PlaceTooltip place={p} city={plan.city} />
-                      </Tooltip>
-                    </Marker>
+                    />
                   );
                 })}
               </Fragment>
@@ -354,16 +344,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
                   key={`guidance-${i}`}
                   position={[p.lat, p.lng]}
                   icon={createLocationIcon(color, isActive)}
-                >
-                  <Tooltip
-                    direction="top"
-                    offset={[0, -14]}
-                    opacity={1}
-                    className="location-tooltip"
-                  >
-                    <PlaceTooltip place={p} city={plan.city} />
-                  </Tooltip>
-                </Marker>
+                />
               );
             })}
 

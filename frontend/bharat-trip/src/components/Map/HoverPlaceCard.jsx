@@ -15,8 +15,8 @@ function HoverPlaceCard({ place, city }) {
           className="hover-card-img" 
         />
         <div className="hover-card-title-section">
+          <span className="hover-card-category">{place.category || "Sightseeing"}</span>
           <h3>{place.name}</h3>
-          <span className="hover-card-category">{place.category}</span>
         </div>
       </div>
 
@@ -24,19 +24,22 @@ function HoverPlaceCard({ place, city }) {
         <div className="hover-card-meta">
           <div className="meta-item">
             <span className="meta-icon">💰</span>
-            <span>{place.estimatedCost > 0 ? formatPrice(place.estimatedCost) : 'Free Entry'}</span>
+            <span>{place.avgCost > 0 ? formatPrice(place.avgCost) : 'Free Entry'}</span>
           </div>
           <div className="meta-item">
             <span className="meta-icon">⏱️</span>
-            <span>{place.timeHours} Hours</span>
+            <span>{place.timeHours || 2} Hours</span>
           </div>
         </div>
 
-        {place.reviews && place.reviews.length > 0 && (
-          <div className="hover-card-reviews">
-            <h4>User Reviews</h4>
-            <div className="reviews-list">
-              {place.reviews.map((rev, idx) => (
+        <div className="hover-card-reviews">
+          <h4>
+            <span className="stars">⭐</span>
+            Verified Reviews
+          </h4>
+          <div className="reviews-list">
+            {place.reviews && place.reviews.length > 0 ? (
+              place.reviews.map((rev, idx) => (
                 <div key={idx} className="review-item">
                   <div className="review-header">
                     <span className="review-author">{rev.author}</span>
@@ -44,10 +47,14 @@ function HoverPlaceCard({ place, city }) {
                   </div>
                   <p className="review-comment">"{rev.comment}"</p>
                 </div>
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="review-item empty">
+                <p className="review-comment">No recent reviews found for this location.</p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

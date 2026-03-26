@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const path = require("path");
+const { generateReviews } = require("../services/reviewService");
 
 /* ── Load combined datasets ── */
 let allPlaces = [];
@@ -47,7 +48,7 @@ function distance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   try {
     let { lat, lng, radius = 5 } = req.body;
 
@@ -57,28 +58,34 @@ router.post("/", (req, res) => {
       lng = 77.5946;
     }
 
-    const nearby = allPlaces
+    const filtered = allPlaces
       .map(place => ({
         ...place,
         distance: distance(Number(lat), Number(lng), place.lat, place.lng)
       }))
       .filter(place => place.distance <= radius)
+      .sort((a, b) => a.distance - b.distance);
+
+    const finalResults = filtered.length > 0 ? filtered.slice(0, 50) : allPlaces
+      .map(place => ({
+        ...place,
+        distance: distance(Number(lat), Number(lng), place.lat, place.lng)
+      }))
       .sort((a, b) => a.distance - b.distance)
-      .slice(0, 50);
+      .slice(0, 10);
 
-    // Fallback: If nothing found within radius, return top 10 closest regardless of radius
-    if (nearby.length === 0) {
-        const fallbacks = allPlaces
-          .map(place => ({
-            ...place,
-            distance: distance(Number(lat), Number(lng), place.lat, place.lng)
-          }))
-          .sort((a, b) => a.distance - b.distance)
-          .slice(0, 10);
-        return res.json(fallbacks);
-    }
+    // Enrich top 10 with reviews
+    const enriched = await Promise.all(
+      finalResults.map(async (p, i) => {
+        if (i < 10) {
+          const reviews = await generateReviews(p.name, p.category, "Bangalore");
+          return { ...p, reviews };
+        }
+        return p;
+      })
+    );
 
-    res.json(nearby);
+    res.json(enriched);
   } catch (err) {
     console.error("Nearby API error:", err);
     res.status(500).json({ error: "Server error" });
