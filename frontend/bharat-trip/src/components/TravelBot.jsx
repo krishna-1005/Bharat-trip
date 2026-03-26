@@ -88,8 +88,8 @@ export default function TravelBot({ isOpen, setIsOpen }) {
         let botText = botReply ? `${botReply}\n\n` : "";
         botText += `🗺️ I've crafted a ${plan.days}-day plan for **${plan.city}**!\n\n`;
         
-        Object.keys(plan.itinerary).forEach(day => {
-          const dayData = plan.itinerary[day];
+        Object.keys(data.plan.itinerary).forEach(day => {
+          const dayData = data.plan.itinerary[day];
           const placeNames = dayData.places.map(p => p.name).join(", ");
           botText += `📍 ${day}: ${placeNames}\n`;
         });

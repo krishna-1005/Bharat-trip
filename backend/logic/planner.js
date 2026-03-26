@@ -160,9 +160,14 @@ async function generatePlan({
       if (hours + t > MAX_HOURS_PER_DAY) continue;
 
       hours += t;
-      cost += calculateDynamicPrice(p, budget) * tMult;
 
-      validPlaces.push(p);
+      const placeCost = calculateDynamicPrice(p, budget) * tMult;
+      cost += placeCost;
+
+      validPlaces.push({
+        ...p,
+        estimatedCost: placeCost
+      });
     }
 
     const meal = (MEAL_COST[budget] || 500) * tMult;

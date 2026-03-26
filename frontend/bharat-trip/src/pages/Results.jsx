@@ -184,8 +184,7 @@ function Results() {
   
   const totalTripCost = plan.totalTripCost || daysKeys.reduce((total, dayKey) => {
     const day = plan.itinerary[dayKey];
-    const placesCost = day.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0);
-    const mealCost = day.dayMealCost || 0;
+    const placesCost = day.places.reduce((sum, p) => sum + (p.avgCost || 200), 0);    const mealCost = day.dayMealCost || 0;
     return total + placesCost + mealCost;
   }, 0);
 
@@ -454,7 +453,7 @@ function Results() {
                     </div>
                     <div className="day-meta">
                       <span>⏱️ {dayData.estimatedHours}h</span>
-                      <span>💰 {formatPrice(placesCost + mealCost)}</span>
+                      <span>💰 {formatPrice(dayData.estimatedCost || (placesCost + mealCost))}</span>
                     </div>
                   </div>
 
@@ -512,7 +511,7 @@ function Results() {
                                   </button>
                                 )}
                                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', marginTop: '4px' }}>
-                                  <span className="place-cost-mini">{place.estimatedCost > 0 ? formatPrice(place.estimatedCost) : 'Free'}</span>
+                                  <span className="place-cost-mini">{formatPrice(place.avgCost || 200)}</span>
                                   <span style={{ fontSize: '8px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>{place.estimatedCost > 0 ? 'Est.' : ''}</span>
                                 </div>
                               </div>
