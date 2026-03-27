@@ -4,8 +4,7 @@ import HoverPlaceCard from "../components/Map/HoverPlaceCard";
 import { DAY_COLORS } from "../constants/dayColors";
 import PlaceImage from "../components/PlaceImage";
 import "./results.css";
-import { useState, useEffect, useMemo } from "react";
-import { getAuth } from "firebase/auth";
+import { useState, useEffect, useMemo, useContext } from "react";
 import { useSettings } from "../context/SettingsContext";
 const API = import.meta.env.VITE_API_URL;
 
@@ -13,6 +12,7 @@ function Results() {
   const navigate = useNavigate();
   const loc = useLocation();
   const { formatPrice, t } = useSettings();
+  const { user } = useContext(AuthContext);
 
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -190,15 +190,16 @@ function Results() {
   const handleSaveTrip = async () => {
     setSaving(true);
     try {
-      const auth = getAuth();
-      const user = auth.currentUser;
       if (!user) { alert("Please login first"); return; }
-      const token = await user.getIdToken(true);
+      
+      const token = user.token || localStorage.getItem("token");
+      if (!token) { alert("Session expired. Please login again."); return; }
+
       const res = await fetch(`${API}/api/profile/trips`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          title: tripTitle || `${totalDays}-Day Bangalore Trip`,
+          title: tripTitle || `${totalDays}-Day ${plan.city || "India"} Trip`,
           city: plan.city || "Bangalore",
           days: totalDays,
           budget: plan.budget,

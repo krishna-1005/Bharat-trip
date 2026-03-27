@@ -1,42 +1,32 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { auth } from "../firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { AuthContext } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
 import "../styles/profile.css";
 
 const API = import.meta.env.VITE_API_URL;
 
-const getToken = async () => {
-  const user = auth.currentUser;
-  if (!user) return null;
-  return await user.getIdToken(true);
-};
-
 export default function Profile() {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const { formatPrice } = useSettings();
 
   const [dbTrips, setDbTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [firebaseUser, setFirebaseUser] = useState(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        navigate("/login");
-        return;
-      }
-      setFirebaseUser(user);
-    });
-    return () => unsub();
-  }, [navigate]);
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
   const fetchTrips = async () => {
-    if (!firebaseUser) return;
+    if (!user) return;
     try {
-      const token = await getToken();
+      const token = user.token || localStorage.getItem("token");
+      if (!token) return;
+
       const res = await fetch(`${API}/api/profile/trips`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -66,8 +56,8 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    if (firebaseUser) fetchTrips();
-  }, [firebaseUser]);
+    if (user) fetchTrips();
+  }, [user]);
 
   const handleViewOnMap = (trip) => {
     const itineryObj = {};
@@ -96,7 +86,7 @@ export default function Profile() {
   const deleteTrip = async (id) => {
     if (!window.confirm("Delete this trip?")) return;
     try {
-      const token = await getToken();
+      const token = user.token || localStorage.getItem("token");
       const res = await fetch(`${API}/api/profile/trips/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
@@ -109,7 +99,7 @@ export default function Profile() {
     }
   };
 
-  const name = firebaseUser?.displayName || firebaseUser?.email?.split("@")[0] || "Explorer";
+  const name = user?.name || user?.email?.split("@")[0] || "Explorer";
   const initial = name.charAt(0).toUpperCase();
 
   const stats = [
