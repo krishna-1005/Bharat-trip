@@ -124,163 +124,171 @@ export default function Admin() {
     } catch (err) { alert("Broadcast failed"); }
   };
 
-  if (loading) return <div className="admin-loading">Initializing Secure Terminal...</div>;
-  if (error) return <div className="admin-error">{error}</div>;
-
   return (
     <div className="admin-page">
-      <Navbar />
       <div className="admin-container">
-        <header className="admin-header">
-          <h1>System <span className="gradient-text">Intelligence</span></h1>
-          <div className="admin-nav-tabs">
-            <button className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>Dashboard</button>
-            <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>Users</button>
-            <button className={activeTab === 'reviews' ? 'active' : ''} onClick={() => setActiveTab('reviews')}>Reviews</button>
-            <button className={activeTab === 'media' ? 'active' : ''} onClick={() => setActiveTab('media')}>Media & CMS</button>
-          </div>
-        </header>
-
-        {activeTab === 'dashboard' && data && (
+        {!auth.currentUser ? (
+          <div className="admin-error">Authentication required. Please login as an administrator.</div>
+        ) : loading ? (
+          <div className="admin-loading">Initializing Secure Terminal...</div>
+        ) : error ? (
+          <div className="admin-error">{error}</div>
+        ) : (
           <>
-            <div className="admin-stats-grid">
-              <div className="admin-stat-card">
-                <span className="stat-icon">👥</span>
-                <div className="stat-info">
-                  <span className="stat-label">Total Users</span>
-                  <span className="stat-value">{data.summary.totalRegisteredUsers}</span>
-                </div>
+            <header className="admin-header">
+              <h1>System <span className="gradient-text">Intelligence</span></h1>
+              <div className="admin-nav-tabs">
+                <button className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>Dashboard</button>
+                <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>Users</button>
+                <button className={activeTab === 'reviews' ? 'active' : ''} onClick={() => setActiveTab('reviews')}>Reviews</button>
+                <button className={activeTab === 'media' ? 'active' : ''} onClick={() => setActiveTab('media')}>Media & CMS</button>
               </div>
-              <div className="admin-stat-card">
-                <span className="stat-icon">🗺️</span>
-                <div className="stat-info">
-                  <span className="stat-label">Plans Generated</span>
-                  <span className="stat-value">{data.summary.totalPlansGenerated}</span>
-                </div>
-              </div>
-              <div className="admin-stat-card">
-                <span className="stat-icon">🔖</span>
-                <div className="stat-info">
-                  <span className="stat-label">Saved Trips</span>
-                  <span className="stat-value">{data.summary.totalTripsSavedByUsers}</span>
-                </div>
-              </div>
-              <div className="admin-stat-card">
-                <span className="stat-icon">📊</span>
-                <div className="stat-info">
-                  <span className="stat-label">Total Polls</span>
-                  <span className="stat-value">{data.summary.totalPolls}</span>
-                </div>
-              </div>
-            </div>
+            </header>
 
-            <div className="admin-tables-row">
-              <section className="admin-section">
-                <h2>Live Activity Feed</h2>
-                <div className="admin-table-wrap">
-                  <table className="admin-table">
-                    <thead><tr><th>User</th><th>Action</th><th>Time</th></tr></thead>
-                    <tbody>
-                      {data.recentActivityLogs.map((log, i) => (
-                        <tr key={i}>
-                          <td className="bold">{log.userId?.name || "Guest"}</td>
-                          <td><span className="tag-blue">{log.details.days} Days Plan</span></td>
-                          <td className="dim">{new Date(log.createdAt).toLocaleTimeString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            </div>
-          </>
-        )}
-
-        {activeTab === 'users' && (
-          <div className="admin-section">
-            <h2>Registered Database</h2>
-            <table className="admin-table">
-              <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
-              <tbody>
-                {users.map(u => (
-                  <tr key={u._id}>
-                    <td className="bold">{u.name}</td>
-                    <td>{u.email}</td>
-                    <td><span className={`role-tag ${u.role}`}>{u.role}</span></td>
-                    <td>
-                      <select 
-                        value={u.role} 
-                        onChange={(e) => handleUpdateRole(u._id, e.target.value)}
-                        className="admin-select"
-                      >
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {activeTab === 'reviews' && (
-          <div className="admin-section">
-            <h2>Review Moderation</h2>
-            <div className="admin-reviews-list">
-              {reviews.map(r => (
-                <div key={r._id} className="admin-review-card">
-                  <div className="review-meta">
-                    <strong>{r.userName}</strong> ({r.rating} ⭐)
-                    <button className="btn-delete" onClick={() => handleDeleteReview(r._id)}>Delete</button>
+            {activeTab === 'dashboard' && data && (
+              <>
+                <div className="admin-stats-grid">
+                  <div className="admin-stat-card">
+                    <span className="stat-icon">👥</span>
+                    <div className="stat-info">
+                      <span className="stat-label">Total Users</span>
+                      <span className="stat-value">{data.summary.totalRegisteredUsers}</span>
+                    </div>
                   </div>
-                  <p>"{r.comment}"</p>
+                  <div className="admin-stat-card">
+                    <span className="stat-icon">🗺️</span>
+                    <div className="stat-info">
+                      <span className="stat-label">Plans Generated</span>
+                      <span className="stat-value">{data.summary.totalPlansGenerated}</span>
+                    </div>
+                  </div>
+                  <div className="admin-stat-card">
+                    <span className="stat-icon">🔖</span>
+                    <div className="stat-info">
+                      <span className="stat-label">Saved Trips</span>
+                      <span className="stat-value">{data.summary.totalTripsSavedByUsers}</span>
+                    </div>
+                  </div>
+                  <div className="admin-stat-card">
+                    <span className="stat-icon">📊</span>
+                    <div className="stat-info">
+                      <span className="stat-label">Total Polls</span>
+                      <span className="stat-value">{data.summary.totalPolls}</span>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {activeTab === 'media' && (
-          <div className="admin-section">
-            <h2>Home Page Configuration</h2>
-            <p className="dim" style={{ marginBottom: '20px' }}>Directly update site-wide content and visuals.</p>
-            
-            <div className="config-grid">
-              <div className="config-card">
-                <h3>System Announcement</h3>
-                <textarea 
-                  className="admin-textarea"
-                  placeholder="Type a message for all users..."
-                  value={broadcastMsg}
-                  onChange={(e) => setBroadcastMsg(e.target.value)}
-                />
-                <button className="btn-broadcast" onClick={sendBroadcast}>Send Global Broadcast 📡</button>
-              </div>
+                <div className="admin-tables-row">
+                  <section className="admin-section">
+                    <h2>Live Activity Feed</h2>
+                    <div className="admin-table-wrap">
+                      <table className="admin-table">
+                        <thead><tr><th>User</th><th>Action</th><th>Time</th></tr></thead>
+                        <tbody>
+                          {data.recentActivityLogs.map((log, i) => (
+                            <tr key={i}>
+                              <td className="bold">{log.userId?.name || "Guest"}</td>
+                              <td><span className="tag-blue">{log.details.days} Days Plan</span></td>
+                              <td className="dim">{new Date(log.createdAt).toLocaleTimeString()}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+                </div>
+              </>
+            )}
 
-              <div className="config-card">
-                <h3>Home Page Hero Images</h3>
-                <p className="dim-small">Enter comma-separated image URLs</p>
-                <textarea 
-                  className="admin-textarea"
-                  defaultValue="https://images.unsplash.com/photo-1506461883276-594a12b11cf3, https://images.unsplash.com/photo-1524492412937-b28074a5d7da"
-                  id="hero-urls"
-                />
-                <button 
-                  className="btn-update" 
-                  onClick={() => handleUpdateConfig("homepage_images", document.getElementById('hero-urls').value.split(',').map(s => s.trim()))}
-                >
-                  Update Visuals ✨
-                </button>
+            {activeTab === 'users' && (
+              <div className="admin-section">
+                <h2>Registered Database</h2>
+                <table className="admin-table">
+                  <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    {users.map(u => (
+                      <tr key={u._id}>
+                        <td className="bold">{u.name}</td>
+                        <td>{u.email}</td>
+                        <td><span className={`role-tag ${u.role}`}>{u.role}</span></td>
+                        <td>
+                          <select 
+                            value={u.role} 
+                            onChange={(e) => handleUpdateRole(u._id, e.target.value)}
+                            className="admin-select"
+                          >
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </div>
-          </div>
+            )}
+
+            {activeTab === 'reviews' && (
+              <div className="admin-section">
+                <h2>Review Moderation</h2>
+                <div className="admin-reviews-list">
+                  {reviews.map(r => (
+                    <div key={r._id} className="admin-review-card">
+                      <div className="review-meta">
+                        <strong>{r.userName}</strong> ({r.rating} ⭐)
+                        <button className="btn-delete" onClick={() => handleDeleteReview(r._id)}>Delete</button>
+                      </div>
+                      <p>"{r.comment}"</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'media' && (
+              <div className="admin-section">
+                <h2>Home Page Configuration</h2>
+                <p className="dim" style={{ marginBottom: '20px' }}>Directly update site-wide content and visuals.</p>
+                
+                <div className="config-grid">
+                  <div className="config-card">
+                    <h3>System Announcement</h3>
+                    <textarea 
+                      className="admin-textarea"
+                      placeholder="Type a message for all users..."
+                      value={broadcastMsg}
+                      onChange={(e) => setBroadcastMsg(e.target.value)}
+                    />
+                    <button className="btn-broadcast" onClick={sendBroadcast}>Send Global Broadcast 📡</button>
+                  </div>
+
+                  <div className="config-card">
+                    <h3>Home Page Hero Images</h3>
+                    <p className="dim-small">Enter comma-separated image URLs</p>
+                    <textarea 
+                      className="admin-textarea"
+                      defaultValue="https://images.unsplash.com/photo-1506461883276-594a12b11cf3, https://images.unsplash.com/photo-1524492412937-b28074a5d7da"
+                      id="hero-urls"
+                    />
+                    <button 
+                      className="btn-update" 
+                      onClick={() => handleUpdateConfig("homepage_images", document.getElementById('hero-urls').value.split(',').map(s => s.trim()))}
+                    >
+                      Update Visuals ✨
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
       <style jsx>{`
         .admin-page { background: #020617; min-height: 100vh; color: #f8fafc; padding-top: 80px; font-family: 'Plus Jakarta Sans', sans-serif; }
         .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .admin-loading { font-size: 1.5rem; text-align: center; margin-top: 5rem; color: #3b82f6; font-weight: 700; }
+        .admin-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 2rem; border-radius: 1rem; border: 1px solid rgba(239, 68, 68, 0.2); text-align: center; margin-top: 2rem; }
         .admin-header { margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: center; }
         .admin-nav-tabs { display: flex; gap: 8px; background: #0f172a; padding: 6px; border-radius: 14px; border: 1px solid #1e293b; }
         .admin-nav-tabs button { background: transparent; border: none; color: #94a3b8; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 700; transition: all 0.3s; font-size: 0.9rem; }

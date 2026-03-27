@@ -117,6 +117,9 @@ function Navbar() {
                   <div className="nb-dd-menu">
                     <button className="nb-dd-item" onClick={() => { navigate("/profile"); setOpen(false); }}>👤 Profile</button>
                     <button className="nb-dd-item" onClick={() => { navigate("/trips"); setOpen(false); }}>🗺️ My Trips</button>
+                    {isAdmin && (
+                      <button className="nb-dd-item" onClick={() => { navigate("/admin"); setOpen(false); }}>🛡️ Admin Panel</button>
+                    )}
                     <button className="nb-dd-logout" onClick={handleLogout}>Logout</button>
                   </div>
                 </motion.div>
@@ -155,7 +158,12 @@ function Navbar() {
               {!user ? (
                 <li className="nb-mobile-item" onClick={() => navigate("/login")}>Login</li>
               ) : (
-                <li className="nb-mobile-item" onClick={() => navigate("/profile")}>Profile</li>
+                <>
+                  <li className="nb-mobile-item" onClick={() => { navigate("/profile"); setMobileMenuOpen(false); }}>Profile</li>
+                  {isAdmin && (
+                    <li className="nb-mobile-item" onClick={() => { navigate("/admin"); setMobileMenuOpen(false); }}>Admin Panel</li>
+                  )}
+                </>
               )}
             </ul>
           </motion.div>
