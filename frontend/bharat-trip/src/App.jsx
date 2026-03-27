@@ -30,6 +30,7 @@ import TravelBot from "./components/TravelBot";
 
 import "./styles/layout.css";
 import "./styles/global.css";
+import "./styles/mobile.css";
 
 import CreatePoll from "./pages/CreatePoll";
 import VotePoll from "./pages/VotePoll";

@@ -1,0 +1,131 @@
+/* =============================================
+   MOBILE-FIRST PREMIUM OVERRIDES
+============================================= */
+
+@media (max-width: 900px) {
+  :root {
+    --mobile-nav-height: 72px;
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
+
+  body {
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
+
+  /* ── MOBILE NAV BAR (PREMIUM) ── */
+  .bottom-nav {
+    height: var(--mobile-nav-height);
+    background: rgba(10, 17, 32, 0.85);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px 24px 0 0;
+    margin: 0 10px;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    width: auto;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    padding: 0 12px calc(var(--safe-bottom) + 5px);
+  }
+
+  .bn-item {
+    border-radius: 16px;
+    margin: 6px 2px;
+    transition: all 0.4s cubic-bezier(0.2, 0, 0.2, 1);
+  }
+
+  .bn-item.active {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent-blue);
+  }
+
+  .bn-icon {
+    font-size: 22px;
+    margin-bottom: 2px;
+  }
+
+  .bn-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    opacity: 0.8;
+  }
+
+  .bn-item.active .bn-label {
+    opacity: 1;
+  }
+
+  /* ── MOBILE HERO ADJUSTMENTS ── */
+  .hero-section {
+    padding-top: 80px;
+    padding-bottom: 40px;
+  }
+
+  .hero-content h1 {
+    font-size: 2.4rem;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .hero-content p {
+    font-size: 1.05rem;
+    margin-bottom: 32px;
+    opacity: 0.9;
+  }
+
+  /* ── CARDS (MOBILE OPTIMIZED) ── */
+  .action-card, .feature-card, .dest-card {
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .action-card {
+    padding: 24px;
+    text-align: left;
+    align-items: flex-start;
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .action-icon {
+    width: 54px;
+    height: 54px;
+    font-size: 1.8rem;
+    border-radius: 14px;
+    flex-shrink: 0;
+  }
+
+  .action-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+  }
+
+  .action-card p {
+    font-size: 0.9rem;
+    text-align: left;
+  }
+
+  /* ── APP-LIKE TRANSITIONS ── */
+  .page-transition-wrapper {
+    will-change: transform, opacity;
+  }
+
+  /* ── TOUCH FEEDBACK ── */
+  .btn-premium:active, .bn-item:active, .action-card:active {
+    transform: scale(0.96);
+    opacity: 0.8;
+  }
+
+  /* ── HIDE DESKTOP ONLY ── */
+  .desktop-only {
+    display: none !important;
+  }
+}
