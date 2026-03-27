@@ -6,6 +6,7 @@ import PlaceImage from "../components/PlaceImage";
 import "./results.css";
 import { useState, useEffect, useMemo, useContext } from "react";
 import { useSettings } from "../context/SettingsContext";
+import { AuthContext } from "../context/AuthContext";
 const API = import.meta.env.VITE_API_URL;
 
 function Results() {
