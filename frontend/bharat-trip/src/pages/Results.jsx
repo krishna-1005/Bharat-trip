@@ -93,8 +93,9 @@ function Results() {
   const allPlaces = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
     const days = Object.keys(plan.itinerary);
-    return days.flatMap(d => plan.itinerary[d]?.places || []);
-  }, [plan?.itinerary]);
+    const city = plan.city || "Bangalore";
+    return days.flatMap(d => (plan.itinerary[d]?.places || []).map(p => ({ ...p, city })));
+  }, [plan?.itinerary, plan?.city]);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -199,16 +200,28 @@ function Results() {
   }, 0);
 
   const handleSaveTrip = async () => {
+    if (saving || saved) return;
     setSaving(true);
     try {
-      if (!user) { alert("Please login first"); return; }
+      if (!user) {
+        alert("Please login to save your trip plan.");
+        setSaving(false);
+        return;
+      }
       
-      const token = user.token || localStorage.getItem("token");
-      if (!token) { alert("Session expired. Please login again."); return; }
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Authentication error. Please login again.");
+        setSaving(false);
+        return;
+      }
 
       const res = await fetch(`${API}/api/profile/trips`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { 
+          "Content-Type": "application/json", 
+          Authorization: `Bearer ${token}` 
+        },
         body: JSON.stringify({
           title: tripTitle || `${totalDays}-Day ${plan.city || "India"} Trip`,
           city: plan.city || "Bangalore",
@@ -221,11 +234,23 @@ function Results() {
           pace: plan.pace
         })
       });
+
       if (res.ok) {
         setSaved(true);
-        setTimeout(() => navigate("/trips"), 1200);
+        // Short delay for visual feedback then redirect to profile as requested
+        setTimeout(() => {
+          navigate("/profile");
+        }, 1000);
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(`Failed to save trip: ${errorData.message || "Unknown server error"}`);
+        setSaving(false);
       }
-    } catch { alert("Server error"); } finally { setSaving(false); }
+    } catch (err) {
+      console.error("Save trip error:", err);
+      alert("Network error. Please check your connection and try again.");
+      setSaving(false);
+    }
   };
 
   const handleShare = () => {
@@ -259,330 +284,200 @@ function Results() {
   };
 
   return (
-    <div className={`res-page ${showMap ? "mobile-map-active" : ""}`}>
-      {saved && (
-        <div className="res-success-overlay">
-          <div className="res-success-card">
-            <div className="success-icon">✨</div>
-            <h2>Adventure Saved!</h2>
-            <p>Your trip to {plan.city || "Bengaluru"} is ready.</p>
-            <div className="success-image-previews">
-              <PlaceImage placeName={plan.city || "Bengaluru"} city={plan.city || "Bengaluru"} className="success-preview-img" />
-            </div>
-            <p className="success-redirect">Redirecting to your trips...</p>
-          </div>
-        </div>
-      )}
-
-      {/* MOBILE HEADER */}
-      <div className="res-mobile-header">
-        <button className="mobile-back-btn" onClick={() => navigate("/planner")}>←</button>
-        <div className="mobile-header-center">
-          <h3>{tripTitle || "Your Trip"}</h3>
-          <span>{plan.city || "Bengaluru"} • {totalDays} Days</span>
-        </div>
-        <button className="mobile-share-btn" onClick={handleShare}>🔗</button>
+    <div className="anchored-planner-root">
+      {/* 1. MAP BASE LAYER */}
+      <div className="planner-map-foundation">
+        <MapView 
+          plan={plan} 
+          isTracking={isTracking} 
+          onHover={setHoveredPlace} 
+          isGuidanceMode={isGuidanceMode}
+          setIsGuidanceMode={setIsGuidanceMode}
+          currentIndex={currentIndex}
+          setCurrentIndex={setCurrentIndex}
+          userLocation={userLocation}
+        />
       </div>
 
-      <div className="res-main-layout">
-        <div className="res-map-section">
-          <div className="map-inner-container">
-            <MapView 
-              plan={plan} 
-              isTracking={isTracking} 
-              onHover={setHoveredPlace} 
-              isGuidanceMode={isGuidanceMode}
-              setIsGuidanceMode={setIsGuidanceMode}
-              currentIndex={currentIndex}
-              setCurrentIndex={setCurrentIndex}
-              userLocation={userLocation}
-            />
-          </div>
-
-          {hoveredPlace && (
-            <div className="res-map-reviews-floating">
-              <HoverPlaceCard place={hoveredPlace} city={plan.city} />
-            </div>
-          )}
-
-          <div className="res-floating-stats">
-            <button 
-              className={`res-stat-pill tracking-btn ${isGuidanceMode ? "active" : ""}`}
-              onClick={() => setIsGuidanceMode(!isGuidanceMode)}
-              title="Step-by-Step Mode"
-            >
-              <span className="pill-icon">{isGuidanceMode ? "⏹️" : "🧭"}</span>
-              <div className="pill-texts">
-                <span className="pill-val">{isGuidanceMode ? "Guide On" : "Guide Me"}</span>
-                <span className="pill-label">STEP-BY-STEP</span>
-              </div>
-            </button>
-
-            <button 
-              className={`res-stat-pill tracking-btn ${isTracking ? "active" : ""}`}
-              onClick={() => setIsTracking(!isTracking)}
-              title="Live GPS Tracking"
-            >
-              <span className="pill-icon">{isTracking ? "📡" : "📍"}</span>
-              <div className="pill-texts">
-                <span className="pill-val">{isTracking ? "Tracking" : "Live Track"}</span>
-                <span className="pill-label">{isTracking ? "ACTIVE" : "OFF"}</span>
-              </div>
-            </button>
-
-            <div className="res-stat-pill cost-pill">
-              <span className="pill-icon">💰</span>
-              <div className="pill-texts">
-                <span className="pill-val">{formatPrice(totalTripCost)}</span>
-                <span className="pill-label">EST. TOTAL</span>
-              </div>
-            </div>
+      {/* 2. TOP NAVBAR */}
+      <nav className="planner-glass-nav">
+        <div className="nav-brand-group">
+          <span className="brand-logo">🇮🇳</span>
+          <span className="brand-name">Bharat Trip</span>
+        </div>
+        <div className="nav-links-center">
+          <button onClick={() => navigate("/")}>Home</button>
+          <button onClick={() => navigate("/create-poll")}>Poll</button>
+          <button className="active">Planner</button>
+        </div>
+        <div className="nav-user-actions">
+          <div className="nav-user-avatar" onClick={() => navigate("/profile")}>
+            {user?.photoURL ? <img src={user.photoURL} alt="P" className="nav-avatar-img" /> : "👤"}
           </div>
         </div>
+      </nav>
 
-        <aside className="res-inventory-panel">
-          <div className="res-inventory-header">
-            <div className="header-top">
-              <button className="back-btn" onClick={() => navigate("/planner")}>←</button>
-              <div className="header-titles">
-                <input 
-                  type="text" 
-                  className="editable-title"
-                  value={tripTitle}
-                  onChange={e => setTripTitle(e.target.value)}
-                  readOnly={plan.isShared}
-                  placeholder="Name your trip..."
-                />
-                <span className="header-sub">
-                  {plan.city || "Bengaluru"} • {plan.travelerType || "Solo"} • {totalDays} Days
-                </span>
+      {/* 3. LEFT ANCHOR: GUIDE CARD */}
+      <div className="anchor-top-left">
+        <div className="guide-assistant-card">
+          {currentIndex < allPlaces.length ? (
+            <>
+              <div className="guide-group now">
+                <span className="guide-badge now">VISIT NOW</span>
+                <h2 className="guide-title">{allPlaces[currentIndex].name}</h2>
+                <p className="guide-meta">📍 {userLocation ? "7.6 km away" : "Calculating distance..."}</p>
               </div>
-              <button className="share-btn" onClick={handleShare}>🔗</button>
+
+              <div className="guide-divider-mini"></div>
+
+              {allPlaces[currentIndex + 1] && (
+                <div className="guide-group next">
+                  <span className="guide-badge next">NEXT UP</span>
+                  <h3 className="guide-title-sm">{allPlaces[currentIndex + 1].name}</h3>
+                  <p className="guide-meta-sm">🚗 {plan.pace || "Moderate"} Pace</p>
+                </div>
+              )}
+
+              <button className="guide-action-btn" onClick={() => setCurrentIndex(prev => prev + 1)}>
+                Mark as Visited & Continue →
+              </button>
+            </>
+          ) : (
+            <div className="guide-completion-state">
+              <span className="emoji">🏁</span>
+              <h3>Trip Completed</h3>
+              <button className="guide-action-btn" onClick={() => window.location.reload()}>New Adventure</button>
             </div>
+          )}
+        </div>
+      </div>
 
-            <div className="header-tools">
-              <div className="tool-group">
-                <label>Mode</label>
-                <select value={travelMode} onChange={e => setTravelMode(e.target.value)}>
-                  <option>Car</option>
-                  <option>Bike</option>
-                  <option>Transit</option>
-                </select>
-              </div>
-              <button className="optimize-btn">✨ Optimize</button>
+      {/* 4. RIGHT ANCHOR: JOURNEY TIMELINE */}
+      <div className="anchor-top-right">
+        <aside className="journey-timeline-panel">
+          <div className="timeline-header-fixed">
+            <div className="timeline-progress-group">
+              <span className="section-label">JOURNEY PROGRESS</span>
+              <span className="progress-percentage-text">{Math.round((currentIndex / allPlaces.length) * 100)}%</span>
+            </div>
+            <div className="timeline-progress-bar">
+              <div className="t-fill" style={{ width: `${(currentIndex / allPlaces.length) * 100}%` }}></div>
             </div>
           </div>
 
-          <div className="res-itinerary-scroll">
-            {/* PROGRESS BAR SECTION */}
-            <div className="trip-progress-container">
-              <div className="progress-stats">
-                <span className="step-count">Step {currentIndex + 1} of {allPlaces.length}</span>
-                <span className="percent-complete">{Math.round((currentIndex / allPlaces.length) * 100)}% done</span>
-              </div>
-              <div className="progress-bar-track">
-                <div 
-                  className="progress-bar-fill" 
-                  style={{ width: `${(currentIndex / allPlaces.length) * 100}%` }}
-                ></div>
-              </div>
-            </div>
+          <div className="timeline-scroll-area">
+            {daysKeys.map((day, dIdx) => (
+              <div key={day} className="timeline-day-block">
+                <div className="day-indicator">
+                  <span className="day-text">{day}</span>
+                  <div className="day-line"></div>
+                </div>
 
-            {/* NEXT STOP CARD */}
-            {currentIndex < allPlaces.length ? (
-              <div className="current-dest-focus-card">
-                <div className="focus-label">NEXT STOP</div>
-                <div className="focus-card-body">
-                  <PlaceImage 
-                    placeName={allPlaces[currentIndex].name} 
-                    city={plan.city || "Bengaluru"} 
-                    className="focus-card-img" 
-                  />
-                  <div className="focus-card-info">
-                    <h3>{allPlaces[currentIndex].name}</h3>
-                    <p className="focus-category">{allPlaces[currentIndex].category || "Sightseeing"}</p>
-                    <div className="focus-card-actions">
-                      <button 
-                        className="focus-btn mark-visited"
-                        onClick={() => setCurrentIndex(prev => prev + 1)}
+                <div className="stops-container">
+                  {plan.itinerary[day].places.map((place, pIdx) => {
+                    // Find global index to sync with currentIndex
+                    let globalIdx = 0;
+                    for (let i = 0; i < dIdx; i++) globalIdx += plan.itinerary[daysKeys[i]].places.length;
+                    const idx = globalIdx + pIdx;
+
+                    const isVisited = idx < currentIndex;
+                    const isCurrent = idx === currentIndex;
+                    const isUpcoming = idx > currentIndex;
+                    
+                    const shortInsight = place.reason 
+                      ? place.reason.split(/[.!?]/)[0] + " ✨" 
+                      : "Explore local highlights";
+
+                    return (
+                      <div 
+                        key={idx} 
+                        className={`premium-stop-card ${isVisited ? "visited" : ""} ${isCurrent ? "active" : ""} ${isUpcoming ? "upcoming" : ""}`}
+                        onClick={() => setHoveredPlace(place)}
                       >
-                        ✓ Mark Done
-                      </button>
-                      {currentIndex > 0 && (
-                        <button className="undo-btn" onClick={handleUndo}>↩</button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="trip-completion-card">
-                <span className="completion-emoji">🎉</span>
-                <h3>Trip Completed!</h3>
-                <button className="undo-visited-btn" onClick={handleUndo}>↩ Reset Last</button>
-              </div>
-            )}
-
-            {/* WEATHER WIDGET */}
-            <div className="weather-preview-card">
-              <div className="weather-info-main">
-                <div className="weather-row-primary">
-                  <span className="weather-temp">{weather.temp}</span>
-                  <span className="weather-large-icon">{weather.icon}</span>
-                </div>
-                <div className="weather-texts">
-                  <span className="weather-desc">{weather.desc.split(' • ')[0]}</span>
-                  <span className="weather-tip">Start: 09:00 AM</span>
-                </div>
-              </div>
-            </div>
-
-            {(() => {
-              let globalPlaceIdx = 0;
-              return daysKeys.map((day, idx) => {
-                const dayData = plan.itinerary[day];
-                const placesCost = dayData.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0);
-                const mealCost = dayData.dayMealCost || 0;
-
-                return (
-                  <div key={day} className="premium-day-card" style={{ "--day-accent": DAY_COLORS[idx % DAY_COLORS.length] }}>
-                    <div className="day-header">
-                      <div className="day-info">
-                        <span className="day-badge">{day}</span>
-                        <h3 className="day-title">Exploration Day</h3>
-                      </div>
-                      <div className="day-meta">
-                        <span>⏱️ {dayData.estimatedHours}h</span>
-                        <span>💰 {formatPrice(dayData.estimatedCost || (placesCost + mealCost))}</span>
-                      </div>
-                    </div>
-
-                    <div className="place-timeline">
-                      {dayData.places.map((place, pIdx) => {
-                        const pGlobalIdx = globalPlaceIdx++;
-                        const isVisited = pGlobalIdx < currentIndex;
-                        const isCurrent = pGlobalIdx === currentIndex;
-                        
-                        const prevPlace = pIdx > 0 ? dayData.places[pIdx - 1] : null;
-                        const distance = prevPlace ? getDistance(prevPlace.lat, prevPlace.lng, place.lat, place.lng) : 0;
-                        const travelTime = prevPlace ? getTravelTime(distance) : null;
-
-                        return (
-                          <div key={pIdx} className={`timeline-item ${isVisited ? "visited" : ""} ${isCurrent ? "current" : ""}`}>
-                            <div className="timeline-marker">
-                              <span className="marker-dot"></span>
-                              {pIdx < dayData.places.length - 1 && <span className="marker-line"></span>}
-                            </div>
-                            <div className="timeline-content">
-                              <div className={`place-card-mini ${isCurrent ? "active-glow" : ""}`}>
-                                <PlaceImage 
-                                  placeName={place.name} 
-                                  city={plan.city || "Bengaluru"} 
-                                  className="mini-card-img" 
-                                />
-                                <div className="place-info-main">
-                                  <div className="place-header-row">
-                                    <h4 style={{ textDecoration: isVisited ? 'line-through' : 'none', opacity: isVisited ? 0.6 : 1 }}>
-                                      {place.name}
-                                    </h4>
-                                  </div>
-
-                                  <div className="place-meta-row">
-                                    <span className="place-tag">{place.category || "Sightseeing"}</span>
-                                    {travelTime && (
-                                      <span className="travel-time-tag">
-                                        {travelMode === "Bike" ? "🏍️" : travelMode === "Car" ? "🚗" : "🚌"} {travelTime}
-                                      </span>
-                                    )}
-                                    <span className="place-cost-mini">{formatPrice(place.avgCost || 200)}</span>
-                                  </div>
-
-                                  {place.reason && (
-                                    <div className="ai-insight-section">
-                                      <span className="ai-insight-label">AI INSIGHT</span>
-                                      <p className="ai-insight-text">
-                                        {place.reason.length > 80 ? place.reason.substring(0, 77) + "..." : place.reason}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                                
-                              <div className="place-actions-mini">
-                                {isVisited ? (
-                                  <div className="status-badge visited" title="Completed">
-                                    <span className="check-icon">✓</span>
-                                  </div>
-                                ) : (
-                                  <button 
-                                    className={`mark-done-action ${isCurrent ? "is-active" : ""}`} 
-                                    onClick={() => setCurrentIndex(pGlobalIdx + 1)}
-                                    title={isCurrent ? "Mark as Visited" : "Planned Stop"}
-                                  >
-                                    <div className="check-circle">
-                                      {isCurrent && <span className="action-label">Done</span>}
-                                      {!isCurrent && <span className="dot-icon"></span>}
-                                    </div>
-                                  </button>
-                                )}
-                              </div>
-                              </div>
-                            </div>
+                        <div className="stop-spine">
+                          <div className="spine-marker">
+                            {isVisited ? "✓" : isCurrent ? "●" : ""}
                           </div>
-                        );
-                      })}
-                      
-                      {mealCost > 0 && (
-                        <div className="timeline-item meal-item">
-                          <div className="timeline-marker"><span className="marker-dot meal-dot"></span></div>
-                          <div className="timeline-content">
-                            <div className="place-card-mini meal-card">
-                              <div className="meal-icon">🍴</div>
-                              <div className="place-info-main">
-                                <div className="place-header-row">
-                                  <h4>Estimated Meals</h4>
-                                  <span className="place-cost-mini">{formatPrice(mealCost)}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                          {!(dIdx === daysKeys.length - 1 && pIdx === plan.itinerary[day].places.length - 1) && (
+                            <div className="spine-connect"></div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              });
-            })()}
 
-            {!plan.isShared && (
-              <div className="res-inventory-actions">
-                <button 
-                  className={`compact-save-btn ${saved ? "saved" : ""}`} 
-                  onClick={handleSaveTrip} 
-                  disabled={saving || saved}
-                >
-                  {saved ? "✓ Saved to Trips" : saving ? "Saving..." : "Confirm & Save Plan"}
-                </button>
-                <button className="reset-trip-btn" onClick={resetProgress}>↺ Reset Progress</button>
+                        <div className="stop-content">
+                          <div className="stop-main-row">
+                            <PlaceImage 
+                              placeName={place.name} 
+                              city={plan.city || "Bangalore"} 
+                              className="stop-img-premium" 
+                            />
+                            <div className="stop-text-meta">
+                              <h4 className="stop-name-premium">{place.name}</h4>
+                              <div className="stop-pills-row">
+                                <span className="p-tag">{place.category || "Sight"}</span>
+                                <span className="p-meta">⏱️ 1.5h</span>
+                                <span className="p-meta">💰 {formatPrice(place.avgCost || 200)}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {isCurrent && (
+                            <div className="stop-active-details">
+                              <p className="stop-ai-tip-premium">{shortInsight}</p>
+                              <button className="done-action-btn" onClick={(e) => {
+                                e.stopPropagation();
+                                setCurrentIndex(idx + 1);
+                              }}>
+                                Mark as Done →
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            )}
+            ))}
+          </div>
+
+          <div className="timeline-footer-actions">
+            <div className="footer-stats-summary">
+               <div className="f-stat">
+                  <span className="f-label">TOTAL BUDGET</span>
+                  <span className="f-val">{formatPrice(totalTripCost)}</span>
+               </div>
+            </div>
+            <button 
+              className={`premium-save-btn ${saving ? "loading" : ""}`} 
+              onClick={handleSaveTrip}
+              disabled={saving || saved}
+            >
+              {saved ? "✓ Saved to Profile" : saving ? "Saving Journey..." : "Save Plan to Profile"}
+            </button>
           </div>
         </aside>
       </div>
 
-      {/* MOBILE TOGGLE */}
-      {windowWidth <= 768 && (
-        <div className="res-mobile-toggle">
-          <button className={!showMap ? "active" : ""} onClick={() => setShowMap(false)}>
-            <span className="toggle-icon">📋</span> List
-          </button>
-          <button className={showMap ? "active" : ""} onClick={() => setShowMap(true)}>
-            <span className="toggle-icon">🗺️</span> Map
-          </button>
+      {/* 5. BOTTOM ANCHOR: CONTROL BAR */}
+      <div className="anchor-bottom-center">
+        <div className="floating-control-pill">
+          <div className="control-section" onClick={() => setIsGuidanceMode(!isGuidanceMode)}>
+            <span className={`status-dot ${isGuidanceMode ? "on" : "off"}`}></span>
+            Guide {isGuidanceMode ? "ON" : "OFF"}
+          </div>
+          <div className="control-divider"></div>
+          <div className="control-section" onClick={() => setIsTracking(!isTracking)}>
+            <span className={`status-dot ${isTracking ? "on" : "off"}`}></span>
+            Live Track {isTracking ? "ON" : "OFF"}
+          </div>
+          <div className="control-divider"></div>
+          <div className="control-section price">
+            <span className="price-label">EST. TOTAL</span>
+            <span className="price-val">{formatPrice(totalTripCost)}</span>
+          </div>
         </div>
-      )}
+      </div>
     </div>
-
-
   );
 }
 

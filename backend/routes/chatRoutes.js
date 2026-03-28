@@ -8,7 +8,11 @@ const ai = new GoogleGenAI({
 });
 const generatePlan = require("../logic/planner");
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+let groq = null;
+if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.startsWith("gsk_")) {
+  groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+}
+
 router.post("/", async (req, res) => {
   const { message, history } = req.body;
   if (!message || typeof message !== "string") {

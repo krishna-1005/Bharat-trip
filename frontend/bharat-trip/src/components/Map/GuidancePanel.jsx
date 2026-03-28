@@ -1,10 +1,10 @@
 import React from 'react';
 import './guidancePanel.css';
+import PlaceImage from '../PlaceImage';
 
 const GuidancePanel = ({ 
   currentPlace, 
   nextPlace, 
-  thenPlace, 
   onNext, 
   isLast,
   userLocation,
@@ -13,87 +13,85 @@ const GuidancePanel = ({
 }) => {
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     if (!lat1 || !lon1 || !lat2 || !lon2) return null;
-    const R = 6371; // Radius of the earth in km
-    const dLat = deg2rad(lat2 - lat1);
-    const dLon = deg2rad(lon2 - lon1);
+    const R = 6371;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c; // Distance in km
-    return d.toFixed(1);
-  };
-
-  const deg2rad = (deg) => {
-    return deg * (Math.PI / 180);
+    return (R * c).toFixed(1);
   };
 
   const distToCurrent = userLocation 
-    ? calculateDistance(userLocation.lat, userLocation.lng, currentPlace.lat, currentPlace.lng)
+    ? calculateDistance(userLocation.lat, userLocation.lng, currentPlace?.lat, currentPlace?.lng)
     : null;
 
-  const distToNext = (currentPlace && nextPlace)
-    ? calculateDistance(currentPlace.lat, currentPlace.lng, nextPlace.lat, nextPlace.lng)
-    : null;
+  if (!currentPlace) return null;
 
   return (
-    <div className="guidance-overlay">
-      <div className="guidance-top-instruction">
-        Trip Assistant: Step {currentIndex + 1} of {totalPlaces}
-      </div>
-
-      <div className="guidance-panel">
-        <div className="guidance-progress-mini">
-           <div className="progress-fill" style={{ width: `${((currentIndex + 1) / totalPlaces) * 100}%` }}></div>
-        </div>
-        
+    <div className="guidance-container">
+      <div className="guidance-card">
         {isLast ? (
-          <div className="guidance-completion">
-            <span className="completion-emoji">🎉</span>
-            <h3>Destination Reached!</h3>
-            <p>You've completed your trip itinerary.</p>
+          <div className="completion-state">
+            <div className="completion-icon">🎉</div>
+            <h3>Trip Complete</h3>
+            <p>You've successfully visited all destinations.</p>
+            <button className="action-btn" onClick={() => window.location.reload()}>
+              Plan New Trip
+            </button>
           </div>
         ) : (
-          <div className="guidance-flow">
-            <div className="guidance-step now">
-              <span className="step-label">Visit Now</span>
-              <div className="step-content">
-                <span className="place-name">{currentPlace.name}</span>        
-                <div className="place-meta-row">
-                  <span className="place-distance">
-                    {userLocation ? `📍 ${distToCurrent} km from you` : "📍 Calculating distance..."}
-                  </span>
-                </div>
-              </div>
+          <>
+            {/* Hero Image Section */}
+            <div className="hero-image-container">
+              <PlaceImage 
+                placeName={currentPlace.name} 
+                city={currentPlace.city || "Bangalore"} 
+                className="hero-image" 
+              />
+              <div className="hero-overlay"></div>
+              <div className="step-indicator">Step {currentIndex + 1} of {totalPlaces}</div>
             </div>
 
-            {nextPlace && (
-              <div className="guidance-step next">
-                <span className="step-label">Next Up</span>
-                <div className="step-content">
-                  <span className="place-name">{nextPlace.name}</span>
-                  {distToNext && (
-                    <span className="place-distance-next">
-                      🚗 {distToNext} km from current stop
-                    </span>
-                  )}
+            <div className="card-body">
+              {/* Now Section */}
+              <div className="now-section">
+                <span className="now-label">Visiting Now</span>
+                <h2 className="current-title">{currentPlace.name}</h2>
+                <div className="current-meta">
+                  <div className="meta-item">📍 {distToCurrent || "0.0"} km away</div>
+                  {currentPlace.rating && <div className="meta-item">⭐ {currentPlace.rating}</div>}
                 </div>
               </div>
-            )}
-          </div>
-        )}
 
-        {!isLast && (
-          <button className="guidance-next-btn" onClick={onNext}>
-            Mark as Visited & Continue
-            <span className="btn-arrow">→</span>
-          </button>
+              {/* Next Preview */}
+              {nextPlace && (
+                <div className="next-preview">
+                  <div className="next-dot"></div>
+                  <div className="next-info">
+                    <span className="next-label">Up Next</span>
+                    <p className="next-title">{nextPlace.name}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <button className="action-btn" onClick={onNext}>
+                Arrived & Continue 
+                <span style={{marginLeft: 'auto'}}>→</span>
+              </button>
+              
+              <button className="secondary-action" onClick={onNext}>
+                Skip this stop
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>
   );
 };
-
 
 export default GuidancePanel;
