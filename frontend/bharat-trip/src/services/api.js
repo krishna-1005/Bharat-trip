@@ -30,6 +30,11 @@ export async function generatePlan(data) {
     })
   });
 
+  if (res.status === 401) {
+    console.warn("Unauthorized! Token might be expired.");
+    // We could trigger a logout here if we had access to AuthContext
+  }
+
   const json = await res.json();
 
   // backend returns { plan: {...} }

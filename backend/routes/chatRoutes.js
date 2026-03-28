@@ -1,11 +1,9 @@
 const express = require("express");
 const router  = express.Router();
 const Groq    = require("groq-sdk");
-const { GoogleGenAI } = require("@google/genai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const generatePlan = require("../logic/planner");
 
 let groq = null;
@@ -58,20 +56,25 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
     }
 
     // 1. TRY GEMINI FIRST
-    // 1. TRY GEMINI FIRST
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: systemInstruction + "\n\nUser: " + message
+      if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
+        throw new Error("GEMINI_API_KEY missing or invalid");
+      }
+
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const chat = model.startChat({
+        history: formattedHistory,
+        generationConfig: { maxOutputTokens: 1000 }
       });
 
-      replyText = response.text;
+      const result = await chat.sendMessage(systemInstruction + "\n\nUser: " + message);
+      replyText = result.response.text();
 
     } catch (geminiError) {
       console.warn("Gemini Error, falling back to Groq:", geminiError.message);
       
       // 2. TRY GROQ IF GEMINI FAILS
-      if (process.env.GROQ_API_KEY) {
+      if (groq) {
         try {
           const chatCompletion = await groq.chat.completions.create({
             messages: [
@@ -88,7 +91,7 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
           throw new Error("All AI services failed"); // Trigger rule-based fallback
         }
       } else {
-        throw new Error("Gemini failed and no Groq key");
+        throw new Error("Gemini failed and no Groq client available");
       }
     }
 

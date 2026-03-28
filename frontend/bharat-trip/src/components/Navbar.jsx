@@ -117,9 +117,11 @@ function Navbar() {
                   <div className="nb-dd-menu">
                     <button className="nb-dd-item" onClick={() => { navigate("/profile"); setOpen(false); }}>👤 Profile</button>
                     <button className="nb-dd-item" onClick={() => { navigate("/trips"); setOpen(false); }}>🗺️ My Trips</button>
+                    <button className="nb-dd-item" onClick={() => { navigate("/settings"); setOpen(false); }}>⚙️ Settings</button>
                     {isAdmin && (
                       <button className="nb-dd-item" onClick={() => { navigate("/admin"); setOpen(false); }}>🛡️ Admin Panel</button>
                     )}
+                    <div className="nb-dd-divider"></div>
                     <button className="nb-dd-logout" onClick={handleLogout}>Logout</button>
                   </div>
                 </motion.div>
@@ -156,13 +158,17 @@ function Navbar() {
                 </li>
               ))}
               {!user ? (
-                <li className="nb-mobile-item" onClick={() => navigate("/login")}>Login</li>
+                <li className="nb-mobile-item nb-mobile-login" onClick={() => navigate("/login")}>Login</li>
               ) : (
                 <>
-                  <li className="nb-mobile-item" onClick={() => { navigate("/profile"); setMobileMenuOpen(false); }}>Profile</li>
+                  <li className="nb-mobile-divider"></li>
+                  <li className="nb-mobile-item" onClick={() => { navigate("/profile"); setMobileMenuOpen(false); }}>👤 Profile</li>
+                  <li className="nb-mobile-item" onClick={() => { navigate("/trips"); setMobileMenuOpen(false); }}>🗺️ My Trips</li>
+                  <li className="nb-mobile-item" onClick={() => { navigate("/settings"); setMobileMenuOpen(false); }}>⚙️ Settings</li>
                   {isAdmin && (
-                    <li className="nb-mobile-item" onClick={() => { navigate("/admin"); setMobileMenuOpen(false); }}>Admin Panel</li>
+                    <li className="nb-mobile-item" onClick={() => { navigate("/admin"); setMobileMenuOpen(false); }}>🛡️ Admin Panel</li>
                   )}
+                  <li className="nb-mobile-item nb-mobile-logout" onClick={handleLogout}>Logout</li>
                 </>
               )}
             </ul>

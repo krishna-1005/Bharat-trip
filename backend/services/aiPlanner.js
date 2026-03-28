@@ -1,8 +1,6 @@
-const { GoogleGenAI } = require("@google/genai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 async function analyzeAndRefinePlan({
   city,
@@ -13,8 +11,8 @@ async function analyzeAndRefinePlan({
   pace,
   candidates
 }) {
-  if (!process.env.GEMINI_API_KEY) {
-    console.warn("⚠️ GEMINI_API_KEY missing");
+  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
+    console.warn("⚠️ GEMINI_API_KEY missing or invalid");
     return null;
   }
 
@@ -33,12 +31,10 @@ Return JSON:
 `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: prompt
-    });
-
-    const text = response.text.replace(/```json|```/g, "").trim();
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text().replace(/```json|```/g, "").trim();
     return JSON.parse(text);
 
   } catch (err) {

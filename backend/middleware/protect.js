@@ -32,11 +32,15 @@ const protect = async (req, res, next) => {
     } catch (firebaseErr) {
       // 2. Try Custom JWT Token
       try {
+        if (!process.env.JWT_SECRET) {
+          throw new Error("JWT_SECRET is not defined in environment variables");
+        }
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         user = await User.findById(decoded.id);
       } catch (jwtErr) {
-        console.error("Auth error:", firebaseErr.message, jwtErr.message);
-        return res.status(401).json({ error: "Invalid token" });
+        // Log both errors for debugging, but be concise
+        console.warn(`Auth failed. Firebase: ${firebaseErr.message.substring(0, 100)}... JWT: ${jwtErr.message}`);
+        return res.status(401).json({ error: "Invalid or expired token" });
       }
     }
 
