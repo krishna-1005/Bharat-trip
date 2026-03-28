@@ -7,7 +7,9 @@ const GuidancePanel = ({
   thenPlace, 
   onNext, 
   isLast,
-  userLocation
+  userLocation,
+  currentIndex,
+  totalPlaces
 }) => {
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     if (!lat1 || !lon1 || !lat2 || !lon2) return null;
@@ -38,28 +40,29 @@ const GuidancePanel = ({
   return (
     <div className="guidance-overlay">
       <div className="guidance-top-instruction">
-        Follow your Itinerary
+        Trip Assistant: Step {currentIndex + 1} of {totalPlaces}
       </div>
 
       <div className="guidance-panel">
+        <div className="guidance-progress-mini">
+           <div className="progress-fill" style={{ width: `${((currentIndex + 1) / totalPlaces) * 100}%` }}></div>
+        </div>
+        
         {isLast ? (
           <div className="guidance-completion">
             <span className="completion-emoji">🎉</span>
-            <h3>Trip Completed</h3>
-            <p>You've reached your last destination!</p>
+            <h3>Destination Reached!</h3>
+            <p>You've completed your trip itinerary.</p>
           </div>
         ) : (
           <div className="guidance-flow">
             <div className="guidance-step now">
-              <span className="step-label">Now</span>
+              <span className="step-label">Visit Now</span>
               <div className="step-content">
                 <span className="place-name">{currentPlace.name}</span>        
                 <div className="place-meta-row">
-                  {currentPlace.timeHours && (
-                    <span className="place-meta">⏱️ {currentPlace.timeHours}h</span>
-                  )}
                   <span className="place-distance">
-                    {userLocation ? `📍 You are ${distToCurrent} km away` : "📍 Location unavailable"}
+                    {userLocation ? `📍 ${distToCurrent} km from you` : "📍 Calculating distance..."}
                   </span>
                 </div>
               </div>
@@ -67,23 +70,14 @@ const GuidancePanel = ({
 
             {nextPlace && (
               <div className="guidance-step next">
-                <span className="step-label">Next</span>
+                <span className="step-label">Next Up</span>
                 <div className="step-content">
                   <span className="place-name">{nextPlace.name}</span>
                   {distToNext && (
                     <span className="place-distance-next">
-                      🚗 Next stop is {distToNext} km away
+                      🚗 {distToNext} km from current stop
                     </span>
                   )}
-                </div>
-              </div>
-            )}
-
-            {thenPlace && (
-              <div className="guidance-step then">
-                <span className="step-label">Then</span>
-                <div className="step-content">
-                  <span className="place-name">{thenPlace.name}</span>
                 </div>
               </div>
             )}
@@ -92,7 +86,7 @@ const GuidancePanel = ({
 
         {!isLast && (
           <button className="guidance-next-btn" onClick={onNext}>
-            Go to Next Location
+            Mark as Visited & Continue
             <span className="btn-arrow">→</span>
           </button>
         )}

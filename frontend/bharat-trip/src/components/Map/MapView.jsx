@@ -224,6 +224,8 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
               onNext={handleNextLocation}
               isLast={currentIndex >= allPlaces.length - 1}
               userLocation={userLocation}
+              currentIndex={currentIndex}
+              totalPlaces={allPlaces.length}
             />
           </div>
         )}
@@ -327,17 +329,22 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
         {isGuidanceMode && (
           <>
             {allPlaces.map((p, i) => {
-              // Only keep: Current location marker, Next location marker, Remaining itinerary markers
-              if (i < currentIndex) return null;
-
-              let color = "#94a3b8"; // Gray for remaining
+              // Dim past markers, highlight current and next, dim future markers
+              let color = "rgba(148, 163, 184, 0.3)"; // Dim gray for future
               let isActive = false;
-              if (i === currentIndex) {
+              let isVisible = true;
+
+              if (i < currentIndex) {
+                isVisible = false; // Hide past markers
+              } else if (i === currentIndex) {
                 color = "#3b82f6"; // Blue for current
                 isActive = true;
               } else if (i === currentIndex + 1) {
                 color = "#10b981"; // Green for next
+                isActive = true;
               }
+
+              if (!isVisible) return null;
 
               return (
                 <Marker
@@ -356,9 +363,10 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
                 ]}
                 pathOptions={{
                   color: "#3b82f6",
-                  weight: 5,
-                  opacity: 0.8,
-                  dashArray: "10, 10"
+                  weight: 6,
+                  opacity: 0.9,
+                  dashArray: "1, 12",
+                  lineCap: "round"
                 }}
               />
             )}

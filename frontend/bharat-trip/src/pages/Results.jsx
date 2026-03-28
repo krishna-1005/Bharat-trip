@@ -32,6 +32,16 @@ function Results() {
     return saved ? parseInt(saved, 10) : 0;
   });
   const [userLocation, setUserLocation] = useState(null);
+  const [scrollRef, setScrollRef] = useState(null);
+
+  useEffect(() => {
+    if (currentIndex >= 0 && isGuidanceMode) {
+      const activeCard = document.querySelector(`.timeline-item.current`);
+      if (activeCard) {
+        activeCard.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [currentIndex, isGuidanceMode]);
 
   useEffect(() => {
     let watchId = null;
@@ -364,6 +374,20 @@ function Results() {
           </div>
 
           <div className="res-itinerary-scroll">
+            {/* PROGRESS BAR SECTION */}
+            <div className="trip-progress-container">
+              <div className="progress-stats">
+                <span className="step-count">Step {currentIndex + 1} of {allPlaces.length}</span>
+                <span className="percent-complete">{Math.round((currentIndex / allPlaces.length) * 100)}% done</span>
+              </div>
+              <div className="progress-bar-track">
+                <div 
+                  className="progress-bar-fill" 
+                  style={{ width: `${(currentIndex / allPlaces.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+
             {/* NEXT STOP CARD */}
             {currentIndex < allPlaces.length ? (
               <div className="current-dest-focus-card">
