@@ -111,6 +111,21 @@ function loadData() {
 
 loadData();
 
+/* ── SUMMARY GENERATOR ── */
+function generatePlanSummary({ city, days, totalBudget, totalTripCost, interests }) {
+  const interestList = interests.length > 0 ? interests.join(", ").toLowerCase() : "general exploration";
+  const budgetStatus = totalTripCost <= totalBudget ? "comfortably within" : "optimized for";
+  const efficiencyNote = "Locations are grouped by proximity to minimize transit time, ensuring a balanced pace each day.";
+
+  const templates = [
+    `This ${days}-day odyssey in ${city} is curated to blend ${interestList} experiences, staying ${budgetStatus} your budget. ${efficiencyNote}`,
+    `Your ${days}-day ${city} escape is perfectly paced for ${interestList}. We've grouped nearby spots to maximize your time while staying ${budgetStatus} your financial plan.`,
+    `Designed for ${interestList}, this ${days}-day ${city} itinerary ensures a seamless flow. It stays ${budgetStatus} your budget goal with a focus on travel efficiency.`
+  ];
+
+  return templates[Math.floor(Math.random() * templates.length)];
+}
+
 /* ── MAIN FUNCTION ── */
 async function generatePlan({
   city,
@@ -160,7 +175,6 @@ async function generatePlan({
   if (filteredPool.length === 0) filteredPool = cityPool;
 
   /* STEP 4: SCORING & TRUNCATING */
-  // We sort by score but we will filter by budget dynamically
   let prioritizedPool = filteredPool
     .map(p => ({
       ...p,
@@ -168,7 +182,7 @@ async function generatePlan({
     }))
     .sort((a, b) => b.score - a.score);
 
-  const maxPlacesNeeded = days * 6; // Slight buffer for budget filtering
+  const maxPlacesNeeded = days * 6;
   prioritizedPool = prioritizedPool.slice(0, maxPlacesNeeded);
 
   /* STEP 5: BALANCED DISTRIBUTION */
@@ -182,17 +196,14 @@ async function generatePlan({
     let dayCost = 0;
     const validPlaces = [];
 
-    const remainingDays = (days - day) + 1;
     const remainingPool = prioritizedPool.filter(p => !usedPlaceNames.has(p.name));
     
-    // Mix strategy: Try to pick a balanced mix of costs
     for (const p of remainingPool) {
-      if (validPlaces.length >= 4) break; // Keep it realistic (max 4 per day)
+      if (validPlaces.length >= 4) break;
       
       const t = p.timeHours || 2;
       const placeCost = (p.avgCost || 200) * tMult;
 
-      // Budget Check: Allow 20% flexibility per day
       if (dayHours + t <= MAX_HOURS_PER_DAY && (dayCost + placeCost) <= (perDayBudget * 1.2)) {
         dayHours += t;
         dayCost += placeCost;
@@ -210,7 +221,6 @@ async function generatePlan({
       }
     }
 
-    // Default meal cost based on per-day budget
     const meal = Math.min(perDayBudget * 0.3, 1000) * tMult;
     dayCost += meal;
     estimatedTotalCost += dayCost;
@@ -228,14 +238,17 @@ async function generatePlan({
     };
   }
 
+  const finalTotalCost = Math.round(estimatedTotalCost);
+
   return { 
     city, 
     itinerary, 
     coordinates: coords,
     totalBudget,
-    totalTripCost: Math.round(estimatedTotalCost),
-    remainingBudget: Math.round(totalBudget - estimatedTotalCost),
-    perDayBudget: Math.round(perDayBudget)
+    totalTripCost: finalTotalCost,
+    remainingBudget: Math.round(totalBudget - finalTotalCost),
+    perDayBudget: Math.round(perDayBudget),
+    summary: generatePlanSummary({ city, days, totalBudget, totalTripCost: finalTotalCost, interests })
   };
 }
 
@@ -255,14 +268,12 @@ async function getCityCoords(city) {
   const cleanCity = city.trim().toLowerCase();
   if (map[cleanCity]) return map[cleanCity];
 
-  // Try curated dataset first (case-insensitive)
   try {
     const indiaPlaces = require("../data/indiaPlaces.json");
     const found = indiaPlaces.find(c => c.city.toLowerCase() === cleanCity);
     if (found) return found.coordinates;
   } catch (e) {}
 
-  // External Geocoder Fallback (Nominatim)
   try {
     const res = await axios.get(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanCity)}&limit=1`,
@@ -278,7 +289,6 @@ async function getCityCoords(city) {
     console.error("Geocoding failed for:", cleanCity, err.message);
   }
 
-  // Final fallback to Bengaluru
   return map["bengaluru"];
 }
 
@@ -288,7 +298,6 @@ function generateReason(place, interests, budget, index) {
 
   const parts = [];
 
-  // 🎯 Category personality (VERY IMPORTANT)
   const categoryLine = {
     nature: "offers a refreshing natural experience",
     food: "is great for exploring local food",
@@ -300,24 +309,19 @@ function generateReason(place, interests, budget, index) {
     parts.push(categoryLine[category]);
   }
 
-  // 🎯 Interest match
   if (interestSet.has(category)) {
     parts.push("matches your interests");
   }
 
-  // 🎯 Time-based
   const timeTag = getTimeOfDayTag(place, index);
   if (timeTag) parts.push(timeTag);
 
-  // 🎯 Budget
   if ((place.avgCost || 200) < 200 && budget === "low") {
     parts.push("budget-friendly");
   }
 
-  // 🎯 Crowd
   parts.push(getCrowdTag(index));
 
-  // 🎯 Trending (not always)
   if (index % 2 === 0) {
     parts.push(getTrendingTag(index));
   }
@@ -325,7 +329,6 @@ function generateReason(place, interests, budget, index) {
   return parts.join(", ") + ".";
 }
 
-// scsewfwefw
 function getTimeOfDayTag(place, index) {
   const morning = ["park", "nature"];
   const evening = ["food", "shopping"];

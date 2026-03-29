@@ -274,9 +274,14 @@ export const SettingsProvider = ({ children }) => {
 
   const formatPrice = (priceInINR) => {
     const rate = conversionRates[currency] || 1;
-    const converted = (priceInINR * rate);
+    const converted = (Number(priceInINR) * rate);
     const formatted = currency === "JPY" ? Math.round(converted) : converted.toFixed(currency === "INR" ? 0 : 2);
     return `${currencySymbols[currency] || "₹"}${Number(formatted).toLocaleString()}`;
+  };
+
+  const formatSelectedCurrency = (amount) => {
+    const symbol = currencySymbols[currency] || "₹";
+    return `${symbol}${Number(amount).toLocaleString()}`;
   };
 
   const t = (key) => {
@@ -290,6 +295,7 @@ export const SettingsProvider = ({ children }) => {
       language, setLanguage, 
       theme, setTheme, toggleTheme,
       formatPrice, 
+      formatSelectedCurrency,
       toINR,
       currencySymbol: currencySymbols[currency],
       currencySymbols,

@@ -5,7 +5,7 @@ import { useSettings } from "../../context/SettingsContext";
 import "../Planner/plannerForm.css";
 
 function PlannerForm({ onPlanGenerated }) {
-  const { formatPrice, currency, setCurrency, currencySymbols, toINR } = useSettings();
+  const { formatPrice, formatSelectedCurrency, currency, setCurrency, currencySymbols, toINR } = useSettings();
   const loc = useLocation();
   const [step, setStep] = useState(1);
   const [city, setCity] = useState("Bengaluru");
@@ -94,7 +94,7 @@ function PlannerForm({ onPlanGenerated }) {
   ];
 
   const getEstimate = () => {
-    return Number(budget) || 0;
+    return Number(budget);
   };
 
   const formatWithSymbol = (val) => {
@@ -299,7 +299,7 @@ function PlannerForm({ onPlanGenerated }) {
       <div className="pf-footer-sleek">
         <div className="pf-estimate-box">
           <span className="pf-est-label">Est. Value</span>
-          <span className="pf-est-val">{formatPrice(getEstimate())}</span>
+          <span className="pf-est-val">{formatSelectedCurrency(getEstimate())}</span>
         </div>
         <div className="pf-btn-group">
           {step > 1 && (
