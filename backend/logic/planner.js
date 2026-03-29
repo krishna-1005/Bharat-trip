@@ -214,7 +214,8 @@ async function generatePlan({
           reason: generateReason(p, interests, budget > 5000 ? "medium" : "low", validPlaces.length),
           rating: generateRating(validPlaces.length),
           reviews: generateReviews(validPlaces.length),
-          tag: generateTag(p, validPlaces.length)
+          tag: generateTag(p, validPlaces.length),
+          priority: Math.round((p.score / 15) * 10) || 5 // Scale score to 1-10 priority
         });
         
         usedPlaceNames.add(p.name);

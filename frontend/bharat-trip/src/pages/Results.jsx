@@ -128,11 +128,86 @@ function Results() {
     };
   }, [isGenerating]);
 
+  /* ── ADAPTIVE LOGIC UTILS ── */
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  const reorderDayByDistance = (places) => {
+    if (places.length <= 1) return places;
+    const sorted = [places[0]];
+    const remaining = [...places.slice(1)];
+    while (remaining.length > 0) {
+      const last = sorted[sorted.length - 1];
+      let nearestIdx = 0;
+      let minDist = getDistance(last.lat, last.lng, remaining[0].lat, remaining[0].lng);
+      for (let i = 1; i < remaining.length; i++) {
+        const d = getDistance(last.lat, last.lng, remaining[i].lat, remaining[i].lng);
+        if (d < minDist) { minDist = d; nearestIdx = i; }
+      }
+      sorted.push(remaining.splice(nearestIdx, 1)[0]);
+    }
+    return sorted;
+  };
+
+  const handleSkip = (dayKey, placeName) => {
+    setPlan(prev => {
+      const newItinerary = { ...prev.itinerary };
+      newItinerary[dayKey].places = newItinerary[dayKey].places.filter(p => p.name !== placeName);
+      // Re-order and re-calc day cost
+      newItinerary[dayKey].places = reorderDayByDistance(newItinerary[dayKey].places);
+      newItinerary[dayKey].estimatedCost = newItinerary[dayKey].places.reduce((sum, p) => sum + (p.estimatedCost || 200), 0) + (newItinerary[dayKey].dayMealCost || 500);
+      
+      const newTotalCost = Object.values(newItinerary).reduce((sum, d) => sum + d.estimatedCost, 0);
+      return { ...prev, itinerary: newItinerary, totalTripCost: newTotalCost };
+    });
+  };
+
+  const handleRunningLate = () => {
+    if (!window.confirm("This will remove low-priority places to save time. Continue?")) return;
+    setPlan(prev => {
+      const newItinerary = { ...prev.itinerary };
+      Object.keys(newItinerary).forEach(dayKey => {
+        // Keep places with priority >= 7
+        newItinerary[dayKey].places = newItinerary[dayKey].places.filter(p => (p.priority || 5) >= 7);
+        newItinerary[dayKey].places = reorderDayByDistance(newItinerary[dayKey].places);
+      });
+      const newTotalCost = Object.values(newItinerary).reduce((sum, d) => sum + d.estimatedCost, 0);
+      return { ...prev, itinerary: newItinerary, totalTripCost: newTotalCost };
+    });
+  };
+
+  const handleRelaxMode = () => {
+    if (!window.confirm("This will limit daily stops to 3 for a more relaxed experience. Continue?")) return;
+    setPlan(prev => {
+      const newItinerary = { ...prev.itinerary };
+      Object.keys(newItinerary).forEach(dayKey => {
+        // Limit to top 3 priority places
+        newItinerary[dayKey].places = [...newItinerary[dayKey].places]
+          .sort((a, b) => (b.priority || 5) - (a.priority || 5))
+          .slice(0, 3);
+        newItinerary[dayKey].places = reorderDayByDistance(newItinerary[dayKey].places);
+      });
+      const newTotalCost = Object.values(newItinerary).reduce((sum, d) => sum + d.estimatedCost, 0);
+      return { ...prev, itinerary: newItinerary, totalTripCost: newTotalCost, pace: "Relaxed" };
+    });
+  };
+
   const optimizeItinerary = async () => {
     if (!plan || !plan.itinerary || isOptimizing) return;
     setIsOptimizing(true);
-    // Optimization logic here...
-    setTimeout(() => setIsOptimizing(false), 1500);
+    setPlan(prev => {
+      const newItinerary = { ...prev.itinerary };
+      Object.keys(newItinerary).forEach(dayKey => {
+        newItinerary[dayKey].places = reorderDayByDistance(newItinerary[dayKey].places);
+      });
+      return { ...prev, itinerary: newItinerary };
+    });
+    setTimeout(() => setIsOptimizing(false), 1000);
   };
 
   const handleResetProgress = () => {
@@ -243,7 +318,7 @@ function Results() {
           token = await auth.currentUser.getIdToken(true);
           localStorage.setItem("token", token);
         } catch (tokenErr) {
-          console.warn("Failed to get Firebase token, using stored token:", tokenErr);
+          console.warn("Firebase token refresh failed, using stored token", tokenErr);
         }
       }
 
@@ -323,8 +398,12 @@ function Results() {
         <div className="sidebar-scroll-content">
           {plan.summary && (
             <div className="plan-summary-card">
-              <h4 className="summary-title">Why this plan works</h4>
+              <h4 className="summary-title">Adaptive Intelligence</h4>
               <p className="summary-text">{plan.summary}</p>
+              <div className="adaptive-controls">
+                <button className="adaptive-btn late" onClick={handleRunningLate}>🏃 Running Late</button>
+                <button className="adaptive-btn relax" onClick={handleRelaxMode}>🧘 Relax Mode</button>
+              </div>
             </div>
           )}
 
@@ -384,7 +463,7 @@ function Results() {
               <div className="stops-container-premium">
                 {plan.itinerary[day].places.map((place, pIdx) => {
                   let globalIdx = 0;
-                  for (let i = 0; i < dIdx; i++) globalIdx += plan.itinerary[daysKeys[i]].places.length;
+                  for (let i = 0; i < dIdx; i++) globalIdx += (plan.itinerary[daysKeys[i]]?.places.length || 0);
                   const idx = globalIdx + pIdx;
                   const isVisited = idx < currentIndex;
                   const isCurrent = idx === currentIndex;
@@ -396,7 +475,12 @@ function Results() {
                         <div className="stop-top-row">
                           <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
                           <div className="stop-details-v2">
-                            <h4>{place.name}</h4>
+                            <div className="stop-title-row">
+                              <h4>{place.name}</h4>
+                              {!isVisited && (
+                                <button className="skip-btn" onClick={(e) => { e.stopPropagation(); handleSkip(day, place.name); }} title="Skip Place">✕</button>
+                              )}
+                            </div>
                             <div className="stop-trust-layer">
                               ⭐ {place.rating || "4.2"} • {typeof place.reviews === 'number' ? place.reviews.toLocaleString() : "1,200+"} reviews • <span className="trust-tag">{place.tag || "Popular Spot"}</span>
                             </div>
@@ -428,7 +512,7 @@ function Results() {
               <span className="budget-value">{formatPrice(totalTripCost)}</span>
             </div>
             <button className="save-journey-btn" onClick={handleSaveTrip} disabled={saving || saved}>
-              {saved ? "✓ Saved" : "Save to Profile"}
+              {saved ? "✓ Saved" : saving ? "Saving Journey..." : "Save to Profile"}
             </button>
           </div>
         </div>
