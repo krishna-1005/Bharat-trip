@@ -97,7 +97,7 @@ router.get("/trips", async (req, res) => {
 router.post("/trips", async (req, res) => {
   try {
     console.log("REQ USER:",req.user);
-    const { title, city, days, budget, interests, itinerary, totalCost, image, location, dates } = req.body;
+    const { title, city, days, budget, interests, itinerary, totalCost, totalBudget, remainingBudget, perDayBudget, image, location, dates } = req.body;
 
     if (!title || !days)
       return res.status(400).json({ error: "title and days are required." });
@@ -114,7 +114,10 @@ router.post("/trips", async (req, res) => {
 
       itinerary: Object.values(itinerary || {}),
 
-      totalTripCost: totalCost || 0
+      totalTripCost: totalCost || 0,
+      totalBudget,
+      remainingBudget,
+      perDayBudget
 
     });
 

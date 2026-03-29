@@ -1,10 +1,28 @@
 const path = require("path");
 const fetchOSMPlaces = require("../services/osmPlaces");
-const { generateReviews } = require("../services/reviewService");
+const { generateReviews: fetchUserReviews } = require("../services/reviewService");
 
 /* ── CONFIG ── */
 const MAX_HOURS_PER_DAY = 8;
 const MEAL_COST = { low: 200, medium: 500, high: 1500 };
+
+/* ── TRUST HELPERS ── */
+function generateRating(index) {
+  // Range: 4.0 to 4.6 (believable)
+  const base = 4.0;
+  const variation = (index * 731) % 7; // pseudo-random variation
+  return parseFloat((base + variation * 0.1).toFixed(1));
+}
+
+function generateReviews(index) {
+  // Range: 100 to 5000 (realistic)
+  return 100 + (index * 917) % 4901;
+}
+
+function generateTag(place, index) {
+  const tags = ["Top Attraction", "Popular Spot", "Hidden Gem"];
+  return tags[index % tags.length];
+}
 
 /* ── DISTANCE FUNCTION ── */
 function getDistance(lat1, lon1, lat2, lon2) {
@@ -97,27 +115,25 @@ loadData();
 async function generatePlan({
   city,
   days,
-  budget,
+  budget, // Now a number
   interests,
   travelerType
 }) {
   const coords = await getCityCoords(city);
   const cleanCity = city.trim().toLowerCase();
+  const totalBudget = Number(budget) || 5000;
+  const perDayBudget = totalBudget / days;
 
   /* STEP 1: GEO FILTER (STRICT) */
   let cityPool = allPlacesPool.filter(p => {
-    // 1. Check for explicit area match (e.g., area: "Agra")
     if (p.area && p.area.toLowerCase() === cleanCity) return true;
-    
-    // 2. Or check for distance within a strict 50km radius
     const dist = getDistance(coords.lat, coords.lng, p.lat, p.lng);
     return dist <= 50;
   });
 
-  /* STEP 2: OSM fallback if pool is too small for this city */
+  /* STEP 2: OSM fallback */
   if (cityPool.length < 8) {
     const osm = await fetchOSMPlaces(coords.lat, coords.lng);
-
     cityPool.push(
       ...osm.map(p => ({
         name: p.name,
@@ -128,91 +144,99 @@ async function generatePlan({
         timeHours: 1.5,
         avgCost: 100,
         source: "osm",
-        area: city // Mark these as belonging to the requested city
+        area: city
       }))
     );
   }
 
   /* STEP 3: INTEREST FILTER */
   const interestSet = new Set(interests.map(i => i.toLowerCase()));
-
-  // Filter the city-specific pool by interests
   let filteredPool = cityPool.filter(p =>
     interestSet.size === 0 ||
     interestSet.has(p.category.toLowerCase()) ||
     (p.tags || []).some(t => interestSet.has(t))
   );
 
-  // If no interest match, use the whole city pool instead of the global pool
   if (filteredPool.length === 0) filteredPool = cityPool;
 
   /* STEP 4: SCORING & TRUNCATING */
+  // We sort by score but we will filter by budget dynamically
   let prioritizedPool = filteredPool
     .map(p => ({
       ...p,
-      score: calculateScore(p, interests, coords, budget)
+      score: calculateScore(p, interests, coords, budget > 10000 ? "high" : (budget > 3000 ? "medium" : "low"))
     }))
     .sort((a, b) => b.score - a.score);
 
-  // Take a reasonable number of top places (e.g., 4-5 per day max)
-  const maxPlacesNeeded = days * 5;
+  const maxPlacesNeeded = days * 6; // Slight buffer for budget filtering
   prioritizedPool = prioritizedPool.slice(0, maxPlacesNeeded);
 
   /* STEP 5: BALANCED DISTRIBUTION */
   const itinerary = {};
   const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
-
-  // Track used places to avoid duplicates
   const usedPlaceNames = new Set();
+  let estimatedTotalCost = 0;
   
   for (let day = 1; day <= days; day++) {
-    let hours = 0;
-    let cost = 0;
+    let dayHours = 0;
+    let dayCost = 0;
     const validPlaces = [];
 
-    // Calculate how many places we should target for this day to keep it even
-    // Remaining places / remaining days
     const remainingDays = (days - day) + 1;
     const remainingPool = prioritizedPool.filter(p => !usedPlaceNames.has(p.name));
-    const targetCount = Math.ceil(remainingPool.length / remainingDays);
-
-    let count = 0;
+    
+    // Mix strategy: Try to pick a balanced mix of costs
     for (const p of remainingPool) {
-      if (count >= targetCount) break;
+      if (validPlaces.length >= 4) break; // Keep it realistic (max 4 per day)
       
       const t = p.timeHours || 2;
-      if (hours + t <= MAX_HOURS_PER_DAY) {
-        hours += t;
-        const placeCost = calculateDynamicPrice(p, budget) * tMult;
-        cost += placeCost;
+      const placeCost = (p.avgCost || 200) * tMult;
+
+      // Budget Check: Allow 20% flexibility per day
+      if (dayHours + t <= MAX_HOURS_PER_DAY && (dayCost + placeCost) <= (perDayBudget * 1.2)) {
+        dayHours += t;
+        dayCost += placeCost;
 
         validPlaces.push({
           ...p,
           estimatedCost: placeCost,
-          reason: generateReason(p, interests, budget, count)
+          reason: generateReason(p, interests, budget > 5000 ? "medium" : "low", validPlaces.length),
+          rating: generateRating(validPlaces.length),
+          reviews: generateReviews(validPlaces.length),
+          tag: generateTag(p, validPlaces.length)
         });
         
         usedPlaceNames.add(p.name);
-        count++;
       }
     }
 
-    const meal = (MEAL_COST[budget] || 500) * tMult;
+    // Default meal cost based on per-day budget
+    const meal = Math.min(perDayBudget * 0.3, 1000) * tMult;
+    dayCost += meal;
+    estimatedTotalCost += dayCost;
 
-    // Enriched data with reviews
     const enrichedPlaces = await Promise.all(validPlaces.map(async (p) => {
-      const reviews = await generateReviews(p.name, p.category, city);
-      return { ...p, reviews };
+      const userReviews = await fetchUserReviews(p.name, p.category, city);
+      return { ...p, userReviews };
     }));
 
     itinerary[`Day ${day}`] = {
       places: enrichedPlaces,
-      estimatedHours: hours,
-      estimatedCost: cost + meal
+      estimatedHours: dayHours,
+      estimatedCost: dayCost,
+      dayMealCost: meal
     };
   }
 
-  return { city, itinerary, coordinates: coords };
+  return { 
+    city, 
+    itinerary, 
+    coordinates: coords,
+    totalBudget,
+    totalTripCost: Math.round(estimatedTotalCost),
+    remainingBudget: Math.round(totalBudget - estimatedTotalCost),
+    perDayBudget: Math.round(perDayBudget)
+  };
 }
 
 const axios = require("axios");

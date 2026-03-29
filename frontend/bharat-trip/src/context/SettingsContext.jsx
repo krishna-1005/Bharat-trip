@@ -223,13 +223,27 @@ export const SettingsProvider = ({ children }) => {
   const currencySymbols = {
     INR: "₹",
     USD: "$",
-    EUR: "€"
+    EUR: "€",
+    GBP: "£",
+    JPY: "¥",
+    AUD: "A$",
+    CAD: "C$"
   };
 
   const conversionRates = {
     INR: 1,
     USD: 0.012,
-    EUR: 0.011
+    EUR: 0.011,
+    GBP: 0.0094,
+    JPY: 1.82,
+    AUD: 0.018,
+    CAD: 0.016
+  };
+
+  // Inverse rates to convert ANY currency back to INR
+  const toINR = (amount, fromCurrency) => {
+    const rate = conversionRates[fromCurrency] || 1;
+    return amount / rate;
   };
 
   useEffect(() => {
@@ -260,8 +274,9 @@ export const SettingsProvider = ({ children }) => {
 
   const formatPrice = (priceInINR) => {
     const rate = conversionRates[currency] || 1;
-    const converted = (priceInINR * rate).toFixed(currency === "INR" ? 0 : 2);
-    return `${currencySymbols[currency] || "₹"}${converted}`;
+    const converted = (priceInINR * rate);
+    const formatted = currency === "JPY" ? Math.round(converted) : converted.toFixed(currency === "INR" ? 0 : 2);
+    return `${currencySymbols[currency] || "₹"}${Number(formatted).toLocaleString()}`;
   };
 
   const t = (key) => {
@@ -275,7 +290,9 @@ export const SettingsProvider = ({ children }) => {
       language, setLanguage, 
       theme, setTheme, toggleTheme,
       formatPrice, 
+      toINR,
       currencySymbol: currencySymbols[currency],
+      currencySymbols,
       t
     }}>
       {children}

@@ -38,8 +38,8 @@ function HoverPlaceCard({ place, city }) {
             Verified Reviews
           </h4>
           <div className="reviews-list">
-            {place.reviews && place.reviews.length > 0 ? (
-              place.reviews.map((rev, idx) => (
+            {place.userReviews && place.userReviews.length > 0 ? (
+              place.userReviews.map((rev, idx) => (
                 <div key={idx} className="review-item">
                   <div className="review-header">
                     <span className="review-author">{rev.author}</span>

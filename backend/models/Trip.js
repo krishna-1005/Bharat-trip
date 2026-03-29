@@ -6,7 +6,10 @@ const placeSchema = new mongoose.Schema({
   lng: Number,
   estimatedCost: Number,
   category: String,
-  reviews: [{
+  rating: Number,
+  reviews: Number,
+  tag: String,
+  userReviews: [{
     author: String,
     rating: Number,
     comment: String
@@ -48,7 +51,11 @@ const tripSchema = new mongoose.Schema({
   totalTripCost: {
     type: Number,
     default: 0
-  }
+  },
+
+  totalBudget: Number,
+  remainingBudget: Number,
+  perDayBudget: Number
 
 }, { timestamps: true });
 

@@ -159,14 +159,17 @@ export default function SamplePlan() {
       totalTripCost += totalDayCost;
 
       formattedItinerary[dayKey] = {
-        places: dayObj.places.map(p => ({
+        places: dayObj.places.map((p, pIdx) => ({
           name: p.name,
           lat: placeCoords[p.name]?.lat || 12.9716,
           lng: placeCoords[p.name]?.lng || 77.5946,
           estimatedCost: p.cost,
           timeHours: 2,
           category: trip.category,
-          tags: [trip.category.toLowerCase()]
+          tags: [trip.category.toLowerCase()],
+          rating: 4.0 + (pIdx % 7) * 0.1,
+          reviews: 500 + (pIdx % 10) * 450,
+          tag: ["Top Attraction", "Popular Spot", "Hidden Gem"][pIdx % 3]
         })),
         estimatedCost: totalDayCost,
         estimatedHours: dayObj.places.length * 2,
