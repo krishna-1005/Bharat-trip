@@ -236,10 +236,29 @@ function Results() {
         setSaving(false);
         return;
       }
-      const token = await auth.currentUser.getIdToken(true);
+
+      let token = localStorage.getItem("token");
+      if (auth.currentUser) {
+        try {
+          token = await auth.currentUser.getIdToken(true);
+          localStorage.setItem("token", token);
+        } catch (tokenErr) {
+          console.warn("Failed to get Firebase token, using stored token:", tokenErr);
+        }
+      }
+
+      if (!token) {
+        alert("Authentication error. Please login again.");
+        setSaving(false);
+        return;
+      }
+
       const res = await fetch(`${API}/api/profile/trips`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { 
+          "Content-Type": "application/json", 
+          Authorization: `Bearer ${token}` 
+        },
         body: JSON.stringify({
           title: tripTitle || `${totalDays}-Day ${plan.city || "India"} Trip`,
           city: plan.city || "Bangalore",
@@ -256,14 +275,23 @@ function Results() {
           summary: plan.summary
         })
       });
+
       if (res.ok) {
         setSaved(true);
-        setTimeout(() => navigate("/profile"), 1000);
+        setTimeout(() => navigate("/profile"), 1500);
       } else {
+        const errorData = await res.json().catch(() => ({}));
+        if (res.status === 401) {
+          alert("Your session has expired. Please log in again.");
+          navigate("/login");
+        } else {
+          alert(`Failed to save trip: ${errorData.error || "Unknown server error"}`);
+        }
         setSaving(false);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Save trip error:", err);
+      alert("Network error. Please try again.");
       setSaving(false);
     }
   };

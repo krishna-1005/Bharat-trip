@@ -55,7 +55,17 @@ const tripSchema = new mongoose.Schema({
 
   totalBudget: Number,
   remainingBudget: Number,
-  perDayBudget: Number
+  perDayBudget: Number,
+
+  summary: String,
+  travelerType: String,
+  pace: String,
+  
+  status: {
+    type: String,
+    enum: ["upcoming", "ongoing", "completed"],
+    default: "upcoming"
+  }
 
 }, { timestamps: true });
 

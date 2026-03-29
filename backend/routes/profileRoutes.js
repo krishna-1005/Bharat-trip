@@ -96,35 +96,41 @@ router.get("/trips", async (req, res) => {
 /* POST /api/profile/trips  — save a new trip (from planner) */
 router.post("/trips", async (req, res) => {
   try {
-    console.log("REQ USER:",req.user);
-    const { title, city, days, budget, interests, itinerary, totalCost, totalBudget, remainingBudget, perDayBudget, image, location, dates } = req.body;
+    const { 
+      title, city, days, budget, interests, itinerary, 
+      totalCost, totalBudget, remainingBudget, perDayBudget, 
+      travelerType, pace, summary 
+    } = req.body;
 
     if (!title || !days)
       return res.status(400).json({ error: "title and days are required." });
 
+    // Correctly map itinerary objects to include the day label if missing
+    const formattedItinerary = Object.entries(itinerary || {}).map(([dayLabel, dayData]) => ({
+      day: dayLabel,
+      ...dayData
+    }));
+
     const trip = await Trip.create({
-
       userId: req.user._id,
-
       title: title || "Custom Trip",
-
       destination: city || "Unknown",
-
       days: days,
-
-      itinerary: Object.values(itinerary || {}),
-
+      itinerary: formattedItinerary,
       totalTripCost: totalCost || 0,
       totalBudget,
       remainingBudget,
-      perDayBudget
-
+      perDayBudget,
+      travelerType,
+      pace,
+      summary,
+      status: "upcoming"
     });
 
     res.status(201).json({ message: "Trip saved.", trip });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error." });
+    console.error("SAVE TRIP ERROR:", err);
+    res.status(500).json({ error: "Server error saving trip." });
   }
 });
 
