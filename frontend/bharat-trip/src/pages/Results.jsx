@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import MapView from "../components/Map/MapView";
+import GuidancePanel from "../components/Map/GuidancePanel";
 import { DAY_COLORS } from "../constants/dayColors";
 import PlaceImage from "../components/PlaceImage";
 import "./results.css";
@@ -28,6 +29,20 @@ function Results() {
     return saved ? parseInt(saved, 10) : 0;
   });
   const [userLocation, setUserLocation] = useState(null);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+
+  const optimizeItinerary = async () => {
+    if (!plan || !plan.itinerary || isOptimizing) return;
+    setIsOptimizing(true);
+    // ... rest of optimize logic ...
+  };
+
+  const handleResetProgress = () => {
+    if (window.confirm("Are you sure you want to reset your trip progress?")) {
+      setCurrentIndex(0);
+      localStorage.setItem("tripCurrentIndex", 0);
+    }
+  };
 
   useEffect(() => {
     let watchId = null;
@@ -61,6 +76,14 @@ function Results() {
 
   useEffect(() => {
     localStorage.setItem("tripCurrentIndex", currentIndex);
+    
+    // Autoscroll to the active card
+    setTimeout(() => {
+      const activeCard = document.querySelector(".premium-stop-card-v2.active");
+      if (activeCard) {
+        activeCard.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
   }, [currentIndex]);
 
   const allPlaces = useMemo(() => {
@@ -103,8 +126,11 @@ function Results() {
       fetchSharedTrip(sharedTripId);
     } else if (loc.state?.plan) {
       setPlan(loc.state.plan);
-      setCurrentIndex(0);
-      localStorage.setItem("tripCurrentIndex", 0);
+      // Only reset if it's explicitly a NEWLY generated plan, not a reload
+      if (loc.state?.isNew) {
+        setCurrentIndex(0);
+        localStorage.setItem("tripCurrentIndex", 0);
+      }
       setLoading(false);
     } else {
       const savedPlan = localStorage.getItem("tripPlan");
@@ -222,6 +248,13 @@ function Results() {
               <span className="meta-pill">✨ {plan.travelerType || "Solo"}</span>
               <span className="meta-pill">⚡ {plan.pace || "Moderate"} Pace</span>
               <span className="meta-pill">📅 {totalDays} Days</span>
+              <button 
+                className={`meta-pill optimize-pill ${isOptimizing ? "loading" : ""}`}
+                onClick={optimizeItinerary}
+                disabled={isOptimizing}
+              >
+                {isOptimizing ? "Optimizing..." : "🚀 Optimize Route"}
+              </button>
             </div>
           </div>
         </div>
@@ -231,7 +264,14 @@ function Results() {
           <div className="journey-progress-card">
             <div className="progress-header">
               <span className="progress-label">Journey Progress</span>
-              <span className="progress-val">{progressPercent}%</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                {currentIndex > 0 && (
+                  <button className="reset-progress-btn" onClick={handleResetProgress}>
+                    Reset
+                  </button>
+                )}
+                <span className="progress-val">{progressPercent}%</span>
+              </div>
             </div>
             <div className="progress-track-premium">
               <div className="progress-fill-premium" style={{ width: `${progressPercent}%` }}></div>
@@ -334,6 +374,19 @@ function Results() {
           setCurrentIndex={setCurrentIndex}
           userLocation={userLocation}
         />
+
+        {/* Guidance Overlay */}
+        {isGuidanceMode && (
+          <GuidancePanel 
+            currentPlace={allPlaces[currentIndex]}
+            nextPlace={allPlaces[currentIndex + 1]}
+            onNext={() => setCurrentIndex(prev => prev + 1)}
+            isLast={currentIndex >= allPlaces.length}
+            userLocation={userLocation}
+            currentIndex={currentIndex}
+            totalPlaces={allPlaces.length}
+          />
+        )}
 
         {/* Floating Map UI */}
         <div className="floating-map-controls">

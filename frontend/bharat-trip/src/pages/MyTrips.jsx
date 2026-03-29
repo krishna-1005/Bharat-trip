@@ -1,6 +1,5 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { AuthContext } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
 import PlaceImage from "../components/PlaceImage";
@@ -47,7 +46,7 @@ export default function MyTrips() {
         days: t.days,
         totalCost: t.totalTripCost,
         itinerary: t.itinerary,
-        img: t.image || "https://images.unsplash.com/photo-1580752300992-559f8e0734e0?w=600&q=80",
+        image: t.image,
       }));
       setDbTrips(formatted);
     } catch (err) {
@@ -79,8 +78,6 @@ export default function MyTrips() {
       days: trip.days,
       itinerary: Object.keys(itineryObj).length > 0 ? itineryObj : trip.itinerary,
       totalTripCost: trip.totalCost,
-      travelerType: trip.travelerType,
-      pace: trip.pace,
       isSaved: true
     };
     localStorage.setItem("tripPlan", JSON.stringify(planData));
@@ -101,7 +98,6 @@ export default function MyTrips() {
         console.log('Error sharing:', err);
       }
     } else {
-      // Fallback: Copy to clipboard
       try {
         await navigator.clipboard.writeText(shareUrl);
         setShareStatus(trip.id);
@@ -112,55 +108,53 @@ export default function MyTrips() {
     }
   };
 
-  const deleteTrip = async (id) => {
-    if (!window.confirm("Delete this trip?")) return;
+  const deleteTrip = async (e, id) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this journey?")) return;
     try {
       const token = user.token || localStorage.getItem("token");
       const res = await fetch(`${API}/api/profile/trips/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.error || "Delete failed");
-        return;
+      if (res.ok) {
+        setDbTrips((prev) => prev.filter((t) => t.id !== id));
       }
-      setDbTrips((prev) => prev.filter((t) => t.id !== id));
     } catch (err) {
       console.error(err);
     }
   };
 
   return (
-    <div className="page pro-page">
+    <div className="pro-page">
       <div className="pro-body">
         <header className="pro-hero">
           <div className="pro-hero-inner">
             <div className="pro-user-info">
-              <h1 className="pro-name">My Saved Trips</h1>
-              <p className="pro-bio">Relive your past adventures and planned getaways.</p>
+              <h1 className="pro-name">My Journeys</h1>
+              <p className="pro-bio">Your personal collection of world-class travel plans.</p>
             </div>
             <button className="btn-premium primary" onClick={() => navigate("/planner")}>
-              + Plan New Adventure
+              + Create New Plan
             </button>
           </div>
         </header>
 
-        <section className="trips-section">
-          <div className="section-header" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Your Itineraries ({dbTrips.length})</h2>
+        <section className="pro-section">
+          <div className="section-header">
+            <h2>Saved Itineraries ({dbTrips.length})</h2>
           </div>
 
           {loading ? (
-            <div className="loading-state" style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Loading your adventures...</p>
+            <div style={{ textAlign: 'center', padding: '60px' }}>
+              <p>Fetching your travel archives...</p>
             </div>
           ) : dbTrips.length === 0 ? (
-            <div className="empty-state" style={{ textAlign: 'center', padding: '80px 20px', background: 'var(--bg-panel)', borderRadius: '24px', border: '1px solid var(--border-main)' }}>
-              <span style={{ fontSize: '48px' }}>🗺️</span>
-              <h3 style={{ marginTop: '16px', fontSize: '1.25rem' }}>No trips found</h3>
-              <p style={{ color: 'var(--text-dim)', marginBottom: '24px' }}>You haven't saved any trips yet. Start planning your first journey!</p>
-              <button className="pro-btn-primary" onClick={() => navigate("/planner")}>
+            <div className="pro-empty">
+              <div className="pro-empty-icon">🗺️</div>
+              <h3>No journeys found</h3>
+              <p>You haven't saved any travel plans yet. Ready to design your first adventure?</p>
+              <button className="btn-premium primary" style={{ marginTop: '12px' }} onClick={() => navigate("/planner")}>
                 Start Planning
               </button>
             </div>
@@ -168,13 +162,13 @@ export default function MyTrips() {
             <div className="pro-trips-grid">
               {dbTrips.map((trip) => (
                 <div className="pro-trip-card" key={trip.id}>
-                  <div className="pro-trip-img-wrap">
+                  <div className="pro-trip-img-wrap" onClick={() => handleViewOnMap(trip)} style={{ cursor: 'pointer' }}>
                     <PlaceImage 
                       placeName={trip.title.includes("Trip") ? trip.location : trip.title} 
                       city={trip.location} 
                       className="pro-trip-img" 
                     />
-                    <div className="pro-trip-badge badge-upcoming">{trip.days} Days</div>
+                    <div className="pro-trip-badge">{trip.days} Days</div>
                   </div>
                   <div className="pro-trip-body">
                     <h3 className="pro-trip-title">{trip.title}</h3>
@@ -191,7 +185,7 @@ export default function MyTrips() {
                         {shareStatus === trip.id ? "✅ Linked" : "🔗 Share"}
                       </button>
 
-                      <button className="pro-del-btn" title="Delete" onClick={() => deleteTrip(trip.id)}>
+                      <button className="pro-del-btn" title="Delete" onClick={(e) => deleteTrip(e, trip.id)}>
                         🗑️
                       </button>
                     </div>

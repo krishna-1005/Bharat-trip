@@ -1,7 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { useSettings } from "../context/SettingsContext";
 import MinimalReviewSection from "../components/MinimalReviewSection";
+import PlaceImage from "../components/PlaceImage";
 import "./home.css";
 
 import ThreeScene from "../components/ThreeScene";
@@ -86,6 +88,182 @@ const FeatureCard = ({ icon, title, desc }) => (
     <p>{desc}</p>
   </motion.div>
 );
+
+const TripPulse = () => {
+  const [activeTrips, setActiveTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchActivity = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/public/recent-activity`);
+      const data = await res.json();
+      if (data.activity && data.activity.length > 0) {
+        // Format time to relative string
+        const formatted = data.activity.map(a => {
+          const diff = Math.floor((new Date() - new Date(a.time)) / 60000);
+          let timeStr = "Just now";
+          if (diff > 0 && diff < 60) timeStr = `${diff}m ago`;
+          else if (diff >= 60 && diff < 1440) timeStr = `${Math.floor(diff / 60)}h ago`;
+          else if (diff >= 1440) timeStr = `${Math.floor(diff / 1440)}d ago`;
+          
+          return { ...a, timeStr };
+        });
+        setActiveTrips(formatted.slice(0, 3));
+      }
+    } catch (err) {
+      console.error("Error fetching live pulse:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchActivity();
+    const interval = setInterval(fetchActivity, 15000); // Refresh every 15s
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading && activeTrips.length === 0) return null;
+  if (!loading && activeTrips.length === 0) return null;
+
+  return (
+    <section className="pulse-section container">
+      <div className="pulse-header">
+        <div className="pulse-live-tag">
+          <span className="pulse-dot"></span>
+          REAL-TIME ACTIVITY
+        </div>
+        <h2>The Pulse of Bharat Trip</h2>
+        <p>Actual destinations being explored by our community right now.</p>
+      </div>
+
+      <div className="pulse-grid">
+        <AnimatePresence mode="popLayout">
+          {activeTrips.map((trip) => (
+            <motion.div
+              key={trip.id}
+              layout
+              initial={{ opacity: 0, x: -20, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="pulse-card"
+            >
+              <div className="pulse-card-icon">✨</div>
+              <div className="pulse-card-content">
+                <div className="pulse-user-info">
+                  <strong>{trip.user}</strong> is exploring <span>{trip.type}</span> spots
+                </div>
+                <div className="pulse-location-info">
+                  <h3>{trip.city}</h3>
+                  <span className="pulse-time">{trip.timeStr}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        
+        <div className="pulse-stats-mini">
+          <div className="mini-stat">
+            <span className="stat-num">Live</span>
+            <span className="stat-lab">Database Feed</span>
+          </div>
+          <div className="mini-stat">
+            <span className="stat-num">Verified</span>
+            <span className="stat-lab">User Interest</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const FeaturedTrips = () => {
+  const [trips, setTrips] = useState([]);
+  const navigate = useNavigate();
+  const { formatPrice } = useSettings();
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/public/featured-trips`);
+        const data = await res.json();
+        if (data.trips) setTrips(data.trips);
+      } catch (err) {
+        console.error("Featured trips error:", err);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
+  const handleClone = (trip) => {
+    const itineryObj = {};
+    if (Array.isArray(trip.itinerary)) {
+      trip.itinerary.forEach((d, idx) => {
+        const key = d.day || `Day ${idx + 1}`;
+        itineryObj[key] = {
+          places: d.places,
+          estimatedCost: d.estimatedCost,
+          estimatedHours: d.estimatedHours,
+          color: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"][idx % 4]
+        };
+      });
+    }
+    const planData = {
+      city: trip.destination,
+      days: trip.days,
+      itinerary: Object.keys(itineryObj).length > 0 ? itineryObj : trip.itinerary,
+      totalTripCost: trip.cost,
+      isCloned: true
+    };
+    localStorage.setItem("tripPlan", JSON.stringify(planData));
+    navigate("/results", { state: { plan: planData, isNew: true } });
+  };
+
+  if (trips.length === 0) return null;
+
+  return (
+    <section className="featured-section container">
+      <div className="section-header-v2">
+        <div className="sh-left">
+          <span className="premium-badge-v2">COMMUNITY MASTERPIECES</span>
+          <h2>Top Rated Itineraries</h2>
+          <p>Hand-crafted journeys by our elite travelers. Clone and customize your own.</p>
+        </div>
+        <button className="sh-btn" onClick={() => navigate('/destinations')}>Explore More →</button>
+      </div>
+
+      <div className="featured-grid">
+        {trips.map((trip, i) => (
+          <motion.div 
+            key={trip.id}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1, duration: 0.6 }}
+            className="featured-card"
+          >
+            <div className="f-card-img">
+              <PlaceImage placeName={trip.destination} city={trip.destination} />
+              <div className="f-card-badge">{trip.days} Days</div>
+              <div className="f-card-saves">🔖 {trip.saves} saves</div>
+            </div>
+            <div className="f-card-content">
+              <div className="f-card-meta">
+                <span className="f-dest">📍 {trip.destination}</span>
+                <span className="f-price">{formatPrice(trip.cost)}</span>
+              </div>
+              <h3>{trip.title}</h3>
+              <button className="f-clone-btn" onClick={() => handleClone(trip)}>
+                <span className="btn-text">Clone this Journey</span>
+                <span className="btn-icon">⚡</span>
+              </button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -271,6 +449,10 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      <TripPulse />
+
+      <FeaturedTrips />
 
       <section id="destinations" className="container" ref={destRef}>
         <div className="section-header">

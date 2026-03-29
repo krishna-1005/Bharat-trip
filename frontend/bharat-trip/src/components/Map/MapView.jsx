@@ -20,19 +20,18 @@ import PlaceImage from "../PlaceImage";
 import L from "leaflet";
 import GuidancePanel from "./GuidancePanel";
 
-// Create a special icon for user location
-const userIcon = L.divIcon({
+// Create a special icon for user location with heading support
+const createUserIcon = (heading) => L.divIcon({
   className: "custom-pin-container",
   html: `
-    <div class="pin-wrapper active" style="color: #3b82f6;">
-      <div class="pin-main" style="background-color: #3b82f6; border-color: #fff;">
-        <div class="pin-inner-dot" style="background-color: #fff;"></div>
-      </div>
-      <div class="pin-drop-shadow"></div>
+    <div class="user-location-wrapper">
+      <div class="user-heading-arrow" style="transform: rotate(${heading || 0}deg); display: ${heading !== null ? 'block' : 'none'};"></div>
+      <div class="user-pulse"></div>
+      <div class="user-dot-main"></div>
     </div>
   `,
-  iconSize: [30, 42],
-  iconAnchor: [15, 42]
+  iconSize: [40, 40],
+  iconAnchor: [20, 20]
 });
 
 /* ---------- ZOOM CONTROLS ---------- */
@@ -289,15 +288,14 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
                   const isVisited = pGlobalIdx < currentIndex;
                   const isCurrent = pGlobalIdx === currentIndex;
 
-                  if (isVisited) return null; // Hide visited markers as requested
-
                   return (
                     <Marker
                       key={`${day}-${i}`}
                       position={[p.lat, p.lng]}
                       icon={createLocationIcon(
                         isCurrent ? "#3b82f6" : DAY_COLORS[idx],
-                        isCurrent || activeDay === idx + 1
+                        isCurrent || activeDay === idx + 1,
+                        isVisited
                       )}
                       eventHandlers={{
                         mouseover: () => onHover(p),
@@ -315,28 +313,28 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
         {isGuidanceMode && (
           <>
             {allPlaces.map((p, i) => {
-              // Dim past markers, highlight current and next, dim future markers
+              const isVisited = i < currentIndex;
+              const isCurrent = i === currentIndex;
+              const isNext = i === currentIndex + 1;
+              
               let color = "rgba(148, 163, 184, 0.3)"; // Dim gray for future
               let isActive = false;
-              let isVisible = true;
 
-              if (i < currentIndex) {
-                isVisible = false; // Hide past markers
-              } else if (i === currentIndex) {
+              if (isVisited) {
+                color = "#10b981"; // Green for visited
+              } else if (isCurrent) {
                 color = "#3b82f6"; // Blue for current
                 isActive = true;
-              } else if (i === currentIndex + 1) {
-                color = "#10b981"; // Green for next
+              } else if (isNext) {
+                color = "#10b981"; // Green for next preview
                 isActive = true;
               }
-
-              if (!isVisible) return null;
 
               return (
                 <Marker
                   key={`guidance-${i}`}
                   position={[p.lat, p.lng]}
-                  icon={createLocationIcon(color, isActive)}
+                  icon={createLocationIcon(color, isActive, isVisited)}
                 />
               );
             })}
@@ -360,7 +358,10 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
         )}
 
         {userLocation && (
-          <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
+          <Marker 
+            position={[userLocation.lat, userLocation.lng]} 
+            icon={createUserIcon(userLocation.heading)}
+          >
             <Tooltip direction="top" offset={[0, -10]} opacity={1}>
               You are here
             </Tooltip>

@@ -1,8 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import { AuthContext } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
+import PlaceImage from "../components/PlaceImage";
 import "../styles/profile.css";
 
 const API = import.meta.env.VITE_API_URL;
@@ -45,7 +45,6 @@ export default function Profile() {
         days: t.days,
         totalCost: t.totalTripCost,
         itinerary: t.itinerary,
-        img: t.image || "https://images.unsplash.com/photo-1580752300992-559f8e0734e0?w=600&q=80",
       }));
       setDbTrips(formatted);
     } catch (err) {
@@ -59,7 +58,7 @@ export default function Profile() {
     if (user) fetchTrips();
   }, [user]);
 
-  const handleViewOnMap = (trip) => {
+  const handleViewTrip = (trip) => {
     const itineryObj = {};
     if (Array.isArray(trip.itinerary)) {
       trip.itinerary.forEach((d, idx) => {
@@ -83,46 +82,36 @@ export default function Profile() {
     navigate("/results", { state: { plan: planData } });
   };
 
-  const deleteTrip = async (id) => {
-    if (!window.confirm("Delete this trip?")) return;
-    try {
-      const token = user.token || localStorage.getItem("token");
-      const res = await fetch(`${API}/api/profile/trips/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        setDbTrips((prev) => prev.filter((t) => t.id !== id));
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const name = user?.name || user?.email?.split("@")[0] || "Explorer";
   const initial = name.charAt(0).toUpperCase();
 
   const stats = [
-    { label: "Planned", value: dbTrips.length, icon: "🗺️", color: "#3b82f6" },
-    { label: "Visits", value: new Set(dbTrips.map(t => t.location)).size, icon: "📍", color: "#10b981" },
-    { label: "Saves", value: 0, icon: "🔖", color: "#8b5cf6" },
+    { label: "Trips Planned", value: dbTrips.length, icon: "🗺️", color: "#3b82f6" },
+    { label: "Cities Explored", value: new Set(dbTrips.map(t => t.location)).size, icon: "📍", color: "#10b981" },
+    { label: "Global Ranking", value: "Top 5%", icon: "🏆", color: "#f59e0b" },
   ];
 
   return (
-    <div className="page pro-page">
+    <div className="pro-page">
       <div className="pro-body">
         <header className="pro-hero">
           <div className="pro-hero-inner">
             <div className="pro-avatar">{initial}</div>
             <div className="pro-user-info">
               <h1 className="pro-name">{name}</h1>
-              <p className="pro-bio">Ready for your next adventure</p>
+              <p className="pro-bio">Adventurer • Explorer • Storyteller</p>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                <span className="pro-trip-badge" style={{ position: 'static', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa' }}>Premium Member</span>
+                <span className="pro-trip-badge" style={{ position: 'static', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}>Verified Traveler</span>
+              </div>
             </div>
             <div className="pro-actions">
               <button className="btn-premium primary" onClick={() => navigate("/planner")}>
-                + New Trip
+                + New Journey
               </button>
-              <button className="btn-premium outline" style={{ width: '44px', height: '44px', padding: 0 }} onClick={() => navigate("/settings")}>⚙️</button>
+              <button className="btn-premium outline" style={{ width: '56px', height: '56px', padding: 0 }} onClick={() => navigate("/settings")}>
+                ⚙️
+              </button>
             </div>
           </div>
         </header>
@@ -141,33 +130,44 @@ export default function Profile() {
 
         <section className="pro-section">
           <div className="section-header">
-            <h2>Recent Journeys</h2>
-            <button className="view-all-btn" onClick={() => navigate("/trips")}>My Trips ›</button>
+            <h2>Recent Adventures</h2>
+            <button className="view-all-btn" onClick={() => navigate("/trips")}>See All Trips →</button>
           </div>
 
-          <div className="pro-trips-grid">
-            {loading ? (
-              <p>Loading trips...</p>
-            ) : dbTrips.length === 0 ? (
-              <div className="pro-empty">
-                <p>No trips yet. Your journey begins here.</p>
-                <button onClick={() => navigate("/planner")}>Plan Now</button>
-              </div>
-            ) : (
-              dbTrips.slice(0, 3).map((trip) => (
-                <div className="pro-trip-card" key={trip.id} onClick={() => handleViewOnMap(trip)}>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '40px' }}>
+              <p>Discovering your journeys...</p>
+            </div>
+          ) : dbTrips.length === 0 ? (
+            <div className="pro-empty">
+              <div className="pro-empty-icon">🌍</div>
+              <h3>The world is waiting</h3>
+              <p>Your journey list is empty. Let's start planning your next masterpiece.</p>
+              <button className="btn-premium primary" style={{ marginTop: '12px' }} onClick={() => navigate("/planner")}>Plan Now</button>
+            </div>
+          ) : (
+            <div className="pro-trips-grid">
+              {dbTrips.slice(0, 3).map((trip) => (
+                <div className="pro-trip-card" key={trip.id} onClick={() => handleViewTrip(trip)} style={{ cursor: 'pointer' }}>
                   <div className="pro-trip-img-wrap">
-                    <img className="pro-trip-img" src={trip.img} alt={trip.title} />
-                    <div className="pro-trip-badge">{trip.days}d</div>
+                    <PlaceImage 
+                      placeName={trip.title.includes("Trip") ? trip.location : trip.title} 
+                      city={trip.location} 
+                      className="pro-trip-img" 
+                    />
+                    <div className="pro-trip-badge">{trip.days} Days</div>
                   </div>
                   <div className="pro-trip-body">
                     <h3 className="pro-trip-title">{trip.title}</h3>
-                    <div className="pro-trip-meta">📍 {trip.location}</div>
+                    <div className="pro-trip-meta">
+                      <span>📍 {trip.location}</span>
+                      <span>💰 {formatPrice(trip.totalCost)}</span>
+                    </div>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </div>

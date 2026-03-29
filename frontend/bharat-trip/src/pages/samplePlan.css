@@ -1,5 +1,5 @@
 /* =============================================
-   SAMPLE PLANS — samplePlan.css
+   SAMPLE PLANS — samplePlan.css (UNIFIED)
 ============================================= */
 
 .sp-page {
@@ -38,11 +38,11 @@
 }
 
 .sp-hero h1 {
-  font-family: 'Syne', sans-serif;
   font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 800;
   margin-bottom: 16px;
   line-height: 1.1;
+  letter-spacing: var(--tracking-tight);
 }
 
 .sp-highlight {
@@ -166,10 +166,10 @@
 }
 
 .sp-card-body h3 {
-  font-family: 'Syne', sans-serif;
   font-size: 1.3rem;
   font-weight: 800;
   margin-bottom: 16px;
+  letter-spacing: var(--tracking-tight);
 }
 
 .sp-days {
@@ -192,6 +192,7 @@
   text-transform: uppercase;
   min-width: 45px;
   margin-top: 3px;
+  letter-spacing: var(--tracking-wide);
 }
 
 .sp-day-places {
@@ -325,10 +326,10 @@
 }
 
 .sp-modal-body h2 {
-  font-family: 'Syne', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
   margin-bottom: 24px;
+  letter-spacing: var(--tracking-tight);
 }
 
 .sp-modal-days {
@@ -353,6 +354,7 @@
   margin-bottom: 10px;
   color: var(--accent-blue);
   text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
 }
 
 .sp-modal-places {

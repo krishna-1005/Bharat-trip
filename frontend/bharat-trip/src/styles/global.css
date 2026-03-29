@@ -1,8 +1,8 @@
 /* =============================================
-   PREMIUM GLOBAL STYLES — BharatTrip
+   PREMIUM GLOBAL STYLES — BharatTrip (UNIFIED)
 ============================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+/* Removed competing font imports - unified via index.css */
 
 :root {
   /* Common Variables */
@@ -12,8 +12,8 @@
   --accent-amber: #f59e0b;
   
   /* Default Dark Theme */
-  --bg-main: #020617;
-  --bg-panel: #0a1120;
+  --bg-main: #020202;
+  --bg-panel: #0a0a0a;
   --bg-card: rgba(255, 255, 255, 0.03);
   --glass: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.08);
@@ -41,7 +41,6 @@ body {
   padding: 0;
   background: var(--bg-main);
   color: var(--text-main);
-  font-family: 'Plus Jakarta Sans', sans-serif;
   overflow-x: hidden;
   transition: background 0.3s ease, color 0.3s ease;
 }
@@ -89,8 +88,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -0.2px;
+  letter-spacing: var(--tracking-normal);
   position: relative;
   overflow: hidden;
 }
@@ -146,62 +144,6 @@ body {
   filter: brightness(1.2);
 }
 
-/* Custom Cursor (Desktop Only) */
-@media (min-width: 1025px) {
-  body {
-    cursor: default;
-  }
-  
-  .custom-cursor {
-    width: 20px;
-    height: 20px;
-    background: var(--accent-blue);
-    border-radius: 50%;
-    position: fixed;
-    pointer-events: none;
-    z-index: 9999;
-    mix-blend-mode: difference;
-    transition: transform 0.1s ease, background 0.3s ease;
-    transform: translate(-50%, -50%);
-  }
-  
-  .custom-cursor.hovering {
-    transform: translate(-50%, -50%) scale(3);
-    background: var(--accent-purple);
-  }
-}
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-main);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border-main);
-  border-radius: 20px;
-  border: 2px solid var(--bg-main);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-dim);
-}
-
-/* ── UTILS ── */
-.gradient-text {
-  background: linear-gradient(135deg, #60a5fa 0%, #a855f7 50%, #ec4899 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-size: 200% auto;
-  animation: gradientFlow 5s linear infinite;
-}
-
-@keyframes gradientFlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
 /* Page Containers */
 .page {
   padding: 120px 80px 60px;
@@ -234,127 +176,27 @@ button, a, input, select, textarea {
   touch-action: manipulation;
 }
 
-input, select, textarea {
-  font-size: 16px; /* Prevents iOS zoom */
-}
-
-/* ── ABOUT PAGE SPECIFIC ── */
-.about-hero {
-  max-width: 800px;
-  margin-bottom: 60px;
-}
-
-.about-hero h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  font-weight: 800;
-  margin: 20px 0;
-  line-height: 1.1;
-}
-
+/* ── TYPOGRAPHY UTILS ── */
 .large-text {
   font-size: 1.25rem;
-  line-height: 1.6;
+  line-height: var(--lh-base);
   color: var(--text-dim);
 }
 
-.about-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 24px;
-  margin-bottom: 80px;
+.section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: 40px;
 }
 
-.about-stat-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-main);
-  padding: 32px;
-  border-radius: 24px;
-  text-align: center;
-}
-
-.about-stat-card .stat-value {
+.stat-value {
   display: block;
-  font-family: 'Syne', sans-serif;
   font-size: 2.5rem;
   font-weight: 800;
   color: var(--accent-blue);
   margin-bottom: 8px;
-}
-
-.about-stat-card .stat-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.about-section {
-  margin-bottom: 100px;
-}
-
-.section-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 2rem;
-  font-weight: 800;
-  margin-bottom: 40px;
-}
-
-.card-icon {
-  font-size: 32px;
-  margin-bottom: 20px;
-}
-
-/* FAQ */
-.faq-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-width: 800px;
-}
-
-.faq-item {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-main);
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.faq-item:hover {
-  border-color: var(--accent-blue);
-}
-
-.faq-question {
-  padding: 20px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 700;
-}
-
-.faq-answer {
-  padding: 0 24px 20px;
-  color: var(--text-dim);
-  line-height: 1.6;
-}
-
-/* CTA */
-.about-cta {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
-  border: 1px solid var(--border-main);
-  padding: 60px 40px;
-  border-radius: 32px;
-  text-align: center;
-}
-
-.cta-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 32px;
+  letter-spacing: var(--tracking-tight);
 }
 
 .auth-input-styled {
@@ -365,7 +207,6 @@ input, select, textarea {
   background: var(--glass);
   color: var(--text-main);
   font-size: 15px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
   outline: none;
   transition: all 0.2s ease;
   box-sizing: border-box;
@@ -375,10 +216,4 @@ input, select, textarea {
   border-color: var(--accent-blue);
   background: var(--bg-panel);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-}
-
-@media (max-width: 600px) {
-  .cta-buttons {
-    flex-direction: column;
-  }
 }

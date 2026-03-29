@@ -5,17 +5,24 @@
 @media (max-width: 900px) {
   :root {
     --mobile-nav-height: 72px;
-    --safe-bottom: env(safe-area-inset-bottom);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
   }
 
   body {
     font-size: 15px;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .container {
     padding: 0 20px;
   }
+
+  /* ── TYPOGRAPHY ── */
+  h1 { font-size: 2.2rem !important; }
+  h2 { font-size: 1.8rem !important; }
+  h3 { font-size: 1.4rem !important; }
 
   /* ── MOBILE NAV BAR (PREMIUM) ── */
   .bottom-nav {
@@ -25,25 +32,21 @@
     -webkit-backdrop-filter: blur(25px) saturate(180%);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px 24px 0 0;
-    margin: 0 10px;
-    bottom: 10px;
+    margin: 0;
+    bottom: 0;
     left: 0;
     right: 0;
-    width: auto;
+    width: 100%;
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
     display: flex;
-    padding: 0 12px calc(var(--safe-bottom) + 5px);
+    padding: 0 12px calc(var(--safe-bottom) + 8px);
+    z-index: 2000;
   }
 
   .bn-item {
     border-radius: 16px;
     margin: 6px 2px;
     transition: all 0.4s cubic-bezier(0.2, 0, 0.2, 1);
-  }
-
-  .bn-item.active {
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--accent-blue);
   }
 
   .bn-icon {
@@ -58,14 +61,11 @@
     opacity: 0.8;
   }
 
-  .bn-item.active .bn-label {
-    opacity: 1;
-  }
-
   /* ── MOBILE HERO ADJUSTMENTS ── */
   .hero-section {
-    padding-top: 80px;
-    padding-bottom: 40px;
+    padding-top: 100px !important;
+    padding-bottom: 40px !important;
+    text-align: center;
   }
 
   .hero-content h1 {
@@ -78,39 +78,69 @@
     font-size: 1.05rem;
     margin-bottom: 32px;
     opacity: 0.9;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-actions {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .btn-large {
+    width: 100% !important;
+    padding: 16px !important;
   }
 
   /* ── CARDS (MOBILE OPTIMIZED) ── */
-  .action-card, .feature-card, .dest-card {
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.03);
+  .action-card, .feature-card, .dest-card, .premium-card {
+    border-radius: 24px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(10px);
   }
 
   .action-card {
-    padding: 24px;
-    text-align: left;
-    align-items: flex-start;
-    flex-direction: row;
-    gap: 16px;
+    padding: 20px !important;
+    text-align: left !important;
+    align-items: center !important;
+    flex-direction: row !important;
+    gap: 16px !important;
   }
 
   .action-icon {
-    width: 54px;
-    height: 54px;
-    font-size: 1.8rem;
-    border-radius: 14px;
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1.5rem !important;
+    border-radius: 12px !important;
     flex-shrink: 0;
   }
 
   .action-card h3 {
-    font-size: 1.15rem;
-    margin-bottom: 4px;
+    font-size: 1.1rem !important;
+    margin-bottom: 2px !important;
   }
 
   .action-card p {
-    font-size: 0.9rem;
-    text-align: left;
+    font-size: 0.85rem !important;
+    text-align: left !important;
+    display: block !important; /* Force show some description on mobile if needed */
+  }
+
+  /* ── MATCHMAKER MOBILE ── */
+  .matchmaker-card {
+    grid-template-columns: 1fr !important;
+    border-radius: 32px !important;
+  }
+
+  .mm-content {
+    padding: 40px 20px !important;
+  }
+
+  .mm-result {
+    border-left: none !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 24px !important;
   }
 
   /* ── APP-LIKE TRANSITIONS ── */
@@ -119,13 +149,28 @@
   }
 
   /* ── TOUCH FEEDBACK ── */
-  .btn-premium:active, .bn-item:active, .action-card:active {
-    transform: scale(0.96);
-    opacity: 0.8;
+  .btn-premium:active, .bn-item:active, .action-card:active, .dest-card:active, .f-clone-btn:active {
+    transform: scale(0.96) !important;
+    opacity: 0.9;
   }
 
   /* ── HIDE DESKTOP ONLY ── */
   .desktop-only {
     display: none !important;
   }
+
+  /* ── NAV BAR MOBILE SLIM ── */
+  .nb-nav {
+    padding: 10px 20px !important;
+    height: 64px !important;
+  }
+
+  .nb-logo-text {
+    font-size: 1.1rem !important;
+  }
+
+  .nb-right {
+    gap: 12px !important;
+  }
 }
+

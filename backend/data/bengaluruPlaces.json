@@ -1,14 +1,14 @@
 [
-
   {
     "name": "Cubbon Park",
     "area": "Central",
     "category": "Nature",
     "budget": "low",
-    "avgCost": 100,
+    "avgCost": 0,
     "timeHours": 2,
     "lat": 12.9763,
-    "lng": 77.5929
+    "lng": 77.5929,
+    "tags": ["park", "morning", "peaceful"]
   },
   {
     "name": "Lalbagh Botanical Garden",
@@ -18,48 +18,8 @@
     "avgCost": 120,
     "timeHours": 2,
     "lat": 12.9507,
-    "lng": 77.5848
-  },
-  {
-    "name": "ISKCON Temple",
-    "area": "North",
-    "category": "Culture",
-    "budget": "low",
-    "avgCost": 0,
-    "timeHours": 2,
-    "lat": 13.0098,
-    "lng": 77.5511
-  },
-  {
-    "name": "Vidhana Soudha",
-    "area": "Central",
-    "category": "Culture",
-    "budget": "low",
-    "avgCost": 0,
-    "timeHours": 1,
-    "lat": 12.9796,
-    "lng": 77.5907
-  },
-  {
-    "name": "VV Puram Food Street",
-    "area": "South",
-    "category": "Food",
-    "budget": "low",
-    "avgCost": 200,
-    "timeHours": 2,
-    "lat": 12.9480,
-    "lng": 77.5738
-  },
-
-  {
-    "name": "Bannerghatta Biological Park",
-    "area": "South",
-    "category": "Nature",
-    "budget": "medium",
-    "avgCost": 500,
-    "timeHours": 4,
-    "lat": 12.8006,
-    "lng": 77.5770
+    "lng": 77.5848,
+    "tags": ["garden", "nature", "photography"]
   },
   {
     "name": "Bangalore Palace",
@@ -69,112 +29,73 @@
     "avgCost": 500,
     "timeHours": 2,
     "lat": 12.9987,
-    "lng": 77.5921
+    "lng": 77.5921,
+    "tags": ["palace", "history", "architecture"]
   },
   {
-    "name": "National Gallery of Modern Art",
+    "name": "ISKCON Temple",
+    "area": "North",
+    "category": "Culture",
+    "budget": "low",
+    "avgCost": 0,
+    "timeHours": 2,
+    "lat": 13.0098,
+    "lng": 77.5511,
+    "tags": ["temple", "spiritual", "peaceful"]
+  },
+  {
+    "name": "Vidhana Soudha",
     "area": "Central",
     "category": "Culture",
-    "budget": "medium",
-    "avgCost": 300,
-    "timeHours": 2,
-    "lat": 12.9886,
-    "lng": 77.5895
+    "budget": "low",
+    "avgCost": 0,
+    "timeHours": 1,
+    "lat": 12.9796,
+    "lng": 77.5907,
+    "tags": ["landmark", "architecture", "government"]
   },
   {
-    "name": "Toit Brewery",
-    "area": "Central",
-    "category": "Food",
-    "budget": "medium",
-    "avgCost": 800,
-    "timeHours": 2,
-    "lat": 12.9786,
-    "lng": 77.6408
-  },
-  {
-    "name": "Ulsoor Lake",
-    "area": "East",
+    "name": "Bannerghatta Biological Park",
+    "area": "South",
     "category": "Nature",
     "budget": "medium",
-    "avgCost": 300,
-    "timeHours": 2,
-    "lat": 12.9825,
-    "lng": 77.6208
-  },
-
-
-
-  {
-    "name": "Nandi Hills Sunrise Trip",
-    "area": "North",
-    "category": "Nature",
-    "budget": "high",
-    "avgCost": 1200,
+    "avgCost": 500,
     "timeHours": 4,
-    "lat": 13.3702,
-    "lng": 77.6835
+    "lat": 12.8006,
+    "lng": 77.5770,
+    "tags": ["wildlife", "safari", "zoo"]
   },
   {
-    "name": "UB City Mall",
+    "name": "UB City",
     "area": "Central",
-    "category": "Food",
+    "category": "Shopping",
     "budget": "high",
     "avgCost": 1500,
     "timeHours": 2,
     "lat": 12.9716,
-    "lng": 77.5966
+    "lng": 77.5966,
+    "tags": ["luxury", "mall", "dining"]
   },
   {
-    "name": "Taj West End High Tea",
-    "area": "Central",
+    "name": "Toit Brewery",
+    "area": "East",
     "category": "Food",
-    "budget": "high",
-    "avgCost": 2000,
+    "budget": "medium",
+    "avgCost": 1500,
     "timeHours": 2,
-    "lat": 12.9890,
-    "lng": 77.5803
+    "lat": 12.9786,
+    "lng": 77.6408,
+    "tags": ["brewery", "nightlife", "pizza"]
   },
   {
-    "name": "Ranga Shankara Theatre",
+    "name": "VV Puram Food Street",
     "area": "South",
-    "category": "Culture",
-    "budget": "high",
-    "avgCost": 1000,
-    "timeHours": 3,
-    "lat": 12.9121,
-    "lng": 77.5960
-  },
-  {
-    "name": "Art of Living International Center",
-    "area": "South",
-    "category": "Culture",
-    "budget": "high",
-    "avgCost": 800,
-    "timeHours": 4,
-    "lat": 12.8000,
-    "lng": 77.5300
-  },
-
-  [
-  {
-    "name": "Ramanagara Hills",
-    "distance": 55,
-    "tags": ["nature", "trek"]
-  },
-  {
-    "name": "Mekedatu",
-    "distance": 90,
-    "tags": ["nature", "river"]
-  },
-  {
-    "name": "Chunchi Falls",
-    "distance": 80,
-    "tags": ["nature", "waterfall"]
-  },
-  {
-    "name": "Kanakapura",
-    "distance": 60,
-    "tags": ["nature", "lake"]
+    "category": "Food",
+    "budget": "low",
+    "avgCost": 300,
+    "timeHours": 2,
+    "lat": 12.9480,
+    "lng": 77.5738,
+    "tags": ["street food", "local", "vegetarian"]
   }
-]
 ]

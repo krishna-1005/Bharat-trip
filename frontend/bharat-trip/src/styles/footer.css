@@ -40,8 +40,6 @@
 .logo-icon { font-size: 28px; }
 
 .footer-brand h3 {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.5rem;
   font-weight: 800;
   margin: 0;
   letter-spacing: -0.5px;
@@ -90,7 +88,6 @@
 }
 
 .link-col h4, .footer-newsletter h4 {
-  font-family: 'Syne', sans-serif;
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-main);

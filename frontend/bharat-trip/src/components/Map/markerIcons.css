@@ -1,3 +1,54 @@
+/* User Location Marker (Google Maps Style) */
+
+.user-location-wrapper {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-dot-main {
+  width: 14px;
+  height: 14px;
+  background: #3b82f6;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  z-index: 5;
+}
+
+.user-pulse {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: rgba(59, 130, 246, 0.4);
+  border-radius: 50%;
+  z-index: 1;
+  animation: user-pulse 2s infinite ease-out;
+}
+
+@keyframes user-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+.user-heading-arrow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 20px solid rgba(59, 130, 246, 0.6);
+  transform-origin: center 20px;
+  margin-left: -8px;
+  z-index: 2;
+  filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.3));
+}
+
 /* Premium Marker Design */
 
 .custom-pin-container {
@@ -40,6 +91,19 @@
   background: #fff;
   border-radius: 50%;
   transform: rotate(45deg);
+}
+
+.pin-check {
+  color: white;
+  font-size: 14px;
+  font-weight: 900;
+  transform: rotate(45deg);
+  display: block;
+}
+
+.pin-wrapper.visited {
+  opacity: 0.8;
+  transform: scale(0.9);
 }
 
 .pin-drop-shadow {

@@ -7,21 +7,21 @@ import "./planner.css";
 import img2 from "../assets/images/img2.webp";
 import img3 from "../assets/images/img3.webp";
 import img4 from "../assets/images/img4.webp";
+import img1 from "../assets/images/img1.webp";
 
 function Planner() {
   const navigate = useNavigate();
   const [activePersona, setActivePersona] = useState('explorer');
 
   const handlePlanGenerated = (generatedPlan) => {
-    navigate("/results", { state: { plan: generatedPlan } });
+    navigate("/results", { state: { plan: generatedPlan, isNew: true } });
   };
 
   const personas = {
     explorer: {
       id: 'explorer',
-      icon: '🧭',
       label: 'The Explorer',
-      tip: 'Pro Tip: Pack light and leave room in your itinerary for spontaneous detours. The best stories are unscripted.',
+      tip: 'The best stories are found off the beaten path. Let curiosity be your compass.',
       spots: [
         { name: "Spiti Valley", type: "High Altitude", img: img3 },
         { name: "Meghalaya", type: "Living Bridges", img: img2 }
@@ -29,9 +29,8 @@ function Planner() {
     },
     relaxer: {
       id: 'relaxer',
-      icon: '🧘',
       label: 'The Relaxer',
-      tip: 'Pro Tip: Focus on one region. Quality of experience beats quantity of destinations. Breathe in the local culture.',
+      tip: 'Slow down and breathe. A journey is measured by the peace it brings to your soul.',
       spots: [
         { name: "Kerala Backwaters", type: "Tranquil", img: img4 },
         { name: "Varkala Beach", type: "Coastal", img: img2 }
@@ -39,57 +38,35 @@ function Planner() {
     },
     luxury: {
       id: 'luxury',
-      icon: '💎',
       label: 'The Luxury Seeker',
-      tip: 'Pro Tip: Book heritage hotels in Rajasthan for an authentic royal experience. Let the concierge handle the details.',
+      tip: 'Indulge in the extraordinary. Every detail crafted for a life well-lived.',
       spots: [
         { name: "Udaipur Palaces", type: "Royal Heritage", img: img3 },
-        { name: "Taj Falaknuma", type: "Opulence", img: img4 }
+        { name: "Taj Falaknuma", type: "Opulence", img: img1 }
       ]
     }
   };
 
-  useEffect(() => {
-      // Intersection Observer for reveal animations
-      const observerOptions = { threshold: 0.1 };
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("revealed");
-          }
-        });
-      }, observerOptions);
-  
-      document.querySelectorAll(".reveal-on-scroll").forEach(el => observer.observe(el));
-      return () => observer.disconnect();
-  }, []);
-
   return (
     <div className="planner-onboarding-page">
-      {/* Cinematic Background */}
       <div className="planner-hero-bg">
           <div className="planner-bg-overlay"></div>
-          <img src={img3} alt="Background" className="planner-bg-img" />
+          <img src={img4} alt="Background" className="planner-bg-img" />
       </div>
       
       <div className="planner-container">
-        {/* ── LEFT: INTRO ── */}
-        <div className="planner-intro-section reveal-on-scroll">
-          <div className="planner-tagline">
-            <span className="pulse-dot"></span>
-            AI-DRIVEN EXPLORATION
-          </div>
+        {/* ── LEFT: EDITORIAL CONTENT ── */}
+        <div className="planner-intro-section">
+          <span className="planner-tagline">Premium Travel Planning</span>
           <h1 className="planner-main-title">
-            Your Journey, <br />
-            <span className="gradient-text">Intelligently</span> Crafted.
+            Where to <em>next?</em>
           </h1>
           <p className="planner-subtitle">
-            Skip the generic guides. Our neural engine synthesizes local secrets and iconic landmarks into a seamless, personalized itinerary for you.
+            Our neural engine synthesizes local secrets and iconic landmarks into a bespoke, editorial-grade itinerary. Discover India like never before.
           </p>
 
-          {/* NEW: INTERACTIVE PERSONA SELECTOR */}
           <div className="persona-selector">
-            <h4 className="persona-title">What's your travel vibe?</h4>
+            <h4 className="persona-title">Select your mood</h4>
             <div className="persona-tabs">
               {Object.values(personas).map((p) => (
                 <button
@@ -97,8 +74,7 @@ function Planner() {
                   className={`persona-tab ${activePersona === p.id ? 'active' : ''}`}
                   onClick={() => setActivePersona(p.id)}
                 >
-                  <span className="persona-icon">{p.icon}</span>
-                  <span className="persona-label">{p.label}</span>
+                  {p.label}
                 </button>
               ))}
             </div>
@@ -109,54 +85,40 @@ function Planner() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.4 }}
                 className="persona-dynamic-content"
               >
-                <div className="persona-tip">
-                  <strong>{personas[activePersona].icon} </strong>
-                  {personas[activePersona].tip}
-                </div>
+                <p className="persona-tip">"{personas[activePersona].tip}"</p>
                 
-                <div className="planner-featured-strip">
-                  <span className="strip-label">PERFECT FOR YOU</span>
-                  <div className="featured-mini-list">
+                <div className="featured-mini-list">
                     {personas[activePersona].spots.map((spot, i) => (
                       <div key={i} className="mini-spot-card">
                         <div className="mini-spot-img-wrap">
                           <img src={spot.img} alt={spot.name} />
                         </div>
-                        <div className="mini-spot-content">
-                          <span className="mini-spot-name">{spot.name}</span>
-                          <span className="mini-spot-type">{spot.type}</span>
-                        </div>
+                        <span className="mini-spot-name">{spot.name}</span>
+                        <span className="mini-spot-type">{spot.type}</span>
                       </div>
                     ))}
-                  </div>
                 </div>
               </motion.div>
             </AnimatePresence>
           </div>
         </div>
 
-        {/* ── RIGHT: FORM CARD ── */}
-        <div className="planner-form-section reveal-on-scroll" style={{ animationDelay: "0.2s" }}>
+        {/* ── RIGHT: CRISP FORM CARD ── */}
+        <div className="planner-form-section">
           <div className="planner-glass-card">
             <div className="planner-form-header">
-                <h3>Start Your Adventure</h3>
-                <p>Tell us your preferences to begin.</p>
+                <h3>Odyssey Blueprint</h3>
+                <p>Engineering your next great escape</p>
             </div>
             <PlannerForm onPlanGenerated={handlePlanGenerated} />
           </div>
           
           <div className="planner-trust-badges">
-              <div className="trust-item">
-                  <span className="trust-icon" role="img" aria-label="secure">🔒</span>
-                  <span>Secure & Private</span>
-              </div>
-              <div className="trust-item">
-                  <span className="trust-icon" role="img" aria-label="fast">⚡</span>
-                  <span>Instant Generation</span>
-              </div>
+              <div className="trust-item">AI CONCIERGE</div>
+              <div className="trust-item">INSTANT ACCESS</div>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-/* ── PREMIUM REDESIGN: BHARAT TRIP RESULTS ── */
+/* ── PREMIUM REDESIGN: BHARAT TRIP RESULTS (UNIFIED) ── */
 
 :root {
   --glass-bg: rgba(10, 10, 10, 0.7);
@@ -19,7 +19,6 @@
   background: #020202;
   color: var(--text-primary);
   overflow: hidden;
-  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
   display: flex;
 }
 
@@ -75,7 +74,7 @@
 .brand-text {
   font-size: 14px;
   font-weight: 800;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
 }
 
@@ -98,7 +97,7 @@
 .trip-hero-info h1 {
   font-size: 28px;
   font-weight: 900;
-  letter-spacing: -1px;
+  letter-spacing: var(--tracking-tight);
   margin: 0 0 8px 0;
   background: linear-gradient(to right, #fff, rgba(255,255,255,0.7));
   -webkit-background-clip: text;
@@ -119,6 +118,25 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--text-secondary);
+}
+
+.optimize-pill {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--accent-blue);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.optimize-pill:hover {
+  background: var(--accent-blue);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.optimize-pill.loading {
+  opacity: 0.7;
+  cursor: wait;
 }
 
 /* --- 4. SCROLLABLE CONTENT --- */
@@ -158,13 +176,31 @@
   font-size: 11px;
   font-weight: 800;
   color: var(--accent-blue);
-  letter-spacing: 1px;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
 }
 
 .progress-val {
   font-size: 14px;
   font-weight: 900;
+}
+
+.reset-progress-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.reset-progress-btn:hover {
+  background: #ef4444;
+  color: white;
 }
 
 .progress-track-premium {
@@ -212,7 +248,7 @@
   font-weight: 800;
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: var(--tracking-wide);
 }
 
 .day-info span {
@@ -258,7 +294,7 @@
 
 .stop-card-inner {
   flex: 1;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid transparent;
   border-radius: 20px;
   padding: 16px;

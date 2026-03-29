@@ -1,5 +1,5 @@
 /* =============================================
-   PLANNER FORM — plannerForm.css (PREMIUM)
+   PLANNER FORM — PRECISION SPACING & PREMIUM COLORS
 ============================================= */
 
 .pf-wrap {
@@ -8,244 +8,220 @@
   gap: 32px;
 }
 
-.pf-themes-row {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.pf-themes-row::-webkit-scrollbar {
-  display: none;
-}
-
-.pf-theme-chip {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px 16px;
-  border-radius: 100px;
-  color: #94a3b8;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
-}
-
-.pf-theme-chip:hover {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
-  color: #f8fafc;
-}
-
-.pf-progress-bar {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.pf-progress-fill {
-  height: 100%;
-  background: linear-gradient(to right, #3b82f6, #8b5cf6);
-  transition: width 0.6s cubic-bezier(0.2, 1, 0.3, 1);
-}
-
-.pf-step-header {
-  margin-bottom: 32px;
-}
-
-.pf-step-num {
-  font-size: 14px;
-  font-weight: 800;
-  color: #3b82f6;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-  display: block;
-}
-
+/* --- STEP HEADERS --- */
 .pf-step-header h2 {
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 8px;
-  color: #f8fafc;
+    font-size: 22px;
+    font-weight: 800;
+    color: #f8fafc; /* Crisp Cool White */
+    letter-spacing: -0.5px;
 }
 
 .pf-step-header p {
-  font-size: 15px;
-  color: #94a3b8;
-  line-height: 1.5;
+    font-size: 11px;
+    color: #3b82f6; /* Vibrant Azure Blue */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 800;
 }
 
-.pf-field {
-  margin-bottom: 24px;
-}
-
+/* --- LABELS & INPUTS --- */
 .pf-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 12px;
-  display: block;
+    font-size: 10px;
+    font-weight: 800;
+    color: #64748b; /* Elegant Slate Gray */
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
 }
 
 .pf-city-input {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 16px 20px;
-  border-radius: 16px;
-  color: #f8fafc;
-  font-size: 16px;
-  outline: none;
-  transition: all 0.3s;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 16px 20px;
+    border-radius: 16px;
+    color: #ffffff;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
 }
 
-.pf-city-input:focus {
-  border-color: #3b82f6;
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-}
-
+/* --- BUTTON GROUP SPACING (DAYS) --- */
 .pf-days-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
 }
 
 .pf-day-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #f1f5f9;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pf-day-btn.active {
-  background: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
-  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
-.pf-traveler-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+/* --- CHOICE CARDS TYPOGRAPHY & SPACING --- */
+.pf-selection-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
 }
 
-.pf-traveler-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 16px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
+.pf-choice-card {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 18px 20px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.4s;
 }
 
-.pf-traveler-card.active {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
+.pf-choice-label { 
+    font-weight: 700; 
+    color: #f1f5f9; 
+    font-size: 14px; 
 }
 
-.pf-card-icon { font-size: 20px; }
-.pf-card-label { font-weight: 600; color: #f1f5f9; }
-
-.pf-budget-grid, .pf-pace-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+.pf-choice-desc { 
+    font-size: 11px; 
+    color: #94a3b8; 
+    line-height: 1.4; 
 }
 
-.pf-budget-card, .pf-pace-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 16px 20px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s;
+.pf-choice-card.active {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
 }
 
-.pf-budget-card.active, .pf-pace-card.active {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
-}
-
-.pf-card-text { display: flex; flex-direction: column; }
-.pf-card-desc { font-size: 12px; color: #64748b; }
-
+/* --- INTEREST CARDS (STEP 3) --- */
 .pf-interest-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
 }
 
-.pf-interest-pill {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 14px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #cbd5e1;
+.pf-interest-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 14px 16px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
 }
 
-.pf-interest-pill.active {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
-  color: #fff;
+.pf-interest-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-3px);
 }
 
-.pf-footer {
-  margin-top: 40px;
-  padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.pf-interest-icon {
+    font-size: 18px;
 }
 
-.pf-next-btn, .pf-gen-btn {
-  background: #3b82f6;
-  color: white;
-  padding: 14px 28px;
-  border-radius: 14px;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
+.pf-interest-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    flex: 1;
+    text-align: left;
 }
 
-.pf-back-btn {
-  background: transparent;
-  color: #94a3b8;
-  padding: 14px 20px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
+.pf-interest-check {
+    font-size: 12px;
+    font-weight: 900;
+    color: #3b82f6;
+    opacity: 0;
+    transition: 0.3s;
 }
 
-@media (max-width: 640px) {
-  .pf-footer { flex-direction: column; gap: 20px; }
-  .pf-footer-btns { width: 100%; display: flex; gap: 10px; }
-  .pf-next-btn, .pf-gen-btn { flex: 1; }
-  .pf-interest-grid { grid-template-columns: 1fr; }
+.pf-interest-card.active {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: #3b82f6;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+}
+
+.pf-interest-card.active .pf-interest-label {
+    color: #ffffff;
+}
+
+.pf-interest-card.active .pf-interest-check {
+    opacity: 1;
+}
+
+/* --- FOOTER LAYOUT & TYPOGRAPHY --- */
+.pf-footer-sleek {
+    margin-top: 16px;
+    padding: 20px 24px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pf-est-label { 
+    font-size: 10px; 
+    font-weight: 800; 
+    color: #3b82f6; 
+    text-transform: uppercase; 
+}
+
+.pf-est-val { 
+    font-size: 20px; 
+    font-weight: 900; 
+    color: #ffffff; 
+}
+
+.pf-btn-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.pf-primary-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #ffffff;
+    padding: 14px 28px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.pf-secondary-btn {
+    background: transparent;
+    color: #94a3b8;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+}
+
+.pf-secondary-btn:hover {
+    color: #3b82f6;
 }

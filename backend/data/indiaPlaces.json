@@ -108,5 +108,16 @@
       { "name": "Hussain Sagar Lake", "category": "Nature", "avgCost": 50, "timeHours": 2, "lat": 17.4239, "lng": 78.4738 },
       { "name": "Salar Jung Museum", "category": "Culture", "avgCost": 50, "timeHours": 3, "lat": 17.3714, "lng": 78.4804 }
     ]
+  },
+  {
+    "city": "Bengaluru",
+    "coordinates": { "lat": 12.9716, "lng": 77.5946 },
+    "places": [
+      { "name": "Cubbon Park", "category": "Nature", "avgCost": 0, "timeHours": 2, "lat": 12.9763, "lng": 77.5929 },
+      { "name": "Lalbagh Botanical Garden", "category": "Nature", "avgCost": 120, "timeHours": 2.5, "lat": 12.9507, "lng": 77.5848 },
+      { "name": "Bangalore Palace", "category": "Culture", "avgCost": 500, "timeHours": 2, "lat": 12.9987, "lng": 77.5921 },
+      { "name": "ISKCON Temple", "category": "Culture", "avgCost": 0, "timeHours": 2, "lat": 13.0098, "lng": 77.5511 },
+      { "name": "Bannerghatta National Park", "category": "Nature", "avgCost": 500, "timeHours": 5, "lat": 12.8006, "lng": 77.577 }
+    ]
   }
 ]

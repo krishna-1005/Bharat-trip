@@ -1,137 +1,142 @@
+/* ── PREMIUM REDESIGN: GUIDANCE PANEL (UNIFIED) ── */
+
 .guidance-container {
   position: absolute;
-  top: 24px;
-  left: 24px;
-  width: 360px;
-  z-index: 1000;
+  top: 100px;
+  left: 32px;
+  width: 380px;
+  z-index: 2000; /* Above sidebar in mobile, or floating on desktop map */
   pointer-events: auto;
-  font-family: 'Inter', -apple-system, sans-serif;
-  animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: premiumEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes slideIn {
-  from { transform: translateX(-20px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+@keyframes premiumEntrance {
+  from { transform: translateY(20px) scale(0.95); opacity: 0; filter: blur(10px); }
+  to { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
 }
 
-/* --- The Card --- */
 .guidance-card {
-  background: #111111; /* Deepest black for premium feel */
-  border-radius: 28px;
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 32px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7);
 }
 
-/* --- Hero Image Section --- */
 .hero-image-container {
   position: relative;
   width: 100%;
-  height: 180px;
-  background: #1a1a1a; /* Fallback background */
+  height: 220px;
+  background: #000;
 }
 
 .hero-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  opacity: 0.8;
+  transition: transform 10s linear;
 }
 
-.image-skeleton {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+.guidance-card:hover .hero-image {
+  transform: scale(1.1);
 }
 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 40%, rgba(17, 17, 17, 0.9) 100%);
+  background: linear-gradient(to bottom, 
+    rgba(0,0,0,0.2) 0%, 
+    rgba(0,0,0,0) 40%, 
+    rgba(10, 10, 10, 1) 100%
+  );
 }
 
 .step-indicator {
   position: absolute;
-  top: 16px;
-  left: 16px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
-  padding: 4px 12px;
+  top: 24px;
+  left: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  padding: 6px 16px;
   border-radius: 100px;
   color: white;
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 800;
+  letter-spacing: var(--tracking-wide);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  text-transform: uppercase;
 }
 
-/* --- Content Section --- */
 .card-body {
-  padding: 24px;
+  padding: 32px;
+  margin-top: -20px;
+  position: relative;
 }
 
 .now-section {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .now-label {
   color: #3b82f6;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: var(--tracking-ultra);
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   display: block;
 }
 
 .current-title {
   color: white;
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-  letter-spacing: -0.5px;
+  font-size: 28px;
+  font-weight: 900;
+  margin: 0 0 12px 0;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.1;
 }
 
 .current-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   color: rgba(255, 255, 255, 0.5);
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
-/* --- Next Stop Minimalist --- */
 .next-preview {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 20px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 24px;
+  margin-bottom: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: 0.3s;
+}
+
+.next-preview:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .next-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   background: #3b82f6;
   border-radius: 50%;
-  margin-top: 6px;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
 }
 
 .next-info {
@@ -140,45 +145,46 @@
 
 .next-label {
   font-size: 10px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.3);
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.35);
   text-transform: uppercase;
   margin-bottom: 4px;
   display: block;
 }
 
 .next-title {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 15px;
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  font-weight: 700;
   margin: 0;
 }
 
-/* --- CTA Button --- */
 .action-btn {
   width: 100%;
   background: white;
   color: black;
   border: none;
-  padding: 16px;
-  border-radius: 18px;
-  font-weight: 700;
-  font-size: 16px;
+  padding: 18px;
+  border-radius: 20px;
+  font-weight: 900;
+  font-size: 15px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
+  box-shadow: 0 10px 20px rgba(255,255,255,0.1);
 }
 
 .action-btn:hover {
-  transform: translateY(-2px);
-  background: #f0f0f0;
+  transform: translateY(-4px) scale(1.02);
+  background: #fff;
+  box-shadow: 0 15px 30px rgba(255,255,255,0.2);
 }
 
 .action-btn:active {
-  transform: translateY(0);
+  transform: translateY(-1px) scale(0.98);
 }
 
 .secondary-action {
@@ -186,46 +192,51 @@
   background: transparent;
   color: rgba(255, 255, 255, 0.4);
   border: none;
-  padding: 12px;
-  font-size: 13px;
-  font-weight: 600;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
-  margin-top: 8px;
-  transition: color 0.2s;
+  margin-top: 10px;
+  transition: 0.3s;
+  border-radius: 16px;
 }
 
 .secondary-action:hover {
   color: white;
+  background: rgba(255,255,255,0.05);
 }
 
-/* --- Completion --- */
 .completion-state {
   text-align: center;
-  padding: 40px 24px;
+  padding: 50px 32px;
 }
 
 .completion-icon {
-  font-size: 40px;
-  margin-bottom: 16px;
+  font-size: 56px;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 0 20px rgba(255,215,0,0.4));
 }
 
 .completion-state h3 {
   color: white;
-  margin-bottom: 8px;
+  font-size: 24px;
+  font-weight: 900;
+  margin-bottom: 12px;
 }
 
 .completion-state p {
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 24px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 32px;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
-/* Responsive */
-@media (max-width: 480px) {
+/* Mobile Adjustments */
+@media (max-width: 768px) {
   .guidance-container {
-    left: 16px;
-    right: 16px;
+    left: 20px;
+    right: 20px;
     width: auto;
-    top: auto;
-    bottom: 24px;
+    top: 80px;
   }
 }

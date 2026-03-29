@@ -28,8 +28,8 @@ export default function Destinations() {
         <p className="large-text">Discover the most loved travel spots across India, curated by experts.</p>
       </section>
 
-      <section style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+      <section className="container" style={{ margin: "0 auto", paddingBottom: "100px" }}>
+        <div className="dest-grid-v2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
           {destinations.map((dest) => (
             <div key={dest.id} className="premium-card" style={{ padding: "0", overflow: "hidden", cursor: "pointer", display: "flex", flexDirection: "column" }} onClick={() => navigate("/planner")}>
               <div style={{ height: "200px", overflow: "hidden", position: "relative" }}>

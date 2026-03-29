@@ -90,7 +90,7 @@ function Navbar() {
       </ul>
 
       <div className="nb-right">
-        <button className="nb-theme-toggle" onClick={toggleTheme}>
+        <button className="nb-theme-toggle desktop-only" onClick={toggleTheme}>
           <motion.span animate={{ rotate: theme === 'dark' ? 0 : 180 }}>{theme === 'dark' ? '🌙' : '☀️'}</motion.span>
         </button>
 
@@ -129,13 +129,13 @@ function Navbar() {
             </AnimatePresence>
           </div>
         ) : (
-          <div className="nb-auth-btns desktop-only">
+          <div className="nb-auth-btns">
             <button className="nb-btn-primary" onClick={() => navigate("/login")}>Login</button>
           </div>
         )}
 
         <button 
-          className={`nb-hamburger ${mobileMenuOpen ? "active" : ""}`}
+          className={`nb-hamburger desktop-only ${mobileMenuOpen ? "active" : ""}`}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           <span></span><span></span><span></span>
