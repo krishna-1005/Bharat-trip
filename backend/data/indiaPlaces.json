@@ -3,121 +3,117 @@
     "city": "Agra",
     "coordinates": { "lat": 27.1767, "lng": 78.0081 },
     "places": [
-      { "name": "Taj Mahal", "category": "Culture", "avgCost": 1100, "timeHours": 3, "lat": 27.1751, "lng": 78.0421 },
-      { "name": "Agra Fort", "category": "Culture", "avgCost": 600, "timeHours": 2, "lat": 27.1795, "lng": 78.0211 },
-      { "name": "Mehtab Bagh", "category": "Nature", "avgCost": 300, "timeHours": 1.5, "lat": 27.1911, "lng": 78.0423 },
-      { "name": "Itmad-ud-Daula", "category": "Culture", "avgCost": 310, "timeHours": 1.5, "lat": 27.1928, "lng": 78.0311 },
-      { "name": "Fatehpur Sikri", "category": "Culture", "avgCost": 610, "timeHours": 4, "lat": 27.0945, "lng": 77.6677 }
+      { "name": "Taj Mahal", "category": "Culture", "avgCost": 1100, "timeHours": 3, "lat": 27.1751, "lng": 78.0421, "rating": 4.9, "reviews": 50000, "tags": ["Iconic", "Heritage", "Wonders of the World"] },
+      { "name": "Agra Fort", "category": "Culture", "avgCost": 600, "timeHours": 2, "lat": 27.1795, "lng": 78.0211, "rating": 4.6, "reviews": 25000, "tags": ["Fort", "History", "Mughal Architecture"] },
+      { "name": "Mehtab Bagh", "category": "Nature", "avgCost": 300, "timeHours": 1.5, "lat": 27.1911, "lng": 78.0423, "rating": 4.4, "reviews": 8000, "tags": ["Garden", "Viewpoint", "Sunset"] },
+      { "name": "Itmad-ud-Daula", "category": "Culture", "avgCost": 310, "timeHours": 1.5, "lat": 27.1928, "lng": 78.0311, "rating": 4.5, "reviews": 5000, "tags": ["History", "Architecture", "Baby Taj"] },
+      { "name": "Fatehpur Sikri", "category": "Culture", "avgCost": 610, "timeHours": 4, "lat": 27.0945, "lng": 77.6677, "rating": 4.6, "reviews": 12000, "tags": ["History", "Heritage", "Architecture"] }
     ]
   },
   {
     "city": "Jaipur",
     "coordinates": { "lat": 26.9124, "lng": 75.7873 },
     "places": [
-      { "name": "Amer Fort", "category": "Culture", "avgCost": 500, "timeHours": 3, "lat": 26.9855, "lng": 75.8513 },
-      { "name": "Hawa Mahal", "category": "Culture", "avgCost": 200, "timeHours": 1, "lat": 26.9239, "lng": 75.8267 },
-      { "name": "City Palace", "category": "Culture", "avgCost": 700, "timeHours": 2, "lat": 26.9258, "lng": 75.8237 },
-      { "name": "Jantar Mantar", "category": "Culture", "avgCost": 200, "timeHours": 1.5, "lat": 26.9248, "lng": 75.8246 },
-      { "name": "Nahargarh Fort", "category": "Adventure", "avgCost": 200, "timeHours": 2, "lat": 26.9374, "lng": 75.8155 }
+      { "name": "Amer Fort", "category": "Culture", "avgCost": 500, "timeHours": 3, "lat": 26.9855, "lng": 75.8513, "rating": 4.7, "reviews": 35000, "tags": ["Fort", "Heritage", "Elephant Ride"] },
+      { "name": "Hawa Mahal", "category": "Culture", "avgCost": 200, "timeHours": 1, "lat": 26.9239, "lng": 75.8267, "rating": 4.5, "reviews": 30000, "tags": ["Iconic", "Architecture", "Pink City"] },
+      { "name": "City Palace", "category": "Culture", "avgCost": 700, "timeHours": 2, "lat": 26.9258, "lng": 75.8237, "rating": 4.5, "reviews": 15000, "tags": ["Palace", "Museum", "Royal"] },
+      { "name": "Jantar Mantar", "category": "Culture", "avgCost": 200, "timeHours": 1.5, "lat": 26.9248, "lng": 75.8246, "rating": 4.6, "reviews": 20000, "tags": ["Science", "Astronomy", "Heritage"] },
+      { "name": "Nahargarh Fort", "category": "Adventure", "avgCost": 200, "timeHours": 2, "lat": 26.9374, "lng": 75.8155, "rating": 4.4, "reviews": 18000, "tags": ["Fort", "Viewpoint", "Trekking"] },
+      { "name": "Albert Hall Museum", "category": "Culture", "avgCost": 150, "timeHours": 2, "lat": 26.9115, "lng": 75.8194, "rating": 4.5, "reviews": 12000, "tags": ["Museum", "History", "Photography"] },
+      { "name": "Birla Mandir", "category": "Spiritual", "avgCost": 0, "timeHours": 1, "lat": 26.8923, "lng": 75.8155, "rating": 4.7, "reviews": 25000, "tags": ["Temple", "Peaceful", "Marble Architecture"] },
+      { "name": "Jaigarh Fort", "category": "Culture", "avgCost": 150, "timeHours": 2, "lat": 26.9804, "lng": 75.8455, "rating": 4.5, "reviews": 10000, "tags": ["Fort", "Cannon", "History"] },
+      { "name": "Johari Bazaar", "category": "Shopping", "avgCost": 500, "timeHours": 2.5, "lat": 26.9200, "lng": 75.8250, "rating": 4.3, "reviews": 15000, "tags": ["Jewelry", "Market", "Traditional"] },
+      { "name": "Chokhi Dhani", "category": "Entertainment", "avgCost": 900, "timeHours": 4, "lat": 26.7667, "lng": 75.8356, "rating": 4.4, "reviews": 22000, "tags": ["Culture", "Food", "Village Experience"] }
     ]
   },
   {
     "city": "Mumbai",
     "coordinates": { "lat": 19.0760, "lng": 72.8777 },
     "places": [
-      { "name": "Gateway of India", "category": "Culture", "avgCost": 0, "timeHours": 1, "lat": 18.922, "lng": 72.8347 },
-      { "name": "Marine Drive", "category": "Nature", "avgCost": 0, "timeHours": 2, "lat": 18.9431, "lng": 72.823 },
-      { "name": "Elephanta Caves", "category": "Culture", "avgCost": 600, "timeHours": 4, "lat": 18.9633, "lng": 72.9315 },
-      { "name": "Chhatrapati Shivaji Maharaj Terminus", "category": "Culture", "avgCost": 0, "timeHours": 1, "lat": 18.94, "lng": 72.8353 },
-      { "name": "Siddhivinayak Temple", "category": "Spiritual", "avgCost": 0, "timeHours": 1.5, "lat": 19.0163, "lng": 72.8304 }
+      { "name": "Gateway of India", "category": "Culture", "avgCost": 0, "timeHours": 1, "lat": 18.922, "lng": 72.8347, "rating": 4.7, "reviews": 45000, "tags": ["Iconic", "Harbor", "Photography"] },
+      { "name": "Marine Drive", "category": "Nature", "avgCost": 0, "timeHours": 2, "lat": 18.9431, "lng": 72.823, "rating": 4.8, "reviews": 50000, "tags": ["Ocean", "Viewpoint", "Sunset"] },
+      { "name": "Elephanta Caves", "category": "Culture", "avgCost": 600, "timeHours": 4, "lat": 18.9633, "lng": 72.9315, "rating": 4.5, "reviews": 15000, "tags": ["Heritage", "Island", "History"] },
+      { "name": "Chhatrapati Shivaji Maharaj Terminus", "category": "Culture", "avgCost": 0, "timeHours": 1, "lat": 18.94, "lng": 72.8353, "rating": 4.7, "reviews": 35000, "tags": ["Architecture", "Heritage", "Railways"] },
+      { "name": "Siddhivinayak Temple", "category": "Spiritual", "avgCost": 0, "timeHours": 1.5, "lat": 19.0163, "lng": 72.8304, "rating": 4.8, "reviews": 40000, "tags": ["Temple", "Spiritual", "Peaceful"] },
+      { "name": "Colaba Causeway", "category": "Shopping", "avgCost": 500, "timeHours": 2, "lat": 18.9130, "lng": 72.8300, "rating": 4.3, "reviews": 20000, "tags": ["Market", "Shopping", "Street Food"] },
+      { "name": "Juhu Beach", "category": "Nature", "avgCost": 200, "timeHours": 2, "lat": 19.0988, "lng": 72.8264, "rating": 4.2, "reviews": 35000, "tags": ["Beach", "Street Food", "Ocean"] },
+      { "name": "Haji Ali Dargah", "category": "Spiritual", "avgCost": 0, "timeHours": 1.5, "lat": 18.9827, "lng": 72.8089, "rating": 4.6, "reviews": 30000, "tags": ["Dargah", "Ocean", "Spiritual"] },
+      { "name": "Kanheri Caves", "category": "Culture", "avgCost": 300, "timeHours": 3, "lat": 19.2057, "lng": 72.9073, "rating": 4.5, "reviews": 10000, "tags": ["History", "Nature", "Monastery"] },
+      { "name": "Sanjay Gandhi National Park", "category": "Nature", "avgCost": 150, "timeHours": 4, "lat": 19.2288, "lng": 72.9182, "rating": 4.4, "reviews": 25000, "tags": ["Nature", "Forest", "Safari"] },
+      { "name": "Bandra Worli Sea Link", "category": "Entertainment", "avgCost": 100, "timeHours": 0.5, "lat": 19.0300, "lng": 72.8200, "rating": 4.8, "reviews": 20000, "tags": ["Architecture", "Ocean", "Photography"] }
     ]
   },
   {
     "city": "New Delhi",
     "coordinates": { "lat": 28.6139, "lng": 77.2090 },
     "places": [
-      { "name": "Red Fort", "category": "Culture", "avgCost": 500, "timeHours": 3, "lat": 28.6562, "lng": 77.241 },
-      { "name": "Qutub Minar", "category": "Culture", "avgCost": 500, "timeHours": 2, "lat": 28.5245, "lng": 77.1855 },
-      { "name": "India Gate", "category": "Culture", "avgCost": 0, "timeHours": 1, "lat": 28.6129, "lng": 77.2295 },
-      { "name": "Lotus Temple", "category": "Spiritual", "avgCost": 0, "timeHours": 1.5, "lat": 28.5535, "lng": 77.2588 },
-      { "name": "Humayun's Tomb", "category": "Culture", "avgCost": 500, "timeHours": 2, "lat": 28.5933, "lng": 77.2507 }
-    ]
-  },
-  {
-    "city": "Varanasi",
-    "coordinates": { "lat": 25.3176, "lng": 82.9739 },
-    "places": [
-      { "name": "Kashi Vishwanath Temple", "category": "Spiritual", "avgCost": 0, "timeHours": 2, "lat": 25.3109, "lng": 83.0107 },
-      { "name": "Dashashwamedh Ghat", "category": "Spiritual", "avgCost": 0, "timeHours": 2, "lat": 25.3068, "lng": 83.0104 },
-      { "name": "Sarnath", "category": "Culture", "avgCost": 200, "timeHours": 3, "lat": 25.3762, "lng": 83.0227 },
-      { "name": "Assi Ghat", "category": "Spiritual", "avgCost": 0, "timeHours": 1.5, "lat": 25.2897, "lng": 83.0066 },
-      { "name": "Ramnagar Fort", "category": "Culture", "avgCost": 150, "timeHours": 2, "lat": 25.2684, "lng": 83.0253 }
-    ]
-  },
-  {
-    "city": "Amritsar",
-    "coordinates": { "lat": 31.6340, "lng": 74.8723 },
-    "places": [
-      { "name": "Golden Temple", "category": "Spiritual", "avgCost": 0, "timeHours": 3, "lat": 31.62, "lng": 74.8765 },
-      { "name": "Jallianwala Bagh", "category": "Culture", "avgCost": 0, "timeHours": 1, "lat": 31.6207, "lng": 74.8801 },
-      { "name": "Wagah Border", "category": "Culture", "avgCost": 0, "timeHours": 4, "lat": 31.6047, "lng": 74.5728 },
-      { "name": "Partition Museum", "category": "Culture", "avgCost": 100, "timeHours": 2, "lat": 31.625, "lng": 74.878 },
-      { "name": "Gobindgarh Fort", "category": "Culture", "avgCost": 200, "timeHours": 2.5, "lat": 31.63, "lng": 74.86 }
-    ]
-  },
-  {
-    "city": "Udaipur",
-    "coordinates": { "lat": 24.5854, "lng": 73.7125 },
-    "places": [
-      { "name": "City Palace", "category": "Culture", "avgCost": 300, "timeHours": 3, "lat": 24.5764, "lng": 73.6835 },
-      { "name": "Lake Pichola", "category": "Nature", "avgCost": 500, "timeHours": 2, "lat": 24.5713, "lng": 73.6796 },
-      { "name": "Jag Mandir", "category": "Culture", "avgCost": 400, "timeHours": 1.5, "lat": 24.5678, "lng": 73.6781 },
-      { "name": "Saheliyon-ki-Bari", "category": "Nature", "avgCost": 50, "timeHours": 1, "lat": 24.6033, "lng": 73.684 },
-      { "name": "Sajjangarh Monsoon Palace", "category": "Culture", "avgCost": 150, "timeHours": 2, "lat": 24.5908, "lng": 73.6386 }
-    ]
-  },
-  {
-    "city": "Kochi",
-    "coordinates": { "lat": 9.9312, "lng": 76.2673 },
-    "places": [
-      { "name": "Fort Kochi", "category": "Culture", "avgCost": 0, "timeHours": 3, "lat": 9.9648, "lng": 76.2428 },
-      { "name": "Mattancherry Palace", "category": "Culture", "avgCost": 5, "timeHours": 1, "lat": 9.9583, "lng": 76.2592 },
-      { "name": "Chinese Fishing Nets", "category": "Culture", "avgCost": 0, "timeHours": 1, "lat": 9.9675, "lng": 76.2422 },
-      { "name": "Jew Town", "category": "Culture", "avgCost": 0, "timeHours": 2, "lat": 9.9575, "lng": 76.2597 },
-      { "name": "Marine Drive Kochi", "category": "Nature", "avgCost": 0, "timeHours": 1.5, "lat": 9.9794, "lng": 76.2764 }
-    ]
-  },
-  {
-    "city": "Mysuru",
-    "coordinates": { "lat": 12.2958, "lng": 76.6394 },
-    "places": [
-      { "name": "Mysore Palace", "category": "Culture", "avgCost": 100, "timeHours": 3, "lat": 12.3051, "lng": 76.6551 },
-      { "name": "Chamundi Hill", "category": "Spiritual", "avgCost": 0, "timeHours": 2, "lat": 12.273, "lng": 76.677 },
-      { "name": "Brindavan Gardens", "category": "Nature", "avgCost": 50, "timeHours": 3, "lat": 12.422, "lng": 76.572 },
-      { "name": "Mysore Zoo", "category": "Nature", "avgCost": 100, "timeHours": 3, "lat": 12.302, "lng": 76.664 },
-      { "name": "St. Philomena's Cathedral", "category": "Spiritual", "avgCost": 0, "timeHours": 1, "lat": 12.321, "lng": 76.658 }
+      { "name": "Red Fort", "category": "Culture", "avgCost": 500, "timeHours": 3, "lat": 28.6562, "lng": 77.241, "rating": 4.5, "reviews": 40000, "tags": ["Heritage", "Mughal", "History"] },
+      { "name": "Qutub Minar", "category": "Culture", "avgCost": 500, "timeHours": 2, "lat": 28.5245, "lng": 77.1855, "rating": 4.6, "reviews": 35000, "tags": ["Architecture", "Heritage", "History"] },
+      { "name": "India Gate", "category": "Culture", "avgCost": 0, "timeHours": 1, "lat": 28.6129, "lng": 77.2295, "rating": 4.7, "reviews": 50000, "tags": ["Monument", "Picnic", "Memorial"] },
+      { "name": "Lotus Temple", "category": "Spiritual", "avgCost": 0, "timeHours": 1.5, "lat": 28.5535, "lng": 77.2588, "rating": 4.6, "reviews": 45000, "tags": ["Peaceful", "Architecture", "Spiritual"] },
+      { "name": "Humayun's Tomb", "category": "Culture", "avgCost": 500, "timeHours": 2, "lat": 28.5933, "lng": 77.2507, "rating": 4.7, "reviews": 25000, "tags": ["Architecture", "Heritage", "Gardens"] },
+      { "name": "Akshardham Temple", "category": "Spiritual", "avgCost": 300, "timeHours": 4, "lat": 28.6127, "lng": 77.2773, "rating": 4.8, "reviews": 60000, "tags": ["Temple", "Exhibition", "Spiritual"] },
+      { "name": "Chandni Chowk", "category": "Shopping", "avgCost": 400, "timeHours": 3, "lat": 28.6608, "lng": 77.2300, "rating": 4.2, "reviews": 30000, "tags": ["Market", "Street Food", "Culture"] },
+      { "name": "Jama Masjid", "category": "Spiritual", "avgCost": 0, "timeHours": 1.5, "lat": 28.6507, "lng": 77.2334, "rating": 4.5, "reviews": 25000, "tags": ["Mosque", "History", "Religion"] },
+      { "name": "National Rail Museum", "category": "Culture", "avgCost": 100, "timeHours": 2.5, "lat": 28.5855, "lng": 77.1814, "rating": 4.4, "reviews": 12000, "tags": ["Museum", "History", "Trains"] },
+      { "name": "Lodhi Garden", "category": "Nature", "avgCost": 0, "timeHours": 2, "lat": 28.5933, "lng": 77.2189, "rating": 4.6, "reviews": 20000, "tags": ["Park", "Nature", "History"] },
+      { "name": "Dilli Haat", "category": "Shopping", "avgCost": 200, "timeHours": 2.5, "lat": 28.5732, "lng": 77.2076, "rating": 4.4, "reviews": 18000, "tags": ["Crafts", "Market", "Food"] }
     ]
   },
   {
     "city": "Hyderabad",
     "coordinates": { "lat": 17.3850, "lng": 78.4867 },
     "places": [
-      { "name": "Charminar", "category": "Culture", "avgCost": 25, "timeHours": 1.5, "lat": 17.3616, "lng": 78.4747 },
-      { "name": "Golconda Fort", "category": "Culture", "avgCost": 25, "timeHours": 3, "lat": 17.3833, "lng": 78.4011 },
-      { "name": "Ramoji Film City", "category": "Culture", "avgCost": 1250, "timeHours": 8, "lat": 17.2543, "lng": 78.6808 },
-      { "name": "Hussain Sagar Lake", "category": "Nature", "avgCost": 50, "timeHours": 2, "lat": 17.4239, "lng": 78.4738 },
-      { "name": "Salar Jung Museum", "category": "Culture", "avgCost": 50, "timeHours": 3, "lat": 17.3714, "lng": 78.4804 }
+      { "name": "Charminar", "category": "Culture", "avgCost": 50, "timeHours": 1.5, "lat": 17.3616, "lng": 78.4747, "rating": 4.5, "reviews": 35000, "tags": ["Iconic", "History", "Market"] },
+      { "name": "Golconda Fort", "category": "Culture", "avgCost": 100, "timeHours": 3, "lat": 17.3833, "lng": 78.4011, "rating": 4.6, "reviews": 28000, "tags": ["Fort", "Viewpoint", "History"] },
+      { "name": "Ramoji Film City", "category": "Entertainment", "avgCost": 1250, "timeHours": 8, "lat": 17.2543, "lng": 78.6808, "rating": 4.4, "reviews": 50000, "tags": ["Studio", "Entertainment", "Full Day"] },
+      { "name": "Hussain Sagar Lake", "category": "Nature", "avgCost": 100, "timeHours": 2, "lat": 17.4239, "lng": 78.4738, "rating": 4.5, "reviews": 32000, "tags": ["Lake", "Buddha Statue", "Boating"] },
+      { "name": "Salar Jung Museum", "category": "Culture", "avgCost": 100, "timeHours": 3, "lat": 17.3714, "lng": 78.4804, "rating": 4.6, "reviews": 15000, "tags": ["Museum", "History", "Antiques"] },
+      { "name": "Chowmahalla Palace", "category": "Culture", "avgCost": 100, "timeHours": 2, "lat": 17.3581, "lng": 78.4717, "rating": 4.6, "reviews": 12000, "tags": ["Palace", "History", "Royal"] },
+      { "name": "Birla Mandir Hyderabad", "category": "Spiritual", "avgCost": 0, "timeHours": 1.5, "lat": 17.4062, "lng": 78.4691, "rating": 4.7, "reviews": 22000, "tags": ["Temple", "Peaceful", "Marble"] },
+      { "name": "Nehru Zoological Park", "category": "Nature", "avgCost": 100, "timeHours": 4, "lat": 17.3508, "lng": 78.4514, "rating": 4.3, "reviews": 25000, "tags": ["Zoo", "Nature", "Animals"] },
+      { "name": "Laad Bazaar", "category": "Shopping", "avgCost": 300, "timeHours": 2, "lat": 17.3616, "lng": 78.4733, "rating": 4.2, "reviews": 18000, "tags": ["Market", "Shopping", "Bangles"] }
+    ]
+  },
+  {
+    "city": "Goa",
+    "coordinates": { "lat": 15.2993, "lng": 74.1240 },
+    "places": [
+      { "name": "Basilica of Bom Jesus", "category": "Culture", "avgCost": 0, "timeHours": 1.5, "lat": 15.5009, "lng": 73.9116, "rating": 4.7, "reviews": 20000, "tags": ["Church", "Heritage", "Architecture"] },
+      { "name": "Baga Beach", "category": "Nature", "avgCost": 500, "timeHours": 3, "lat": 15.5553, "lng": 73.7517, "rating": 4.3, "reviews": 40000, "tags": ["Beach", "Party", "Watersports"] },
+      { "name": "Aguada Fort", "category": "Culture", "avgCost": 0, "timeHours": 2, "lat": 15.4920, "lng": 73.7730, "rating": 4.5, "reviews": 30000, "tags": ["Fort", "Viewpoint", "Ocean"] },
+      { "name": "Dudhsagar Falls", "category": "Nature", "avgCost": 1500, "timeHours": 6, "lat": 15.3126, "lng": 74.3146, "rating": 4.6, "reviews": 15000, "tags": ["Waterfall", "Adventure", "Nature"] },
+      { "name": "Anjuna Flea Market", "category": "Shopping", "avgCost": 300, "timeHours": 2.5, "lat": 15.5728, "lng": 73.7441, "rating": 4.2, "reviews": 12000, "tags": ["Market", "Shopping", "Vibe"] },
+      { "name": "Palolem Beach", "category": "Nature", "avgCost": 400, "timeHours": 3, "lat": 15.0100, "lng": 74.0232, "rating": 4.6, "reviews": 18000, "tags": ["Beach", "Scenic", "Relaxed"] },
+      { "name": "Mangueshi Temple", "category": "Spiritual", "avgCost": 0, "timeHours": 1, "lat": 15.4337, "lng": 73.9684, "rating": 4.6, "reviews": 10000, "tags": ["Temple", "Spiritual", "History"] },
+      { "name": "Chapora Fort", "category": "Culture", "avgCost": 0, "timeHours": 1.5, "lat": 15.6067, "lng": 73.7364, "rating": 4.4, "reviews": 25000, "tags": ["Fort", "Viewpoint", "Dil Chahta Hai"] }
+    ]
+  },
+  {
+    "city": "Chennai",
+    "coordinates": { "lat": 13.0827, "lng": 80.2707 },
+    "places": [
+      { "name": "Marina Beach", "category": "Nature", "avgCost": 0, "timeHours": 2, "lat": 13.0418, "lng": 80.2825, "rating": 4.5, "reviews": 45000, "tags": ["Beach", "Ocean", "Iconic"] },
+      { "name": "Kapaleeshwarar Temple", "category": "Spiritual", "avgCost": 0, "timeHours": 1.5, "lat": 13.0333, "lng": 80.2694, "rating": 4.7, "reviews": 18000, "tags": ["Temple", "Architecture", "Spiritual"] },
+      { "name": "Government Museum Chennai", "category": "Culture", "avgCost": 15, "timeHours": 3, "lat": 13.0694, "lng": 80.2522, "rating": 4.4, "reviews": 10000, "tags": ["Museum", "History", "Antiques"] },
+      { "name": "Santhome Cathedral Basilica", "category": "Spiritual", "avgCost": 0, "timeHours": 1, "lat": 13.0337, "lng": 80.2778, "rating": 4.6, "reviews": 12000, "tags": ["Church", "History", "Architecture"] },
+      { "name": "Guindy National Park", "category": "Nature", "avgCost": 20, "timeHours": 3, "lat": 13.0033, "lng": 80.2331, "rating": 4.2, "reviews": 15000, "tags": ["Nature", "Zoo", "Deer Park"] },
+      { "name": "DakshinaChitra Museum", "category": "Culture", "avgCost": 100, "timeHours": 3, "lat": 12.8222, "lng": 80.2417, "rating": 4.5, "reviews": 8000, "tags": ["Culture", "Art", "Heritage"] },
+      { "name": "T. Nagar Market", "category": "Shopping", "avgCost": 500, "timeHours": 3, "lat": 13.0400, "lng": 80.2300, "rating": 4.3, "reviews": 25000, "tags": ["Market", "Shopping", "Busy"] }
     ]
   },
   {
     "city": "Bengaluru",
     "coordinates": { "lat": 12.9716, "lng": 77.5946 },
     "places": [
-      { "name": "Cubbon Park", "category": "Nature", "avgCost": 0, "timeHours": 2, "lat": 12.9763, "lng": 77.5929 },
-      { "name": "Lalbagh Botanical Garden", "category": "Nature", "avgCost": 120, "timeHours": 2.5, "lat": 12.9507, "lng": 77.5848 },
-      { "name": "Bangalore Palace", "category": "Culture", "avgCost": 500, "timeHours": 2, "lat": 12.9987, "lng": 77.5921 },
-      { "name": "ISKCON Temple", "category": "Culture", "avgCost": 0, "timeHours": 2, "lat": 13.0098, "lng": 77.5511 },
-      { "name": "Bannerghatta National Park", "category": "Nature", "avgCost": 500, "timeHours": 5, "lat": 12.8006, "lng": 77.577 }
+      { "name": "Cubbon Park", "category": "Nature", "avgCost": 0, "timeHours": 2, "lat": 12.9763, "lng": 77.5929, "rating": 4.6, "reviews": 32000, "tags": ["Nature", "Park", "Greenery"] },
+      { "name": "Lalbagh Botanical Garden", "category": "Nature", "avgCost": 120, "timeHours": 2.5, "lat": 12.9507, "lng": 77.5848, "rating": 4.7, "reviews": 35000, "tags": ["Nature", "Garden", "Flowers"] },
+      { "name": "Bangalore Palace", "category": "Culture", "avgCost": 500, "timeHours": 2, "lat": 12.9987, "lng": 77.5921, "rating": 4.5, "reviews": 18000, "tags": ["Palace", "History", "Royal"] },
+      { "name": "ISKCON Temple Bangalore", "category": "Spiritual", "avgCost": 0, "timeHours": 2, "lat": 13.0098, "lng": 77.5511, "rating": 4.8, "reviews": 40000, "tags": ["Temple", "Peaceful", "Spiritual"] },
+      { "name": "Bannerghatta National Park", "category": "Nature", "avgCost": 500, "timeHours": 5, "lat": 12.8006, "lng": 77.577, "rating": 4.4, "reviews": 25000, "tags": ["Safari", "Nature", "Zoo"] },
+      { "name": "Vidhana Soudha", "category": "Culture", "avgCost": 0, "timeHours": 1, "lat": 12.9796, "lng": 77.5906, "rating": 4.6, "reviews": 15000, "tags": ["Architecture", "Iconic", "Government"] },
+      { "name": "Commercial Street", "category": "Shopping", "avgCost": 500, "timeHours": 3, "lat": 12.9822, "lng": 77.6083, "rating": 4.3, "reviews": 28000, "tags": ["Shopping", "Market", "Vibrant"] },
+      { "name": "Nandi Hills", "category": "Nature", "avgCost": 150, "timeHours": 4, "lat": 13.3702, "lng": 77.6835, "rating": 4.5, "reviews": 45000, "tags": ["Nature", "Viewpoint", "Sunrise"] }
     ]
   }
 ]

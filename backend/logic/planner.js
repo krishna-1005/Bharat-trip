@@ -144,6 +144,36 @@ function generatePlanSummary({ city, days, totalBudget, totalTripCost, interests
   return templates[Math.floor(Math.random() * templates.length)];
 }
 
+/* ── OSM CACHE ── */
+const osmCache = new Map();
+
+/* ── DE-DUPLICATION UTILITY ── */
+function mergePools(curated, dynamic) {
+  const merged = [...curated];
+  const curatedNames = new Set(curated.map(p => p.name.toLowerCase().trim()));
+
+  for (const p of dynamic) {
+    const cleanName = p.name.toLowerCase().trim();
+    if (!curatedNames.has(cleanName)) {
+      merged.push(p);
+      curatedNames.add(cleanName);
+    }
+  }
+  return merged;
+}
+
+/* ── DATA ENRICHMENT ── */
+function enrichPlace(p, index) {
+  return {
+    ...p,
+    rating: p.rating || generateRating(index),
+    reviews: p.reviews || generateReviews(index),
+    tag: p.tag || generateTag(p, index),
+    avgCost: p.avgCost || 200,
+    timeHours: p.timeHours || 2
+  };
+}
+
 /* ── MAIN FUNCTION ── */
 async function generatePlan({
   city,
@@ -158,47 +188,48 @@ async function generatePlan({
   const totalBudget = Number(budget) || 5000;
   const perDayBudget = totalBudget / days;
 
-  /* STEP 1: GEO FILTER (STRICT) */
-  let cityPool = allPlacesPool.filter(p => {
+  /* STEP 1: CURATED POOL */
+  let curatedPool = allPlacesPool.filter(p => {
     if (p.area && p.area.toLowerCase() === cleanCity) return true;
     const dist = getDistance(coords.lat, coords.lng, p.lat, p.lng);
-    return dist <= 50;
+    return dist <= 40; // 40km radius for curated
   });
 
-  /* STEP 2: OSM fallback */
-  if (cityPool.length < 8) {
-    const osm = await fetchOSMPlaces(coords.lat, coords.lng);
-    cityPool.push(
-      ...osm.map(p => ({
-        name: p.name,
-        lat: Number(p.lat),
-        lng: Number(p.lng),
-        category: p.category || "Other",
-        tags: [],
-        timeHours: 1.5,
-        avgCost: 100,
-        source: "osm",
-        area: city
-      }))
-    );
+  /* STEP 2: HYBRID FETCH (OSM) */
+  let osmPool = [];
+  const cacheKey = `${coords.lat.toFixed(3)},${coords.lng.toFixed(3)}`;
+  
+  if (osmCache.has(cacheKey)) {
+    osmPool = osmCache.get(cacheKey);
+  } else {
+    // Increase radius for larger cities or if curated pool is small
+    const radius = curatedPool.length < 10 ? 15 : 10;
+    osmPool = await fetchOSMPlaces(coords.lat, coords.lng, radius);
+    osmCache.set(cacheKey, osmPool);
   }
 
-  /* STEP 3: INTEREST FILTER */
+  /* STEP 3: MERGE & DE-DUPLICATE */
+  let cityPool = mergePools(curatedPool, osmPool);
+
+  /* STEP 4: INTEREST FILTER */
   const interestSet = new Set(interests.map(i => i.toLowerCase()));
   let filteredPool = cityPool.filter(p =>
     interestSet.size === 0 ||
     interestSet.has(p.category.toLowerCase()) ||
-    (p.tags || []).some(t => interestSet.has(t))
+    (p.tags || []).some(t => interestSet.has(t.toLowerCase()))
   );
 
   if (filteredPool.length === 0) filteredPool = cityPool;
 
-  /* STEP 4: SCORING & TRUNCATING */
+  /* STEP 5: SCORING & ENRICHMENT */
   let prioritizedPool = filteredPool
-    .map(p => ({
-      ...p,
-      score: calculateScore(p, interests, coords, budget > 10000 ? "high" : (budget > 3000 ? "medium" : "low"), userPreferences)
-    }))
+    .map((p, idx) => {
+      const enriched = enrichPlace(p, idx);
+      return {
+        ...enriched,
+        score: calculateScore(enriched, interests, coords, budget > 10000 ? "high" : (budget > 3000 ? "medium" : "low"), userPreferences)
+      };
+    })
     .sort((a, b) => b.score - a.score);
 
   const maxPlacesNeeded = days * 6;
