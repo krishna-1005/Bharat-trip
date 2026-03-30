@@ -56,7 +56,15 @@ const userSchema = new mongoose.Schema(
       type: Map,
       of: Number,
       default: {}
-    }
+    },
+
+    /* SMART PREFERENCES */
+    travelStyleTags: { type: [String], default: [] },
+    pastVotes: [{
+      pollId: String,
+      city: String,
+      votedAt: { type: Date, default: Date.now }
+    }]
   },
 
   savedPlaces: {

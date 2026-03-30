@@ -5,8 +5,11 @@ const pollSchema = new mongoose.Schema({
   tripName: { type: String, required: true },
   groupSize: { type: Number },
   options: [{
-    name: { type: String, required: true },
-    votes: { type: Number, default: 0 }
+    name: { type: String, required: true }, // Usually the city name
+    votes: { type: Number, default: 0 },
+    city: { type: String },
+    tags: { type: [String], default: [] },
+    vibe: { type: String }
   }],
   isClosed: { type: Boolean, default: false },
   winner: { type: String, default: null },

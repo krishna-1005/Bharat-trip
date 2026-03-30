@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Poll = require("../models/Poll");
+const User = require("../models/User");
 const { v4: uuidv4 } = require("uuid");
 const { protect } = require("../middleware/protect");
 
@@ -17,7 +18,13 @@ router.post("/create", async (req, res) => {
       pollId,
       tripName,
       groupSize: groupSize === "" ? undefined : groupSize,
-      options: options.map(opt => ({ name: opt, votes: 0 })),
+      options: options.map(opt => ({ 
+        name: typeof opt === 'string' ? opt : opt.name,
+        city: typeof opt === 'string' ? opt : opt.city,
+        tags: opt.tags || [],
+        vibe: opt.vibe || "",
+        votes: 0 
+      })),
       createdBy: userId || undefined
     });
 
@@ -40,10 +47,10 @@ router.get("/:pollId", async (req, res) => {
   }
 });
 
-// Submit a vote
+// Submit a vote (Optionally protected to capture preferences)
 router.post("/vote", async (req, res) => {
   try {
-    const { pollId, optionName } = req.body;
+    const { pollId, optionName, userId } = req.body;
     const poll = await Poll.findOne({ pollId });
     if (!poll) return res.status(404).json({ error: "Poll not found." });
 
@@ -55,6 +62,35 @@ router.post("/vote", async (req, res) => {
     if (!option) return res.status(400).json({ error: "Option not found." });
 
     option.votes += 1;
+
+    // CAPTURE USER PREFERENCES
+    if (userId) {
+      const user = await User.findById(userId);
+      if (user) {
+        // Store past vote
+        user.preferences.pastVotes.push({
+          pollId: poll.pollId,
+          city: option.city || option.name,
+          votedAt: new Date()
+        });
+
+        // Store tags associated with the city
+        if (option.tags && option.tags.length > 0) {
+          option.tags.forEach(tag => {
+            if (!user.preferences.travelStyleTags.includes(tag)) {
+              user.preferences.travelStyleTags.push(tag);
+            }
+            
+            // Also optionally update general interests if tag matches a category
+            const category = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
+            if (!user.preferences.interests.includes(category)) {
+              user.preferences.interests.push(category);
+            }
+          });
+        }
+        await user.save();
+      }
+    }
 
     const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
     const maxVotes = Math.max(...poll.options.map(o => o.votes));

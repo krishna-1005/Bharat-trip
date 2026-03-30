@@ -71,6 +71,7 @@ function plannerEngine(places, { city, days, interests, budget, userPreferences 
     interests: userInterests = [],
     avoidedCategories = [],
     categoryWeights = new Map(),
+    travelStyleTags = []
   } = userPreferences;
 
   // 2. Personalized Scoring
@@ -81,6 +82,12 @@ function plannerEngine(places, { city, days, interests, budget, userPreferences 
     // Boost if in user's general interests
     if (userInterests.includes(place.category)) {
       score += 1.5;
+      isPersonalized = true;
+    }
+
+    // NEW: Boost if in travel style tags from polls
+    if (travelStyleTags.some(tag => tag.toLowerCase() === place.category.toLowerCase())) {
+      score += 1.0;
       isPersonalized = true;
     }
 

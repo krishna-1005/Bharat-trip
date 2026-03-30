@@ -14,12 +14,27 @@ export default function Profile() {
 
   const [dbTrips, setDbTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [profileData, setProfileData] = useState(null);
 
   useEffect(() => {
     if (!user) {
       navigate("/login");
     }
   }, [user, navigate]);
+
+  const fetchProfile = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await fetch(`${API}/api/profile`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) setProfileData(data.user);
+    } catch (err) {
+      console.warn("Could not fetch profile details", err);
+    }
+  };
 
   const fetchTrips = async () => {
     if (!user) return;
@@ -55,7 +70,10 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    if (user) fetchTrips();
+    if (user) {
+      fetchTrips();
+      fetchProfile();
+    }
   }, [user]);
 
   const handleViewTrip = (trip) => {
@@ -85,6 +103,8 @@ export default function Profile() {
   const name = user?.name || user?.email?.split("@")[0] || "Explorer";
   const initial = name.charAt(0).toUpperCase();
 
+  const travelTags = profileData?.preferences?.travelStyleTags || [];
+
   const stats = [
     { label: "Trips Planned", value: dbTrips.length, icon: "🗺️", color: "#3b82f6" },
     { label: "Cities Explored", value: new Set(dbTrips.map(t => t.location)).size, icon: "📍", color: "#10b981" },
@@ -100,6 +120,25 @@ export default function Profile() {
             <div className="pro-user-info">
               <h1 className="pro-name">{name}</h1>
               <p className="pro-bio">Adventurer • Explorer • Storyteller</p>
+              
+              {travelTags.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+                  {travelTags.map(tag => (
+                    <span key={tag} style={{ 
+                      fontSize: '10px', 
+                      background: 'rgba(59, 130, 246, 0.1)', 
+                      color: '#60a5fa', 
+                      padding: '4px 10px', 
+                      borderRadius: '100px',
+                      fontWeight: '800',
+                      border: '1px solid rgba(59, 130, 246, 0.2)'
+                    }}>
+                      ✦ {tag.toUpperCase()}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
                 <span className="pro-trip-badge" style={{ position: 'static', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa' }}>Premium Member</span>
                 <span className="pro-trip-badge" style={{ position: 'static', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}>Verified Traveler</span>
