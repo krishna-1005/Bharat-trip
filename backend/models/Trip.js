@@ -66,6 +66,31 @@ const tripSchema = new mongoose.Schema({
     type: String,
     enum: ["upcoming", "ongoing", "completed"],
     default: "upcoming"
+  },
+
+  isPublic: {
+    type: Boolean,
+    default: false
+  },
+
+  likes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  }],
+
+  views: {
+    type: Number,
+    default: 0
+  },
+
+  savesCount: {
+    type: Number,
+    default: 0
+  },
+
+  image: {
+    type: String,
+    default: ""
   }
 
 }, { timestamps: true });

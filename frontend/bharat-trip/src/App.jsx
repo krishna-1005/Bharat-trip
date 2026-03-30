@@ -19,6 +19,7 @@ import Profile from "./pages/Profile";
 import MyTrips from "./pages/MyTrips";
 import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
+import Exploration from "./pages/Exploration";
 import Results from "./pages/Results";
 import SamplePlan from "./pages/SamplePlan";
 import NearbyPlaces from "./components/NearbyPlaces";
@@ -55,6 +56,7 @@ function App() {
             }
           />
 
+          <Route path="/explore" element={<Exploration />} />
           <Route path="/destinations" element={<Destinations />} />
           <Route path="/about" element={<About />} />
           <Route path="/weekend" element={<Weekend />} />

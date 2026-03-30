@@ -44,6 +44,7 @@ function Results() {
     return savedIdx ? parseInt(savedIdx, 10) : 0;
   });
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(loc.search);
@@ -51,26 +52,27 @@ function Results() {
 
     const fetchSharedTrip = async (id) => {
       try {
-        const res = await fetch(`${API}/api/trips/${id}`);
+        const res = await fetch(`${API}/api/public/trips/${id}`);
         const data = await res.json();
         if (res.ok) {
+          const t = data.trip;
           const formattedPlan = {
-            id: data._id,
-            city: data.destination || "Bangalore",
-            coordinates: data.coordinates,
-            days: data.days,
-            itinerary: data.itinerary,
+            id: t._id,
+            city: t.destination || "Bangalore",
+            coordinates: t.coordinates,
+            days: t.days,
+            itinerary: t.itinerary,
             isShared: true,
-            totalTripCost: data.totalTripCost,
-            totalBudget: data.totalBudget,
-            remainingBudget: data.remainingBudget,
-            perDayBudget: data.perDayBudget,
-            travelerType: data.travelerType,
-            pace: data.pace,
-            summary: data.summary || "A custom-crafted journey designed just for you."
+            totalTripCost: t.totalTripCost,
+            totalBudget: t.totalBudget,
+            remainingBudget: t.remainingBudget,
+            perDayBudget: t.perDayBudget,
+            travelerType: t.travelerType,
+            pace: t.pace,
+            summary: t.summary || "A custom-crafted journey designed just for you."
           };
           setPlan(formattedPlan);
-          setTripTitle(data.title);
+          setTripTitle(t.title);
         }
       } catch (err) {
         console.error("Error fetching shared trip:", err);
@@ -145,7 +147,8 @@ function Results() {
           perDayBudget: plan.perDayBudget,
           travelerType: plan.travelerType,
           pace: plan.pace,
-          summary: plan.summary
+          summary: plan.summary,
+          isPublic: isPublic
         })
       });
 
@@ -348,6 +351,15 @@ function Results() {
         alert("Could not copy link. Manually copy: " + shareUrl);
       }
     }
+  };
+
+  const handleCloneTrip = () => {
+    if (!plan) return;
+    const clonedPlan = { ...plan, id: null, isShared: false, isNew: true };
+    localStorage.setItem("tripPlan", JSON.stringify(clonedPlan));
+    localStorage.setItem("tripCurrentIndex", 0);
+    navigate("/results", { state: { plan: clonedPlan, isNew: true } });
+    window.location.reload(); // Refresh to reset state
   };
 
   const allPlaces = useMemo(() => {
@@ -574,21 +586,43 @@ function Results() {
         </div>
 
         <div className="sidebar-footer-premium">
+          {!saved && !plan?.isShared && (
+            <div className="public-toggle-row">
+              <label className="public-switch">
+                <input 
+                  type="checkbox" 
+                  checked={isPublic} 
+                  onChange={(e) => setIsPublic(e.target.checked)} 
+                />
+                <span className="public-slider round"></span>
+              </label>
+              <span className="public-label">Make this trip public 🌍</span>
+            </div>
+          )}
+          
           <div className="footer-summary-row">
             <div className="budget-estimate">
               <span className="budget-label">Est. Total Budget</span>
               <span className="budget-value">{formatPrice(totalTripCost)}</span>
             </div>
             <div className="footer-action-group">
-              <button 
-                className="share-journey-btn" 
-                onClick={handleShare}
-              >
-                {shareStatus ? "✅ Copied" : "🔗 Share"}
-              </button>
-              <button className="save-journey-btn" onClick={() => handleSaveTrip()} disabled={saving || saved}>
-                {saved ? "✓ Saved" : saving ? "Saving Journey..." : "Save Journey"}
-              </button>
+              {plan?.isShared ? (
+                <button className="save-journey-btn clone-btn" onClick={handleCloneTrip}>
+                  ✨ Use This Plan
+                </button>
+              ) : (
+                <>
+                  <button 
+                    className="share-journey-btn" 
+                    onClick={handleShare}
+                  >
+                    {shareStatus ? "✅ Copied" : "🔗 Share"}
+                  </button>
+                  <button className="save-journey-btn" onClick={() => handleSaveTrip()} disabled={saving || saved}>
+                    {saved ? "✓ Saved" : saving ? "Saving Journey..." : "Save Journey"}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

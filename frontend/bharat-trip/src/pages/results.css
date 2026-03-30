@@ -898,3 +898,82 @@
     height: 40vh;
   }
 }
+
+/* --- 8. PUBLIC DISCOVERY & SOCIAL --- */
+.public-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+}
+
+.public-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.public-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.public-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.public-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255,255,255,0.1);
+  transition: .4s;
+  border: 1px solid var(--glass-border);
+}
+
+.public-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .public-slider {
+  background-color: var(--accent-blue);
+}
+
+input:checked + .public-slider:before {
+  transform: translateX(18px);
+}
+
+.public-slider.round {
+  border-radius: 22px;
+}
+
+.public-slider.round:before {
+  border-radius: 50%;
+}
+
+.clone-btn {
+  background: linear-gradient(135deg, #8b5cf6, #d946ef) !important;
+  box-shadow: 0 10px 25px rgba(217, 70, 239, 0.3) !important;
+}
+
+.clone-btn:hover {
+  box-shadow: 0 15px 30px rgba(217, 70, 239, 0.4) !important;
+}
