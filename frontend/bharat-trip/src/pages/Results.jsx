@@ -45,6 +45,16 @@ function Results() {
   });
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(() => {
+    return localStorage.getItem("tripExecuting") === "true";
+  });
+
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(loc.search);
@@ -319,6 +329,52 @@ function Results() {
       trackPreference(place.category, "visit");
     }
     setCurrentIndex(idx + 1);
+    localStorage.setItem("tripCurrentIndex", idx + 1);
+  };
+
+  const handleStartTrip = () => {
+    setIsExecuting(true);
+    localStorage.setItem("tripExecuting", "true");
+    if (currentIndex >= allPlaces.length) {
+      setCurrentIndex(0);
+      localStorage.setItem("tripCurrentIndex", 0);
+    }
+  };
+
+  const handleCompleteStop = () => {
+    const currentPlace = allPlaces[currentIndex];
+    if (currentPlace) {
+      handleVisited(null, currentPlace, currentIndex);
+    }
+  };
+
+  const handleSkipStop = () => {
+    setCurrentIndex(prev => {
+      const next = prev + 1;
+      localStorage.setItem("tripCurrentIndex", next);
+      return next;
+    });
+  };
+
+  const handleJumpToNext = () => {
+    // Already same as skip in simple sequential mode
+    handleSkipStop();
+  };
+
+  const getDayGreeting = () => {
+    const hour = currentTime.getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
+
+  const getTimeAwareSuggestion = () => {
+    const hour = currentTime.getHours();
+    if (hour >= 7 && hour < 10) return "Perfect time for a morning walk or spiritual visit.";
+    if (hour >= 12 && hour < 14) return "Ideal time to explore local lunch spots.";
+    if (hour >= 17 && hour < 19) return "Great time for sunset views or evening markets.";
+    if (hour >= 20) return "Time to relax and enjoy the city's nightlife.";
+    return "Keep exploring the hidden gems!";
   };
 
   const handleShare = async () => {
@@ -457,132 +513,209 @@ function Results() {
               <div className="brand-dot"></div>
               <span className="brand-text">Bharat Trip</span>
             </div>
-            <button className="back-control" onClick={() => navigate("/planner")}>← Edit Plan</button>
+            <button className="back-control" onClick={() => {
+              if (isExecuting) {
+                setIsExecuting(false);
+                localStorage.setItem("tripExecuting", "false");
+              } else {
+                navigate("/planner");
+              }
+            }}>
+              {isExecuting ? "← Full Plan" : "← Edit Plan"}
+            </button>
           </div>
-          <div className="trip-hero-info">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h1>{tripTitle || `${totalDays} Days in ${plan.city || "India"}`}</h1>
-              {plan.isPersonalized && (
-                <span className="personalized-badge" title="Learned from your behavior">✨ Personalized</span>
-              )}
+          
+          {!isExecuting ? (
+            <div className="trip-hero-info">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
+                <h1>{tripTitle || `${totalDays} Days in ${plan.city || "India"}`}</h1>
+                <button className="start-trip-btn" onClick={handleStartTrip}>🚀 Start Trip</button>
+              </div>
+              <div className="trip-meta-pills">
+                <span className="meta-pill">✨ {plan.travelerType || "Solo"}</span>
+                <span className="meta-pill">⚡ {plan.pace || "Moderate"} Pace</span>
+                <span className="meta-pill">📅 {totalDays} Days</span>
+                <button className="meta-pill optimize-pill" onClick={optimizeItinerary}>🚀 Optimize Route</button>
+              </div>
             </div>
-            <div className="trip-meta-pills">
-              <span className="meta-pill">✨ {plan.travelerType || "Solo"}</span>
-              <span className="meta-pill">⚡ {plan.pace || "Moderate"} Pace</span>
-              <span className="meta-pill">📅 {totalDays} Days</span>
-              <button className="meta-pill optimize-pill" onClick={optimizeItinerary}>🚀 Optimize Route</button>
+          ) : (
+            <div className="trip-hero-info execution-header">
+              <div className="exec-greeting-row">
+                <span className="exec-greeting">{getDayGreeting()}, {user?.name?.split(' ')[0] || "Traveler"}!</span>
+                <span className="exec-time">{currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <p className="exec-suggestion">{getTimeAwareSuggestion()}</p>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="sidebar-scroll-content">
-          {plan.summary && (
-            <div className="plan-summary-card">
-              <h4 className="summary-title">Adaptive Intelligence</h4>
-              <p className="summary-text">{plan.summary}</p>
-              <div className="adaptive-controls">
-                <button className="adaptive-btn late" onClick={handleRunningLate}>🏃 Running Late</button>
-                <button className="adaptive-btn relax" onClick={handleRelaxMode}>🧘 Relax Mode</button>
-              </div>
-            </div>
-          )}
-
-          {plan.totalBudget && (
-            <div className="journey-progress-card budget-intelligence">
-              <div className="progress-header">
-                <span className="progress-label">Budget Intelligence</span>
-                <span className="progress-val">{Math.round((totalTripCost / (plan.totalBudget || 1)) * 100)}%</span>
-              </div>
-              <div className="budget-stats-grid">
-                <div className="budget-stat-item">
-                  <span className="stat-label">Total Budget</span>
-                  <span className="stat-val">{formatPrice(plan.totalBudget)}</span>
+          {isExecuting ? (
+            <div className="execution-mode-focused animate-in">
+              {/* Progress Summary */}
+              <div className="exec-progress-summary">
+                <div className="exec-stat">
+                  <span className="exec-stat-val">{currentIndex}</span>
+                  <span className="exec-stat-label">Visited</span>
                 </div>
-                <div className="budget-stat-item">
-                  <span className="stat-label">Est. Cost</span>
-                  <span className="stat-val">{formatPrice(totalTripCost)}</span>
+                <div className="exec-stat">
+                  <span className="exec-stat-val">{allPlaces.length - currentIndex}</span>
+                  <span className="exec-stat-label">Remaining</span>
                 </div>
-                <div className="budget-stat-item">
-                  <span className="stat-label">Remaining</span>
-                  <span className="stat-val" style={{ color: (plan.totalBudget - totalTripCost) >= 0 ? 'var(--accent-green)' : '#ef4444' }}>
-                    {formatPrice(plan.totalBudget - totalTripCost)}
-                  </span>
+                <div className="exec-progress-track">
+                   <div className="exec-progress-fill" style={{ width: `${progressPercent}%` }}></div>
                 </div>
               </div>
-              <div className="progress-track-premium" style={{ marginTop: '12px' }}>
-                <div 
-                  className="progress-fill-premium" 
-                  style={{ 
-                    width: `${Math.min((totalTripCost / (plan.totalBudget || 1)) * 100, 100)}%`,
-                    background: totalTripCost > plan.totalBudget ? '#ef4444' : 'linear-gradient(to right, var(--accent-blue), var(--accent-green))'
-                  }}
-                ></div>
-              </div>
-            </div>
-          )}
 
-          <div className="journey-progress-card">
-            <div className="progress-header">
-              <span className="progress-label">Journey Progress</span>
-              <span className="progress-val">{progressPercent}%</span>
-            </div>
-            <div className="progress-track-premium">
-              <div className="progress-fill-premium" style={{ width: `${progressPercent}%` }}></div>
-            </div>
-          </div>
+              {/* Current Stop Card */}
+              {currentIndex < allPlaces.length ? (
+                <div className="focused-stop-card current">
+                  <span className="stop-status-tag current">CURRENT STOP</span>
+                  <PlaceImage placeName={allPlaces[currentIndex].name} city={plan.city} className="focused-stop-img" />
+                  <div className="focused-stop-body">
+                    <h2>{allPlaces[currentIndex].name}</h2>
+                    <p className="focused-stop-insight">{allPlaces[currentIndex].reason}</p>
+                    
+                    <div className="focused-action-row">
+                      <button className="exec-action-btn complete" onClick={handleCompleteStop}>✅ Mark Completed</button>
+                      <button className="exec-action-btn skip" onClick={handleSkipStop}>⏭️ Skip</button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="focused-stop-card completed">
+                   <div className="confetti-icon">🎉</div>
+                   <h2>Trip Completed!</h2>
+                   <p>You've explored all planned destinations. Hope you had an amazing journey!</p>
+                   <button className="btn-premium primary" onClick={() => setIsExecuting(false)}>View Summary</button>
+                </div>
+              )}
 
-          {daysKeys.map((day, dIdx) => (
-            <div key={day} className="premium-day-section">
-              <div className="day-header-premium">
-                <div className="day-circle">{dIdx + 1}</div>
-                <div className="day-info">
-                  <h3>{day}</h3>
-                  <span>{plan.itinerary[day].places.length} Destinations</span>
+              {/* Next Stop Preview */}
+              {currentIndex + 1 < allPlaces.length && (
+                <div className="next-stop-preview">
+                  <span className="stop-status-tag next">UP NEXT</span>
+                  <div className="next-stop-row">
+                    <div className="next-stop-info">
+                      <h4>{allPlaces[currentIndex + 1].name}</h4>
+                      <span>📍 {allPlaces[currentIndex + 1].category}</span>
+                    </div>
+                    <button className="exec-action-btn jump" onClick={handleJumpToNext}>Jump to →</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              {plan.summary && (
+                <div className="plan-summary-card">
+                  <h4 className="summary-title">Adaptive Intelligence</h4>
+                  <p className="summary-text">{plan.summary}</p>
+                  <div className="adaptive-controls">
+                    <button className="adaptive-btn late" onClick={handleRunningLate}>🏃 Running Late</button>
+                    <button className="adaptive-btn relax" onClick={handleRelaxMode}>🧘 Relax Mode</button>
+                  </div>
+                </div>
+              )}
+
+              {plan.totalBudget && (
+                <div className="journey-progress-card budget-intelligence">
+                  <div className="progress-header">
+                    <span className="progress-label">Budget Intelligence</span>
+                    <span className="progress-val">{Math.round((totalTripCost / (plan.totalBudget || 1)) * 100)}%</span>
+                  </div>
+                  <div className="budget-stats-grid">
+                    <div className="budget-stat-item">
+                      <span className="stat-label">Total Budget</span>
+                      <span className="stat-val">{formatPrice(plan.totalBudget)}</span>
+                    </div>
+                    <div className="budget-stat-item">
+                      <span className="stat-label">Est. Cost</span>
+                      <span className="stat-val">{formatPrice(totalTripCost)}</span>
+                    </div>
+                    <div className="budget-stat-item">
+                      <span className="stat-label">Remaining</span>
+                      <span className="stat-val" style={{ color: (plan.totalBudget - totalTripCost) >= 0 ? 'var(--accent-green)' : '#ef4444' }}>
+                        {formatPrice(plan.totalBudget - totalTripCost)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="progress-track-premium" style={{ marginTop: '12px' }}>
+                    <div 
+                      className="progress-fill-premium" 
+                      style={{ 
+                        width: `${Math.min((totalTripCost / (plan.totalBudget || 1)) * 100, 100)}%`,
+                        background: totalTripCost > plan.totalBudget ? '#ef4444' : 'linear-gradient(to right, var(--accent-blue), var(--accent-green))'
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
+              <div className="journey-progress-card">
+                <div className="progress-header">
+                  <span className="progress-label">Journey Progress</span>
+                  <span className="progress-val">{progressPercent}%</span>
+                </div>
+                <div className="progress-track-premium">
+                  <div className="progress-fill-premium" style={{ width: `${progressPercent}%` }}></div>
                 </div>
               </div>
-              <div className="stops-container-premium">
-                {plan.itinerary[day].places.map((place, pIdx) => {
-                  let globalIdx = 0;
-                  for (let i = 0; i < dIdx; i++) globalIdx += (plan.itinerary[daysKeys[i]]?.places.length || 0);
-                  const idx = globalIdx + pIdx;
-                  const isVisited = idx < currentIndex;
-                  const isCurrent = idx === currentIndex;
 
-                  return (
-                    <div key={idx} className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}>
-                      <div className="stop-marker-v2"></div>
-                      <div className="stop-card-inner">
-                        <div className="stop-top-row">
-                          <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
-                          <div className="stop-details-v2">
-                            <div className="stop-title-row">
-                              <h4>{place.name}</h4>
-                              {!isVisited && (
-                                <button className="skip-btn" onClick={(e) => { e.stopPropagation(); handleSkip(day, place.name); }} title="Skip Place">✕</button>
-                              )}
+              {daysKeys.map((day, dIdx) => (
+                <div key={day} className="premium-day-section">
+                  <div className="day-header-premium">
+                    <div className="day-circle">{dIdx + 1}</div>
+                    <div className="day-info">
+                      <h3>{day}</h3>
+                      <span>{plan.itinerary[day].places.length} Destinations</span>
+                    </div>
+                  </div>
+                  <div className="stops-container-premium">
+                    {plan.itinerary[day].places.map((place, pIdx) => {
+                      let globalIdx = 0;
+                      for (let i = 0; i < dIdx; i++) globalIdx += (plan.itinerary[daysKeys[i]]?.places.length || 0);
+                      const idx = globalIdx + pIdx;
+                      const isVisited = idx < currentIndex;
+                      const isCurrent = idx === currentIndex;
+
+                      return (
+                        <div key={idx} className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}>
+                          <div className="stop-marker-v2"></div>
+                          <div className="stop-card-inner">
+                            <div className="stop-top-row">
+                              <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
+                              <div className="stop-details-v2">
+                                <div className="stop-title-row">
+                                  <h4>{place.name}</h4>
+                                  {!isVisited && (
+                                    <button className="skip-btn" onClick={(e) => { e.stopPropagation(); handleSkip(day, place.name); }} title="Skip Place">✕</button>
+                                  )}
+                                </div>
+                                <div className="stop-trust-layer">
+                                  ⭐ {place.rating || "4.2"} • {typeof place.reviews === 'number' ? place.reviews.toLocaleString() : "1,200+"} reviews • <span className="trust-tag">{place.tag || "Popular Spot"}</span>
+                                </div>
+                                <div className="stop-pills-v2">
+                                  <span className="stop-pill-v2">{place.category || "Sight"}</span>
+                                  <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="stop-trust-layer">
-                              ⭐ {place.rating || "4.2"} • {typeof place.reviews === 'number' ? place.reviews.toLocaleString() : "1,200+"} reviews • <span className="trust-tag">{place.tag || "Popular Spot"}</span>
-                            </div>
-                            <div className="stop-pills-v2">
-                              <span className="stop-pill-v2">{place.category || "Sight"}</span>
-                              <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
-                            </div>
+                            {isCurrent && (
+                              <div className="active-action-pane">
+                                <p className="stop-insight-v2">{place.reason || "Discover the beauty of this location."}</p>
+                                <button className="premium-action-btn" onClick={(e) => { e.stopPropagation(); handleVisited(day, place, idx); }}>Mark as Visited →</button>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        {isCurrent && (
-                          <div className="active-action-pane">
-                            <p className="stop-insight-v2">{place.reason || "Discover the beauty of this location."}</p>
-                            <button className="premium-action-btn" onClick={(e) => { e.stopPropagation(); handleVisited(day, place, idx); }}>Mark as Visited →</button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
 
         <div className="sidebar-footer-premium">

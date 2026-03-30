@@ -977,3 +977,241 @@ input:checked + .public-slider:before {
 .clone-btn:hover {
   box-shadow: 0 15px 30px rgba(217, 70, 239, 0.4) !important;
 }
+
+/* --- 9. EXECUTION MODE (FOCUSED) --- */
+.start-trip-btn {
+  background: var(--accent-green);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  transition: 0.3s;
+}
+
+.start-trip-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.execution-header {
+  padding-bottom: 10px;
+}
+
+.exec-greeting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.exec-greeting {
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.exec-time {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+
+.exec-suggestion {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+}
+
+.exec-progress-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.exec-stat {
+  background: rgba(255,255,255,0.03);
+  padding: 16px;
+  border-radius: 16px;
+  text-align: center;
+  border: 1px solid var(--glass-border);
+}
+
+.exec-stat-val {
+  display: block;
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.exec-stat-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.exec-progress-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.exec-progress-fill {
+  height: 100%;
+  background: var(--accent-blue);
+  transition: width 0.5s ease;
+}
+
+.focused-stop-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.stop-status-tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 900;
+  z-index: 2;
+  letter-spacing: 1px;
+}
+
+.stop-status-tag.current {
+  background: var(--accent-blue);
+  color: white;
+}
+
+.stop-status-tag.next {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-secondary);
+}
+
+.focused-stop-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.focused-stop-body {
+  padding: 24px;
+}
+
+.focused-stop-body h2 {
+  font-size: 24px;
+  font-weight: 900;
+  margin: 0 0 12px 0;
+}
+
+.focused-stop-insight {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.focused-action-row {
+  display: flex;
+  gap: 12px;
+}
+
+.exec-action-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.exec-action-btn.complete {
+  background: white;
+  color: black;
+}
+
+.exec-action-btn.complete:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+.exec-action-btn.skip {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid var(--glass-border);
+}
+
+.exec-action-btn.skip:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.next-stop-preview {
+  background: rgba(255,255,255,0.02);
+  border: 1px dashed var(--glass-border);
+  padding: 20px;
+  border-radius: 20px;
+  position: relative;
+}
+
+.next-stop-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.next-stop-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.next-stop-info span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.exec-action-btn.jump {
+  flex: 0;
+  padding: 8px 16px;
+  font-size: 11px;
+  white-space: nowrap;
+  background: var(--glass-border);
+}
+
+.focused-stop-card.completed {
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.confetti-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
