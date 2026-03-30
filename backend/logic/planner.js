@@ -223,7 +223,12 @@ async function generatePlan({
       const t = p.timeHours || 2;
       const placeCost = (p.avgCost || 200) * tMult;
 
-      if (dayHours + t <= MAX_HOURS_PER_DAY && (dayCost + placeCost) <= (perDayBudget * 1.2)) {
+      // MORE LENIENT BUDGET CHECK: 
+      // Always allow at least 2 places per day regardless of budget if they fit the time,
+      // OR if they fit within 150% of the per-day budget (was 120%).
+      const isBudgetOk = (dayCost + placeCost) <= (perDayBudget * 1.5) || validPlaces.length < 2;
+
+      if (dayHours + t <= MAX_HOURS_PER_DAY && isBudgetOk) {
         dayHours += t;
         dayCost += placeCost;
 
