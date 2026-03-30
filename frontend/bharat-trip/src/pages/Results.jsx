@@ -638,6 +638,24 @@ function Results() {
                   </div>
                 </div>
               )}
+
+              {/* Upcoming Queue */}
+              {currentIndex + 2 < allPlaces.length && (
+                <div className="upcoming-queue-section">
+                  <h4 className="queue-title">Remaining stops today</h4>
+                  <div className="queue-list">
+                    {allPlaces.slice(currentIndex + 2).map((place, qIdx) => (
+                      <div key={qIdx} className="queue-item">
+                        <div className="queue-dot"></div>
+                        <div className="queue-info">
+                          <span className="queue-name">{place.name}</span>
+                          <span className="queue-cat">{place.category}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <>
