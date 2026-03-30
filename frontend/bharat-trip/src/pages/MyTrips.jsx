@@ -85,7 +85,7 @@ export default function MyTrips() {
   };
 
   const handleShare = async (trip) => {
-    const shareUrl = `${window.location.origin}/results?sharedTripId=${trip.id}`;
+    const shareUrl = `${window.location.origin}/trip/${trip.id}`;
     
     if (navigator.share) {
       try {

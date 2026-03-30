@@ -68,6 +68,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/results" element={<Results />} />
           <Route path="/map" element={<Results />} />
+          <Route path="/trip/:id" element={<Results />} />
           <Route path="/sample-plan" element={<SamplePlan />} />
           <Route path="/explore/:city" element={<DestinationDetails />} />
           <Route path="/nearby" element={<NearbyPlaces />} />

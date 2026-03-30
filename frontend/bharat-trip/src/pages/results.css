@@ -721,6 +721,13 @@
   margin-bottom: 20px;
 }
 
+.footer-action-group {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  margin-left: 20px;
+}
+
 .budget-estimate {
   display: flex;
   flex-direction: column;
@@ -739,9 +746,29 @@
   color: var(--accent-blue);
 }
 
+.share-journey-btn {
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: white;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.share-journey-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-blue);
+}
+
 .save-journey-btn {
-  flex: 1;
-  margin-left: 20px;
+  flex: 2;
   padding: 16px;
   background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
   color: white;

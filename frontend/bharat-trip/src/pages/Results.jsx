@@ -1,14 +1,12 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import MapView from "../components/Map/MapView";
-import GuidancePanel from "../components/Map/GuidancePanel";
-import { DAY_COLORS } from "../constants/dayColors";
 import PlaceImage from "../components/PlaceImage";
 import "./results.css";
-import { useState, useEffect, useMemo, useContext } from "react";
+import { useState, useEffect, useMemo, useContext, useCallback } from "react";
 import { useSettings } from "../context/SettingsContext";
 import { AuthContext } from "../context/AuthContext";
 import { auth } from "../firebase";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -24,7 +22,8 @@ const THINKING_MESSAGES = [
 function Results() {
   const navigate = useNavigate();
   const loc = useLocation();
-  const { formatPrice, t, currency } = useSettings();
+  const { id: routeTripId } = useParams();
+  const { formatPrice, t } = useSettings();
   const { user } = useContext(AuthContext);
 
   const [plan, setPlan] = useState(null);
@@ -38,19 +37,17 @@ function Results() {
   const [tripTitle, setTripTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [shareStatus, setShareStatus] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
-  const [isGuidanceMode, setIsGuidanceMode] = useState(false);
-  const [hoveredPlace, setHoveredPlace] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(() => {
     const savedIdx = localStorage.getItem("tripCurrentIndex");
     return savedIdx ? parseInt(savedIdx, 10) : 0;
   });
-  const [userLocation, setUserLocation] = useState(null);
   const [isOptimizing, setIsOptimizing] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(loc.search);
-    const sharedTripId = params.get("sharedTripId");
+    const sharedTripId = params.get("sharedTripId") || routeTripId;
 
     const fetchSharedTrip = async (id) => {
       try {
@@ -58,6 +55,7 @@ function Results() {
         const data = await res.json();
         if (res.ok) {
           const formattedPlan = {
+            id: data._id,
             city: data.destination || "Bangalore",
             coordinates: data.coordinates,
             days: data.days,
@@ -98,24 +96,100 @@ function Results() {
       }
       setLoading(false);
     }
-  }, [loc.search, loc.state]);
+  }, [loc.search, loc.state, routeTripId]);
+
+  const handleSaveTrip = useCallback(async (isAutoSave = false) => {
+    if (saving || saved || !plan) return;
+    if (!isAutoSave) setSaving(true);
+    try {
+      if (!user) {
+        if (!isAutoSave) alert("Please login to save your trip plan.");
+        return;
+      }
+
+      let token = localStorage.getItem("token");
+      if (auth.currentUser) {
+        try {
+          token = await auth.currentUser.getIdToken(true);
+          localStorage.setItem("token", token);
+        } catch (tokenErr) {
+          console.warn("Firebase token refresh failed, using stored token", tokenErr);
+        }
+      }
+
+      if (!token) {
+        if (!isAutoSave) alert("Authentication error. Please login again.");
+        return;
+      }
+
+      const daysKeys = Object.keys(plan.itinerary);
+      const totalDays = daysKeys.length;
+      const totalTripCost = plan.totalTripCost || 0;
+
+      const res = await fetch(`${API}/api/profile/trips`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json", 
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          title: tripTitle || `${totalDays}-Day ${plan.city || "India"} Trip`,
+          city: plan.city || "Bangalore",
+          days: totalDays,
+          budget: plan.totalBudget,
+          interests: plan.interests,
+          itinerary: plan.itinerary,
+          totalCost: totalTripCost,
+          totalBudget: plan.totalBudget,
+          remainingBudget: plan.remainingBudget,
+          perDayBudget: plan.perDayBudget,
+          travelerType: plan.travelerType,
+          pace: plan.pace,
+          summary: plan.summary
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSaved(true);
+        if (data.trip && data.trip._id) {
+          setPlan(prev => ({ ...prev, id: data.trip._id }));
+        }
+        if (!isAutoSave) {
+           setTimeout(() => navigate("/trips"), 1500);
+        }
+      } else {
+        if (!isAutoSave) {
+          if (res.status === 401) {
+            alert("Your session has expired. Please log in again.");
+            navigate("/login");
+          } else {
+            const errorData = await res.json().catch(() => ({}));
+            alert(`Failed to save trip: ${errorData.error || "Unknown server error"}`);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Save trip error:", err);
+      if (!isAutoSave) alert("Network error. Please try again.");
+    } finally {
+      if (!isAutoSave) setSaving(false);
+    }
+  }, [saving, saved, user, plan, tripTitle, navigate]);
 
   // AI Generation sequence logic
   useEffect(() => {
     if (!isGenerating) return;
 
-    // Phase 1: Message Rotation
     const msgInterval = setInterval(() => {
       setMessageIdx((prev) => (prev + 1) % THINKING_MESSAGES.length);
     }, 700);
 
-    // Phase 2: Move to Summary (after 2s)
     const summaryTimeout = setTimeout(() => {
       setGenStep("summary");
       clearInterval(msgInterval);
     }, 2000);
 
-    // Phase 3: Finalize (after 4s total)
     const doneTimeout = setTimeout(() => {
       setIsGenerating(false);
       setGenStep("done");
@@ -127,6 +201,13 @@ function Results() {
       clearTimeout(doneTimeout);
     };
   }, [isGenerating]);
+
+  // Handle auto-save after generation
+  useEffect(() => {
+    if (!isGenerating && genStep === "done" && user && plan && loc.state?.isNew && !saved && !saving) {
+      handleSaveTrip(true);
+    }
+  }, [isGenerating, genStep, user, plan, loc.state, saved, saving, handleSaveTrip]);
 
   /* ── ADAPTIVE LOGIC UTILS ── */
   const getDistance = (lat1, lon1, lat2, lon2) => {
@@ -158,7 +239,6 @@ function Results() {
     setPlan(prev => {
       const newItinerary = { ...prev.itinerary };
       newItinerary[dayKey].places = newItinerary[dayKey].places.filter(p => p.name !== placeName);
-      // Re-order and re-calc day cost
       newItinerary[dayKey].places = reorderDayByDistance(newItinerary[dayKey].places);
       newItinerary[dayKey].estimatedCost = newItinerary[dayKey].places.reduce((sum, p) => sum + (p.estimatedCost || 200), 0) + (newItinerary[dayKey].dayMealCost || 500);
       
@@ -172,7 +252,6 @@ function Results() {
     setPlan(prev => {
       const newItinerary = { ...prev.itinerary };
       Object.keys(newItinerary).forEach(dayKey => {
-        // Keep places with priority >= 7
         newItinerary[dayKey].places = newItinerary[dayKey].places.filter(p => (p.priority || 5) >= 7);
         newItinerary[dayKey].places = reorderDayByDistance(newItinerary[dayKey].places);
       });
@@ -186,7 +265,6 @@ function Results() {
     setPlan(prev => {
       const newItinerary = { ...prev.itinerary };
       Object.keys(newItinerary).forEach(dayKey => {
-        // Limit to top 3 priority places
         newItinerary[dayKey].places = [...newItinerary[dayKey].places]
           .sort((a, b) => (b.priority || 5) - (a.priority || 5))
           .slice(0, 3);
@@ -210,10 +288,35 @@ function Results() {
     setTimeout(() => setIsOptimizing(false), 1000);
   };
 
-  const handleResetProgress = () => {
-    if (window.confirm("Are you sure you want to reset your trip progress?")) {
-      setCurrentIndex(0);
-      localStorage.setItem("tripCurrentIndex", 0);
+  const handleShare = async () => {
+    if (!plan?.id && !saved) {
+      const shouldSave = window.confirm("You need to save this trip to your profile before sharing. Save now?");
+      if (shouldSave) {
+        await handleSaveTrip();
+      }
+      return;
+    }
+
+    const shareUrl = `${window.location.origin}/trip/${plan?.id || routeTripId}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `My Trip to ${plan?.city}`,
+          text: `Check out my travel plan for ${plan?.city} on Bharat Trip!`,
+          url: shareUrl,
+        });
+      } catch (err) {
+        console.log('Error sharing:', err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareStatus(true);
+        setTimeout(() => setShareStatus(false), 2000);
+      } catch (err) {
+        alert("Could not copy link. Manually copy: " + shareUrl);
+      }
     }
   };
 
@@ -222,7 +325,7 @@ function Results() {
     const days = Object.keys(plan.itinerary);
     const city = plan.city || "Bangalore";
     return days.flatMap(d => (plan.itinerary[d]?.places || []).map(p => ({ ...p, city })));
-  }, [plan?.itinerary, plan?.city]);
+  }, [plan]);
 
   if (loading) {
     return (
@@ -301,76 +404,6 @@ function Results() {
   const daysKeys = Object.keys(plan.itinerary);
   const totalDays = daysKeys.length;
   const totalTripCost = plan.totalTripCost || 0;
-
-  const handleSaveTrip = async () => {
-    if (saving || saved) return;
-    setSaving(true);
-    try {
-      if (!user) {
-        alert("Please login to save your trip plan.");
-        setSaving(false);
-        return;
-      }
-
-      let token = localStorage.getItem("token");
-      if (auth.currentUser) {
-        try {
-          token = await auth.currentUser.getIdToken(true);
-          localStorage.setItem("token", token);
-        } catch (tokenErr) {
-          console.warn("Firebase token refresh failed, using stored token", tokenErr);
-        }
-      }
-
-      if (!token) {
-        alert("Authentication error. Please login again.");
-        setSaving(false);
-        return;
-      }
-
-      const res = await fetch(`${API}/api/profile/trips`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json", 
-          Authorization: `Bearer ${token}` 
-        },
-        body: JSON.stringify({
-          title: tripTitle || `${totalDays}-Day ${plan.city || "India"} Trip`,
-          city: plan.city || "Bangalore",
-          days: totalDays,
-          budget: plan.totalBudget,
-          interests: plan.interests,
-          itinerary: plan.itinerary,
-          totalCost: totalTripCost,
-          totalBudget: plan.totalBudget,
-          remainingBudget: plan.remainingBudget,
-          perDayBudget: plan.perDayBudget,
-          travelerType: plan.travelerType,
-          pace: plan.pace,
-          summary: plan.summary
-        })
-      });
-
-      if (res.ok) {
-        setSaved(true);
-        setTimeout(() => navigate("/profile"), 1500);
-      } else {
-        const errorData = await res.json().catch(() => ({}));
-        if (res.status === 401) {
-          alert("Your session has expired. Please log in again.");
-          navigate("/login");
-        } else {
-          alert(`Failed to save trip: ${errorData.error || "Unknown server error"}`);
-        }
-        setSaving(false);
-      }
-    } catch (err) {
-      console.error("Save trip error:", err);
-      alert("Network error. Please try again.");
-      setSaving(false);
-    }
-  };
-
   const progressPercent = Math.round((currentIndex / (allPlaces.length || 1)) * 100);
 
   return (
@@ -469,7 +502,7 @@ function Results() {
                   const isCurrent = idx === currentIndex;
 
                   return (
-                    <div key={idx} className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`} onClick={() => setHoveredPlace(place)}>
+                    <div key={idx} className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}>
                       <div className="stop-marker-v2"></div>
                       <div className="stop-card-inner">
                         <div className="stop-top-row">
@@ -511,15 +544,23 @@ function Results() {
               <span className="budget-label">Est. Total Budget</span>
               <span className="budget-value">{formatPrice(totalTripCost)}</span>
             </div>
-            <button className="save-journey-btn" onClick={handleSaveTrip} disabled={saving || saved}>
-              {saved ? "✓ Saved" : saving ? "Saving Journey..." : "Save to Profile"}
-            </button>
+            <div className="footer-action-group">
+              <button 
+                className="share-journey-btn" 
+                onClick={handleShare}
+              >
+                {shareStatus ? "✅ Copied" : "🔗 Share"}
+              </button>
+              <button className="save-journey-btn" onClick={() => handleSaveTrip()} disabled={saving || saved}>
+                {saved ? "✓ Saved" : saving ? "Saving Journey..." : "Save Journey"}
+              </button>
+            </div>
           </div>
         </div>
       </aside>
 
       <div className="planner-map-foundation">
-        <MapView plan={plan} isTracking={isTracking} onHover={setHoveredPlace} currentIndex={currentIndex} />
+        <MapView plan={plan} isTracking={isTracking} currentIndex={currentIndex} />
         <div className="floating-map-controls">
           <button className={`map-control-btn ${isTracking ? "active" : ""}`} onClick={() => setIsTracking(!isTracking)}>📍</button>
         </div>
