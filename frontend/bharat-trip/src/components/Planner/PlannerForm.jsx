@@ -26,7 +26,14 @@ function PlannerForm({ onPlanGenerated }) {
   useEffect(() => {
     const params = new URLSearchParams(loc.search);
     const destParam = params.get("destination");
+    const daysParam = params.get("days");
+    const budgetParam = params.get("budget");
+    const interestsParam = params.get("interests");
+
     if (destParam) setCity(decodeURIComponent(destParam));
+    if (daysParam) setDays(Number(daysParam));
+    if (budgetParam) setBudget(Number(budgetParam));
+    if (interestsParam) setInterests(decodeURIComponent(interestsParam).split(','));
   }, [loc.search]);
 
   const [days, setDays] = useState(2);

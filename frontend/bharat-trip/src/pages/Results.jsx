@@ -49,6 +49,8 @@ function Results() {
     return localStorage.getItem("tripExecuting") === "true";
   });
 
+  const [multiCityContext, setMultiCityContext] = useState(null);
+
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -95,6 +97,9 @@ function Results() {
       fetchSharedTrip(sharedTripId);
     } else if (loc.state?.plan) {
       setPlan(loc.state.plan);
+      if (loc.state?.multiCityContext) {
+        setMultiCityContext(loc.state.multiCityContext);
+      }
       if (loc.state?.isNew) {
         setIsGenerating(true);
         setCurrentIndex(0);
@@ -504,6 +509,17 @@ function Results() {
   const totalTripCost = plan.totalTripCost || 0;
   const progressPercent = Math.round((currentIndex / (allPlaces.length || 1)) * 100);
 
+  const handleCitySwitch = (idx) => {
+    if (!multiCityContext) return;
+    const selected = multiCityContext.tripStructure[idx];
+    if (selected && selected.plan) {
+      setPlan(selected.plan);
+      setMultiCityContext(prev => ({ ...prev, currentIndex: idx }));
+      setCurrentIndex(0);
+      localStorage.setItem("tripCurrentIndex", 0);
+    }
+  };
+
   return (
     <div className="anchored-planner-root">
       <aside className="premium-itinerary-sidebar">
@@ -517,13 +533,29 @@ function Results() {
               if (isExecuting) {
                 setIsExecuting(false);
                 localStorage.setItem("tripExecuting", "false");
+              } else if (multiCityContext) {
+                navigate("/multi-city-overview", { state: { tripStructure: multiCityContext.tripStructure } });
               } else {
                 navigate("/planner");
               }
             }}>
-              {isExecuting ? "← Full Plan" : "← Edit Plan"}
+              {isExecuting ? "← Full Plan" : multiCityContext ? "← Trip Overview" : "← Edit Plan"}
             </button>
           </div>
+          
+          {multiCityContext && !isExecuting && (
+            <div className="multi-city-nav-tabs">
+              {multiCityContext.tripStructure.map((item, idx) => (
+                <button 
+                  key={idx}
+                  className={`city-nav-tab ${multiCityContext.currentIndex === idx ? 'active' : ''}`}
+                  onClick={() => handleCitySwitch(idx)}
+                >
+                  {item.city}
+                </button>
+              ))}
+            </div>
+          )}
           
           {!isExecuting ? (
             <div className="trip-hero-info">

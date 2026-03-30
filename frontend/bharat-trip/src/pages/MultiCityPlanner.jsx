@@ -24,6 +24,21 @@ const MultiCityPlanner = () => {
     setInterests(prev => prev.includes(value) ? prev.filter(i => i !== value) : [...prev, value]);
   };
 
+  const distributeDays = (cities, totalDays) => {
+    const n = cities.length;
+    const baseDays = new Array(n).fill(1);
+    let remaining = totalDays - n;
+    
+    // Distribute remaining days evenly
+    let i = 0;
+    while (remaining > 0) {
+      baseDays[i % n]++;
+      remaining--;
+      i++;
+    }
+    return baseDays;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
@@ -45,15 +60,17 @@ const MultiCityPlanner = () => {
       return;
     }
 
-    const data = {
-      cities,
-      days,
-      budget,
-      interests
-    };
+    const dayDistribution = distributeDays(cities, days);
+    const budgetPerCity = Math.round(budget / cities.length);
 
-    console.log("Multi-City Trip Data:", data);
-    alert("Data logged to console. Check browser console for details.");
+    const tripStructure = cities.map((city, idx) => ({
+      city,
+      days: dayDistribution[idx],
+      budget: budgetPerCity,
+      interests: interests
+    }));
+
+    navigate('/multi-city-overview', { state: { tripStructure, totalDays: days, totalBudget: budget } });
   };
 
   return (

@@ -1215,3 +1215,41 @@ input:checked + .public-slider:before {
   font-size: 48px;
   margin-bottom: 20px;
 }
+
+/* --- 10. MULTI-CITY NAVIGATION --- */
+.multi-city-nav-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.multi-city-nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.city-nav-tab {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.city-nav-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.city-nav-tab.active {
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}

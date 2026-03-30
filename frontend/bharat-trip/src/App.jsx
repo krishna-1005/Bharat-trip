@@ -7,6 +7,7 @@ import About from "./pages/About";
 import Planner from "./pages/Planner";
 import TripType from "./pages/TripType";
 import MultiCityPlanner from "./pages/MultiCityPlanner";
+import MultiCityOverview from "./pages/MultiCityOverview";
 import Destinations from "./pages/Destinations";
 import Weekend from "./pages/Weekend";
 import Honeymoon from "./pages/Honeymoon";
@@ -51,6 +52,7 @@ function App() {
 
           <Route path="/trip-type" element={<TripType />} />
           <Route path="/multi-city" element={<MultiCityPlanner />} />
+          <Route path="/multi-city-overview" element={<MultiCityOverview />} />
 
           <Route
             path="/planner"
