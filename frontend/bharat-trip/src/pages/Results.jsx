@@ -472,6 +472,27 @@ function Results() {
     return normalizedItinerary.flatMap(d => (d.places || []).map(p => ({ ...p, city: plan?.city || "India" })));
   }, [normalizedItinerary, plan?.city]);
 
+  const getBestVisitTimeFallback = (category, index) => {
+    const cat = (category || "").toLowerCase();
+    const isEven = index % 2 === 0;
+    if (["nature", "park", "garden", "hill", "lake", "waterfall", "beach"].some(kw => cat.includes(kw))) {
+      return { time: isEven ? "Morning" : "Evening", reason: isEven ? "Pleasant weather and soft sunlight" : "Golden hour views and cool breeze" };
+    }
+    if (["temple", "church", "mosque", "spiritual", "monument", "museum", "history", "cultural"].some(kw => cat.includes(kw))) {
+      return { time: "Morning", reason: "Peaceful atmosphere and fewer crowds" };
+    }
+    if (["cafe", "restaurant", "dining", "food", "bakery"].some(kw => cat.includes(kw))) {
+      return { time: isEven ? "Afternoon" : "Evening", reason: isEven ? "Ideal for a relaxed lunch" : "Great dining ambiance" };
+    }
+    if (["shopping", "market", "mall", "street"].some(kw => cat.includes(kw))) {
+      return { time: "Evening", reason: "Most active local atmosphere" };
+    }
+    if (["nightlife", "pub", "bar", "club", "lounge"].some(kw => cat.includes(kw))) {
+      return { time: "Night", reason: "Peak energy and music" };
+    }
+    return { time: ["Morning", "Afternoon", "Evening"][index % 3], reason: "Great time to explore" };
+  };
+
   const [sidebarTab, setSidebarTab] = useState(isExecuting ? "live" : "plan");
 
   useEffect(() => {
@@ -666,6 +687,27 @@ function Results() {
                   <PlaceImage placeName={allPlaces[currentIndex].name} city={plan.city} className="focused-stop-img" />
                   <div className="focused-stop-body">
                     <h2>{allPlaces[currentIndex].name}</h2>
+                    {(() => {
+                      const timing = allPlaces[currentIndex].bestTime 
+                        ? { time: allPlaces[currentIndex].bestTime, reason: allPlaces[currentIndex].timeReason }
+                        : getBestVisitTimeFallback(allPlaces[currentIndex].category, currentIndex);
+                      return (
+                        <div className="stop-timing-info" style={{ 
+                          fontSize: '12px', 
+                          marginBottom: '15px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px',
+                          padding: '10px',
+                          background: 'rgba(59, 130, 246, 0.1)',
+                          borderRadius: '8px',
+                          borderLeft: '3px solid var(--accent-blue)'
+                        }}>
+                          <span style={{ color: 'var(--accent-blue)', fontWeight: '800' }}>🕒 Suggested: {timing.time}</span>
+                          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '11px' }}>{timing.reason}</span>
+                        </div>
+                      );
+                    })()}
                     <p className="focused-stop-insight">{allPlaces[currentIndex].reason}</p>
                     
                     <div className="focused-action-row">
@@ -851,8 +893,17 @@ function Results() {
                                             flexDirection: 'column',
                                             gap: '2px'
                                           }}>
-                                            <span style={{ color: 'var(--accent-blue)', fontWeight: '700' }}>🕒 Suggested Time: {place.bestTime}</span>
-                                            <span style={{ fontStyle: 'italic', fontSize: '10px' }}>💡 {place.timeReason}</span>
+                                            {(() => {
+                                              const timing = place.bestTime 
+                                                ? { time: place.bestTime, reason: place.timeReason }
+                                                : getBestVisitTimeFallback(place.category, globalIdx);
+                                              return (
+                                                <>
+                                                  <span style={{ color: 'var(--accent-blue)', fontWeight: '700' }}>🕒 Suggested Time: {timing.time}</span>
+                                                  <span style={{ fontStyle: 'italic', fontSize: '10px' }}>💡 {timing.reason}</span>
+                                                </>
+                                              );
+                                            })()}
                                           </div>
                                           <div className="stop-trust-layer">
                                             ⭐ {place.rating || "4.2"} • {typeof place.reviews === 'number' ? place.reviews.toLocaleString() : "1,200+"} reviews • <span className="trust-tag">{place.tag || "Popular Spot"}</span>
