@@ -893,75 +893,47 @@ function Results() {
                                 const isCurrent = globalIdx === currentIndex;
 
                                 return (
-                                  <div key={globalIdx} className={`premium-stop-card-v2 ${place.isBreak ? "break-stop" : ""} ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}>
-                                    {!place.isBreak && (
-                                      <div className="stop-marker-v2">
-                                        {isVisited && <span className="visited-tick">✓</span>}
-                                      </div>
-                                    )}
+                                  <div key={globalIdx} className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}>
+                                    <div className="stop-marker-v2">
+                                      {isVisited && <span className="visited-tick">✓</span>}
+                                    </div>
                                     <div className="stop-card-inner">
-                                      <div className="stop-time-slot" style={{ 
-                                        fontSize: '11px', 
-                                        fontWeight: '800', 
-                                        color: 'var(--accent-blue)', 
-                                        marginBottom: '10px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px'
-                                      }}>
-                                        <span style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '2px 8px', borderRadius: '12px' }}>
-                                          {place.startTime} – {place.endTime}
-                                        </span>
-                                        {place.duration && <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: '400' }}>({place.duration})</span>}
-                                      </div>
-
                                       <div className="stop-top-row">
-                                        {!place.isBreak && <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />}
+                                        <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
                                         <div className="stop-details-v2">
                                           <div className="stop-title-row">
-                                            <h4 style={{ color: place.isBreak ? 'var(--accent-green)' : '#fff' }}>
-                                              {place.isBreak ? `🍴 ${place.name}` : place.name}
-                                            </h4>
-                                            {!isVisited && !place.isBreak && (
+                                            <h4>{place.name}</h4>
+                                            {!isVisited && (
                                               <button className="skip-btn" onClick={(e) => { e.stopPropagation(); handleSkip(dayObj.day, place.name, dIdx); }} title="Skip Place">✕</button>
                                             )}
                                           </div>
-                                          
-                                          {!place.isBreak && (
-                                            <>
-                                              <div className="stop-timing-info" style={{ 
-                                                fontSize: '11px', 
-                                                color: 'rgba(255,255,255,0.5)', 
-                                                marginBottom: '8px',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                gap: '2px'
-                                              }}>
-                                                {(() => {
-                                                  const timing = place.bestTime 
-                                                    ? { time: place.bestTime, reason: place.timeReason }
-                                                    : getBestVisitTimeFallback(place.category, globalIdx);
-                                                  return (
-                                                    <>
-                                                      <span style={{ color: 'var(--accent-blue)', fontWeight: '700' }}>🕒 Suggested Time: {timing.time}</span>
-                                                      <span style={{ fontStyle: 'italic', fontSize: '10px' }}>💡 {timing.reason}</span>
-                                                    </>
-                                                  );
-                                                })()}
-                                              </div>
-                                              <div className="stop-trust-layer">
-                                                ⭐ {place.rating || "4.2"} • {typeof place.reviews === 'number' ? place.reviews.toLocaleString() : "1,200+"} reviews • <span className="trust-tag">{place.tag || "Popular Spot"}</span>
-                                              </div>
-                                              <div className="stop-pills-v2">
-                                                <span className="stop-pill-v2">{place.category || "Sight"}</span>
-                                                <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
-                                              </div>
-                                            </>
-                                          )}
-
-                                          {place.isBreak && (
-                                            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', margin: '5px 0 0 0' }}>{place.timeReason}</p>
-                                          )}
+                                          <div className="stop-timing-info" style={{ 
+                                            fontSize: '11px', 
+                                            color: 'rgba(255,255,255,0.5)', 
+                                            marginBottom: '8px',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '2px'
+                                          }}>
+                                            {(() => {
+                                              const timing = place.bestTime 
+                                                ? { time: place.bestTime, reason: place.timeReason }
+                                                : getBestVisitTimeFallback(place.category, globalIdx);
+                                              return (
+                                                <>
+                                                  <span style={{ color: 'var(--accent-blue)', fontWeight: '700' }}>🕒 Suggested Time: {timing.time}</span>
+                                                  <span style={{ fontStyle: 'italic', fontSize: '10px' }}>💡 {timing.reason}</span>
+                                                </>
+                                              );
+                                            })()}
+                                          </div>
+                                          <div className="stop-trust-layer">
+                                            ⭐ {place.rating || "4.2"} • {typeof place.reviews === 'number' ? place.reviews.toLocaleString() : "1,200+"} reviews • <span className="trust-tag">{place.tag || "Popular Spot"}</span>
+                                          </div>
+                                          <div className="stop-pills-v2">
+                                            <span className="stop-pill-v2">{place.category || "Sight"}</span>
+                                            <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
+                                          </div>
                                         </div>
                                       </div>
                                       {isCurrent && (
