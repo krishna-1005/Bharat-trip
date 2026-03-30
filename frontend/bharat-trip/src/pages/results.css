@@ -1304,13 +1304,69 @@ input:checked + .public-slider:before {
   flex-direction: column;
 }
 
-.queue-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
+/* Sidebar Mode Tabs */
+.sidebar-mode-tabs {
+  display: flex;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 4px;
 }
 
-.queue-cat {
+.mode-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mode-tab.active {
+  background: var(--accent-blue);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.mode-tab:hover:not(.active) {
+  background: rgba(255,255,255,0.08);
+  color: white;
+}
+
+/* Visited Status */
+.visited-tick {
+  color: white;
+  font-size: 8px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.visited-status-label {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
   font-size: 11px;
-  color: var(--text-muted);
+  font-weight: 800;
+  color: var(--accent-green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.premium-stop-card-v2.visited .stop-marker-v2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+/* Timeline specific line adjustment */
+.premium-itinerary-list {
+  padding-left: 5px;
 }

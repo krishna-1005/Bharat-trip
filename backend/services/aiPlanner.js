@@ -24,9 +24,20 @@ Budget: ${budget}
 Traveler: ${travelerType}
 Pace: ${pace}
 
+For each place, suggest a realistic "bestTime" to visit (Morning, Afternoon, Evening, or Night) and a brief "timeReason" (e.g., "Cool weather", "Fewer crowds", "Active nightlife", "Best lighting").
+
 Return JSON:
 {
-  "1": [{ "name": "", "category": "", "avgCost": 0, "timeHours": 2, "lat": 0, "lng": 0 }]
+  "1": [{ 
+    "name": "", 
+    "category": "", 
+    "avgCost": 0, 
+    "timeHours": 2, 
+    "lat": 0, 
+    "lng": 0,
+    "bestTime": "Morning",
+    "timeReason": "Cool weather and fewer crowds"
+  }]
 }
 `;
 

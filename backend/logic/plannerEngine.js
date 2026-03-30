@@ -1,3 +1,60 @@
+function getBestVisitTime(category, index) {
+  const cat = (category || "").toLowerCase();
+  
+  // Rule-based logic with variations
+  if (["nature", "park", "garden", "hill", "lake", "waterfall", "beach"].some(kw => cat.includes(kw))) {
+    const isEven = index % 2 === 0;
+    return {
+      time: isEven ? "Morning" : "Evening",
+      reason: isEven ? "Pleasant weather and soft sunlight for photos" : "Golden hour views and cool breeze"
+    };
+  }
+
+  if (["temple", "church", "mosque", "spiritual", "monument", "museum", "history", "cultural"].some(kw => cat.includes(kw))) {
+    const isEven = index % 2 === 0;
+    return {
+      time: "Morning",
+      reason: isEven ? "Peaceful atmosphere and fewer crowds" : "Beat the midday heat and enjoy the tranquility"
+    };
+  }
+
+  if (["cafe", "restaurant", "dining", "food", "bakery"].some(kw => cat.includes(kw))) {
+    const isEven = index % 2 === 0;
+    return {
+      time: isEven ? "Afternoon" : "Evening",
+      reason: isEven ? "Perfect time for a relaxed lunch break" : "Enjoy the vibrant dinner ambiance"
+    };
+  }
+
+  if (["shopping", "market", "mall", "street"].some(kw => cat.includes(kw))) {
+    return {
+      time: "Evening",
+      reason: "Most active hours with a lively local atmosphere"
+    };
+  }
+
+  if (["nightlife", "pub", "bar", "club", "lounge"].some(kw => cat.includes(kw))) {
+    return {
+      time: "Night",
+      reason: "Peak experience time with music and energy"
+    };
+  }
+
+  // Default fallback
+  const times = ["Morning", "Afternoon", "Evening"];
+  const selectedTime = times[index % 3];
+  const reasons = [
+    "Ideal for exploring without the midday rush",
+    "Great time to experience the local vibe",
+    "Cooler temperatures and beautiful light"
+  ];
+  
+  return {
+    time: selectedTime,
+    reason: reasons[index % 3]
+  };
+}
+
 function plannerEngine(places, { city, days, interests, budget, userPreferences = {} }) {
   // 1. Initial Filtering
   let candidates = places.filter(p => p.city.toLowerCase() === city.toLowerCase());
@@ -63,17 +120,22 @@ function plannerEngine(places, { city, days, interests, budget, userPreferences 
     const dayPlaces = candidates.slice(i * perDay, (i + 1) * perDay);
 
     itinerary[`Day ${i + 1}`] = {
-      places: dayPlaces.map(p => ({
-        name: p.name,
-        category: p.category,
-        estimatedCost: p.cost || p.estimatedCost || 0,
-        timeHours: p.avgTime || 2,
-        lat: p.lat,
-        lng: p.lng,
-        rating: p.rating,
-        tag: p.tag,
-        isPersonalized: p.isPersonalized
-      }))
+      places: dayPlaces.map((p, idx) => {
+        const timing = getBestVisitTime(p.category, idx + i); // use idx + i for more variation
+        return {
+          name: p.name,
+          category: p.category,
+          estimatedCost: p.cost || p.estimatedCost || 0,
+          timeHours: p.avgTime || 2,
+          lat: p.lat,
+          lng: p.lng,
+          rating: p.rating,
+          tag: p.tag,
+          isPersonalized: p.isPersonalized,
+          bestTime: timing.time,
+          timeReason: timing.reason
+        };
+      })
     };
   }
 

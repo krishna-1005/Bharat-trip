@@ -198,9 +198,9 @@ const MultiCityOverview = () => {
                         {dayKey.replace('Day ', 'D')}
                       </span>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                        {dayData.places.slice(0, 3).map((place, pIdx) => (
+                        {(dayData.places || []).map((place, pIdx) => (
                           <span key={pIdx} style={{ 
-                            fontSize: '12px', 
+                            fontSize: '11px', 
                             color: 'rgba(255,255,255,0.7)',
                             background: 'rgba(255,255,255,0.05)',
                             padding: '2px 8px',
@@ -209,11 +209,6 @@ const MultiCityOverview = () => {
                             📍 {place.name}
                           </span>
                         ))}
-                        {dayData.places.length > 3 && (
-                          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', padding: '2px 4px' }}>
-                            +{dayData.places.length - 3}
-                          </span>
-                        )}
                       </div>
                     </div>
                   ))}
