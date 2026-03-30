@@ -180,10 +180,51 @@ const MultiCityOverview = () => {
               </div>
             </div>
 
-            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', lineHeight: '1.6', marginBottom: '25px', flex: 1 }}>
-              Explore the unique charm of {item.city}. From its local culture to hidden gems, 
-              this stop is tailored to match your interest in {item.interests.slice(0, 2).join(' & ')}.
-            </p>
+            <div style={{ flex: 1, marginBottom: '25px' }}>
+              {item.plan && item.plan.itinerary ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {Object.entries(item.plan.itinerary).map(([dayKey, dayData], dIdx) => (
+                    <div key={dIdx} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                      <span style={{ 
+                        fontSize: '11px', 
+                        fontWeight: '800', 
+                        color: 'var(--accent-blue)', 
+                        minWidth: '40px',
+                        background: 'rgba(59, 130, 246, 0.1)',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        textAlign: 'center'
+                      }}>
+                        {dayKey.replace('Day ', 'D')}
+                      </span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {dayData.places.slice(0, 3).map((place, pIdx) => (
+                          <span key={pIdx} style={{ 
+                            fontSize: '12px', 
+                            color: 'rgba(255,255,255,0.7)',
+                            background: 'rgba(255,255,255,0.05)',
+                            padding: '2px 8px',
+                            borderRadius: '10px'
+                          }}>
+                            📍 {place.name}
+                          </span>
+                        ))}
+                        {dayData.places.length > 3 && (
+                          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', padding: '2px 4px' }}>
+                            +{dayData.places.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', lineHeight: '1.6', margin: 0 }}>
+                  Explore the unique charm of {item.city}. From its local culture to hidden gems, 
+                  this stop is tailored to match your interest in {item.interests.slice(0, 2).join(' & ')}.
+                </p>
+              )}
+            </div>
 
             <button 
               onClick={() => handleViewCityPlan(item, idx)}

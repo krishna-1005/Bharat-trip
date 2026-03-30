@@ -253,6 +253,27 @@ const FeaturedTrips = () => {
                 <span className="f-price">{formatPrice(trip.cost)}</span>
               </div>
               <h3>{trip.title}</h3>
+              
+              <div className="f-card-itinerary-preview" style={{ marginTop: '15px', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {(Array.isArray(trip.itinerary) ? trip.itinerary : Object.entries(trip.itinerary || {})).slice(0, 2).map((item, i) => {
+                  const dayLabel = Array.isArray(trip.itinerary) ? (item.day || `Day ${i+1}`) : item[0];
+                  const places = Array.isArray(trip.itinerary) ? item.places : item[1].places;
+                  return (
+                    <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--accent-blue)', opacity: 0.8, minWidth: '35px' }}>{dayLabel.toUpperCase()}</span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {(places || []).slice(0, 2).map((p, pi) => (
+                          <span key={pi} style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.05)', padding: '1px 6px', borderRadius: '4px' }}>
+                            {p.name}
+                          </span>
+                        ))}
+                        {(places || []).length > 2 && <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>+{places.length - 2}</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
               <button className="f-clone-btn" onClick={() => handleClone(trip)}>
                 <span className="btn-text">Clone this Journey</span>
                 <span className="btn-icon">⚡</span>

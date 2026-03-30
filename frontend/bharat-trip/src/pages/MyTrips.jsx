@@ -176,6 +176,29 @@ export default function MyTrips() {
                       <span>📍 {trip.location}</span>
                       <span>💰 {formatPrice(trip.totalCost)}</span>
                     </div>
+
+                    <div className="pro-trip-itinerary-preview" style={{ marginTop: '15px', marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {(Array.isArray(trip.itinerary) ? trip.itinerary : Object.entries(trip.itinerary || {})).slice(0, 2).map((item, i) => {
+                        const dayLabel = Array.isArray(trip.itinerary) ? (item.day || `Day ${i+1}`) : item[0];
+                        const places = Array.isArray(trip.itinerary) ? item.places : item[1].places;
+                        return (
+                          <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--accent-blue)', opacity: 0.8, minWidth: '35px' }}>{dayLabel.toUpperCase()}</span>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                              {(places || []).slice(0, 2).map((p, pi) => (
+                                <span key={pi} style={{ fontSize: '11px', color: 'var(--text-dim)', background: 'rgba(255,255,255,0.05)', padding: '1px 6px', borderRadius: '4px' }}>
+                                  {p.name}
+                                </span>
+                              ))}
+                              {(places || []).length > 2 && <span style={{ fontSize: '10px', color: 'var(--text-dim)', opacity: 0.5 }}>+{places.length - 2}</span>}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {(Array.isArray(trip.itinerary) ? trip.itinerary.length : Object.keys(trip.itinerary || {}).length) > 2 && (
+                        <div style={{ fontSize: '10px', color: 'var(--accent-blue)', fontWeight: '700', marginLeft: '43px' }}>+ more days</div>
+                      )}
+                    </div>
                     <div className="pro-trip-actions">
                       <button className="pro-map-btn" onClick={() => handleViewOnMap(trip)}>
                         🗺️ View Map
