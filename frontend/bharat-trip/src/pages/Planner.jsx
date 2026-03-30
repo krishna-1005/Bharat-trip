@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PlannerForm from "../components/Planner/PlannerForm";
+import "./tripType.css"; // Reusing premium root styles
 import "./planner.css";
 
 import img2 from "../assets/images/img2.webp";
@@ -47,32 +48,68 @@ function Planner() {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+    }
+  };
+
   return (
-    <div className="planner-onboarding-page">
-      <div className="planner-hero-bg">
-          <div className="planner-bg-overlay"></div>
-          <img src={img4} alt="Background" className="planner-bg-img" />
+    <div className="tt-premium-root" style={{ alignItems: 'flex-start', paddingTop: '100px' }}>
+      {/* Dynamic Background */}
+      <div className="tt-bg-ambient">
+        <div className="tt-blob tt-blob-1" style={{ background: '#3b82f6', top: '10%', left: '10%' }}></div>
+        <div className="tt-blob tt-blob-2" style={{ background: '#8b5cf6', bottom: '10%', right: '10%' }}></div>
+        <div className="tt-grid-overlay"></div>
       </div>
-      
-      <div className="planner-container">
+
+      <motion.div 
+        className="planner-container"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        style={{ zIndex: 10, maxWidth: '1200px', width: '100%', padding: '40px' }}
+      >
         {/* ── LEFT: EDITORIAL CONTENT ── */}
-        <div className="planner-intro-section">
-          <span className="planner-tagline">Premium Travel Planning</span>
-          <h1 className="planner-main-title">
-            Where to <em>next?</em>
+        <motion.div className="planner-intro-section" variants={itemVariants}>
+          <div className="tt-badge-ai">PREMIUM ENGINE</div>
+          <h1 className="tt-main-title" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', textAlign: 'left', margin: '20px 0' }}>
+            Where to <span>next?</span>
           </h1>
-          <p className="planner-subtitle">
+          <p className="tt-subtitle" style={{ textAlign: 'left', margin: '0 0 40px 0' }}>
             Our neural engine synthesizes local secrets and iconic landmarks into a bespoke, editorial-grade itinerary. Discover India like never before.
           </p>
 
-          <div className="persona-selector">
-            <h4 className="persona-title">Select your mood</h4>
-            <div className="persona-tabs">
+          <div className="persona-selector" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '30px' }}>
+            <h4 className="persona-title" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', letterSpacing: '2px', fontWeight: '900' }}>SELECT YOUR VIBE</h4>
+            <div className="persona-tabs" style={{ display: 'flex', gap: '30px', margin: '20px 0' }}>
               {Object.values(personas).map((p) => (
                 <button
                   key={p.id}
                   className={`persona-tab ${activePersona === p.id ? 'active' : ''}`}
                   onClick={() => setActivePersona(p.id)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: activePersona === p.id ? '#fff' : 'rgba(255,255,255,0.3)',
+                    fontSize: '18px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    padding: '0 0 10px 0',
+                    borderBottom: activePersona === p.id ? '2px solid #3b82f6' : '2px solid transparent',
+                    transition: '0.3s'
+                  }}
                 >
                   {p.label}
                 </button>
@@ -82,46 +119,46 @@ function Planner() {
             <AnimatePresence mode="wait">
               <motion.div 
                 key={activePersona}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
                 transition={{ duration: 0.4 }}
                 className="persona-dynamic-content"
               >
-                <p className="persona-tip">"{personas[activePersona].tip}"</p>
+                <p className="persona-tip" style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.6)', marginBottom: '30px' }}>"{personas[activePersona].tip}"</p>
                 
-                <div className="featured-mini-list">
+                <div className="featured-mini-list" style={{ display: 'flex', gap: '20px' }}>
                     {personas[activePersona].spots.map((spot, i) => (
-                      <div key={i} className="mini-spot-card">
-                        <div className="mini-spot-img-wrap">
-                          <img src={spot.img} alt={spot.name} />
+                      <div key={i} className="mini-spot-card" style={{ flex: 1, maxWidth: '150px' }}>
+                        <div className="mini-spot-img-wrap" style={{ borderRadius: '15px', overflow: 'hidden', height: '180px', marginBottom: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                          <img src={spot.img} alt={spot.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
-                        <span className="mini-spot-name">{spot.name}</span>
-                        <span className="mini-spot-type">{spot.type}</span>
+                        <span className="mini-spot-name" style={{ display: 'block', fontWeight: '700', fontSize: '14px' }}>{spot.name}</span>
+                        <span className="mini-spot-type" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>{spot.type}</span>
                       </div>
                     ))}
                 </div>
               </motion.div>
             </AnimatePresence>
           </div>
-        </div>
+        </motion.div>
 
         {/* ── RIGHT: CRISP FORM CARD ── */}
-        <div className="planner-form-section">
-          <div className="planner-glass-card">
-            <div className="planner-form-header">
-                <h3>Odyssey Blueprint</h3>
-                <p>Engineering your next great escape</p>
+        <motion.div className="planner-form-section" variants={itemVariants}>
+          <div className="planner-glass-card" style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '32px', padding: '40px' }}>
+            <div className="planner-form-header" style={{ textAlign: 'center', marginBottom: '30px' }}>
+                <h3 style={{ fontSize: '24px', fontWeight: '800' }}>Odyssey Blueprint</h3>
+                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '5px' }}>Engineering your next great escape</p>
             </div>
             <PlannerForm onPlanGenerated={handlePlanGenerated} />
           </div>
           
-          <div className="planner-trust-badges">
-              <div className="trust-item">AI CONCIERGE</div>
-              <div className="trust-item">INSTANT ACCESS</div>
+          <div className="planner-trust-badges" style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '30px' }}>
+              <div className="trust-item" style={{ fontSize: '10px', fontWeight: '900', color: 'rgba(255,255,255,0.2)', letterSpacing: '2px' }}>AI CONCIERGE</div>
+              <div className="trust-item" style={{ fontSize: '10px', fontWeight: '900', color: 'rgba(255,255,255,0.2)', letterSpacing: '2px' }}>INSTANT ACCESS</div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
