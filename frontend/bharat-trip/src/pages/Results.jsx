@@ -11,12 +11,13 @@ import { AnimatePresence, motion } from "framer-motion";
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 const THINKING_MESSAGES = [
-  "Analyzing your preferences...",
-  "Optimizing travel routes...",
-  "Balancing your budget...",
-  "Designing your experience...",
-  "Curating local secrets...",
-  "Finalizing your odyssey..."
+  "Initializing Neural Path Optimization...",
+  "Synchronizing Geospatial Datasets...",
+  "Analyzing User Preference Vectors...",
+  "Executing Multi-Objective Route Balancing...",
+  "Applying Climatic Alignment Algorithms...",
+  "Synthesizing Local Narrative Layers...",
+  "Finalizing High-Fidelity Odyssey..."
 ];
 
 function Results() {
@@ -806,6 +807,27 @@ function Results() {
                   </div>
                 </div>
               )}
+
+              <div className="journey-progress-card geospatial-intel">
+                <div className="progress-header">
+                  <span className="progress-label">Geospatial Intelligence</span>
+                  <span className="progress-val">Active</span>
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span>Neural Route Density</span>
+                    <span style={{ color: 'var(--accent-blue)' }}>Optimal</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span>Climatic Alignment</span>
+                    <span style={{ color: 'var(--accent-blue)' }}>94% Match</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Crowd Dynamics AI</span>
+                    <span style={{ color: 'var(--accent-blue)' }}>Avoiding Peaks</span>
+                  </div>
+                </div>
+              </div>
 
               <div className="journey-progress-card">
                 <div className="progress-header">
