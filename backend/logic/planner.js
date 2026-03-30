@@ -149,14 +149,16 @@ const osmCache = new Map();
 
 /* ── DE-DUPLICATION UTILITY ── */
 function mergePools(curated, dynamic) {
-  const merged = [...curated];
-  const curatedNames = new Set(curated.map(p => p.name.toLowerCase().trim()));
+  const merged = [];
+  const seenNames = new Set();
 
-  for (const p of dynamic) {
+  const combined = [...curated, ...dynamic];
+
+  for (const p of combined) {
     const cleanName = p.name.toLowerCase().trim();
-    if (!curatedNames.has(cleanName)) {
+    if (!seenNames.has(cleanName)) {
       merged.push(p);
-      curatedNames.add(cleanName);
+      seenNames.add(cleanName);
     }
   }
   return merged;
@@ -250,6 +252,7 @@ async function generatePlan({
     
     for (const p of remainingPool) {
       if (validPlaces.length >= 4) break;
+      if (usedPlaceNames.has(p.name)) continue; // Extra safety
       
       const t = p.timeHours || 2;
       const placeCost = (p.avgCost || 200) * tMult;
