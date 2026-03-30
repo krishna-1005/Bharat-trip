@@ -73,6 +73,7 @@ const MultiCityOverview = () => {
     navigate(`/results`, { 
       state: { 
         plan: item.plan, 
+        isNew: true,
         multiCityContext: {
           currentIndex: idx,
           tripStructure: tripStructure
@@ -185,7 +186,7 @@ const MultiCityOverview = () => {
             </p>
 
             <button 
-              onClick={() => handleViewCityPlan(item)}
+              onClick={() => handleViewCityPlan(item, idx)}
               className="pf-primary-btn"
               style={{ width: '100%', padding: '12px' }}
             >

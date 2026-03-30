@@ -104,6 +104,8 @@ function Results() {
         setIsGenerating(true);
         setCurrentIndex(0);
         localStorage.setItem("tripCurrentIndex", 0);
+      } else {
+        setIsGenerating(false);
       }
       setLoading(false);
     } else {
