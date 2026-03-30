@@ -54,7 +54,7 @@ function Navbar() {
     { label: "Home",    id: "home",    path: "/"            },
     { label: "Explore", id: "explore", path: "/explore"     },
     { label: "Poll",    id: "poll",    path: "/create-poll" },
-    { label: "Planner", id: "planner", path: "/planner"     },
+    { label: "Planner", id: "planner", path: "/trip-type"   },
   ];
 
   const navLinks = isHomePage ? homeLinks : defaultLinks;

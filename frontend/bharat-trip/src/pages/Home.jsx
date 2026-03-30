@@ -368,7 +368,7 @@ const Home = () => {
               <motion.button 
                 whileTap={{ scale: 0.95 }}
                 className="btn-large btn-primary" 
-                onClick={() => navigate('/planner')}
+                onClick={() => navigate('/trip-type')}
               >
                 Start Planning
               </motion.button>
@@ -390,7 +390,7 @@ const Home = () => {
       <div className="container">
         <div className="actions-grid">
           {[
-            { label: "AI Planner", icon: "🤖", path: "/planner", desc: "Craft custom itinerary." },
+            { label: "AI Planner", icon: "🤖", path: "/trip-type", desc: "Craft custom itinerary." },
             { label: "Polls", icon: "🗳️", path: "/create-poll", desc: "Vote with friends." },
             { label: "Map", icon: "🗺️", path: "/map", desc: "Visual exploration." },
             { label: "Explore", icon: "✨", action: scrollToDestinations, desc: "Top destinations." },

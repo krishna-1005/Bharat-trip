@@ -5,6 +5,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Planner from "./pages/Planner";
+import TripType from "./pages/TripType";
+import MultiCityPlanner from "./pages/MultiCityPlanner";
 import Destinations from "./pages/Destinations";
 import Weekend from "./pages/Weekend";
 import Honeymoon from "./pages/Honeymoon";
@@ -46,6 +48,9 @@ function App() {
           <Route path="/create-poll" element={<CreatePoll />} />
           <Route path="/vote/:pollId" element={<VotePoll />} />
           <Route path="/poll-results/:pollId" element={<PollResults />} />
+
+          <Route path="/trip-type" element={<TripType />} />
+          <Route path="/multi-city" element={<MultiCityPlanner />} />
 
           <Route
             path="/planner"
