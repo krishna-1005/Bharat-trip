@@ -637,7 +637,129 @@
   box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
 
-/* Timeline specific line adjustment */
-.premium-itinerary-list {
-  padding-left: 5px;
+.premium-action-btn {
+  background: var(--accent-blue);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 15px;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+
+.premium-action-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+/* AI Sparkle Effects */
+.ai-sparkle-tag {
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+.ai-gen-summary-box {
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid var(--glass-border);
+  padding: 40px;
+  border-radius: 30px;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+}
+
+.ai-summary-text-large {
+  font-size: 18px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.9);
+  margin: 20px 0;
+}
+
+/* Timeline vertical line */
+.stops-container-premium::before {
+  content: '';
+  position: absolute;
+  left: -22px;
+  top: 35px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent-blue), transparent);
+  opacity: 0.3;
+}
+
+/* Custom empty state */
+.res-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.res-empty h2 {
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.res-empty button {
+  background: var(--accent-blue);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Map Foundation */
+.planner-map-foundation {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  background: #111;
+}
+
+.floating-map-controls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.map-control-btn {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: 0.3s;
+}
+
+.map-control-btn.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
 }

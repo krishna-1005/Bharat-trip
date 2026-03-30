@@ -44,14 +44,12 @@ function Results() {
     const savedIdx = localStorage.getItem("tripCurrentIndex");
     return savedIdx ? parseInt(savedIdx, 10) : 0;
   });
-  const [isOptimizing, setIsOptimizing] = useState(false);
   const [isPublic, setIsPublic] = useState(false);
   const [isExecuting, setIsExecuting] = useState(() => {
     return localStorage.getItem("tripExecuting") === "true";
   });
 
   const [multiCityContext, setMultiCityContext] = useState(null);
-
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -71,15 +69,13 @@ function Results() {
           const t = data.trip;
           const formattedPlan = {
             id: t._id,
-            city: t.destination || "Bangalore",
+            city: t.destination || "India",
             coordinates: t.coordinates,
             days: t.days,
             itinerary: t.itinerary,
             isShared: true,
             totalTripCost: t.totalTripCost,
             totalBudget: t.totalBudget,
-            remainingBudget: t.remainingBudget,
-            perDayBudget: t.perDayBudget,
             travelerType: t.travelerType,
             pace: t.pace,
             summary: t.summary || "A custom-crafted journey designed just for you."
@@ -126,45 +122,23 @@ function Results() {
         if (!isAutoSave) alert("Please login to save your trip plan.");
         return;
       }
-
       let token = localStorage.getItem("token");
       if (auth.currentUser) {
-        try {
-          token = await auth.currentUser.getIdToken(true);
-          localStorage.setItem("token", token);
-        } catch (tokenErr) {
-          console.warn("Firebase token refresh failed, using stored token", tokenErr);
-        }
+        token = await auth.currentUser.getIdToken(true);
+        localStorage.setItem("token", token);
       }
-
-      if (!token) {
-        if (!isAutoSave) alert("Authentication error. Please login again.");
-        return;
-      }
-
-      const daysKeys = Object.keys(plan.itinerary);
-      const totalDays = daysKeys.length;
-      const totalTripCost = plan.totalTripCost || 0;
+      if (!token) return;
 
       const res = await fetch(`${API}/api/profile/trips`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json", 
-          Authorization: `Bearer ${token}` 
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          title: tripTitle || `${totalDays}-Day ${plan.city || "India"} Trip`,
-          city: plan.city || "Bangalore",
-          days: totalDays,
-          budget: plan.totalBudget,
-          interests: plan.interests,
+          title: tripTitle || `${plan.days || Object.keys(plan.itinerary).length}-Day ${plan.city} Trip`,
+          city: plan.city,
+          days: plan.days || Object.keys(plan.itinerary).length,
           itinerary: plan.itinerary,
-          totalCost: totalTripCost,
+          totalCost: plan.totalTripCost,
           totalBudget: plan.totalBudget,
-          remainingBudget: plan.remainingBudget,
-          perDayBudget: plan.perDayBudget,
-          travelerType: plan.travelerType,
-          pace: plan.pace,
           summary: plan.summary,
           isPublic: isPublic
         })
@@ -173,202 +147,45 @@ function Results() {
       if (res.ok) {
         const data = await res.json();
         setSaved(true);
-        if (data.trip && data.trip._id) {
-          setPlan(prev => ({ ...prev, id: data.trip._id }));
-        }
-        if (!isAutoSave) {
-           setTimeout(() => navigate("/trips"), 1500);
-        }
-      } else {
-        if (!isAutoSave) {
-          if (res.status === 401) {
-            alert("Your session has expired. Please log in again.");
-            navigate("/login");
-          } else {
-            const errorData = await res.json().catch(() => ({}));
-            alert(`Failed to save trip: ${errorData.error || "Unknown server error"}`);
-          }
-        }
+        if (data.trip?._id) setPlan(prev => ({ ...prev, id: data.trip._id }));
+        if (!isAutoSave) setTimeout(() => navigate("/trips"), 1500);
       }
     } catch (err) {
       console.error("Save trip error:", err);
-      if (!isAutoSave) alert("Network error. Please try again.");
     } finally {
       if (!isAutoSave) setSaving(false);
     }
-  }, [saving, saved, user, plan, tripTitle, navigate]);
+  }, [saving, saved, user, plan, tripTitle, navigate, isPublic]);
 
-  // AI Generation sequence logic
   useEffect(() => {
     if (!isGenerating) return;
-
-    const msgInterval = setInterval(() => {
-      setMessageIdx((prev) => (prev + 1) % THINKING_MESSAGES.length);
-    }, 700);
-
-    const summaryTimeout = setTimeout(() => {
-      setGenStep("summary");
-      clearInterval(msgInterval);
-    }, 2000);
-
-    const doneTimeout = setTimeout(() => {
-      setIsGenerating(false);
-      setGenStep("done");
-    }, 4500);
-
-    return () => {
-      clearInterval(msgInterval);
-      clearTimeout(summaryTimeout);
-      clearTimeout(doneTimeout);
-    };
+    const msgInterval = setInterval(() => setMessageIdx((prev) => (prev + 1) % THINKING_MESSAGES.length), 700);
+    const summaryTimeout = setTimeout(() => { setGenStep("summary"); clearInterval(msgInterval); }, 2000);
+    const doneTimeout = setTimeout(() => { setIsGenerating(false); setGenStep("done"); }, 4500);
+    return () => { clearInterval(msgInterval); clearTimeout(summaryTimeout); clearTimeout(doneTimeout); };
   }, [isGenerating]);
 
-  // Handle auto-save after generation
   useEffect(() => {
     if (!isGenerating && genStep === "done" && user && plan && loc.state?.isNew && !saved && !saving) {
       handleSaveTrip(true);
     }
   }, [isGenerating, genStep, user, plan, loc.state, saved, saving, handleSaveTrip]);
 
-  /* ── ADAPTIVE LOGIC UTILS ── */
-  const getDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  };
-
-  const reorderDayByDistance = (places) => {
-    if (places.length <= 1) return places;
-    const sorted = [places[0]];
-    const remaining = [...places.slice(1)];
-    while (remaining.length > 0) {
-      const last = sorted[sorted.length - 1];
-      let nearestIdx = 0;
-      let minDist = getDistance(last.lat, last.lng, remaining[0].lat, remaining[0].lng);
-      for (let i = 1; i < remaining.length; i++) {
-        const d = getDistance(last.lat, last.lng, remaining[i].lat, remaining[i].lng);
-        if (d < minDist) { minDist = d; nearestIdx = i; }
-      }
-      sorted.push(remaining.splice(nearestIdx, 1)[0]);
-    }
-    return sorted;
-  };
-
-  const handleSkip = (dayLabel, placeName, dayIdx) => {
-    const isArr = Array.isArray(plan.itinerary);
-    const dayKey = isArr ? dayIdx : dayLabel;
-    const dayData = isArr ? plan.itinerary[dayIdx] : plan.itinerary[dayLabel];
-    
-    if (!dayData) return;
-
-    const placeToSkip = dayData.places.find(p => p.name === placeName);
-    if (placeToSkip && user) {
-      // Track skip action for personalization
-      trackPreference(placeToSkip.category, "skip");
-    }
-
+  const handleSkip = (dayLabel, placeName) => {
     setPlan(prev => {
-      const isArrPrev = Array.isArray(prev.itinerary);
-      const newItinerary = isArrPrev ? [...prev.itinerary] : { ...prev.itinerary };
-      const currentDay = isArrPrev ? { ...newItinerary[dayKey] } : { ...newItinerary[dayKey] };
-      
+      const isArr = Array.isArray(prev.itinerary);
+      const newItinerary = isArr ? [...prev.itinerary] : { ...prev.itinerary };
+      const dayKey = isArr ? prev.itinerary.findIndex(d => d.day === dayLabel) : dayLabel;
+      if (dayKey === -1 && isArr) return prev;
+
+      const currentDay = isArr ? { ...newItinerary[dayKey] } : { ...newItinerary[dayKey] };
       currentDay.places = currentDay.places.filter(p => p.name !== placeName);
-      currentDay.places = reorderDayByDistance(currentDay.places);
-      
-      const mealCost = currentDay.dayMealCost || 500;
-      currentDay.estimatedCost = currentDay.places.reduce((sum, p) => sum + (p.estimatedCost || 200), 0) + mealCost;
-      
       newItinerary[dayKey] = currentDay;
-      
-      const itValues = isArrPrev ? newItinerary : Object.values(newItinerary);
-      const newTotalCost = itValues.reduce((sum, d) => sum + (d.estimatedCost || 0), 0);
-      return { ...prev, itinerary: newItinerary, totalTripCost: newTotalCost };
-    });
-  };
-
-  const trackPreference = async (category, action) => {
-    const token = localStorage.getItem("token");
-    if (!token || !category) return;
-    try {
-      await fetch(`${API}/api/profile/preferences/track`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ category, action })
-      });
-    } catch (err) {
-      console.warn("Preference tracking failed", err);
-    }
-  };
-
-  const handleRunningLate = () => {
-    if (!window.confirm("This will remove low-priority places to save time. Continue?")) return;
-    setPlan(prev => {
-      const isArr = Array.isArray(prev.itinerary);
-      const newItinerary = isArr ? [...prev.itinerary] : { ...prev.itinerary };
-      const keys = isArr ? newItinerary.map((_, i) => i) : Object.keys(newItinerary);
-      
-      keys.forEach(dayKey => {
-        const day = { ...newItinerary[dayKey] };
-        day.places = day.places.filter(p => (p.priority || 5) >= 7);
-        day.places = reorderDayByDistance(day.places);
-        newItinerary[dayKey] = day;
-      });
-      
-      const itValues = isArr ? newItinerary : Object.values(newItinerary);
-      const newTotalCost = itValues.reduce((sum, d) => sum + (d.estimatedCost || 0), 0);
-      return { ...prev, itinerary: newItinerary, totalTripCost: newTotalCost };
-    });
-  };
-
-  const handleRelaxMode = () => {
-    if (!window.confirm("This will limit daily stops to 3 for a more relaxed experience. Continue?")) return;
-    setPlan(prev => {
-      const isArr = Array.isArray(prev.itinerary);
-      const newItinerary = isArr ? [...prev.itinerary] : { ...prev.itinerary };
-      const keys = isArr ? newItinerary.map((_, i) => i) : Object.keys(newItinerary);
-
-      keys.forEach(dayKey => {
-        const day = { ...newItinerary[dayKey] };
-        day.places = [...day.places]
-          .sort((a, b) => (b.priority || 5) - (a.priority || 5))
-          .slice(0, 3);
-        day.places = reorderDayByDistance(day.places);
-        newItinerary[dayKey] = day;
-      });
-      
-      const itValues = isArr ? newItinerary : Object.values(newItinerary);
-      const newTotalCost = itValues.reduce((sum, d) => sum + (d.estimatedCost || 0), 0);
-      return { ...prev, itinerary: newItinerary, totalTripCost: newTotalCost, pace: "Relaxed" };
-    });
-  };
-
-  const optimizeItinerary = async () => {
-    if (!plan || !plan.itinerary || isOptimizing) return;
-    setIsOptimizing(true);
-    setPlan(prev => {
-      const isArr = Array.isArray(prev.itinerary);
-      const newItinerary = isArr ? [...prev.itinerary] : { ...prev.itinerary };
-      const keys = isArr ? newItinerary.map((_, i) => i) : Object.keys(newItinerary);
-
-      keys.forEach(dayKey => {
-        const day = { ...newItinerary[dayKey] };
-        day.places = reorderDayByDistance(day.places);
-        newItinerary[dayKey] = day;
-      });
       return { ...prev, itinerary: newItinerary };
     });
-    setTimeout(() => setIsOptimizing(false), 1000);
   };
 
-  const handleVisited = (dayKey, place, idx) => {
-    if (user) {
-      trackPreference(place.category, "visit");
-    }
+  const handleVisited = (idx) => {
     setCurrentIndex(idx + 1);
     localStorage.setItem("tripCurrentIndex", idx + 1);
   };
@@ -377,87 +194,6 @@ function Results() {
     setIsExecuting(true);
     localStorage.setItem("tripExecuting", "true");
     setSidebarTab("live");
-    if (currentIndex >= allPlaces.length) {
-      setCurrentIndex(0);
-      localStorage.setItem("tripCurrentIndex", 0);
-    }
-  };
-
-  const handleCompleteStop = () => {
-    const currentPlace = allPlaces[currentIndex];
-    if (currentPlace) {
-      handleVisited(null, currentPlace, currentIndex);
-    }
-  };
-
-  const handleSkipStop = () => {
-    setCurrentIndex(prev => {
-      const next = prev + 1;
-      localStorage.setItem("tripCurrentIndex", next);
-      return next;
-    });
-  };
-
-  const handleJumpToNext = () => {
-    // Already same as skip in simple sequential mode
-    handleSkipStop();
-  };
-
-  const getDayGreeting = () => {
-    const hour = currentTime.getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 17) return "Good Afternoon";
-    return "Good Evening";
-  };
-
-  const getTimeAwareSuggestion = () => {
-    const hour = currentTime.getHours();
-    if (hour >= 7 && hour < 10) return "Perfect time for a morning walk or spiritual visit.";
-    if (hour >= 12 && hour < 14) return "Ideal time to explore local lunch spots.";
-    if (hour >= 17 && hour < 19) return "Great time for sunset views or evening markets.";
-    if (hour >= 20) return "Time to relax and enjoy the city's nightlife.";
-    return "Keep exploring the hidden gems!";
-  };
-
-  const handleShare = async () => {
-    if (!plan?.id && !saved) {
-      const shouldSave = window.confirm("You need to save this trip to your profile before sharing. Save now?");
-      if (shouldSave) {
-        await handleSaveTrip();
-      }
-      return;
-    }
-
-    const shareUrl = `${window.location.origin}/trip/${plan?.id || routeTripId}`;
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `My Trip to ${plan?.city}`,
-          text: `Check out my travel plan for ${plan?.city} on Bharat Trip!`,
-          url: shareUrl,
-        });
-      } catch (err) {
-        console.log('Error sharing:', err);
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        setShareStatus(true);
-        setTimeout(() => setShareStatus(false), 2000);
-      } catch (err) {
-        alert("Could not copy link. Manually copy: " + shareUrl);
-      }
-    }
-  };
-
-  const handleCloneTrip = () => {
-    if (!plan) return;
-    const clonedPlan = { ...plan, id: null, isShared: false, isNew: true };
-    localStorage.setItem("tripPlan", JSON.stringify(clonedPlan));
-    localStorage.setItem("tripCurrentIndex", 0);
-    navigate("/results", { state: { plan: clonedPlan, isNew: true } });
-    window.location.reload(); // Refresh to reset state
   };
 
   const normalizedItinerary = useMemo(() => {
@@ -470,103 +206,56 @@ function Results() {
   }, [plan]);
 
   const allPlaces = useMemo(() => {
-    return normalizedItinerary.flatMap(d => (d.places || []).map(p => ({ ...p, city: plan?.city || "India" })));
-  }, [normalizedItinerary, plan?.city]);
+    return normalizedItinerary.flatMap(d => (d.places || []).map(p => ({ ...p, dayLabel: d.day })));
+  }, [normalizedItinerary]);
 
   const getBestVisitTimeFallback = (category, index) => {
     const cat = (category || "").toLowerCase();
     const isEven = index % 2 === 0;
-    if (["nature", "park", "garden", "hill", "lake", "waterfall", "beach"].some(kw => cat.includes(kw))) {
-      return { time: isEven ? "Morning" : "Evening", reason: isEven ? "Pleasant weather and soft sunlight" : "Golden hour views and cool breeze" };
+    if (["nature", "park", "garden", "hill", "lake", "beach"].some(kw => cat.includes(kw))) {
+      return { time: isEven ? "Morning" : "Evening", reason: "Pleasant weather and soft sunlight" };
     }
     if (["temple", "church", "mosque", "spiritual", "monument", "museum", "history", "cultural"].some(kw => cat.includes(kw))) {
       return { time: "Morning", reason: "Peaceful atmosphere and fewer crowds" };
     }
     if (["cafe", "restaurant", "dining", "food", "bakery"].some(kw => cat.includes(kw))) {
-      return { time: isEven ? "Afternoon" : "Evening", reason: isEven ? "Ideal for a relaxed lunch" : "Great dining ambiance" };
-    }
-    if (["shopping", "market", "mall", "street"].some(kw => cat.includes(kw))) {
-      return { time: "Evening", reason: "Most active local atmosphere" };
-    }
-    if (["nightlife", "pub", "bar", "club", "lounge"].some(kw => cat.includes(kw))) {
-      return { time: "Night", reason: "Peak energy and music" };
+      return { time: isEven ? "Afternoon" : "Evening", reason: "Ideal for a relaxed meal" };
     }
     return { time: ["Morning", "Afternoon", "Evening"][index % 3], reason: "Great time to explore" };
   };
 
   const [sidebarTab, setSidebarTab] = useState(isExecuting ? "live" : "plan");
 
-  useEffect(() => {
-    if (isExecuting) setSidebarTab("live");
-    else setSidebarTab("plan");
-  }, [isExecuting]);
-
-  const handleCitySwitch = (idx) => {
-    if (!multiCityContext) return;
-    const selected = multiCityContext.tripStructure[idx];
-    if (selected && selected.plan) {
-      setPlan(selected.plan);
-      setMultiCityContext(prev => ({ ...prev, currentIndex: idx }));
-      setCurrentIndex(0);
-      localStorage.setItem("tripCurrentIndex", 0);
+  const handleShare = async () => {
+    if (!plan?.id && !saved) {
+      if (window.confirm("Save trip before sharing?")) await handleSaveTrip();
+      return;
     }
+    const shareUrl = `${window.location.origin}/trip/${plan?.id || routeTripId}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareStatus(true);
+      setTimeout(() => setShareStatus(false), 2000);
+    } catch (err) { alert("Link: " + shareUrl); }
   };
 
-  if (loading) {
-    return (
-      <div className="res-loading-screen">
-        <div className="res-spinner"></div>
-        <h2>Initializing Odyssey...</h2>
-      </div>
-    );
-  }
+  if (loading) return <div className="res-loading-screen"><div className="res-spinner"></div><h2>Initializing Odyssey...</h2></div>;
 
-  // Generation Overlay
   if (isGenerating && plan) {
     return (
       <div className="ai-gen-overlay">
         <AnimatePresence mode="wait">
           {genStep === "thinking" && (
-            <motion.div 
-              key="thinking"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="ai-gen-content"
-            >
-              <div className="ai-pulse-ring">
-                <div className="ai-pulse-dot"></div>
-              </div>
-              <motion.h2
-                key={messageIdx}
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.3 }}
-              >
-                {THINKING_MESSAGES[messageIdx]}
-              </motion.h2>
-              <div className="ai-loading-bar-wrap">
-                <motion.div 
-                  className="ai-loading-bar-fill"
-                  initial={{ width: "0%" }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: 2, ease: "linear" }}
-                />
-              </div>
+            <motion.div key="thinking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="ai-gen-content">
+              <div className="ai-pulse-ring"><div className="ai-pulse-dot"></div></div>
+              <motion.h2 key={messageIdx}>{THINKING_MESSAGES[messageIdx]}</motion.h2>
+              <div className="ai-loading-bar-wrap"><motion.div className="ai-loading-bar-fill" initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 2 }} /></div>
             </motion.div>
           )}
-
           {genStep === "summary" && (
-            <motion.div 
-              key="summary"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, filter: "blur(10px)" }}
-              className="ai-gen-summary-box"
-            >
-              <span className="ai-sparkle-tag">✨ Why this plan works</span>
-              <h2>Your Custom Itinerary is Ready</h2>
+            <motion.div key="summary" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="ai-gen-summary-box">
+              <span className="ai-sparkle-tag">✨ AI Insight</span>
+              <h2>Itinerary Ready</h2>
               <p className="ai-summary-text-large">{plan.summary}</p>
               <div className="ai-countdown-loader"></div>
             </motion.div>
@@ -576,18 +265,8 @@ function Results() {
     );
   }
 
-  if (!plan || !plan.itinerary) {
-    return (
-      <div className="res-empty">
-        <div className="res-empty-icon">🗺️</div>
-        <h2>{t("no_trip")}</h2>
-        <button onClick={() => navigate("/planner")}>← {t("back_to_planner")}</button>
-      </div>
-    );
-  }
+  if (!plan || !plan.itinerary) return <div className="res-empty"><h2>{t("no_trip")}</h2><button onClick={() => navigate("/planner")}>Back</button></div>;
 
-  const totalDays = normalizedItinerary.length;
-  const totalTripCost = plan.totalTripCost || 0;
   const progressPercent = Math.round((currentIndex / (allPlaces.length || 1)) * 100);
 
   return (
@@ -595,65 +274,19 @@ function Results() {
       <aside className="premium-itinerary-sidebar">
         <div className="sidebar-header-premium">
           <div className="header-top-row">
-            <div className="premium-brand">
-              <div className="brand-dot"></div>
-              <span className="brand-text">Bharat Trip</span>
-            </div>
-            <button className="back-control" onClick={() => {
-              if (multiCityContext) {
-                navigate("/multi-city-overview", { state: { tripStructure: multiCityContext.tripStructure } });
-              } else {
-                navigate("/planner");
-              }
-            }}>
-              {multiCityContext ? "← Trip Overview" : "← Edit Plan"}
-            </button>
+            <div className="premium-brand"><div className="brand-dot"></div><span className="brand-text">Bharat Trip</span></div>
+            <button className="back-control" onClick={() => navigate("/planner")}>← Edit</button>
           </div>
           
-          {multiCityContext && (
-            <div className="multi-city-nav-tabs">
-              {multiCityContext.tripStructure.map((item, idx) => (
-                <button 
-                  key={idx}
-                  className={`city-nav-tab ${multiCityContext.currentIndex === idx ? 'active' : ''}`}
-                  onClick={() => handleCitySwitch(idx)}
-                >
-                  {item.city}
-                </button>
-              ))}
-            </div>
-          )}
-          
           <div className="trip-hero-info">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between', marginBottom: '15px' }}>
-              <h1 style={{ fontSize: '22px', margin: 0 }}>{tripTitle || `${totalDays} Days in ${plan.city || "India"}`}</h1>
-              {!isExecuting && (
-                <button className="start-trip-btn" onClick={handleStartTrip}>🚀 Guide Me</button>
-              )}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
+              <h1 style={{ fontSize: '22px' }}>{tripTitle || `${normalizedItinerary.length} Days in ${plan.city}`}</h1>
+              {!isExecuting && <button className="start-trip-btn" onClick={handleStartTrip}>🚀 Guide Me</button>}
             </div>
             
-            <div className="sidebar-mode-tabs" style={{ 
-              display: 'flex', 
-              background: 'rgba(255,255,255,0.05)', 
-              borderRadius: '12px', 
-              padding: '4px',
-              marginBottom: '15px'
-            }}>
-              <button 
-                className={`mode-tab ${sidebarTab === 'plan' ? 'active' : ''}`}
-                onClick={() => setSidebarTab('plan')}
-              >
-                📋 Full Plan
-              </button>
-              <button 
-                className={`mode-tab ${sidebarTab === 'live' ? 'active' : ''}`}
-                onClick={() => {
-                  setSidebarTab('live');
-                  if (!isExecuting) handleStartTrip();
-                }}
-              >
-                🧭 Live Guide
-              </button>
+            <div className="sidebar-mode-tabs">
+              <button className={`mode-tab ${sidebarTab === 'plan' ? 'active' : ''}`} onClick={() => setSidebarTab('plan')}>📋 Plan</button>
+              <button className={`mode-tab ${sidebarTab === 'live' ? 'active' : ''}`} onClick={() => { setSidebarTab('live'); if(!isExecuting) handleStartTrip(); }}>🧭 Live</button>
             </div>
           </div>
         </div>
@@ -661,344 +294,88 @@ function Results() {
         <div className="sidebar-scroll-content">
           {sidebarTab === 'live' ? (
             <div className="execution-mode-focused animate-in">
-              <div className="exec-header-small" style={{ marginBottom: '20px' }}>
-                <span className="exec-greeting" style={{ fontSize: '16px', fontWeight: '800' }}>{getDayGreeting()}, {user?.name?.split(' ')[0] || "Traveler"}!</span>
-                <p className="exec-suggestion" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '5px' }}>{getTimeAwareSuggestion()}</p>
-              </div>
-
-              {/* Progress Summary */}
               <div className="exec-progress-summary">
-                <div className="exec-stat">
-                  <span className="exec-stat-val">{currentIndex}</span>
-                  <span className="exec-stat-label">Visited</span>
-                </div>
-                <div className="exec-stat">
-                  <span className="exec-stat-val">{allPlaces.length - currentIndex}</span>
-                  <span className="exec-stat-label">Remaining</span>
-                </div>
-                <div className="exec-progress-track">
-                   <div className="exec-progress-fill" style={{ width: `${progressPercent}%` }}></div>
-                </div>
+                <div className="exec-stat"><span className="exec-stat-val">{currentIndex}</span><span className="exec-stat-label">Visited</span></div>
+                <div className="exec-stat"><span className="exec-stat-val">{allPlaces.length - currentIndex}</span><span className="exec-stat-label">Left</span></div>
+                <div className="exec-progress-track"><div className="exec-progress-fill" style={{ width: `${progressPercent}%` }}></div></div>
               </div>
 
-              {/* Current Stop Card */}
               {currentIndex < allPlaces.length ? (
                 <div className="focused-stop-card current">
                   <span className="stop-status-tag current">CURRENT STOP</span>
                   <PlaceImage placeName={allPlaces[currentIndex].name} city={plan.city} className="focused-stop-img" />
                   <div className="focused-stop-body">
                     <h2>{allPlaces[currentIndex].name}</h2>
-                    {(() => {
-                      const timing = allPlaces[currentIndex].bestTime 
-                        ? { time: allPlaces[currentIndex].bestTime, reason: allPlaces[currentIndex].timeReason }
-                        : getBestVisitTimeFallback(allPlaces[currentIndex].category, currentIndex);
-                      return (
-                        <div className="stop-timing-info" style={{ 
-                          fontSize: '12px', 
-                          marginBottom: '15px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '4px',
-                          padding: '10px',
-                          background: 'rgba(59, 130, 246, 0.1)',
-                          borderRadius: '8px',
-                          borderLeft: '3px solid var(--accent-blue)'
-                        }}>
-                          <span style={{ color: 'var(--accent-blue)', fontWeight: '800' }}>🕒 Suggested: {timing.time}</span>
-                          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '11px' }}>{timing.reason}</span>
-                        </div>
-                      );
-                    })()}
-                    <p className="focused-stop-insight">{allPlaces[currentIndex].reason}</p>
-                    
-                    <div className="focused-action-row">
-                      <button className="exec-action-btn complete" onClick={handleCompleteStop}>✅ Mark Completed</button>
-                      <button className="exec-action-btn skip" onClick={handleSkipStop}>⏭️ Skip</button>
-                    </div>
+                    <button className="exec-action-btn complete" onClick={() => handleVisited(currentIndex)}>✅ Completed</button>
                   </div>
                 </div>
               ) : (
-                <div className="focused-stop-card completed">
-                   <div className="confetti-icon">🎉</div>
-                   <h2>Trip Completed!</h2>
-                   <p>You've explored all planned destinations. Hope you had an amazing journey!</p>
-                   <button className="btn-premium primary" onClick={() => setIsExecuting(false)}>View Summary</button>
-                </div>
+                <div className="focused-stop-card completed"><h2>Trip Completed! 🎉</h2><button className="pf-secondary-btn" onClick={() => setSidebarTab('plan')}>View Full Plan</button></div>
               )}
-
-              {/* Next Stop Preview */}
-              {currentIndex + 1 < allPlaces.length && (
-                <div className="next-stop-preview">
-                  <span className="stop-status-tag next">UP NEXT</span>
-                  <div className="next-stop-row">
-                    <div className="next-stop-info">
-                      <h4>{allPlaces[currentIndex + 1].name}</h4>
-                      <span>📍 {allPlaces[currentIndex + 1].category}</span>
-                    </div>
-                    <button className="exec-action-btn jump" onClick={handleJumpToNext}>Jump to →</button>
-                  </div>
-                </div>
-              )}
-
-              {/* Upcoming Queue */}
-              {currentIndex + 2 < allPlaces.length && (
-                <div className="upcoming-queue-section">
-                  <h4 className="queue-title">Remaining stops today</h4>
-                  <div className="queue-list">
-                    {allPlaces.slice(currentIndex + 2).map((place, qIdx) => (
-                      <div key={qIdx} className="queue-item">
-                        <div className="queue-dot"></div>
-                        <div className="queue-info">
-                          <span className="queue-name">{place.name}</span>
-                          <span className="queue-cat">{place.category}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div style={{ textAlign: 'center', marginTop: '30px' }}>
-                <button className="pf-secondary-btn" style={{ fontSize: '12px' }} onClick={() => { setIsExecuting(false); localStorage.setItem("tripExecuting", "false"); setSidebarTab("plan"); }}>Exit Guide Mode</button>
-              </div>
             </div>
           ) : (
             <div className="plan-mode-content animate-in">
-              {plan.summary && (
-                <div className="plan-summary-card">
-                  <h4 className="summary-title">Adaptive Intelligence</h4>
-                  <p className="summary-text">{plan.summary}</p>
-                  <div className="adaptive-controls">
-                    <button className="adaptive-btn late" onClick={handleRunningLate}>🏃 Running Late</button>
-                    <button className="adaptive-btn relax" onClick={handleRelaxMode}>🧘 Relax Mode</button>
-                  </div>
-                </div>
-              )}
-
-              {plan.totalBudget && (
-                <div className="journey-progress-card budget-intelligence">
-                  <div className="progress-header">
-                    <span className="progress-label">Budget Intelligence</span>
-                    <span className="progress-val">{Math.round((totalTripCost / (plan.totalBudget || 1)) * 100)}%</span>
-                  </div>
-                  <div className="budget-stats-grid">
-                    <div className="budget-stat-item">
-                      <span className="stat-label">Total Budget</span>
-                      <span className="stat-val">{formatPrice(plan.totalBudget)}</span>
-                    </div>
-                    <div className="budget-stat-item">
-                      <span className="stat-label">Est. Cost</span>
-                      <span className="stat-val">{formatPrice(totalTripCost)}</span>
-                    </div>
-                    <div className="budget-stat-item">
-                      <span className="stat-label">Remaining</span>
-                      <span className="stat-val" style={{ color: (plan.totalBudget - totalTripCost) >= 0 ? 'var(--accent-green)' : '#ef4444' }}>
-                        {formatPrice(plan.totalBudget - totalTripCost)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="progress-track-premium" style={{ marginTop: '12px' }}>
-                    <div 
-                      className="progress-fill-premium" 
-                      style={{ 
-                        width: `${Math.min((totalTripCost / (plan.totalBudget || 1)) * 100, 100)}%`,
-                        background: totalTripCost > plan.totalBudget ? '#ef4444' : 'linear-gradient(to right, var(--accent-blue), var(--accent-green))'
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-
-              <div className="journey-progress-card geospatial-intel">
-                <div className="progress-header">
-                  <span className="progress-label">Geospatial Intelligence</span>
-                  <span className="progress-val">Active</span>
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span>Neural Route Density</span>
-                    <span style={{ color: 'var(--accent-blue)' }}>Optimal</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span>Climatic Alignment</span>
-                    <span style={{ color: 'var(--accent-blue)' }}>94% Match</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Crowd Dynamics AI</span>
-                    <span style={{ color: 'var(--accent-blue)' }}>Avoiding Peaks</span>
-                  </div>
-                </div>
-              </div>
-
               <div className="journey-progress-card">
-                <div className="progress-header">
-                  <span className="progress-label">Journey Progress</span>
-                  <span className="progress-val">{progressPercent}%</span>
-                </div>
-                <div className="progress-track-premium">
-                  <div className="progress-fill-premium" style={{ width: `${progressPercent}%` }}></div>
-                </div>
+                <div className="progress-header"><span className="progress-label">Journey Progress</span><span className="progress-val">{progressPercent}%</span></div>
+                <div className="progress-track-premium"><div className="progress-fill-premium" style={{ width: `${progressPercent}%` }}></div></div>
               </div>
 
               <div className="premium-itinerary-list">
-                {normalizedItinerary.map((dayObj, dIdx) => {
-                  // Group places by bestTime
-                  const groupedPlaces = dayObj.places.reduce((acc, place) => {
-                    const time = place.bestTime || "Other";
-                    if (!acc[time]) acc[time] = [];
-                    acc[time].push(place);
-                    return acc;
-                  }, {});
-
-                  const timeOrder = ["Morning", "Afternoon", "Evening", "Night", "Other"];
-
-                  return (
-                    <div key={dIdx} className="premium-day-section">
-                      <div className="day-header-premium">
-                        <div className="day-circle">{dIdx + 1}</div>
-                        <div className="day-info">
-                          <h3>{dayObj.day}</h3>
-                          <span>{dayObj.places.length} Destinations</span>
-                        </div>
-                      </div>
-                      
-                      {timeOrder.map(timeKey => {
-                        const placesInTime = groupedPlaces[timeKey];
-                        if (!placesInTime || placesInTime.length === 0) return null;
+                {normalizedItinerary.map((dayObj, dIdx) => (
+                  <div key={dIdx} className="premium-day-section">
+                    <div className="day-header-premium">
+                      <div className="day-circle">{dIdx + 1}</div>
+                      <div className="day-info"><h3>{dayObj.day}</h3><span>{dayObj.places.length} Places</span></div>
+                    </div>
+                    
+                    <div className="stops-container-premium">
+                      {dayObj.places.map((place, pIdx) => {
+                        let globalIdx = 0;
+                        for (let i = 0; i < dIdx; i++) globalIdx += (normalizedItinerary[i]?.places.length || 0);
+                        const currentIdx = globalIdx + pIdx;
+                        const isVisited = currentIdx < currentIndex;
+                        const isCurrent = currentIdx === currentIndex;
+                        const timing = place.bestTime ? { time: place.bestTime, reason: place.timeReason } : getBestVisitTimeFallback(place.category, currentIdx);
 
                         return (
-                          <div key={timeKey} className="time-group-section" style={{ marginBottom: '20px' }}>
-                            <div className="time-group-header" style={{ 
-                              fontSize: '10px', 
-                              fontWeight: '900', 
-                              color: 'var(--accent-blue)', 
-                              textTransform: 'uppercase', 
-                              letterSpacing: '1px',
-                              marginBottom: '12px',
-                              paddingLeft: '20px',
-                              opacity: 0.8,
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px'
-                            }}>
-                              <span style={{ width: '8px', height: '1px', background: 'currentColor' }}></span>
-                              {timeKey}
-                            </div>
-                            
-                            <div className="stops-container-premium">
-                              {placesInTime.map((place, pIdxInTime) => {
-                                // Calculate global index for visited/current state
-                                // This is a bit tricky with grouping, let's find the original index
-                                const globalIdx = allPlaces.findIndex(ap => ap.name === place.name && ap.lat === place.lat);
-                                const isVisited = globalIdx < currentIndex;
-                                const isCurrent = globalIdx === currentIndex;
-
-                                return (
-                                  <div key={globalIdx} className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}>
-                                    <div className="stop-marker-v2">
-                                      {isVisited && <span className="visited-tick">✓</span>}
-                                    </div>
-                                    <div className="stop-card-inner">
-                                      <div className="stop-top-row">
-                                        <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
-                                        <div className="stop-details-v2">
-                                          <div className="stop-title-row">
-                                            <h4>{place.name}</h4>
-                                            {!isVisited && (
-                                              <button className="skip-btn" onClick={(e) => { e.stopPropagation(); handleSkip(dayObj.day, place.name, dIdx); }} title="Skip Place">✕</button>
-                                            )}
-                                          </div>
-                                          <div className="stop-timing-info" style={{ 
-                                            fontSize: '11px', 
-                                            color: 'rgba(255,255,255,0.5)', 
-                                            marginBottom: '8px',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: '2px'
-                                          }}>
-                                            {(() => {
-                                              const timing = place.bestTime 
-                                                ? { time: place.bestTime, reason: place.timeReason }
-                                                : getBestVisitTimeFallback(place.category, globalIdx);
-                                              return (
-                                                <>
-                                                  <span style={{ color: 'var(--accent-blue)', fontWeight: '700' }}>🕒 Suggested Time: {timing.time}</span>
-                                                  <span style={{ fontStyle: 'italic', fontSize: '10px' }}>💡 {timing.reason}</span>
-                                                </>
-                                              );
-                                            })()}
-                                          </div>
-                                          <div className="stop-trust-layer">
-                                            ⭐ {place.rating || "4.2"} • {typeof place.reviews === 'number' ? place.reviews.toLocaleString() : "1,200+"} reviews • <span className="trust-tag">{place.tag || "Popular Spot"}</span>
-                                          </div>
-                                          <div className="stop-pills-v2">
-                                            <span className="stop-pill-v2">{place.category || "Sight"}</span>
-                                            <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      {isCurrent && (
-                                        <div className="active-action-pane">
-                                          <p className="stop-insight-v2">{place.reason || "Discover the beauty of this location."}</p>
-                                          <button className="premium-action-btn" onClick={(e) => { e.stopPropagation(); handleVisited(dayObj.day, place, globalIdx); }}>Mark as Visited →</button>
-                                        </div>
-                                      )}
-                                      {isVisited && (
-                                        <div className="visited-status-label">Visited • {place.category}</div>
-                                      )}
-                                    </div>
+                          <div key={currentIdx} className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}>
+                            <div className="stop-marker-v2">{isVisited && <span className="visited-tick">✓</span>}</div>
+                            <div className="stop-card-inner">
+                              <div className="stop-top-row">
+                                <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
+                                <div className="stop-details-v2">
+                                  <div className="stop-title-row">
+                                    <h4>{place.name}</h4>
+                                    {!isVisited && <button className="skip-btn" onClick={() => handleSkip(dayObj.day, place.name)}>✕</button>}
                                   </div>
-                                );
-                              })}
+                                  <div className="stop-timing-info" style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                                    <span style={{ color: 'var(--accent-blue)', fontWeight: '700' }}>🕒 {timing.time}</span> • {timing.reason}
+                                  </div>
+                                  <div className="stop-pills-v2">
+                                    <span className="stop-pill-v2">{place.category}</span>
+                                    <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              {isCurrent && <button className="premium-action-btn" style={{ marginTop: '15px', width: '100%' }} onClick={() => handleVisited(currentIdx)}>Mark Visited →</button>}
                             </div>
                           </div>
                         );
                       })}
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             </div>
           )}
         </div>
 
         <div className="sidebar-footer-premium">
-          {!saved && !plan?.isShared && (
-            <div className="public-toggle-row">
-              <label className="public-switch">
-                <input 
-                  type="checkbox" 
-                  checked={isPublic} 
-                  onChange={(e) => setIsPublic(e.target.checked)} 
-                />
-                <span className="public-slider round"></span>
-              </label>
-              <span className="public-label">Make this trip public 🌍</span>
-            </div>
-          )}
-          
           <div className="footer-summary-row">
-            <div className="budget-estimate">
-              <span className="budget-label">Est. Total Budget</span>
-              <span className="budget-value">{formatPrice(totalTripCost)}</span>
-            </div>
+            <div className="budget-estimate"><span className="budget-label">Est. Budget</span><span className="budget-value">{formatPrice(plan.totalTripCost || 0)}</span></div>
             <div className="footer-action-group">
-              {plan?.isShared ? (
-                <button className="save-journey-btn clone-btn" onClick={handleCloneTrip}>
-                  ✨ Use This Plan
-                </button>
-              ) : (
-                <>
-                  <button 
-                    className="share-journey-btn" 
-                    onClick={handleShare}
-                  >
-                    {shareStatus ? "✅ Copied" : "🔗 Share"}
-                  </button>
-                  <button className="save-journey-btn" onClick={() => handleSaveTrip()} disabled={saving || saved}>
-                    {saved ? "✓ Saved" : saving ? "Saving Journey..." : "Save Journey"}
-                  </button>
-                </>
-              )}
+              <button className="share-journey-btn" onClick={handleShare}>{shareStatus ? "✓ Link" : "Share"}</button>
+              <button className="save-journey-btn" onClick={() => handleSaveTrip()} disabled={saving || saved}>{saved ? "✓ Saved" : "Save Plan"}</button>
             </div>
           </div>
         </div>
