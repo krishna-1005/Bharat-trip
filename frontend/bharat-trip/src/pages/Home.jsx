@@ -286,8 +286,10 @@ const FeaturedTrips = () => {
   );
 };
 
+/* Added inline styles for mobile responsiveness where classes aren't enough */
 const Home = () => {
   const navigate = useNavigate();
+  const isMobile = window.innerWidth <= 768;
   const destRef = useRef(null);
 
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024);

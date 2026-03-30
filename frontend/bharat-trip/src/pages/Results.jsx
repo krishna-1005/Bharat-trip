@@ -269,9 +269,12 @@ function Results() {
 
   const progressPercent = Math.round((currentIndex / (allPlaces.length || 1)) * 100);
 
+  const [showMapOnMobile, setShowMapOnMobile] = useState(false);
+  const isMobile = window.innerWidth <= 900;
+
   return (
-    <div className="anchored-planner-root">
-      <aside className="premium-itinerary-sidebar">
+    <div className={`anchored-planner-root ${showMapOnMobile ? 'show-map-mobile' : ''}`}>
+      <aside className={`premium-itinerary-sidebar ${showMapOnMobile ? 'hidden-mobile' : ''}`}>
         <div className="sidebar-header-premium">
           <div className="header-top-row">
             <div className="premium-brand"><div className="brand-dot"></div><span className="brand-text">Bharat Trip</span></div>
@@ -380,6 +383,12 @@ function Results() {
           </div>
         </div>
       </aside>
+
+      {isMobile && (
+        <button className="mobile-view-toggle" onClick={() => setShowMapOnMobile(!showMapOnMobile)}>
+          {showMapOnMobile ? "📋 View Plan" : "🗺️ View Map"}
+        </button>
+      )}
 
       <div className="planner-map-foundation">
         <MapView plan={plan} isTracking={isTracking} currentIndex={currentIndex} />

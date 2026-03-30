@@ -410,6 +410,46 @@
     cursor: pointer;
 }
 
-.pf-secondary-btn:hover {
-    color: #3b82f6;
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .pf-selection-grid, .pf-interest-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pf-choice-card {
+        flex-direction: row;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .pf-choice-icon {
+        font-size: 24px;
+    }
+
+    .pf-budget-numeric-input {
+        font-size: 32px;
+        width: 130px;
+    }
+
+    .pf-footer-sleek {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .pf-btn-group {
+        width: 100%;
+    }
+
+    .pf-primary-btn {
+        flex: 1;
+        width: 100%;
+    }
+
+    .pf-estimate-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 }

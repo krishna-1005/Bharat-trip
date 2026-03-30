@@ -198,12 +198,15 @@
 .nb-hamburger {
   display: none;
   flex-direction: column;
+  justify-content: center;
   gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
   padding: 10px;
   z-index: 1001;
+  width: 44px;
+  height: 44px;
 }
 
 .nb-hamburger span {
@@ -211,6 +214,7 @@
   height: 2px;
   background: #f8fafc;
   transition: 0.3s;
+  display: block;
 }
 
 .nb-hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -224,8 +228,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: #020617;
-  padding: 100px 40px;
+  background: rgba(2, 6, 23, 0.98);
+  backdrop-filter: blur(20px);
+  padding: 100px 30px 40px;
   z-index: 999;
   display: flex;
   flex-direction: column;
@@ -236,40 +241,49 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
 }
 
 .nb-mobile-item {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #f8fafc;
   cursor: pointer;
   transition: all 0.2s;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
-.nb-mobile-item:hover {
+.nb-mobile-item:last-child {
+  border-bottom: none;
+}
+
+.nb-mobile-item:active {
   color: #3b82f6;
-  transform: translateX(10px);
+  padding-left: 10px;
 }
 
 .nb-mobile-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.1);
-  margin: 10px 0;
+  margin: 15px 0;
 }
 
 .nb-mobile-login {
   color: #3b82f6;
+  border-bottom: none !important;
 }
 
 .nb-mobile-logout {
-  color: #f87171;
-  font-size: 1.5rem;
-  margin-top: 10px;
+  color: #f87171 !important;
+  margin-top: 20px;
+  border-bottom: none !important;
 }
 
 @media (max-width: 900px) {
-  .nb-nav { padding: 15px 24px; }
+  .nb-nav { padding: 10px 20px; height: 64px; }
   .nb-links, .nb-auth-btns.desktop-only { display: none; }
   .nb-hamburger { display: flex; }
+  .nb-right { gap: 10px; }
+  .nb-scrolled { padding: 10px 20px; }
 }
