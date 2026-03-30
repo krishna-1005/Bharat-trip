@@ -108,19 +108,32 @@ router.post("/trips", async (req, res) => {
     // Correctly map itinerary objects to include the day label if missing
     const formattedItinerary = Object.entries(itinerary || {}).map(([dayLabel, dayData]) => ({
       day: dayLabel,
-      ...dayData
+      estimatedHours: dayData.estimatedHours || 0,
+      estimatedCost: dayData.estimatedCost || 0,
+      places: (dayData.places || []).map(p => ({
+        name: p.name,
+        lat: p.lat,
+        lng: p.lng,
+        estimatedCost: p.estimatedCost || p.avgCost || 0,
+        estimatedHours: p.estimatedHours || p.timeHours || 0,
+        category: p.category,
+        rating: p.rating,
+        reviews: p.reviews,
+        tag: p.tag,
+        userReviews: p.userReviews || []
+      }))
     }));
 
     const trip = await Trip.create({
       userId: req.user._id,
       title: title || "Custom Trip",
       destination: city || "Unknown",
-      days: days,
+      days: Number(days),
       itinerary: formattedItinerary,
-      totalTripCost: totalCost || 0,
-      totalBudget,
-      remainingBudget,
-      perDayBudget,
+      totalTripCost: Number(totalCost) || 0,
+      totalBudget: Number(totalBudget) || 0,
+      remainingBudget: Number(remainingBudget) || 0,
+      perDayBudget: Number(perDayBudget) || 0,
       travelerType,
       pace,
       summary,
@@ -263,5 +276,72 @@ router.delete("/saved-places/:placeId", async (req, res) => {
 //   totalTripCost: totalCost || 0,
 //   status: "upcoming"
 // });
+
+/* ═══════════════════════════════════════
+   PERSONALIZATION & PREFERENCES
+═══════════════════════════════════════ */
+
+/* POST /api/profile/preferences/track — track skip/visit to learn weights */
+router.post("/preferences/track", async (req, res) => {
+  try {
+    const { category, action } = req.body; // action: 'skip', 'visit'
+    if (!category || !action) {
+      return res.status(400).json({ error: "category and action are required." });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: "User not found." });
+
+    if (!user.preferences.categoryWeights) {
+      user.preferences.categoryWeights = new Map();
+    }
+
+    const currentWeight = user.preferences.categoryWeights.get(category) || 0;
+    
+    if (action === "skip") {
+      // Decrease weight
+      user.preferences.categoryWeights.set(category, currentWeight - 0.5);
+      
+      // If skipped many times, consider avoiding
+      if (currentWeight < -3 && !user.preferences.avoidedCategories.includes(category)) {
+        user.preferences.avoidedCategories.push(category);
+      }
+    } else if (action === "visit") {
+      // Increase weight
+      user.preferences.categoryWeights.set(category, currentWeight + 1.0);
+      
+      // Remove from avoided if they actually visited it
+      user.preferences.avoidedCategories = user.preferences.avoidedCategories.filter(c => c !== category);
+      
+      // Add to interests if not there
+      if (!user.preferences.interests.includes(category)) {
+        user.preferences.interests.push(category);
+      }
+    }
+
+    await user.save();
+    res.json({ message: "Preference tracked.", preferences: user.preferences });
+  } catch (err) {
+    console.error("TRACK PREFERENCE ERROR:", err);
+    res.status(500).json({ error: "Server error tracking preference." });
+  }
+});
+
+/* PUT /api/profile/preferences — bulk update preferences */
+router.put("/preferences", async (req, res) => {
+  try {
+    const { interests, preferredBudget } = req.body;
+    const user = await User.findById(req.user._id);
+    
+    if (interests) user.preferences.interests = interests;
+    if (preferredBudget) user.preferences.preferredBudget = preferredBudget;
+    
+    await user.save();
+    res.json({ message: "Preferences updated.", preferences: user.preferences });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error updating preferences." });
+  }
+});
 
 module.exports = router;

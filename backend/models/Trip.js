@@ -5,6 +5,7 @@ const placeSchema = new mongoose.Schema({
   lat: Number,
   lng: Number,
   estimatedCost: Number,
+  estimatedHours: Number,
   category: String,
   rating: Number,
   reviews: Number,

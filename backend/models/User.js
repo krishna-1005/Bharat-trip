@@ -44,7 +44,19 @@ const userSchema = new mongoose.Schema(
   preferences: {
     emailAlerts: { type: Boolean, default: true },
     tripReminders: { type: Boolean, default: true },
-    promoOffers: { type: Boolean, default: false }
+    promoOffers: { type: Boolean, default: false },
+    
+    /* PERSONALIZATION */
+    interests: { type: [String], default: [] },
+    avoidedCategories: { type: [String], default: [] },
+    preferredBudget: { type: String, default: "medium" }, // low, medium, high
+    
+    /* SCORING WEIGHTS */
+    categoryWeights: {
+      type: Map,
+      of: Number,
+      default: {}
+    }
   },
 
   savedPlaces: {

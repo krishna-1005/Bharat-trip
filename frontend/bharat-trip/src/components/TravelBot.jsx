@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import "../styles/travelBot.css";
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 export default function TravelBot({ isOpen, setIsOpen }) {
   const navigate = useNavigate();

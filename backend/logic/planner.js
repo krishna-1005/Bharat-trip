@@ -40,13 +40,31 @@ function getDistance(lat1, lon1, lat2, lon2) {
 }
 
 /* ── SCORING ENGINE ── */
-function calculateScore(place, interests, coords, budget) {
+function calculateScore(place, interests, coords, budget, userPreferences = {}) {
   let score = 0;
   const interestSet = new Set(interests.map(i => i.toLowerCase()));
+  
+  const {
+    interests: userInterests = [],
+    avoidedCategories = [],
+    categoryWeights = {}
+  } = userPreferences;
 
-  if (interestSet.has((place.category || "").toLowerCase())) score += 5;
+  const category = (place.category || "").toLowerCase();
 
-  if ((place.tags || []).some(tag => interestSet.has(tag))) score += 3;
+  // Boost for CURRENT trip interests
+  if (interestSet.has(category)) score += 5;
+  if ((place.tags || []).some(tag => interestSet.has(tag.toLowerCase()))) score += 3;
+
+  // Boost for USER general interests (Personalization)
+  if (userInterests.some(i => i.toLowerCase() === category)) score += 2;
+
+  // Learned weights
+  const weight = categoryWeights instanceof Map ? (categoryWeights.get(place.category) || 0) : (categoryWeights[place.category] || 0);
+  score += weight;
+
+  // Penalty for avoided categories
+  if (avoidedCategories.some(i => i.toLowerCase() === category)) score -= 10;
 
   const cost = place.avgCost || 200;
   if (budget === "low" && cost < 200) score += 3;
@@ -132,7 +150,8 @@ async function generatePlan({
   days,
   budget, // Now a number
   interests,
-  travelerType
+  travelerType,
+  userPreferences = {}
 }) {
   const coords = await getCityCoords(city);
   const cleanCity = city.trim().toLowerCase();
@@ -178,7 +197,7 @@ async function generatePlan({
   let prioritizedPool = filteredPool
     .map(p => ({
       ...p,
-      score: calculateScore(p, interests, coords, budget > 10000 ? "high" : (budget > 3000 ? "medium" : "low"))
+      score: calculateScore(p, interests, coords, budget > 10000 ? "high" : (budget > 3000 ? "medium" : "low"), userPreferences)
     }))
     .sort((a, b) => b.score - a.score);
 
@@ -249,6 +268,7 @@ async function generatePlan({
     totalTripCost: finalTotalCost,
     remainingBudget: Math.round(totalBudget - finalTotalCost),
     perDayBudget: Math.round(perDayBudget),
+    isPersonalized: Object.keys(userPreferences).length > 0,
     summary: generatePlanSummary({ city, days, totalBudget, totalTripCost: finalTotalCost, interests })
   };
 }

@@ -1,44 +1,89 @@
-function plannerEngine(places, { city, days, interests, budget }) {
-  // 1. Filter by city + interests
-  let filtered = places.filter(p =>
-    p.city.toLowerCase() === city.toLowerCase() &&
-    interests.includes(p.category)
-  );
+function plannerEngine(places, { city, days, interests, budget, userPreferences = {} }) {
+  // 1. Initial Filtering
+  let candidates = places.filter(p => p.city.toLowerCase() === city.toLowerCase());
 
-  // 2. Budget filter
+  const {
+    interests: userInterests = [],
+    avoidedCategories = [],
+    categoryWeights = new Map(),
+  } = userPreferences;
+
+  // 2. Personalized Scoring
+  candidates = candidates.map(place => {
+    let score = place.rating || 0;
+    let isPersonalized = false;
+
+    // Boost if in user's general interests
+    if (userInterests.includes(place.category)) {
+      score += 1.5;
+      isPersonalized = true;
+    }
+
+    // Boost if in CURRENT trip interests
+    if (interests.includes(place.category)) {
+      score += 2.0;
+    }
+
+    // Apply learned weights
+    const weight = categoryWeights instanceof Map 
+      ? (categoryWeights.get(place.category) || 0)
+      : (categoryWeights[place.category] || 0);
+    
+    if (weight !== 0) {
+      score += weight;
+      if (weight > 0) isPersonalized = true;
+    }
+
+    // Heavy penalty for avoided categories
+    if (avoidedCategories.includes(place.category)) {
+      score -= 5.0;
+    }
+
+    return { ...place, score, isPersonalized };
+  });
+
+  // 3. Filter by Budget & Minimum Score
   if (budget === "low") {
-    filtered = filtered.filter(p => p.cost <= 500);
+    candidates = candidates.filter(p => (p.cost || p.estimatedCost || 0) <= 500);
   } else if (budget === "medium") {
-    filtered = filtered.filter(p => p.cost <= 1500);
+    candidates = candidates.filter(p => (p.cost || p.estimatedCost || 0) <= 1500);
   }
-  // high → no filter
 
-  // 3. Sort by rating (if exists)
-  filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  // Remove heavily penalized places
+  candidates = candidates.filter(p => p.score > 0);
 
-  // 4. Distribute across days
-  const perDay = Math.ceil(filtered.length / days);
+  // 4. Sort by Score
+  candidates.sort((a, b) => b.score - a.score);
+
+  // 5. Distribute across days
+  const perDay = Math.ceil(candidates.length / days);
   const itinerary = {};
 
   for (let i = 0; i < days; i++) {
-    const dayPlaces = filtered.slice(i * perDay, (i + 1) * perDay);
+    const dayPlaces = candidates.slice(i * perDay, (i + 1) * perDay);
 
-    itinerary[i + 1] = dayPlaces.map(p => ({
-      name: p.name,
-      category: p.category,
-      avgCost: p.cost || 0,
-      timeHours: p.avgTime || 2,
-      lat: p.lat,
-      lng: p.lng
-    }));
+    itinerary[`Day ${i + 1}`] = {
+      places: dayPlaces.map(p => ({
+        name: p.name,
+        category: p.category,
+        estimatedCost: p.cost || p.estimatedCost || 0,
+        timeHours: p.avgTime || 2,
+        lat: p.lat,
+        lng: p.lng,
+        rating: p.rating,
+        tag: p.tag,
+        isPersonalized: p.isPersonalized
+      }))
+    };
   }
 
-  // 5. Total cost
-  const totalCost = filtered.reduce((sum, p) => sum + (p.cost || 0), 0);
+  // 6. Total cost
+  const totalCost = candidates.reduce((sum, p) => sum + (p.cost || p.estimatedCost || 0), 0);
 
   return {
     itinerary,
-    totalCost
+    totalCost,
+    isPersonalized: true
   };
 }
 

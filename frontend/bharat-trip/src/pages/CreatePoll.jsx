@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import "../styles/global.css";
 import "./planner.css"; // Reuse some planner styles
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 export default function CreatePoll() {
   const { user } = useAuth();

@@ -4,6 +4,8 @@ import { generatePlan } from "../../services/api";
 import { useSettings } from "../../context/SettingsContext";
 import "../Planner/plannerForm.css";
 
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
+
 function PlannerForm({ onPlanGenerated }) {
   const { formatPrice, formatSelectedCurrency, currency, setCurrency, currencySymbols, toINR } = useSettings();
   const loc = useLocation();
@@ -34,6 +36,34 @@ function PlannerForm({ onPlanGenerated }) {
   const [pace, setPace] = useState("moderate");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isPersonalizedPrefill, setIsPersonalizedPrefill] = useState(false);
+
+  // Prefill from user preferences
+  useEffect(() => {
+    const fetchPrefs = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      try {
+        const res = await fetch(`${API}/api/profile`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.user?.preferences) {
+          const { interests: uInterests, preferredBudget } = data.user.preferences;
+          if (uInterests?.length > 0) {
+            setInterests(uInterests);
+            setIsPersonalizedPrefill(true);
+          }
+          if (preferredBudget) {
+             setIsPersonalizedPrefill(true);
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch user preferences for prefill", err);
+      }
+    };
+    fetchPrefs();
+  }, []);
 
   const totalSteps = 3;
 
@@ -49,17 +79,27 @@ function PlannerForm({ onPlanGenerated }) {
     setError("");
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       // Convert budget to INR before sending to backend
       const budgetInINR = toINR(Number(budget), currency);
-      const result = await generatePlan({ 
-        city, 
-        days, 
-        budget: Math.round(budgetInINR), 
-        interests, 
-        travelerType, 
-        pace 
+      
+      const res = await fetch(`${API}/api/plan/generate`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ 
+          city, 
+          days, 
+          budget: Math.round(budgetInINR), 
+          interests, 
+          travelerType, 
+          pace 
+        })
       });
-      if (onPlanGenerated && result?.itinerary) onPlanGenerated(result);
+      const data = await res.json();
+      if (onPlanGenerated && data.plan?.itinerary) onPlanGenerated(data.plan);
     } catch {
       setError("We encountered an issue. Please try again.");
     } finally {
@@ -273,7 +313,12 @@ function PlannerForm({ onPlanGenerated }) {
           <div className="pf-step animate-in">
             <div className="pf-step-header">
               <p>Step 03</p>
-              <h2>The Soul of the Trip</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <h2>The Soul of the Trip</h2>
+                {isPersonalizedPrefill && (
+                  <span className="pf-personalized-badge">✨ Personalized for you</span>
+                )}
+              </div>
             </div>
 
             <div className="pf-interest-grid">

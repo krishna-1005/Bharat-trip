@@ -5,11 +5,12 @@ const Trip         = require("../models/Trip");
 const UsageLog     = require("../models/UsageLog");
 const admin        = require("../firebaseAdmin");
 const User         = require("../models/User");
+const jwt          = require("jsonwebtoken");
 
 const router = express.Router();
 
 /* ── Generate Trip Plan ── */
-router.post("/generate", async (req, res) => {        // ✅ async added
+router.post("/generate", async (req, res) => {
 
   if (!req.body) {
     return res.status(400).json({ error: "Request body missing" });
@@ -22,22 +23,41 @@ router.post("/generate", async (req, res) => {        // ✅ async added
   }
 
   try {
-    // Attempt to log the planner usage to MongoDB
+    let userPreferences = {};
+    let loggedUserId = null;
+
+    // Optional auth to get user preferences
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      try {
+        // 1. Try Firebase Token
+        const decoded = await admin.auth().verifyIdToken(token);
+        const userObj = await User.findOne({ email: decoded.email });
+        if (userObj) {
+          loggedUserId = userObj._id;
+          userPreferences = userObj.preferences || {};
+        }
+      } catch (e) { 
+        // 2. Try Custom JWT Token
+        try {
+          if (process.env.JWT_SECRET) {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const userObj = await User.findById(decoded.id);
+            if (userObj) {
+              loggedUserId = userObj._id;
+              userPreferences = userObj.preferences || {};
+            }
+          }
+        } catch (jwtErr) {
+          console.warn("Invalid token in generate plan:", jwtErr.message);
+        }
+      }
+    }
+
+    // Log the planner usage
     try {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-      let loggedUserId = null;
-
-      // Check if user is logged in (optional auth for logging)
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        const token = authHeader.split(" ")[1];
-        try {
-          const decoded = await admin.auth().verifyIdToken(token);
-          const userObj = await User.findOne({ email: decoded.email });
-          if (userObj) loggedUserId = userObj._id;
-        } catch (e) { /* ignore invalid token for simple logging */ }
-      }
-
       await UsageLog.create({
         action: "generate_plan",
         userId: loggedUserId,
@@ -55,10 +75,11 @@ router.post("/generate", async (req, res) => {        // ✅ async added
       budget,
       interests: interests || [],
       travelerType: req.body.travelerType || "solo",
-      pace: req.body.pace || "moderate"
+      pace: req.body.pace || "moderate",
+      userPreferences // Pass preferences to the generator
     });
 
-    res.json({ plan });                               // ✅ wrap in { plan } so frontend gets plan.itinerary
+    res.json({ plan });
 
   } catch (err) {
     console.error("Plan generation error:", err);

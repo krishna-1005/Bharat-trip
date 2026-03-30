@@ -5,7 +5,7 @@ import { useSettings } from "../context/SettingsContext";
 import PlaceImage from "../components/PlaceImage";
 import "../styles/profile.css";
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 export default function Profile() {
   const navigate = useNavigate();

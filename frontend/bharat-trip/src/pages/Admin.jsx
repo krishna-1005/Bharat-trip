@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 import { auth } from "../firebase";
 import "../styles/global.css";
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 export default function Admin() {
   const [data, setData] = useState(null);

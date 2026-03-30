@@ -8,7 +8,7 @@ import { AuthContext } from "../context/AuthContext";
 import { auth } from "../firebase";
 import { AnimatePresence, motion } from "framer-motion";
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 const THINKING_MESSAGES = [
   "Analyzing your preferences...",
@@ -236,6 +236,12 @@ function Results() {
   };
 
   const handleSkip = (dayKey, placeName) => {
+    const placeToSkip = plan.itinerary[dayKey].places.find(p => p.name === placeName);
+    if (placeToSkip && user) {
+      // Track skip action for personalization
+      trackPreference(placeToSkip.category, "skip");
+    }
+
     setPlan(prev => {
       const newItinerary = { ...prev.itinerary };
       newItinerary[dayKey].places = newItinerary[dayKey].places.filter(p => p.name !== placeName);
@@ -245,6 +251,23 @@ function Results() {
       const newTotalCost = Object.values(newItinerary).reduce((sum, d) => sum + d.estimatedCost, 0);
       return { ...prev, itinerary: newItinerary, totalTripCost: newTotalCost };
     });
+  };
+
+  const trackPreference = async (category, action) => {
+    const token = localStorage.getItem("token");
+    if (!token || !category) return;
+    try {
+      await fetch(`${API}/api/profile/preferences/track`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ category, action })
+      });
+    } catch (err) {
+      console.warn("Preference tracking failed", err);
+    }
   };
 
   const handleRunningLate = () => {
@@ -286,6 +309,13 @@ function Results() {
       return { ...prev, itinerary: newItinerary };
     });
     setTimeout(() => setIsOptimizing(false), 1000);
+  };
+
+  const handleVisited = (dayKey, place, idx) => {
+    if (user) {
+      trackPreference(place.category, "visit");
+    }
+    setCurrentIndex(idx + 1);
   };
 
   const handleShare = async () => {
@@ -418,7 +448,12 @@ function Results() {
             <button className="back-control" onClick={() => navigate("/planner")}>← Edit Plan</button>
           </div>
           <div className="trip-hero-info">
-            <h1>{tripTitle || `${totalDays} Days in ${plan.city || "India"}`}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h1>{tripTitle || `${totalDays} Days in ${plan.city || "India"}`}</h1>
+              {plan.isPersonalized && (
+                <span className="personalized-badge" title="Learned from your behavior">✨ Personalized</span>
+              )}
+            </div>
             <div className="trip-meta-pills">
               <span className="meta-pill">✨ {plan.travelerType || "Solo"}</span>
               <span className="meta-pill">⚡ {plan.pace || "Moderate"} Pace</span>
@@ -526,7 +561,7 @@ function Results() {
                         {isCurrent && (
                           <div className="active-action-pane">
                             <p className="stop-insight-v2">{place.reason || "Discover the beauty of this location."}</p>
-                            <button className="premium-action-btn" onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx + 1); }}>Mark as Visited →</button>
+                            <button className="premium-action-btn" onClick={(e) => { e.stopPropagation(); handleVisited(day, place, idx); }}>Mark as Visited →</button>
                           </div>
                         )}
                       </div>

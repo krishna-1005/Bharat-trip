@@ -4,7 +4,7 @@ import { getAuth, signOut } from "firebase/auth";
 import { useSettings } from "../context/SettingsContext";
 import "../styles/settings.css";
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 export default function Settings() {
   const navigate = useNavigate();
