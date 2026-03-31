@@ -52,6 +52,9 @@ function Results() {
   const [multiCityContext, setMultiCityContext] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const [showMapOnMobile, setShowMapOnMobile] = useState(false);
+  const isMobile = window.innerWidth <= 900;
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
@@ -268,9 +271,6 @@ function Results() {
   if (!plan || !plan.itinerary) return <div className="res-empty"><h2>{t("no_trip")}</h2><button onClick={() => navigate("/planner")}>Back</button></div>;
 
   const progressPercent = Math.round((currentIndex / (allPlaces.length || 1)) * 100);
-
-  const [showMapOnMobile, setShowMapOnMobile] = useState(false);
-  const isMobile = window.innerWidth <= 900;
 
   return (
     <div className={`anchored-planner-root ${showMapOnMobile ? 'show-map-mobile' : ''}`}>

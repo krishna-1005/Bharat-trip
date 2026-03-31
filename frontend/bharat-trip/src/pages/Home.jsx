@@ -8,6 +8,29 @@ import "./home.css";
 
 import ThreeScene from "../components/ThreeScene";
 
+const FloatingImageCard = ({ place, index, sx, sy }) => {
+  const x = useTransform(sx, (val) => val * (index + 1) * 0.5);
+  const y = useTransform(sy, (val) => val * (index + 1) * 0.5);
+
+  return (
+    <motion.div
+      className={`floating-image-card card-${index}`}
+      style={{
+        x,
+        y,
+        rotate: place.rotate,
+      }}
+      whileHover={{ scale: place.scale * 1.1, zIndex: 50, rotate: 0 }}
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: place.scale }}
+      transition={{ duration: 0.8, delay: index * 0.1 }}
+    >
+      <img src={place.img} alt={place.name} />
+      <div className="image-caption">{place.name}</div>
+    </motion.div>
+  );
+};
+
 const InteractiveHeroImages = () => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -54,22 +77,13 @@ const InteractiveHeroImages = () => {
   return (
     <div className="hero-interactive-images">
       {famousPlaces.map((place, index) => (
-        <motion.div
-          key={index}
-          className={`floating-image-card card-${index}`}
-          style={{
-            x: useTransform(sx, (val) => val * (index + 1) * 0.5),
-            y: useTransform(sy, (val) => val * (index + 1) * 0.5),
-            rotate: place.rotate,
-          }}
-          whileHover={{ scale: place.scale * 1.1, zIndex: 50, rotate: 0 }}
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: place.scale }}
-          transition={{ duration: 0.8, delay: index * 0.1 }}
-        >
-          <img src={place.img} alt={place.name} />
-          <div className="image-caption">{place.name}</div>
-        </motion.div>
+        <FloatingImageCard 
+          key={index} 
+          place={place} 
+          index={index} 
+          sx={sx} 
+          sy={sy} 
+        />
       ))}
     </div>
   );
