@@ -307,12 +307,51 @@ const Home = () => {
   const destRef = useRef(null);
 
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipStep, setTooltipStep] = useState(0);
 
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth > 1024);
     window.addEventListener('resize', handleResize);
+    
+    // Onboarding check
+    const hasSeenGuide = localStorage.getItem("hasSeenGuide");
+    if (!hasSeenGuide) {
+      setTimeout(() => setShowTooltip(true), 2000);
+    }
+
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const tooltips = [
+    { title: "Welcome to Bharat Trip!", text: "Your AI-powered travel companion. Let's show you around." },
+    { title: "Smart Planning", text: "Click 'Start Planning' to get a bespoke itinerary in seconds." },
+    { title: "Group Polls", text: "Planning with friends? Create a poll and let the group decide." }
+  ];
+
+  const handleNextTooltip = () => {
+    if (tooltipStep < tooltips.length - 1) {
+      setTooltipStep(tooltipStep + 1);
+    } else {
+      setShowTooltip(false);
+      localStorage.setItem("hasSeenGuide", "true");
+    }
+  };
+
+  const handleQuickStart = () => {
+    navigate('/planner', { 
+      state: { 
+        prefilledCity: "Goa",
+        prefilledDays: 3,
+        prefilledBudget: "Comfort"
+      } 
+    });
+  };
+
+  const handleViewSample = () => {
+    // Navigate to a known popular destination details or results
+    navigate('/explore/Goa');
+  };
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [heroText, setHeroText] = useState({
@@ -390,6 +429,33 @@ const Home = () => {
           transition={{ type: 'spring', damping: 30, stiffness: 50 }}
         />
       </div>
+
+      <AnimatePresence>
+        {showTooltip && (
+          <motion.div 
+            className="tooltip-guide-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className="tooltip-card"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+            >
+              <div className="tooltip-dot" />
+              <h3>{tooltips[tooltipStep].title}</h3>
+              <p>{tooltips[tooltipStep].text}</p>
+              <div className="tooltip-actions">
+                <button className="btn-tertiary" onClick={() => { setShowTooltip(false); localStorage.setItem("hasSeenGuide", "true"); }}>Skip</button>
+                <button className="btn-primary" style={{ padding: '10px 24px', borderRadius: '10px' }} onClick={handleNextTooltip}>
+                  {tooltipStep === tooltips.length - 1 ? "Finish" : "Next →"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       <section className="hero-section container">
         <div className="hero-grid">
@@ -416,11 +482,50 @@ const Home = () => {
               >
                 Group Vote
               </motion.button>
+              
+              <button className="btn-sample" onClick={handleViewSample}>
+                <div className="icon-circle">▶</div>
+                View Sample Trip
+              </button>
             </div>
           </motion.div>
           <div className="hero-preview-container desktop-only">
             <InteractiveHeroImages />
           </div>
+        </div>
+      </section>
+
+      <section className="onboarding-decision-section container">
+        <div className="section-header">
+          <h2>What do you want to do?</h2>
+          <p className="dashboard-subtitle">Quickly jump into your next travel phase</p>
+        </div>
+        <div className="decision-grid">
+          <motion.div whileHover={{ y: -5 }} className="decision-card" onClick={() => navigate('/trip-type')}>
+            <div className="decision-icon">🤖</div>
+            <h3>Plan a Trip</h3>
+            <p>Get an AI-crafted itinerary for any destination.</p>
+          </motion.div>
+          <motion.div whileHover={{ y: -5 }} className="decision-card" onClick={() => navigate('/destinations')}>
+            <div className="decision-icon">✨</div>
+            <h3>Explore Trips</h3>
+            <p>Discover hand-picked journeys from the community.</p>
+          </motion.div>
+          <motion.div whileHover={{ y: -5 }} className="decision-card" onClick={() => navigate('/create-poll')}>
+            <div className="decision-icon">🗳️</div>
+            <h3>Use Polls</h3>
+            <p>Can't decide? Let your group vote on the best spot.</p>
+          </motion.div>
+        </div>
+
+        <div className="quick-start-bar">
+          <div className="quick-start-info">
+            <h4>Plan a trip in 30 seconds</h4>
+            <p>Let us pre-fill a popular 3-day Goa itinerary for you.</p>
+          </div>
+          <button className="btn-primary" style={{ padding: '14px 28px', borderRadius: '12px' }} onClick={handleQuickStart}>
+            Quick Start ✨
+          </button>
         </div>
       </section>
 
