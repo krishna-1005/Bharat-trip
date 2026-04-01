@@ -374,11 +374,20 @@ function Results() {
         </div>
 
         <div className="sidebar-footer-premium">
-          <div className="footer-summary-row">
-            <div className="budget-estimate"><span className="budget-label">Est. Budget</span><span className="budget-value">{formatPrice(plan.totalTripCost || 0)}</span></div>
-            <div className="footer-action-group">
-              <button className="share-journey-btn" onClick={handleShare}>{shareStatus ? "✓ Link" : "Share"}</button>
-              <button className="save-journey-btn" onClick={() => handleSaveTrip()} disabled={saving || saved}>{saved ? "✓ Saved" : "Save Plan"}</button>
+          <div className="footer-summary-row" style={{ flexDirection: 'column', gap: '15px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+              <div className="budget-estimate">
+                <span className="budget-label">Target Budget</span>
+                <span className="budget-value" style={{ opacity: 0.7, fontSize: '14px' }}>{formatPrice(plan.totalBudget || 0)}</span>
+              </div>
+              <div className="budget-estimate" style={{ textAlign: 'right' }}>
+                <span className="budget-label">Final Est. Total</span>
+                <span className="budget-value" style={{ color: 'var(--accent-green)' }}>{formatPrice(plan.totalTripCost || 0)}</span>
+              </div>
+            </div>
+            <div className="footer-action-group" style={{ width: '100%', justifyContent: 'stretch' }}>
+              <button className="share-journey-btn" style={{ flex: 1 }} onClick={handleShare}>{shareStatus ? "✓ Link" : "Share"}</button>
+              <button className="save-journey-btn" style={{ flex: 1 }} onClick={() => handleSaveTrip()} disabled={saving || saved}>{saved ? "✓ Saved" : "Save Plan"}</button>
             </div>
           </div>
         </div>

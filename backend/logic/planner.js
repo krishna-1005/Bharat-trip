@@ -241,7 +241,7 @@ async function generatePlan({
   const itinerary = {};
   const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
   const usedPlaceNames = new Set();
-  let estimatedTotalCost = 0;
+  let accumulatedTotalCost = 0;
   
   for (let day = 1; day <= days; day++) {
     let dayHours = 0;
@@ -250,19 +250,24 @@ async function generatePlan({
 
     const remainingPool = prioritizedPool.filter(p => !usedPlaceNames.has(p.name));
     
+    // Calculate per-day meal cost
+    const meal = Math.min(perDayBudget * 0.25, 800) * tMult;
+    
     for (const p of remainingPool) {
       if (validPlaces.length >= 4) break;
-      if (usedPlaceNames.has(p.name)) continue; // Extra safety
       
       const t = p.timeHours || 2;
       const placeCost = (p.avgCost || 200) * tMult;
 
-      // MORE LENIENT BUDGET CHECK: 
-      // Always allow at least 2 places per day regardless of budget if they fit the time,
-      // OR if they fit within 150% of the per-day budget (was 120%).
-      const isBudgetOk = (dayCost + placeCost) <= (perDayBudget * 1.5) || validPlaces.length < 2;
+      // STRICTER BUDGET CHECK: 
+      // Ensure (total accumulated cost + current day cost + this place + remaining days' meals) 
+      // does not exceed totalBudget.
+      const remainingDays = days - day;
+      const projectedFutureMealCosts = remainingDays * meal;
+      
+      const canAfford = (accumulatedTotalCost + dayCost + placeCost + meal + projectedFutureMealCosts) <= totalBudget;
 
-      if (dayHours + t <= MAX_HOURS_PER_DAY && isBudgetOk) {
+      if (dayHours + t <= MAX_HOURS_PER_DAY && (canAfford || validPlaces.length < 1)) {
         dayHours += t;
         dayCost += placeCost;
 
@@ -273,16 +278,15 @@ async function generatePlan({
           rating: generateRating(validPlaces.length),
           reviews: generateReviews(validPlaces.length),
           tag: generateTag(p, validPlaces.length),
-          priority: Math.round((p.score / 15) * 10) || 5 // Scale score to 1-10 priority
+          priority: Math.round((p.score / 15) * 10) || 5
         });
         
         usedPlaceNames.add(p.name);
       }
     }
 
-    const meal = Math.min(perDayBudget * 0.3, 1000) * tMult;
-    dayCost += meal;
-    estimatedTotalCost += dayCost;
+    const actualDayCost = dayCost + meal;
+    accumulatedTotalCost += actualDayCost;
 
     const enrichedPlaces = await Promise.all(validPlaces.map(async (p) => {
       const userReviews = await fetchUserReviews(p.name, p.category, city);
@@ -292,12 +296,12 @@ async function generatePlan({
     itinerary[`Day ${day}`] = {
       places: enrichedPlaces,
       estimatedHours: dayHours,
-      estimatedCost: dayCost,
+      estimatedCost: actualDayCost,
       dayMealCost: meal
     };
   }
 
-  const finalTotalCost = Math.round(estimatedTotalCost);
+  const finalTotalCost = Math.round(accumulatedTotalCost);
 
   return { 
     city, 
