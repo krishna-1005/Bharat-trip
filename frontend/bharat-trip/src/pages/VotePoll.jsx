@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 import PlaceImage from "../components/PlaceImage";
-import "../styles/global.css";
+import "./poll.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
@@ -74,7 +75,6 @@ export default function VotePoll() {
 
   useEffect(() => {
     if (hasVoted && poll) {
-      // Generate simple recommendations based on the last voted city's tags
       const votedOpt = poll.options.find(o => o.name === selectedOption) || poll.options[0];
       const tags = votedOpt.tags || [];
       
@@ -128,162 +128,185 @@ export default function VotePoll() {
     navigate(`/planner?destination=${encodeURIComponent(cityName)}&interests=${encodeURIComponent(data.tags.join(','))}`);
   };
 
-  if (loading) return <div className="page" style={{ justifyContent: 'center', alignItems: 'center' }}><h2>Loading Poll...</h2></div>;
-  if (!poll) return <div className="page" style={{ justifyContent: 'center', alignItems: 'center' }}><h2>Poll not found.</h2></div>;
-
-  const totalVotes = poll.options.reduce((sum, o) => sum + o.votes, 0);
-  const maxVotes = Math.max(...poll.options.map(o => o.votes));
-  const topOptions = poll.options.filter(o => o.votes === maxVotes);
-  const isTie = topOptions.length > 1 && totalVotes >= 2;
+  if (loading) return <div className="poll-page-container"><h2>Loading Poll...</h2></div>;
+  if (!poll) return <div className="poll-page-container"><h2>Poll not found.</h2></div>;
 
   return (
-    <div className="page" style={{ alignItems: 'center', justifyContent: 'flex-start', background: '#030712', overflowY: 'auto', paddingBottom: '100px' }}>
+    <div className="poll-page-container" style={{ paddingTop: '100px' }}>
       
       {!poll.isClosed && (
-        <div style={{ 
-          position: 'fixed', 
-          top: '80px', 
-          left: 0, 
-          right: 0, 
-          background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)', 
-          color: 'white', 
-          padding: '12px', 
-          textAlign: 'center', 
-          zIndex: 1000,
-          fontWeight: '800',
-          fontSize: '0.8rem',
-          textTransform: 'uppercase',
-          letterSpacing: '1px'
-        }}>
-          LIVE PREFERENCE CAPTURE ACTIVE
-        </div>
+        <motion.div 
+          initial={{ y: -50 }}
+          animate={{ y: 0 }}
+          style={{ 
+            position: 'fixed', 
+            top: '80px', 
+            left: 0, 
+            right: 0, 
+            background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)', 
+            color: 'white', 
+            padding: '10px', 
+            textAlign: 'center', 
+            zIndex: 1000,
+            fontWeight: '800',
+            fontSize: '0.75rem',
+            letterSpacing: '1.5px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
+          }}
+        >
+          LIVE PREFERENCE CAPTURE ACTIVE • SHAPE YOUR TRIP
+        </motion.div>
       )}
 
-      <div className="tt-container" style={{ maxWidth: '600px', width: '100%', marginTop: '60px' }}>
-        
-        <header className="tt-header" style={{ marginBottom: '40px' }}>
-          <div className="tt-badge-ai">CITY BATTLE</div>
-          <h1 className="tt-main-title" style={{ fontSize: '2.5rem' }}>{poll.tripName}</h1>
-          <p className="tt-subtitle">
-            {poll.isClosed ? `Decision Locked: ${poll.winner} won.` : "Cast your vote to shape your group's travel profile."}
+      <div className="poll-glass-card" style={{ maxWidth: '700px' }}>
+        <header className="poll-header">
+          <div className="poll-badge">{poll.isClosed ? "BATTLE CONCLUDED" : "CITY BATTLE"}</div>
+          <h1 className="poll-title">{poll.tripName}</h1>
+          <p className="poll-subtitle">
+            {poll.isClosed 
+              ? `The group has spoken. ${poll.winner} is the winner!` 
+              : "Pick your favorite destination and let the group decide."}
           </p>
         </header>
 
-        {message && (
-          <div style={{ 
-            background: 'rgba(16, 185, 129, 0.1)', 
-            color: '#10b981', 
-            padding: '16px', 
-            borderRadius: '16px', 
-            textAlign: 'center', 
-            marginBottom: '32px', 
-            fontWeight: '700',
-            border: '1px solid rgba(16, 185, 129, 0.2)'
-          }}>
-            {message}
-          </div>
-        )}
+        <AnimatePresence>
+          {message && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="vote-tag"
+              style={{ 
+                width: '100%', 
+                textAlign: 'center', 
+                marginBottom: '32px', 
+                background: 'rgba(16, 185, 129, 0.1)', 
+                color: '#10b981',
+                padding: '12px',
+                borderRadius: '12px',
+                fontSize: '1rem'
+              }}
+            >
+              {message}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', width: '100%' }}>
+        <div className="options-grid">
           {poll.options.map((opt, i) => {
             const isWinner = poll.isClosed && poll.winner === opt.name;
             const isSelected = selectedOption === opt.name;
             const cityData = cityDataMap[opt.name] || { tags: ["Explore"], vibe: "New Experience" };
 
             return (
-              <div 
-                key={i} 
-                className={`tt-card ${isSelected || isWinner ? 'active' : ''}`}
+              <motion.div 
+                key={opt.name}
+                initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className={`vote-card ${isSelected || isWinner ? 'selected' : ''}`}
                 style={{ 
-                  height: 'auto', 
-                  maxWidth: '100%', 
-                  padding: '0', 
-                  overflow: 'hidden',
-                  border: (isWinner || isSelected) ? '2px solid #3b82f6' : '1px solid rgba(255,255,255,0.08)',
-                  background: 'rgba(15, 23, 42, 0.6)',
-                  opacity: (hasVoted && !isSelected && !isWinner) ? 0.7 : 1
+                  opacity: (hasVoted && !isSelected && !isWinner) ? 0.6 : 1,
+                  pointerEvents: (hasVoted || poll.isClosed) ? 'none' : 'auto'
                 }}
                 onClick={() => handleVote(opt.name)}
               >
-                <div style={{ display: 'flex', height: '140px' }}>
-                  <div style={{ width: '140px', height: '100%', position: 'relative' }}>
-                    <PlaceImage placeName={opt.name} city={opt.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div className="vote-card-img">
+                  <PlaceImage placeName={opt.name} city={opt.name} />
+                  <div style={{ 
+                    position: 'absolute', 
+                    top: '12px', 
+                    left: '12px', 
+                    background: 'rgba(15, 23, 42, 0.8)', 
+                    padding: '4px 10px', 
+                    borderRadius: '8px',
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    zIndex: 2,
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}>
+                    🗳️ {opt.votes} Votes
+                  </div>
+                  {isWinner && (
                     <div style={{ 
                       position: 'absolute', 
-                      bottom: '10px', 
-                      left: '10px', 
-                      background: 'rgba(0,0,0,0.6)', 
-                      padding: '4px 8px', 
+                      top: '12px', 
+                      right: '12px', 
+                      background: '#10b981', 
+                      color: 'white',
+                      padding: '4px 10px', 
                       borderRadius: '8px',
-                      fontSize: '12px',
-                      fontWeight: '800'
+                      fontSize: '11px',
+                      fontWeight: '800',
+                      zIndex: 2,
+                      boxShadow: '0 0 15px rgba(16, 185, 129, 0.5)'
                     }}>
-                      🗳️ {opt.votes}
+                      WINNER
                     </div>
+                  )}
+                </div>
+                <div className="vote-card-content">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 className="vote-card-title">{opt.name}</h3>
+                    {(isSelected || isWinner) && (
+                      <motion.span 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        style={{ color: '#3b82f6', fontSize: '1.4rem' }}
+                      >
+                        ✓
+                      </motion.span>
+                    )}
                   </div>
-                  <div style={{ flex: 1, padding: '20px', textAlign: 'left', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <h3 style={{ margin: '0 0 5px', fontSize: '1.2rem', fontWeight: '800' }}>{opt.name}</h3>
-                      {(isSelected || isWinner) && <span style={{ color: '#3b82f6', fontSize: '1.2rem' }}>✓</span>}
-                    </div>
-                    <p style={{ margin: '0 0 10px', fontSize: '0.85rem', color: '#94a3b8', fontStyle: 'italic' }}>"{cityData.vibe}"</p>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                      {cityData.tags.slice(0, 3).map(tag => (
-                        <span key={tag} style={{ 
-                          fontSize: '10px', 
-                          background: 'rgba(59, 130, 246, 0.1)', 
-                          color: '#60a5fa', 
-                          padding: '2px 8px', 
-                          borderRadius: '100px',
-                          fontWeight: '700'
-                        }}>
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+                  <p className="vote-card-vibe">"{cityData.vibe}"</p>
+                  <div className="vote-tag-list">
+                    {cityData.tags.slice(0, 3).map(tag => (
+                      <span key={tag} className="vote-tag" style={{ fontSize: '9px', padding: '2px 8px' }}>
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
 
         {hasVoted && recommendations.length > 0 && (
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            style={{ marginTop: '60px', width: '100%' }}
+            style={{ marginTop: '48px', paddingTop: '40px', borderTop: '1px solid rgba(255,255,255,0.06)' }}
           >
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px', textAlign: 'center' }}>
-              <div className="tt-badge-ai">SMART SUGGESTIONS</div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '10px' }}>Based on your preference</h2>
-              <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '30px' }}>
-                You seem to enjoy <strong>{recommendations[0].tags[0]}</strong> and <strong>{recommendations[0].tags[1]}</strong>. Explore these similar gems:
-              </p>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '15px' }}>
-                {recommendations.map(rec => (
-                  <div key={rec.name} className="premium-card" style={{ padding: '15px', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                    <div style={{ width: '100%', height: '80px', borderRadius: '12px', overflow: 'hidden', marginBottom: '10px' }}>
-                      <PlaceImage placeName={rec.name} city={rec.name} />
-                    </div>
-                    <h4 style={{ margin: '0 0 10px', fontSize: '1rem' }}>{rec.name}</h4>
-                    <button 
-                      className="btn-premium primary" 
-                      style={{ padding: '6px 12px', fontSize: '0.75rem', width: '100%', justifyContent: 'center' }}
-                      onClick={() => handlePlanForCity(rec.name)}
-                    >
-                      Plan Trip →
-                    </button>
+            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+              <div className="poll-badge">SMART SUGGESTIONS</div>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: '800', margin: '0 0 8px' }}>Since you liked {selectedOption}</h2>
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>You might also enjoy these similar destinations:</p>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
+              {recommendations.map(rec => (
+                <div key={rec.name} className="premium-card" style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '20px' }}>
+                  <div style={{ width: '100%', height: '100px', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px' }}>
+                    <PlaceImage placeName={rec.name} city={rec.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
-                ))}
-              </div>
+                  <h4 style={{ margin: '0 0 12px', fontSize: '1rem', fontWeight: '700' }}>{rec.name}</h4>
+                  <button 
+                    className="btn-premium primary" 
+                    style={{ padding: '8px 12px', fontSize: '0.75rem', width: '100%', borderRadius: '10px' }}
+                    onClick={() => handlePlanForCity(rec.name)}
+                  >
+                    Plan Trip →
+                  </button>
+                </div>
+              ))}
             </div>
           </motion.div>
         )}
 
-        <div style={{ marginTop: '60px', textAlign: 'center' }}>
-          <button className="pf-secondary-btn" onClick={() => navigate(`/poll-results/${pollId}`)}>View Full Stats 📊</button>
+        <div style={{ marginTop: '48px', display: 'flex', gap: '16px', justifyContent: 'center' }}>
+          <button className="btn-premium outline" style={{ borderRadius: '16px' }} onClick={() => navigate(`/poll-results/${pollId}`)}>
+            View Live Results 📊
+          </button>
         </div>
 
       </div>

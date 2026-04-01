@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import "../styles/global.css";
-import "./planner.css"; // Reuse some planner styles
+import { motion, AnimatePresence } from "framer-motion";
+import "./poll.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 export default function CreatePoll() {
   const { user } = useAuth();
   const [tripName, setTripName] = useState("");
-  const [groupSize, setGroupSize] = useState(""); // Initialize as empty string
+  const [groupSize, setGroupSize] = useState("");
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -109,124 +109,155 @@ export default function CreatePoll() {
 
   if (pollCreated) {
     return (
-      <div className="page" style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <div className="premium-card" style={{ maxWidth: '500px', width: '100%', padding: '40px', textAlign: 'center' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🚀</div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '10px' }}>Poll <span className="gradient-text">Ready!</span></h1>
-          <div style={{ 
-            background: 'rgba(59, 130, 246, 0.1)', 
-            padding: '16px', 
-            borderRadius: '16px', 
-            marginBottom: '24px',
-            border: '1px solid rgba(59, 130, 246, 0.2)'
-          }}>
-            <p style={{ color: '#60a5fa', fontWeight: '800', margin: 0 }}>
-              Send this link in your group to finalize quickly
-            </p>
-          </div>
+      <div className="poll-page-container">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="poll-glass-card"
+          style={{ textAlign: 'center' }}
+        >
+          <div style={{ fontSize: '5rem', marginBottom: '20px', animation: 'float 3s ease-in-out infinite' }}>🚀</div>
+          <div className="poll-badge">POLL CREATED SUCCESSFULLY</div>
+          <h1 className="poll-title">Your Trip Poll is <span className="gradient-text">Ready!</span></h1>
+          <p className="poll-subtitle">Share this link with your group to start the battle of destinations.</p>
           
-          <div className="pf-field">
-            <label className="pf-label" style={{ textAlign: 'left' }}>Shareable Link</label>
-            <div style={{ position: 'relative' }}>
+          <div className="link-copy-container">
+            <p style={{ color: '#cbd5e1', fontSize: '0.9rem', marginBottom: '12px', textAlign: 'left', fontWeight: '600' }}>Shareable Voting Link</p>
+            <div className="link-input-group">
               <input 
                 readOnly 
                 value={`${window.location.origin}/vote/${createdPollId}`} 
-                className="auth-input-styled" 
-                style={{ paddingRight: '100px', cursor: 'pointer', textOverflow: 'ellipsis' }}
-                onClick={copyToClipboard}
+                className="link-input"
               />
               <button 
                 className="btn-premium primary" 
                 onClick={copyToClipboard}
-                style={{ position: 'absolute', right: '5px', top: '5px', height: '44px', padding: '0 15px', fontSize: '0.8rem' }}
+                style={{ padding: '0 20px', borderRadius: '12px', height: 'auto' }}
               >
-                Copy Link
+                Copy
               </button>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
-            <button className="btn-premium outline" onClick={() => setPollCreated(false)} style={{ flex: 1, justifyContent: 'center' }}>Create Another</button>
-            <button className="btn-premium primary" onClick={() => navigate(`/vote/${createdPollId}`)} style={{ flex: 1, justifyContent: 'center' }}>Go to Vote ➔</button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '40px' }}>
+            <button className="btn-premium outline" onClick={() => setPollCreated(false)} style={{ width: '100%' }}>Create Another</button>
+            <button className="btn-premium primary" onClick={() => navigate(`/vote/${createdPollId}`)} style={{ width: '100%' }}>Go to Poll ➔</button>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="page" style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <div className="premium-card" style={{ maxWidth: '500px', width: '100%', padding: '40px' }}>
-        <h1 style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '10px' }}>Trip <span className="gradient-text">Poll</span></h1>
-        <p style={{ textAlign: 'center', color: 'var(--text-dim)', marginBottom: '30px' }}>Decide your next destination with friends.</p>
+    <div className="poll-page-container">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="poll-glass-card"
+      >
+        <div className="poll-header">
+          <div className="poll-badge">PLAN WITH FRIENDS</div>
+          <h1 className="poll-title">Create a <span className="gradient-text">Trip Poll</span></h1>
+          <p className="poll-subtitle">Can't decide where to go? Let the majority win.</p>
+        </div>
 
-        <div className="pf-field">
-          <label className="pf-label">Trip Name</label>
+        <div className="poll-field-group">
+          <label className="poll-label">Trip Name</label>
           <input 
             type="text" 
             placeholder="e.g., Summer Getaway 2026" 
-            className="auth-input-styled"
+            className="poll-input"
             value={tripName}
             onChange={(e) => setTripName(e.target.value)}
           />
         </div>
 
-        <div className="pf-field">
-          <label className="pf-label">Expected number of voters (optional)</label>
+        <div className="poll-field-group">
+          <label className="poll-label">Group Size (Optional)</label>
           <input 
             type="number" 
             min="2"
             max="100"
-            placeholder="e.g. 5 (Leave blank for dynamic majority)"
-            className="auth-input-styled"
+            placeholder="How many friends are voting?"
+            className="poll-input"
             value={groupSize}
             onChange={(e) => setGroupSize(e.target.value)}
           />
-          <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+          <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '8px', paddingLeft: '4px' }}>
             {groupSize 
-              ? `Poll will close when more than half (${Math.floor(parseInt(groupSize)/2) + 1}) vote for one spot.` 
-              : "Poll will close when someone gets more than 50% of total votes cast."}
+              ? `Decision finalized when someone gets ${Math.floor(parseInt(groupSize)/2) + 1} votes.` 
+              : "Dynamic majority: First destination to cross 50% of cast votes wins."}
           </p>
         </div>
 
-        <div className="pf-field">
-          <label className="pf-label">Add Destination</label>
-          <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="poll-field-group">
+          <label className="poll-label">Add Destinations</label>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <input 
               type="text" 
-              placeholder="e.g., Goa" 
-              className="auth-input-styled"
+              placeholder="e.g., Goa, Manali, Jaipur..." 
+              className="poll-input"
               value={option}
               onChange={(e) => setOption(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addOption()}
             />
-            <button className="btn-premium primary" onClick={addOption} style={{ padding: '0 20px' }}>Add</button>
+            <button className="btn-premium primary" onClick={addOption} style={{ padding: '0 24px', borderRadius: '16px' }}>Add</button>
           </div>
         </div>
 
-        {options.length > 0 && (
-          <div style={{ marginBottom: '30px' }}>
-            <label className="pf-label">Destinations</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {options.map((opt, i) => (
-                <div key={i} className="pf-interest-pill active" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  {opt}
-                  <span onClick={() => removeOption(i)} style={{ cursor: 'pointer', fontWeight: 'bold' }}>×</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {options.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              style={{ marginBottom: '32px' }}
+            >
+              <label className="poll-label">Selected Options ({options.length})</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                {options.map((opt, i) => (
+                  <motion.div 
+                    key={opt}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="vote-tag" 
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px', 
+                      padding: '8px 16px', 
+                      fontSize: '14px',
+                      background: 'rgba(59, 130, 246, 0.15)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)'
+                    }}
+                  >
+                    {opt}
+                    <span 
+                      onClick={() => removeOption(i)} 
+                      style={{ cursor: 'pointer', fontWeight: 'bold', color: '#ef4444', fontSize: '18px', marginLeft: '4px' }}
+                    >×</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <button 
           className="btn-premium primary" 
-          style={{ width: '100%', justifyContent: 'center', height: '54px' }}
+          style={{ width: '100%', height: '58px', fontSize: '1.1rem', marginTop: '10px' }}
           onClick={createPoll}
-          disabled={loading}
+          disabled={loading || options.length < 2}
         >
-          {loading ? "Creating..." : "Create Poll"}
+          {loading ? "Initializing Poll..." : "Launch Poll 🚀"}
         </button>
-      </div>
+        
+        {options.length < 2 && (
+          <p style={{ textAlign: 'center', color: '#64748b', fontSize: '0.8rem', marginTop: '12px' }}>
+            Add at least 2 destinations to start
+          </p>
+        )}
+      </motion.div>
     </div>
   );
 }
