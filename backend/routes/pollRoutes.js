@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const Poll = require("../models/Poll");
 const User = require("../models/User");
 const { v4: uuidv4 } = require("uuid");
@@ -65,7 +66,14 @@ router.post("/vote", async (req, res) => {
 
     // CAPTURE USER PREFERENCES
     if (userId) {
-      const user = await User.findById(userId);
+      let user = null;
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        user = await User.findById(userId);
+      }
+      if (!user) {
+        user = await User.findOne({ firebaseUid: userId });
+      }
+
       if (user) {
         // Store past vote
         user.preferences.pastVotes.push({
