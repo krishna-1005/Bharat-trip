@@ -370,21 +370,189 @@
     color: var(--dash-muted);
 }
 
-/* --- EMPTY STATE --- */
-.empty-dashboard {
-    padding: 80px 40px;
-    text-align: center;
-    background: var(--dash-card);
-    border-radius: 24px;
-    border: 1px dashed var(--dash-border);
+/* --- CREATE POLL MULTI-STEP --- */
+.step-indicator-container {
     width: 100%;
+    margin-bottom: 40px;
 }
 
-.empty-dashboard h2 {
-    font-size: 1.5rem;
-    color: var(--dash-muted);
-    margin-bottom: 24px;
+.step-progress-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 100px;
+    width: 100%;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
 }
+
+.step-progress-fill {
+    height: 100%;
+    background: var(--dash-primary);
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
+
+.step-labels {
+    display: flex;
+    justify-content: space-between;
+}
+
+.step-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dash-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.step-label.active {
+    color: var(--dash-primary);
+}
+
+.create-poll-step-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    min-height: 400px;
+}
+
+/* Step 1: Huge Input */
+.huge-poll-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--dash-border);
+    padding: 20px 0;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    outline: none;
+    transition: border-color 0.3s ease;
+    text-align: center;
+}
+
+.huge-poll-input:focus {
+    border-color: var(--dash-primary);
+}
+
+.huge-poll-input::placeholder {
+    color: #1F2937;
+}
+
+/* Step 2: City Cards */
+.add-city-input-group {
+    display: flex;
+    gap: 12px;
+    background: var(--dash-card);
+    padding: 8px;
+    border-radius: 16px;
+    border: 1px solid var(--dash-border);
+}
+
+.add-city-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 12px 16px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+}
+
+.city-option-card {
+    background: var(--dash-card);
+    border: 1px solid var(--dash-border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.city-option-card:hover {
+    border-color: var(--dash-primary);
+    transform: translateY(-2px);
+}
+
+.city-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.city-card-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.remove-city-btn {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.remove-city-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* Step 3: Review */
+.review-section {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    padding: 32px;
+    border: 1px solid var(--dash-border);
+}
+
+.review-question {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    color: var(--dash-text);
+}
+
+.review-cities-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* Navigation Buttons */
+.step-nav-buttons {
+    display: flex;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.btn-back {
+    background: transparent;
+    border: 1px solid var(--dash-border);
+    color: var(--dash-muted);
+    padding: 0 24px;
+    height: 54px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+    color: white;
+    border-color: white;
+}
+
+/* Existing styles... */
 
 /* Existing poll glass card and vote card styles remain for other pages */
 .poll-glass-card {

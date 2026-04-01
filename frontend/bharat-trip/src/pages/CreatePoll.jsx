@@ -8,8 +8,8 @@ const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://local
 
 export default function CreatePoll() {
   const { user } = useAuth();
+  const [step, setStep] = useState(1);
   const [tripName, setTripName] = useState("");
-  const [groupSize, setGroupSize] = useState("");
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -17,67 +17,50 @@ export default function CreatePoll() {
   const [createdPollId, setCreatedPollId] = useState("");
   const navigate = useNavigate();
 
+  const cityDataMap = {
+    "Goa": { tags: ["Beach", "Nightlife", "Party"], vibe: "Chill & Vibrant" },
+    "Bangalore": { tags: ["IT Hub", "Nightlife", "Weather"], vibe: "Modern & Green" },
+    "Bengaluru": { tags: ["IT Hub", "Nightlife", "Weather"], vibe: "Modern & Green" },
+    "Mumbai": { tags: ["Metropolis", "Ocean", "Food"], vibe: "Energetic & Coastal" },
+    "Jaipur": { tags: ["Heritage", "Culture", "Architecture"], vibe: "Royal & Historic" },
+    "Delhi": { tags: ["History", "Food", "Shopping"], vibe: "Historic & Intense" },
+    "Udaipur": { tags: ["Lakes", "Romantic", "Palaces"], vibe: "Serene & Royal" },
+    "Manali": { tags: ["Adventure", "Mountains", "Snow"], vibe: "Adventurous & Scenic" },
+    "Shimla": { tags: ["Mountains", "Heritage", "Colonial"], vibe: "Scenic & Nostalgic" },
+    "Kochi": { tags: ["Coastal", "Culture", "History"], vibe: "Relaxed & Cultural" },
+    "Varanasi": { tags: ["Spiritual", "Culture", "Ghats"], vibe: "Mystical & Ancient" },
+    "Agra": { tags: ["Heritage", "Iconic", "History"], vibe: "Historic & Iconic" },
+    "Hyderabad": { tags: ["Food", "History", "Pearls"], vibe: "Vibrant & Historic" },
+    "Pondicherry": { tags: ["Coastal", "French", "Yoga"], vibe: "Quiet & Colonial" },
+    "Gokarna": { tags: ["Beach", "Peaceful", "Trekking"], vibe: "Bohemian & Natural" },
+    "Rishikesh": { tags: ["Spiritual", "Adventure", "Yoga"], vibe: "Spiritual & Active" },
+    "Mysore": { tags: ["Heritage", "Palace", "Culture"], vibe: "Royal & Traditional" },
+    "Ooty": { tags: ["Mountains", "Tea Gardens", "Weather"], vibe: "Scenic & Refreshing" },
+    "Coorg": { tags: ["Nature", "Coffee", "Mountains"], vibe: "Green & Serene" },
+    "Munnar": { tags: ["Nature", "Tea Gardens", "Weather"], vibe: "Emerald & Quiet" },
+    "Alleppey": { tags: ["Backwaters", "Nature", "Coastal"], vibe: "Liquid & Serene" },
+    "Leh": { tags: ["Mountains", "Adventure", "Culture"], vibe: "Epic & Stark" },
+    "Hampi": { tags: ["Heritage", "History", "Ruins"], vibe: "Ancient & Unique" }
+  };
+
   const addOption = () => {
     if (option.trim() && !options.includes(option.trim())) {
-      setOptions([...options, option.trim()]);
+      const cityInfo = cityDataMap[option.trim()] || { tags: ["Explore"], vibe: "New Discovery" };
+      setOptions([...options, { name: option.trim(), ...cityInfo }]);
       setOption("");
     }
   };
 
-  const removeOption = (index) => {
-    setOptions(options.filter((_, i) => i !== index));
-  };
-
-  const cityDataMap = {
-    "Goa": { tags: ["Beach", "Nightlife", "Party", "Relaxed"], vibe: "Chill & Vibrant" },
-    "Bangalore": { tags: ["IT Hub", "Nightlife", "Gardens", "Weather"], vibe: "Modern & Green" },
-    "Bengaluru": { tags: ["IT Hub", "Nightlife", "Gardens", "Weather"], vibe: "Modern & Green" },
-    "Mumbai": { tags: ["Metropolis", "Ocean", "Food", "Fast-paced"], vibe: "Energetic & Coastal" },
-    "Jaipur": { tags: ["Heritage", "Culture", "Architecture", "Shopping"], vibe: "Royal & Historic" },
-    "Delhi": { tags: ["History", "Food", "Shopping", "Capital"], vibe: "Historic & Intense" },
-    "New Delhi": { tags: ["History", "Food", "Shopping", "Capital"], vibe: "Historic & Intense" },
-    "Udaipur": { tags: ["Lakes", "Romantic", "Palaces", "Heritage"], vibe: "Serene & Royal" },
-    "Manali": { tags: ["Adventure", "Mountains", "Snow", "Trekking"], vibe: "Adventurous & Scenic" },
-    "Shimla": { tags: ["Mountains", "Heritage", "Colonial", "Nature"], vibe: "Scenic & Nostalgic" },
-    "Kochi": { tags: ["Coastal", "Culture", "History", "Backwaters"], vibe: "Relaxed & Cultural" },
-    "Varanasi": { tags: ["Spiritual", "Culture", "Heritage", "Ghats"], vibe: "Mystical & Ancient" },
-    "Agra": { tags: ["Heritage", "Iconic", "History", "Architecture"], vibe: "Historic & Iconic" },
-    "Hyderabad": { tags: ["Food", "History", "IT Hub", "Pearls"], vibe: "Vibrant & Historic" },
-    "Pondicherry": { tags: ["Coastal", "French", "Peaceful", "Yoga"], vibe: "Quiet & Colonial" },
-    "Gokarna": { tags: ["Beach", "Peaceful", "Spiritual", "Trekking"], vibe: "Bohemian & Natural" },
-    "Rishikesh": { tags: ["Spiritual", "Adventure", "Ganga", "Yoga"], vibe: "Spiritual & Active" },
-    "Mysore": { tags: ["Heritage", "Palace", "Culture", "Yoga"], vibe: "Royal & Traditional" },
-    "Ooty": { tags: ["Mountains", "Tea Gardens", "Nature", "Weather"], vibe: "Scenic & Refreshing" },
-    "Coorg": { tags: ["Nature", "Coffee", "Mountains", "Weather"], vibe: "Green & Serene" },
-    "Munnar": { tags: ["Nature", "Tea Gardens", "Mountains", "Weather"], vibe: "Emerald & Quiet" },
-    "Alleppey": { tags: ["Backwaters", "Nature", "Houseboat", "Coastal"], vibe: "Liquid & Serene" },
-    "Leh": { tags: ["Mountains", "Adventure", "High Altitude", "Culture"], vibe: "Epic & Stark" },
-    "Ladakh": { tags: ["Mountains", "Adventure", "High Altitude", "Culture"], vibe: "Epic & Stark" },
-    "Hampi": { tags: ["Heritage", "History", "Architecture", "Ruins"], vibe: "Boulder-strewn & Ancient" }
+  const removeOption = (name) => {
+    setOptions(options.filter(o => o.name !== name));
   };
 
   const createPoll = async () => {
-    if (!tripName.trim() || options.length < 2) {
-      alert("Please provide a trip name and at least 2 destinations.");
-      return;
-    }
-
     setLoading(true);
     try {
-      const enrichedOptions = options.map(opt => {
-        const data = cityDataMap[opt] || { tags: ["Explore"], vibe: "New Experience" };
-        return {
-          name: opt,
-          city: opt,
-          tags: data.tags,
-          vibe: data.vibe
-        };
-      });
-
       const payload = { 
         tripName, 
-        options: enrichedOptions, 
-        groupSize: groupSize === "" ? undefined : parseInt(groupSize),
+        options: options.map(o => ({ name: o.name, city: o.name, tags: o.tags, vibe: o.vibe })), 
         userId: user?.uid || user?.id 
       };
       
@@ -104,160 +87,162 @@ export default function CreatePoll() {
   const copyToClipboard = () => {
     const url = `${window.location.origin}/vote/${createdPollId}`;
     navigator.clipboard.writeText(url);
-    alert("Poll link copied to clipboard! ✨");
+    alert("Poll link copied! ✨");
   };
 
   if (pollCreated) {
     return (
       <div className="poll-page-container">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="poll-glass-card"
-          style={{ textAlign: 'center' }}
-        >
-          <div style={{ fontSize: '5rem', marginBottom: '20px', animation: 'float 3s ease-in-out infinite' }}>🚀</div>
-          <div className="poll-badge">POLL CREATED SUCCESSFULLY</div>
-          <h1 className="poll-title">Your Trip Poll is <span className="gradient-text">Ready!</span></h1>
-          <p className="poll-subtitle">Share this link with your group to start the battle of destinations.</p>
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="poll-glass-card" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '5rem', marginBottom: '24px' }}>🚀</div>
+          <h1 className="poll-title">Poll <span className="gradient-text">Launched!</span></h1>
+          <p className="poll-subtitle">Your group decision hub is ready. Share the link below.</p>
           
-          <div className="link-copy-container">
-            <p style={{ color: '#cbd5e1', fontSize: '0.9rem', marginBottom: '12px', textAlign: 'left', fontWeight: '600' }}>Shareable Voting Link</p>
+          <div className="link-copy-container" style={{ textAlign: 'left' }}>
+            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--dash-primary)', marginBottom: '12px', textTransform: 'uppercase' }}>Shareable Voting Link</p>
             <div className="link-input-group">
-              <input 
-                readOnly 
-                value={`${window.location.origin}/vote/${createdPollId}`} 
-                className="link-input"
-              />
-              <button 
-                className="btn-premium primary" 
-                onClick={copyToClipboard}
-                style={{ padding: '0 20px', borderRadius: '12px', height: 'auto' }}
-              >
-                Copy
-              </button>
+              <input readOnly value={`${window.location.origin}/vote/${createdPollId}`} className="link-input" />
+              <button className="btn-premium primary" onClick={copyToClipboard} style={{ height: 'auto', borderRadius: '12px', padding: '0 20px' }}>Copy</button>
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '40px' }}>
-            <button className="btn-premium outline" onClick={() => setPollCreated(false)} style={{ width: '100%' }}>Create Another</button>
-            <button className="btn-premium primary" onClick={() => navigate(`/vote/${createdPollId}`)} style={{ width: '100%' }}>Go to Poll ➔</button>
+            <button className="btn-premium outline" onClick={() => window.location.reload()}>Create New</button>
+            <button className="btn-premium primary" onClick={() => navigate(`/vote/${createdPollId}`)}>View Poll ➔</button>
           </div>
         </motion.div>
       </div>
     );
   }
 
+  const stepVariants = {
+    initial: { opacity: 0, x: 20 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -20 }
+  };
+
   return (
     <div className="poll-page-container">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="poll-glass-card"
-      >
-        <div className="poll-header">
-          <div className="poll-badge">PLAN WITH FRIENDS</div>
-          <h1 className="poll-title">Create a <span className="gradient-text">Trip Poll</span></h1>
-          <p className="poll-subtitle">Can't decide where to go? Let the majority win.</p>
+      <div className="poll-dashboard-wrapper">
+        
+        <header className="dashboard-header" style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h1 className="dashboard-title">Create a Travel Poll</h1>
+            <p className="dashboard-subtitle">Let others help you decide your next destination</p>
+        </header>
+
+        <div className="step-indicator-container">
+            <div className="step-progress-bar">
+                <div className="step-progress-fill" style={{ width: `${(step / 3) * 100}%` }}></div>
+            </div>
+            <div className="step-labels">
+                <span className={`step-label ${step >= 1 ? 'active' : ''}`}>Question</span>
+                <span className={`step-label ${step >= 2 ? 'active' : ''}`}>Add Cities</span>
+                <span className={`step-label ${step >= 3 ? 'active' : ''}`}>Review</span>
+            </div>
         </div>
 
-        <div className="poll-field-group">
-          <label className="poll-label">Trip Name</label>
-          <input 
-            type="text" 
-            placeholder="e.g., Summer Getaway 2026" 
-            className="poll-input"
-            value={tripName}
-            onChange={(e) => setTripName(e.target.value)}
-          />
-        </div>
+        <AnimatePresence mode="wait">
+            {step === 1 && (
+                <motion.div key="step1" {...stepVariants} className="create-poll-step-container">
+                    <div style={{ textAlign: 'center' }}>
+                        <input 
+                            type="text" 
+                            className="huge-poll-input" 
+                            placeholder="Where should I travel next?"
+                            value={tripName}
+                            onChange={(e) => setTripName(e.target.value)}
+                            autoFocus
+                        />
+                        <p style={{ marginTop: '20px', color: 'var(--dash-muted)' }}>Enter your main poll question or trip name</p>
+                    </div>
+                    <button 
+                        className="btn-premium primary" 
+                        style={{ width: '100%', height: '60px', marginTop: 'auto' }}
+                        disabled={!tripName.trim()}
+                        onClick={() => setStep(2)}
+                    >
+                        Next: Add Destinations ➔
+                    </button>
+                </motion.div>
+            )}
 
-        <div className="poll-field-group">
-          <label className="poll-label">Group Size (Optional)</label>
-          <input 
-            type="number" 
-            min="2"
-            max="100"
-            placeholder="How many friends are voting?"
-            className="poll-input"
-            value={groupSize}
-            onChange={(e) => setGroupSize(e.target.value)}
-          />
-          <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '8px', paddingLeft: '4px' }}>
-            {groupSize 
-              ? `Decision finalized when someone gets ${Math.floor(parseInt(groupSize)/2) + 1} votes.` 
-              : "Dynamic majority: First destination to cross 50% of cast votes wins."}
-          </p>
-        </div>
+            {step === 2 && (
+                <motion.div key="step2" {...stepVariants} className="create-poll-step-container">
+                    <div className="add-city-input-group">
+                        <input 
+                            className="add-city-input" 
+                            placeholder="Type a city (e.g., Goa, Manali...)" 
+                            value={option}
+                            onChange={(e) => setOption(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && addOption()}
+                        />
+                        <button className="btn-premium primary" onClick={addOption} style={{ height: 'auto', borderRadius: '12px' }}>Add</button>
+                    </div>
 
-        <div className="poll-field-group">
-          <label className="poll-label">Add Destinations</label>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <input 
-              type="text" 
-              placeholder="e.g., Goa, Manali, Jaipur..." 
-              className="poll-input"
-              value={option}
-              onChange={(e) => setOption(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && addOption()}
-            />
-            <button className="btn-premium primary" onClick={addOption} style={{ padding: '0 24px', borderRadius: '16px' }}>Add</button>
-          </div>
-        </div>
+                    <div className="results-grid">
+                        {options.map((opt) => (
+                            <motion.div layout key={opt.name} className="city-option-card">
+                                <div className="city-card-info">
+                                    <span className="city-card-name">{opt.name}</span>
+                                    <div className="option-tags">
+                                        {opt.tags.map(t => <span key={t} className="dash-tag">{t}</span>)}
+                                    </div>
+                                </div>
+                                <button className="remove-city-btn" onClick={() => removeOption(opt.name)}>×</button>
+                            </motion.div>
+                        ))}
+                        {options.length < 2 && (
+                            <div className="empty-dashboard" style={{ padding: '40px', borderStyle: 'dashed' }}>
+                                <p style={{ color: 'var(--dash-muted)', margin: 0 }}>Add at least 2 destinations to continue</p>
+                            </div>
+                        )}
+                    </div>
 
-        <AnimatePresence>
-          {options.length > 0 && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              style={{ marginBottom: '32px' }}
-            >
-              <label className="poll-label">Selected Options ({options.length})</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                {options.map((opt, i) => (
-                  <motion.div 
-                    key={opt}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="vote-tag" 
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '8px', 
-                      padding: '8px 16px', 
-                      fontSize: '14px',
-                      background: 'rgba(59, 130, 246, 0.15)',
-                      border: '1px solid rgba(59, 130, 246, 0.3)'
-                    }}
-                  >
-                    {opt}
-                    <span 
-                      onClick={() => removeOption(i)} 
-                      style={{ cursor: 'pointer', fontWeight: 'bold', color: '#ef4444', fontSize: '18px', marginLeft: '4px' }}
-                    >×</span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
+                    <div className="step-nav-buttons">
+                        <button className="btn-back" onClick={() => setStep(1)}>Back</button>
+                        <button 
+                            className="btn-premium primary" 
+                            style={{ flex: 1, height: '54px' }}
+                            disabled={options.length < 2}
+                            onClick={() => setStep(3)}
+                        >
+                            Review Poll ➔
+                        </button>
+                    </div>
+                </motion.div>
+            )}
+
+            {step === 3 && (
+                <motion.div key="step3" {...stepVariants} className="create-poll-step-container">
+                    <div className="review-section">
+                        <p style={{ fontSize: '12px', color: 'var(--dash-primary)', fontWeight: '800', marginBottom: '8px', textTransform: 'uppercase' }}>Poll Summary</p>
+                        <h2 className="review-question">{tripName}</h2>
+                        
+                        <div className="review-cities-grid">
+                            {options.map(opt => (
+                                <div key={opt.name} className="dash-tag" style={{ padding: '10px 16px', fontSize: '14px', background: 'rgba(255,255,255,0.05)', borderRadius: '100px' }}>
+                                    {opt.name}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="step-nav-buttons">
+                        <button className="btn-back" onClick={() => setStep(2)}>Back</button>
+                        <button 
+                            className="btn-premium primary" 
+                            style={{ flex: 1, height: '54px' }}
+                            onClick={createPoll}
+                            disabled={loading}
+                        >
+                            {loading ? "Creating Poll..." : "Create Poll 🚀"}
+                        </button>
+                    </div>
+                </motion.div>
+            )}
         </AnimatePresence>
 
-        <button 
-          className="btn-premium primary" 
-          style={{ width: '100%', height: '58px', fontSize: '1.1rem', marginTop: '10px' }}
-          onClick={createPoll}
-          disabled={loading || options.length < 2}
-        >
-          {loading ? "Initializing Poll..." : "Launch Poll 🚀"}
-        </button>
-        
-        {options.length < 2 && (
-          <p style={{ textAlign: 'center', color: '#64748b', fontSize: '0.8rem', marginTop: '12px' }}>
-            Add at least 2 destinations to start
-          </p>
-        )}
-      </motion.div>
+      </div>
     </div>
   );
 }
