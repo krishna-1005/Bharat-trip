@@ -200,70 +200,45 @@ export default function VotePoll() {
             return (
               <motion.div 
                 key={opt.name}
-                initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 className={`vote-card ${isSelected || isWinner ? 'selected' : ''}`}
                 style={{ 
-                  opacity: (hasVoted && !isSelected && !isWinner) ? 0.6 : 1,
+                  opacity: (hasVoted && !isSelected && !isWinner) ? 0.5 : 1,
                   pointerEvents: (hasVoted || poll.isClosed) ? 'none' : 'auto'
                 }}
                 onClick={() => handleVote(opt.name)}
               >
-                <div className="vote-card-img">
-                  <PlaceImage placeName={opt.name} city={opt.name} />
-                  <div style={{ 
-                    position: 'absolute', 
-                    top: '12px', 
-                    left: '12px', 
-                    background: 'rgba(15, 23, 42, 0.8)', 
-                    padding: '4px 10px', 
-                    borderRadius: '8px',
-                    fontSize: '11px',
-                    fontWeight: '800',
-                    zIndex: 2,
-                    border: '1px solid rgba(255,255,255,0.1)'
-                  }}>
-                    🗳️ {opt.votes} Votes
-                  </div>
-                  {isWinner && (
-                    <div style={{ 
-                      position: 'absolute', 
-                      top: '12px', 
-                      right: '12px', 
-                      background: '#10b981', 
-                      color: 'white',
-                      padding: '4px 10px', 
-                      borderRadius: '8px',
-                      fontSize: '11px',
-                      fontWeight: '800',
-                      zIndex: 2,
-                      boxShadow: '0 0 15px rgba(16, 185, 129, 0.5)'
-                    }}>
-                      WINNER
-                    </div>
-                  )}
-                </div>
                 <div className="vote-card-content">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
                     <h3 className="vote-card-title">{opt.name}</h3>
                     {(isSelected || isWinner) && (
                       <motion.span 
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        style={{ color: '#3b82f6', fontSize: '1.4rem' }}
+                        style={{ color: '#3b82f6', fontSize: '1.2rem' }}
                       >
                         ✓
                       </motion.span>
                     )}
                   </div>
-                  <p className="vote-card-vibe">"{cityData.vibe}"</p>
+                  <p className="vote-card-vibe">{cityData.vibe}</p>
                   <div className="vote-tag-list">
                     {cityData.tags.slice(0, 3).map(tag => (
                       <span key={tag} className="vote-tag" style={{ fontSize: '9px', padding: '2px 8px' }}>
                         {tag}
                       </span>
                     ))}
+                  </div>
+                </div>
+
+                <div className="vote-card-stats">
+                  {isWinner && (
+                    <div className="winner-indicator">WINNER</div>
+                  )}
+                  <div className="vote-count-badge">
+                    🗳️ {opt.votes} {opt.votes === 1 ? 'Vote' : 'Votes'}
                   </div>
                 </div>
               </motion.div>

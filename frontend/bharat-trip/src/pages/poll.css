@@ -14,155 +14,83 @@
 }
 
 .poll-glass-card {
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 32px;
     width: 100%;
-    max-width: 600px;
-    padding: 48px;
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+    max-width: 650px;
+    padding: 56px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
     position: relative;
     overflow: hidden;
 }
 
-.poll-glass-card::before {
+.poll-glass-card::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-}
-
-.poll-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.poll-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 16px;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 100px;
-    font-size: 11px;
-    font-weight: 800;
-    color: #60a5fa;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-}
-
-.poll-title {
-    font-size: clamp(2rem, 5vw, 2.8rem);
-    font-weight: 800;
-    letter-spacing: -1px;
-    margin: 0 0 12px;
-    line-height: 1.1;
-}
-
-.poll-subtitle {
-    color: #94a3b8;
-    font-size: 1.1rem;
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-/* Form Elements */
-.poll-field-group {
-    margin-bottom: 28px;
-}
-
-.poll-label {
-    display: block;
-    font-size: 13px;
-    font-weight: 700;
-    color: #cbd5e1;
-    margin-bottom: 10px;
-    margin-left: 4px;
-}
-
-.poll-input-wrapper {
-    position: relative;
-}
-
-.poll-input-icon {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #64748b;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent 0%, transparent 40%, #3b82f6 50%, transparent 60%, transparent 100%);
+    animation: rotate-border 10s linear infinite;
+    opacity: 0.15;
     pointer-events: none;
+    z-index: 0;
 }
 
-.poll-input {
-    width: 100%;
-    padding: 16px 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    color: #f8fafc;
-    font-size: 16px;
-    transition: all 0.3s ease;
+@keyframes rotate-border {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-.poll-input:focus {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-    outline: none;
-}
-
-/* Option Cards for Voting */
-.vote-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 24px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    display: flex;
-    height: 140px;
+.poll-header, .poll-field-group, .options-grid, .link-copy-container, .btn-premium {
     position: relative;
+    z-index: 1;
+}
+
+/* Option Cards for Voting - Refined Text-Only Version */
+.vote-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 24px 32px;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    height: auto;
+    min-height: 110px;
 }
 
 .vote-card:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-4px) scale(1.02);
+    background: rgba(51, 65, 85, 0.5);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .vote-card.selected {
-    background: rgba(59, 130, 246, 0.05);
-    border-color: #3b82f6;
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+    background: rgba(59, 130, 246, 0.08);
+    border: 1.5px solid #3b82f6;
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.15);
 }
 
-.vote-card-img {
-    width: 160px;
-    height: 100%;
-    flex-shrink: 0;
-    position: relative;
-}
-
-.vote-card-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.vote-card-img::after {
+.vote-card.selected::before {
     content: '';
     position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent 50%, rgba(15, 23, 42, 0.6) 100%);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.1), transparent);
+    pointer-events: none;
 }
 
 .vote-card-content {
     flex: 1;
-    padding: 24px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -170,17 +98,50 @@
 }
 
 .vote-card-title {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: 800;
-    margin: 0 0 6px;
+    margin: 0 0 4px;
     color: #f8fafc;
+    letter-spacing: -0.5px;
 }
 
 .vote-card-vibe {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: #94a3b8;
     margin: 0 0 12px;
     font-style: italic;
+    opacity: 0.8;
+}
+
+.vote-card-stats {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    margin-left: 20px;
+}
+
+.vote-count-badge {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.winner-indicator {
+    background: #10b981;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
 }
 
 .vote-tag-list {
