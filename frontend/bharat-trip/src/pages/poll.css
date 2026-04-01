@@ -32,27 +32,166 @@
     gap: 24px;
 }
 
-/* --- HEADER --- */
-.dashboard-header {
-    text-align: left;
-    margin-bottom: 8px;
-    padding-left: 4px;
+/* --- VOTING SPECIFIC --- */
+.vote-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
     width: 100%;
+    margin-bottom: 100px; /* Space for sticky button */
 }
 
-.dashboard-title {
-    font-size: clamp(24px, 5vw, 32px);
+.vote-option-card {
+    background: var(--dash-card);
+    border: 1px solid var(--dash-border);
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.vote-option-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.vote-option-card.selected {
+    border: 2px solid var(--dash-primary);
+    background: rgba(59, 130, 246, 0.05);
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+}
+
+.card-image-wrapper {
+    height: 180px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.vote-option-card:hover .card-image-wrapper img {
+    transform: scale(1.1);
+}
+
+.card-image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 0%, rgba(17, 24, 39, 0.8) 100%);
+}
+
+.selection-indicator {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    background: var(--dash-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    z-index: 10;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.vote-card-body {
+    padding: 20px;
+    flex: 1;
+}
+
+.vote-card-vibe {
+    font-size: 13px;
+    color: var(--dash-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.vote-card-name {
+    font-size: 1.5rem;
     font-weight: 800;
+    margin-bottom: 12px;
     color: var(--dash-text);
-    margin: 0 0 4px;
-    letter-spacing: -0.5px;
 }
 
-.dashboard-subtitle {
-    font-size: 14px;
-    color: var(--dash-muted);
-    font-weight: 500;
+/* --- STICKY ACTION BAR --- */
+.sticky-vote-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(11, 18, 32, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 20px 24px;
+    border-top: 1px solid var(--dash-border);
+    display: flex;
+    justify-content: center;
+    z-index: 1000;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
 }
+
+.vote-submit-btn {
+    width: 100%;
+    max-width: 500px;
+    height: 56px;
+    border-radius: 16px;
+    background: linear-gradient(90deg, #3B82F6, #2563EB);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+}
+
+.vote-submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(37, 99, 235, 0.4);
+    filter: brightness(1.1);
+}
+
+.vote-submit-btn:disabled {
+    background: #1F2937;
+    color: #4B5563;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.vote-success-toast {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #22C55E;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-weight: 700;
+    z-index: 2000;
+    box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Existing styles remain... */
 
 /* --- WINNER HIGHLIGHT --- */
 .winner-highlight-card {
