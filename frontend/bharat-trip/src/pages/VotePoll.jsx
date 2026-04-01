@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
-import PlaceImage from "../components/PlaceImage";
 import "./poll.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
@@ -260,14 +259,12 @@ export default function VotePoll() {
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
               {recommendations.map(rec => (
-                <div key={rec.name} className="premium-card" style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '20px' }}>
-                  <div style={{ width: '100%', height: '100px', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px' }}>
-                    <PlaceImage placeName={rec.name} city={rec.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                  <h4 style={{ margin: '0 0 12px', fontSize: '1rem', fontWeight: '700' }}>{rec.name}</h4>
+                <div key={rec.name} className="premium-card" style={{ padding: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', textAlign: 'center' }}>
+                  <h4 style={{ margin: '0 0 12px', fontSize: '1.1rem', fontWeight: '800' }}>{rec.name}</h4>
+                  <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '16px' }}>{rec.vibe}</p>
                   <button 
                     className="btn-premium primary" 
-                    style={{ padding: '8px 12px', fontSize: '0.75rem', width: '100%', borderRadius: '10px' }}
+                    style={{ padding: '8px 12px', fontSize: '0.75rem', width: '100%', borderRadius: '10px', justifyContent: 'center' }}
                     onClick={() => handlePlanForCity(rec.name)}
                   >
                     Plan Trip →
