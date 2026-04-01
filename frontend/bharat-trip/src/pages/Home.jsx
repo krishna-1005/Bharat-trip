@@ -300,6 +300,79 @@ const FeaturedTrips = () => {
   );
 };
 
+const TravelFeed = () => {
+  const navigate = useNavigate();
+  const { formatPrice } = useSettings();
+
+  const trending = [
+    { id: 1, title: "Golden Triangle Luxury", city: "Delhi, Agra, Jaipur", days: 6, cost: 45000, tags: ["History", "Luxury"], img: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80" },
+    { id: 2, title: "Kerala Backwater Bliss", city: "Alleppey", days: 4, cost: 22000, tags: ["Nature", "Relaxed"], img: "https://images.unsplash.com/photo-1593179241557-bce1eb92e47e?auto=format&fit=crop&w=800&q=80" },
+    { id: 3, title: "Goa Beach Party", city: "North Goa", days: 3, cost: 15000, tags: ["Party", "Beach"], img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80" }
+  ];
+
+  const ideas = [
+    { id: 4, title: "Spirituality in Kashi", city: "Varanasi", days: 3, cost: 12000, tags: ["Culture", "Spiritual"], img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80" },
+    { id: 5, title: "Yoga Retreat", city: "Rishikesh", days: 5, cost: 18000, tags: ["Wellness", "Adventure"], img: "https://images.unsplash.com/photo-1545105511-923f63f29e07?auto=format&fit=crop&w=800&q=80" },
+    { id: 6, title: "Tea Gardens Escape", city: "Munnar", days: 4, cost: 20000, tags: ["Nature", "Hills"], img: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80" }
+  ];
+
+  const gems = [
+    { id: 7, title: "The Ruins of Hampi", city: "Hampi", days: 3, cost: 10000, tags: ["Heritage", "Ancient"], img: "https://images.unsplash.com/photo-1600100397608-f010e4aa0984?auto=format&fit=crop&w=800&q=80" },
+    { id: 8, title: "French Quarter Stroll", city: "Pondicherry", days: 3, cost: 14000, tags: ["Culture", "Coastal"], img: "https://images.unsplash.com/photo-1589793907316-f94025b46850?auto=format&fit=crop&w=800&q=80" },
+    { id: 9, title: "Boulders & Bicycles", city: "Badami", days: 2, cost: 8000, tags: ["Adventure", "History"], img: "https://images.unsplash.com/photo-1623150502742-6a849aa94be4?auto=format&fit=crop&w=800&q=80" }
+  ];
+
+  const FeedRow = ({ title, items, badge }) => (
+    <div className="feed-row">
+      <div className="feed-row-header">
+        <h2>{title}</h2>
+        <span className="btn-tertiary">View All →</span>
+      </div>
+      <div className="feed-scroll-container">
+        {items.map(item => (
+          <motion.div 
+            key={item.id} 
+            className="feed-card"
+            whileHover={{ y: -5 }}
+            onClick={() => navigate('/planner', { state: { prefilledCity: item.city.split(',')[0].trim() } })}
+          >
+            <div className="feed-card-img">
+              <img src={item.img} alt={item.title} />
+              {badge && <span className="feed-badge">{badge}</span>}
+            </div>
+            <div className="feed-card-content">
+              <div className="feed-card-meta">
+                <span>📍 {item.city}</span>
+                <span>{item.days} Days</span>
+              </div>
+              <h3 className="feed-card-title">{item.title}</h3>
+              <div className="feed-card-tags">
+                {item.tags.map(t => <span key={t} className="feed-tag">{t}</span>)}
+              </div>
+              <div style={{ marginTop: '10px', fontWeight: '800', color: 'var(--text-main)' }}>
+                {formatPrice(item.cost)}
+              </div>
+              <button className="feed-plan-btn">
+                Plan this trip ⚡
+              </button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <section className="travel-feed-section container">
+      <div className="feed-container">
+        <FeedRow title="Trending Destinations" items={trending} badge="TRENDING" />
+        <FeedRow title="Travel Ideas" items={ideas} />
+        <FeedRow title="Hidden Gems" items={gems} badge="RARE" />
+      </div>
+    </section>
+  );
+};
+
 /* Added inline styles for mobile responsiveness where classes aren't enough */
 const Home = () => {
   const navigate = useNavigate();
@@ -591,6 +664,8 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+
+      <TravelFeed />
 
       <TripPulse />
 
