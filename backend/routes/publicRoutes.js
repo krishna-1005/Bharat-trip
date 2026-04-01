@@ -82,8 +82,8 @@ router.get("/trips", async (req, res) => {
 router.get("/trips/:id", async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.id).populate("userId", "name photo");
-    if (!trip || !trip.isPublic) {
-      return res.status(404).json({ error: "Trip not found or private." });
+    if (!trip) {
+      return res.status(404).json({ error: "Trip not found." });
     }
 
     // Increment views
@@ -92,6 +92,7 @@ router.get("/trips/:id", async (req, res) => {
 
     res.json({ trip });
   } catch (err) {
+    console.error("Fetch trip error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });

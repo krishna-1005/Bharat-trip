@@ -268,7 +268,13 @@ function Results() {
     );
   }
 
-  if (!plan || !plan.itinerary) return <div className="res-empty"><h2>{t("no_trip")}</h2><button onClick={() => navigate("/planner")}>Back</button></div>;
+  if (!plan || !plan.itinerary) return (
+    <div className="res-empty" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', gap: '20px' }}>
+      <h2>{t("no_trip") || "No trip plan found."}</h2>
+      <p style={{ color: 'var(--text-muted)' }}>The link might be broken or the trip doesn't exist.</p>
+      <button className="pf-primary-btn" style={{ width: '200px' }} onClick={() => navigate("/")}>Back to Home</button>
+    </div>
+  );
 
   const progressPercent = Math.round((currentIndex / (allPlaces.length || 1)) * 100);
 
