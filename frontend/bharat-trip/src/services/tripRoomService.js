@@ -51,7 +51,7 @@ export const createOrGetTripRoom = async (pollId, tripName, user) => {
 
     if (!querySnapshot.empty) {
       const doc = querySnapshot.docs[0];
-      return { id: doc.id, joinCode: doc.data().joinCode };
+      return { id: doc.id, joinCode: doc.data().joinCode, status: doc.data().status || "polling" };
     }
 
     // Generate a unique join code for the new room
@@ -68,11 +68,12 @@ export const createOrGetTripRoom = async (pollId, tripName, user) => {
       }],
       pollId: pollId,
       joinCode: joinCode,
+      status: "polling",
       createdAt: serverTimestamp()
     };
 
     const docRef = await addDoc(roomsRef, newRoomData);
-    return { id: docRef.id, joinCode: joinCode };
+    return { id: docRef.id, joinCode: joinCode, status: "polling" };
   } catch (error) {
     console.error("DEBUG: Firestore Write Error:", error);
     throw error;
@@ -81,8 +82,6 @@ export const createOrGetTripRoom = async (pollId, tripName, user) => {
 
 /**
  * Finds a Trip Room by its unique join code.
- * @param {string} code - The uppercase join code.
- * @returns {Promise<Object|null>} - Returns { roomId, pollId } or null.
  */
 export const getRoomByCode = async (code) => {
   if (!code) return null;
@@ -104,6 +103,31 @@ export const getRoomByCode = async (code) => {
     console.error("Error finding room by code:", err);
     return null;
   }
+};
+
+/**
+ * Updates the status of a Trip Room.
+ */
+export const updateRoomStatus = async (roomId, status) => {
+  if (!roomId) return;
+  try {
+    const roomRef = doc(db, "tripRooms", roomId);
+    await updateDoc(roomRef, { status });
+  } catch (err) {
+    console.error("Error updating room status:", err);
+  }
+};
+
+/**
+ * Real-time listener for room data (including status).
+ */
+export const listenToRoom = (roomId, callback) => {
+  if (!roomId) return () => {};
+  return onSnapshot(doc(db, "tripRooms", roomId), (docSnap) => {
+    if (docSnap.exists()) {
+      callback({ id: docSnap.id, ...docSnap.data() });
+    }
+  });
 };
 
 /**

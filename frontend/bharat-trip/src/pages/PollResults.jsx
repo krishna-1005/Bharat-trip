@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { createOrGetTripRoom, addUserToRoom, addActivity } from "../services/tripRoomService";
+import { createOrGetTripRoom, addUserToRoom, addActivity, listenToRoom, updateRoomStatus } from "../services/tripRoomService";
 import ActivityFeed from "../components/ActivityFeed";
+import TripTimeline from "../components/TripTimeline";
 import CostPlanner from "../components/CostPlanner";
 import "./poll.css";
 
@@ -17,6 +18,7 @@ export default function PollResults() {
   const [loading, setLoading] = useState(true);
   const [roomId, setRoomId] = useState(null);
   const [joinCode, setJoinCode] = useState("");
+  const [room, setRoom] = useState(null);
   const [finalizing, setFinalizing] = useState(false);
 
   useEffect(() => {
@@ -38,6 +40,22 @@ export default function PollResults() {
     const interval = setInterval(fetchPoll, 5000);
     return () => clearInterval(interval);
   }, [pollId]);
+
+  // Real-time Room Listener
+  useEffect(() => {
+    if (!roomId) return;
+    const unsubscribe = listenToRoom(roomId, (data) => {
+      setRoom(data);
+    });
+    return () => unsubscribe();
+  }, [roomId]);
+
+  // Sync Poll Closure with Room Status
+  useEffect(() => {
+    if (poll?.isClosed && roomId && room && room.status === 'polling') {
+      updateRoomStatus(roomId, 'planning');
+    }
+  }, [poll?.isClosed, roomId, room]);
 
   // Separate effect for Room Initialization to handle timing
   useEffect(() => {
@@ -172,6 +190,13 @@ export default function PollResults() {
                 </button>
             )}
         </header>
+
+        {/* --- TRIP TIMELINE SECTION --- */}
+        <TripTimeline 
+            status={room?.status || 'polling'} 
+            totalMembers={poll.totalMembers} 
+            totalVotes={totalVotes} 
+        />
 
         {/* --- STEP 2: WINNER HIGHLIGHT CARD --- */}
         <motion.div 
