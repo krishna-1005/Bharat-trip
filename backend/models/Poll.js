@@ -4,6 +4,7 @@ const pollSchema = new mongoose.Schema({
   pollId: { type: String, required: true, unique: true },
   tripName: { type: String, required: true },
   groupSize: { type: Number },
+  totalMembers: { type: Number, default: 1 },
   options: [{
     name: { type: String, required: true }, // Usually the city name
     votes: { type: Number, default: 0 },

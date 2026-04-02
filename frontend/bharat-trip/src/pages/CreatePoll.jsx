@@ -10,6 +10,7 @@ export default function CreatePoll() {
   const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [tripName, setTripName] = useState("");
+  const [totalMembers, setTotalMembers] = useState(1);
   const [option, setOption] = useState("");
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -60,6 +61,7 @@ export default function CreatePoll() {
     try {
       const payload = { 
         tripName, 
+        totalMembers,
         options: options.map(o => ({ name: o.name, city: o.name, tags: o.tags, vibe: o.vibe })), 
         userId: user?.uid || user?.id 
       };
@@ -144,16 +146,31 @@ export default function CreatePoll() {
         <AnimatePresence mode="wait">
             {step === 1 && (
                 <motion.div key="step1" {...stepVariants} className="create-poll-step-container">
-                    <div style={{ textAlign: 'center' }}>
-                        <input 
-                            type="text" 
-                            className="huge-poll-input" 
-                            placeholder="Where should I travel next?"
-                            value={tripName}
-                            onChange={(e) => setTripName(e.target.value)}
-                            autoFocus
-                        />
-                        <p style={{ marginTop: '20px', color: 'var(--dash-muted)' }}>Enter your main poll question or trip name</p>
+                    <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                        <div>
+                            <input 
+                                type="text" 
+                                className="huge-poll-input" 
+                                placeholder="Where should I travel next?"
+                                value={tripName}
+                                onChange={(e) => setTripName(e.target.value)}
+                                autoFocus
+                            />
+                            <p style={{ marginTop: '12px', color: 'var(--dash-muted)', fontSize: '14px' }}>Enter your main poll question or trip name</p>
+                        </div>
+
+                        <div style={{ maxWidth: '300px', margin: '0 auto', width: '100%' }}>
+                            <p style={{ fontSize: '12px', fontWeight: '800', color: 'var(--dash-primary)', marginBottom: '12px', textTransform: 'uppercase' }}>Number of Members</p>
+                            <input 
+                                type="number" 
+                                className="auth-input-styled" 
+                                style={{ textAlign: 'center', fontSize: '1.5rem' }}
+                                min="1"
+                                value={totalMembers}
+                                onChange={(e) => setTotalMembers(Math.max(1, parseInt(e.target.value) || 1))}
+                            />
+                            <p style={{ marginTop: '8px', color: 'var(--dash-muted)', fontSize: '12px' }}>How many people are in this group?</p>
+                        </div>
                     </div>
                     <button 
                         className="btn-premium primary" 

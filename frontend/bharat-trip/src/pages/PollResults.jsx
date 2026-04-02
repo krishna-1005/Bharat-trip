@@ -16,6 +16,7 @@ export default function PollResults() {
   const [poll, setPoll] = useState(null);
   const [loading, setLoading] = useState(true);
   const [roomId, setRoomId] = useState(null);
+  const [finalizing, setFinalizing] = useState(false);
 
   useEffect(() => {
     const fetchPoll = async () => {
@@ -72,6 +73,31 @@ export default function PollResults() {
     initRoom();
   }, [user, authLoading, poll]);
 
+  const handleFinalizeNow = async () => {
+    if (!poll || finalizing) return;
+    if (!window.confirm("Finalize this poll now based on current top votes?")) return;
+
+    setFinalizing(true);
+    try {
+      const res = await fetch(`${API}/api/polls/finalize-now`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pollId: poll.pollId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPoll(data.poll);
+        alert("Poll finalized successfully! ✨");
+      } else {
+        alert(data.error || "Failed to finalize.");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFinalizing(false);
+    }
+  };
+
   if (loading) return <div className="poll-page-container"><h2>Loading Dashboards...</h2></div>;
   
   if (!poll) return (
@@ -108,18 +134,39 @@ export default function PollResults() {
     );
   }
 
+  const isCreator = user && poll.createdBy === user.uid;
+  const isFinalized = poll.isClosed;
+
   return (
     <div className="poll-page-container">
       <div className="poll-dashboard-wrapper">
         
         {/* --- STEP 1: HEADER SECTION --- */}
-        <header className="dashboard-header">
+        <header className="dashboard-header" style={{ position: 'relative' }}>
             <h1 className="dashboard-title">{poll.tripName}</h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
                 <p className="dashboard-subtitle">Group Decision Dashboard</p>
                 <span style={{ width: '4px', height: '4px', background: '#4B5563', borderRadius: '50%' }}></span>
-                <p className="dashboard-subtitle">{totalVotes} Total Votes</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <p className="dashboard-subtitle" style={{ color: totalVotes >= poll.totalMembers ? '#10b981' : 'var(--dash-primary)', fontWeight: '800' }}>
+                        {totalVotes} / {poll.totalMembers || 1} members voted
+                    </p>
+                    {totalVotes < poll.totalMembers && !isFinalized && (
+                        <span className="live-dot" style={{ width: '6px', height: '6px' }}></span>
+                    )}
+                </div>
             </div>
+
+            {!isFinalized && isCreator && totalVotes >= 2 && (
+                <button 
+                    className="btn-premium outline" 
+                    style={{ position: 'absolute', right: 0, top: 0, padding: '8px 16px', fontSize: '12px' }}
+                    onClick={handleFinalizeNow}
+                    disabled={finalizing}
+                >
+                    {finalizing ? "Finalizing..." : "Finalize Now 🏁"}
+                </button>
+            )}
         </header>
 
         {/* --- STEP 2: WINNER HIGHLIGHT CARD --- */}

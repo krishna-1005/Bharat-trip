@@ -9,7 +9,7 @@ const { protect } = require("../middleware/protect");
 // Create a new poll
 router.post("/create", async (req, res) => {
   try {
-    const { tripName, options, groupSize, userId } = req.body;
+    const { tripName, options, groupSize, totalMembers, userId } = req.body;
     if (!tripName || !options || options.length < 2) {
       return res.status(400).json({ error: "Trip name and at least 2 options are required." });
     }
@@ -19,6 +19,7 @@ router.post("/create", async (req, res) => {
       pollId,
       tripName,
       groupSize: groupSize === "" ? undefined : groupSize,
+      totalMembers: parseInt(totalMembers) || 1,
       options: options.map(opt => ({ 
         name: typeof opt === 'string' ? opt : opt.name,
         city: typeof opt === 'string' ? opt : opt.city,
@@ -120,20 +121,12 @@ router.post("/vote", async (req, res) => {
     let shouldClose = false;
     let winner = null;
 
-    // RULE: NEVER close automatically on a tie
+    // RULE: Finalize when votesCount >= Math.ceil(totalMembers / 2) AND no tie
     if (topOptions.length === 1) {
-        if (poll.groupSize) {
-            // Condition A: Fixed Group Size
-            if (maxVotes > poll.groupSize / 2 || totalVotes >= poll.groupSize) {
-                shouldClose = true;
-                winner = topOptions[0].name;
-            }
-        } else {
-            // Condition B: Dynamic logic (at least 3 votes)
-            if (totalVotes >= 3) {
-                shouldClose = true;
-                winner = topOptions[0].name;
-            }
+        const threshold = Math.ceil(poll.totalMembers / 2);
+        if (totalVotes >= threshold || (poll.groupSize && totalVotes >= poll.groupSize)) {
+            shouldClose = true;
+            winner = topOptions[0].name;
         }
     }
 
