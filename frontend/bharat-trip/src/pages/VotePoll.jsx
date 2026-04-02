@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +17,10 @@ export default function VotePoll() {
   const [hasVoted, setHasVoted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [lastActivity, setLastActivity] = useState(null);
+  
+  // Use a ref to track current poll state for polling comparison
+  const pollRef = useRef(null);
 
   const cityDataMap = {
     "Goa": { tags: ["Beach", "Nightlife", "Party"], vibe: "Beach • Chill" },
@@ -46,28 +50,38 @@ export default function VotePoll() {
     "Hampi": { tags: ["Heritage", "History", "Ruins"], vibe: "Boulder-strewn • Ancient" }
   };
 
-  useEffect(() => {
-    const fetchPoll = async () => {
-      try {
-        const res = await fetch(`${API}/api/polls/${pollId}`);
-        const data = await res.json();
-        if (res.ok) {
-          setPoll(data);
-          const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "[]");
-          if (votedPolls.includes(pollId) || data.isClosed) {
-            setHasVoted(true);
-            // If already voted or closed, redirect to results after a short delay
-            setTimeout(() => navigate(`/poll-results/${pollId}`), 2000);
-          }
+  const fetchPoll = async () => {
+    try {
+      const res = await fetch(`${API}/api/polls/${pollId}`);
+      const data = await res.json();
+      if (res.ok) {
+        // Check if someone new voted
+        if (pollRef.current && data.voters?.length > pollRef.current.voters?.length) {
+          const latestVoter = data.voters[data.voters.length - 1];
+          setLastActivity(`${latestVoter.name} just voted!`);
+          setTimeout(() => setLastActivity(null), 4000);
         }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+        
+        setPoll(data);
+        pollRef.current = data;
+        
+        const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "[]");
+        if (votedPolls.includes(pollId) || data.isClosed) {
+          setHasVoted(true);
+        }
       }
-    };
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchPoll();
-  }, [pollId, navigate]);
+    const interval = setInterval(fetchPoll, 5000);
+    return () => clearInterval(interval);
+  }, [pollId]);
 
   const handleVoteSubmit = async () => {
     if (!selectedOption || hasVoted || submitting || poll?.isClosed) return;
@@ -77,7 +91,8 @@ export default function VotePoll() {
       const payload = { 
         pollId, 
         optionName: selectedOption,
-        userId: user?.uid || user?.id
+        userId: user?.uid || user?.id || `anon-${Math.random().toString(36).substr(2, 9)}`,
+        userName: user?.displayName || user?.name || "A traveler"
       };
       
       const res = await fetch(`${API}/api/polls/vote`, {
@@ -90,11 +105,13 @@ export default function VotePoll() {
         setHasVoted(true);
         setMessage("✅ Your vote has been recorded");
         const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "[]");
-        votedPolls.push(pollId);
-        localStorage.setItem("votedPolls", JSON.stringify(votedPolls));
+        if (!votedPolls.includes(pollId)) {
+          votedPolls.push(pollId);
+          localStorage.setItem("votedPolls", JSON.stringify(votedPolls));
+        }
         
         // Auto redirect after success
-        setTimeout(() => navigate(`/poll-results/${pollId}`), 1500);
+        setTimeout(() => navigate(`/poll-results/${pollId}`), 2000);
       } else {
         alert(data.error || "Failed to record vote.");
       }
@@ -104,6 +121,16 @@ export default function VotePoll() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Link copied! Share it with your group. 🚀");
+  };
+
+  const handleWhatsAppShare = () => {
+    const text = `Hey! Vote for our next trip destination on Bharat Trip: ${window.location.href}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   if (loading) return <div className="poll-page-container"><h2>Loading Voting Experience...</h2></div>;
@@ -140,8 +167,26 @@ export default function VotePoll() {
             >
                 {poll.tripName} • Vote and help decide the best destination
             </motion.p>
-            <p style={{ fontSize: '12px', color: '#4B5563', marginTop: '12px' }}>Based on community votes • {totalVotes} already cast</p>
+            
+            <div className="live-voter-count">
+              <span className="live-dot"></span>
+              {totalVotes} travelers have voted
+            </div>
         </header>
+
+        {/* --- LIVE ACTIVITY FEED --- */}
+        <AnimatePresence>
+          {lastActivity && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="live-activity-badge"
+            >
+              ✨ {lastActivity}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence>
           {message && (
@@ -199,6 +244,15 @@ export default function VotePoll() {
           })}
         </div>
 
+        {/* --- SHARE SECTION --- */}
+        <div className="poll-share-section">
+            <h3>Invite your friends to vote</h3>
+            <div className="share-buttons-row">
+              <button className="share-btn link" onClick={handleCopyLink}>Copy Link 🔗</button>
+              <button className="share-btn whatsapp" onClick={handleWhatsAppShare}>WhatsApp 📱</button>
+            </div>
+        </div>
+
         {/* --- STEP 5: VOTE BUTTON (Sticky) --- */}
         {!hasVoted && (
             <div className="sticky-vote-bar">
@@ -214,11 +268,90 @@ export default function VotePoll() {
 
         {hasVoted && (
             <div style={{ textAlign: 'center', marginTop: '20px', color: 'var(--dash-muted)' }}>
-                Redirecting to results dashboard...
+                {poll.isClosed ? "Poll is finalized! Taking you to results..." : "Vote recorded! Redirecting to results dashboard..."}
             </div>
         )}
 
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .live-voter-count {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: rgba(255,255,255,0.05);
+          padding: 6px 16px;
+          border-radius: 100px;
+          font-size: 13px;
+          color: var(--text-dim);
+          margin-top: 15px;
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .live-dot {
+          width: 8px;
+          height: 8px;
+          background: #10b981;
+          border-radius: 50%;
+          box-shadow: 0 0 10px #10b981;
+          animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+          0% { opacity: 0.4; }
+          50% { opacity: 1; }
+          100% { opacity: 0.4; }
+        }
+
+        .live-activity-badge {
+          position: fixed;
+          top: 100px;
+          right: 20px;
+          background: var(--accent-blue);
+          color: white;
+          padding: 10px 20px;
+          border-radius: 12px;
+          font-size: 13px;
+          font-weight: 700;
+          box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+          z-index: 1000;
+        }
+
+        .poll-share-section {
+          margin-top: 40px;
+          padding: 30px;
+          background: rgba(255,255,255,0.03);
+          border-radius: 24px;
+          text-align: center;
+          border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .poll-share-section h3 {
+          font-size: 1.1rem;
+          margin-bottom: 20px;
+        }
+
+        .share-buttons-row {
+          display: flex;
+          justify-content: center;
+          gap: 12px;
+        }
+
+        .share-btn {
+          padding: 10px 20px;
+          border-radius: 12px;
+          font-weight: 700;
+          font-size: 14px;
+          cursor: pointer;
+          transition: 0.3s;
+          border: none;
+        }
+
+        .share-btn.link { background: rgba(255,255,255,0.1); color: white; }
+        .share-btn.whatsapp { background: #25D366; color: white; }
+        
+        .share-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+      `}} />
     </div>
   );
 }

@@ -51,7 +51,7 @@ router.get("/:pollId", async (req, res) => {
 // Submit a vote (Optionally protected to capture preferences)
 router.post("/vote", async (req, res) => {
   try {
-    const { pollId, optionName, userId } = req.body;
+    const { pollId, optionName, userId, userName } = req.body;
     const poll = await Poll.findOne({ pollId });
     if (!poll) return res.status(404).json({ error: "Poll not found." });
 
@@ -62,7 +62,20 @@ router.post("/vote", async (req, res) => {
     const option = poll.options.find(opt => opt.name === optionName);
     if (!option) return res.status(400).json({ error: "Option not found." });
 
+    // Track voter participation
+    const alreadyVoted = poll.voters.some(v => v.userId === userId && userId !== undefined);
+    if (alreadyVoted && userId) {
+      return res.status(400).json({ error: "You have already voted in this poll." });
+    }
+
     option.votes += 1;
+    
+    // Add to voters list
+    poll.voters.push({
+      userId: userId || `anon-${Date.now()}`,
+      name: userName || "Someone",
+      votedAt: new Date()
+    });
 
     // CAPTURE USER PREFERENCES
     if (userId) {

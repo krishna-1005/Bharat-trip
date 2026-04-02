@@ -14,6 +14,11 @@ const pollSchema = new mongoose.Schema({
   isClosed: { type: Boolean, default: false },
   winner: { type: String, default: null },
   createdBy: { type: String },
+  voters: [{
+    userId: { type: String }, // Firebase UID or temporary session ID
+    name: { type: String },
+    votedAt: { type: Date, default: Date.now }
+  }],
   createdAt: { type: Date, default: Date.now }
 });
 
