@@ -2,6 +2,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import MapView from "../components/Map/MapView";
 import PlaceImage from "../components/PlaceImage";
 import CategoryCostBreakdown from "../components/CategoryCostBreakdown";
+import { calculateDistance, calculateTravelCost } from "../utils/travelUtils";
 import "./results.css";
 import { useState, useEffect, useMemo, useContext, useCallback } from "react";
 import { useSettings } from "../context/SettingsContext";
@@ -40,6 +41,7 @@ function Results() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [shareStatus, setShareStatus] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
   const [isTracking, setIsTracking] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(() => {
     const savedIdx = localStorage.getItem("tripCurrentIndex");
@@ -59,6 +61,20 @@ function Results() {
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => console.warn("Geolocation access denied or error:", error)
+      );
+    }
   }, []);
 
   useEffect(() => {
@@ -364,6 +380,10 @@ function Results() {
                         const isCurrent = currentIdx === currentIndex;
                         const timing = place.bestTime ? { time: place.bestTime, reason: place.timeReason } : getBestVisitTimeFallback(place.category, currentIdx);
 
+                        // Calculate distance and cost
+                        const distance = userLocation ? calculateDistance(userLocation.lat, userLocation.lng, place.lat, place.lng) : null;
+                        const travelCost = distance !== null ? calculateTravelCost(distance) : null;
+
                         return (
                           <div key={currentIdx} className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}>
                             <div className="stop-marker-v2">{isVisited && <span className="visited-tick">✓</span>}</div>
@@ -378,6 +398,14 @@ function Results() {
                                   <div className="stop-timing-info" style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
                                     <span style={{ color: 'var(--accent-blue)', fontWeight: '700' }}>🕒 {timing.time}</span> • {timing.reason}
                                   </div>
+                                  
+                                  {distance !== null && (
+                                    <div className="stop-travel-info" style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '8px', display: 'flex', gap: '10px' }}>
+                                      <span>📍 {distance} km away</span>
+                                      <span style={{ color: 'var(--accent-green)' }}>🚗 {formatPrice(travelCost)} travel cost</span>
+                                    </div>
+                                  )}
+
                                   <div className="stop-pills-v2">
                                     <span className="stop-pill-v2">{place.category}</span>
                                     <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
@@ -447,7 +475,7 @@ function Results() {
       )}
 
       <div className="planner-map-foundation">
-        <MapView plan={plan} isTracking={isTracking} currentIndex={currentIndex} />
+        <MapView plan={plan} isTracking={isTracking} currentIndex={currentIndex} userLocation={userLocation} />
         <div className="floating-map-controls">
           <button className={`map-control-btn ${isTracking ? "active" : ""}`} onClick={() => setIsTracking(!isTracking)}>📍</button>
         </div>
