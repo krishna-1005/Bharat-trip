@@ -124,7 +124,7 @@
   .action-card p {
     font-size: 0.85rem !important;
     text-align: left !important;
-    display: block !important; /* Force show some description on mobile if needed */
+    display: block !important;
   }
 
   /* ── MATCHMAKER MOBILE ── */
@@ -143,34 +143,113 @@
     padding: 24px !important;
   }
 
-  /* ── APP-LIKE TRANSITIONS ── */
-  .page-transition-wrapper {
-    will-change: transform, opacity;
+  /* ── POLL & VOTING MOBILE ── */
+  .poll-page-container {
+    padding: 80px 16px 120px !important;
   }
 
-  /* ── TOUCH FEEDBACK ── */
-  .btn-premium:active, .bn-item:active, .action-card:active, .dest-card:active, .f-clone-btn:active {
-    transform: scale(0.96) !important;
-    opacity: 0.9;
+  .vote-grid, .results-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
   }
 
-  /* ── HIDE DESKTOP ONLY ── */
+  .vote-option-card {
+    flex-direction: row !important;
+    height: auto !important;
+    padding: 12px !important;
+    align-items: center !important;
+    gap: 16px !important;
+  }
+
+  .card-image-wrapper {
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 16px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .vote-card-body {
+    text-align: left !important;
+    padding: 0 !important;
+  }
+
+  .vote-card-name {
+    font-size: 1.1rem !important;
+    margin: 4px 0 !important;
+  }
+
+  .sticky-vote-bar {
+    padding: 16px !important;
+    background: linear-gradient(to top, #080808 80%, transparent) !important;
+  }
+
+  /* ── ACTIVITY FEED & TIMELINE MOBILE ── */
+  .live-activity-badge {
+    top: auto !important;
+    bottom: 100px !important;
+    right: 16px !important;
+    left: 16px !important;
+    width: auto !important;
+    text-align: center;
+  }
+
+  .trip-timeline-wrapper {
+    margin: 24px 0 !important;
+  }
+
+  /* ── RESULTS & ITINERARY MOBILE ── */
+  .planner-layout-premium {
+    flex-direction: column !important;
+  }
+
+  .sidebar-premium {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 60vh !important;
+    position: relative !important;
+    border-left: none !important;
+    border-top: 1px solid var(--glass-border) !important;
+  }
+
+  .planner-map-foundation {
+    height: 40vh !important;
+    width: 100% !important;
+  }
+
+  .stop-top-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .stop-image-v2 {
+    width: 100% !important;
+    height: 160px !important;
+  }
+
+  /* ── COST PLANNER MOBILE ── */
+  .cost-planner-card {
+    padding: 24px 16px !important;
+    margin-top: 24px !important;
+  }
+
+  .cost-planner-card h2 {
+    font-size: 1.25rem !important;
+  }
+
+  .cost-planner-card > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+
+  /* ── UTILITIES ── */
   .desktop-only {
     display: none !important;
   }
-
-  /* ── NAV BAR MOBILE SLIM ── */
-  .nb-nav {
-    padding: 10px 20px !important;
-    height: 64px !important;
-  }
-
-  .nb-logo-text {
-    font-size: 1.1rem !important;
-  }
-
-  .nb-right {
-    gap: 12px !important;
-  }
 }
 
+/* ── DESKTOP ONLY UTILITY ── */
+@media (min-width: 901px) {
+  .mobile-only {
+    display: none !important;
+  }
+}

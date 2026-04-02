@@ -16,7 +16,7 @@ const BottomNav = () => {
   ];
 
   return (
-    <nav className="bottom-nav">
+    <nav className="bottom-nav mobile-only">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
         return (
