@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import CostPlanner from "../components/CostPlanner";
 import "./poll.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
@@ -145,6 +146,9 @@ export default function PollResults() {
             );
           })}
         </div>
+
+        {/* --- COST PLANNER SECTION --- */}
+        <CostPlanner destination={winner?.name} />
 
         {/* --- STEP 7: CTA SECTION --- */}
         <motion.div 
