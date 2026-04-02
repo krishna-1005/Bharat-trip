@@ -11,7 +11,7 @@ const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://local
 export default function PollResults() {
   const { pollId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth(); // Access loading state
   const [poll, setPoll] = useState(null);
   const [loading, setLoading] = useState(true);
   const [roomId, setRoomId] = useState(null);
@@ -23,15 +23,9 @@ export default function PollResults() {
         const data = await res.json();
         if (res.ok) {
           setPoll(data);
-          
-          // INITIALIZE TRIP ROOM
-          if (user && data) {
-            const id = await createOrGetTripRoom(data.pollId, data.tripName, user);
-            setRoomId(id);
-          }
         }
       } catch (err) {
-        console.error(err);
+        console.error("DEBUG: Failed to fetch poll:", err);
       } finally {
         setLoading(false);
       }
@@ -41,6 +35,37 @@ export default function PollResults() {
     const interval = setInterval(fetchPoll, 5000);
     return () => clearInterval(interval);
   }, [pollId]);
+
+  // Separate effect for Room Initialization to handle timing
+  useEffect(() => {
+    const initRoom = async () => {
+      // GUARD: Only proceed if auth is done, user exists, and poll data is ready
+      if (authLoading) {
+        console.log("DEBUG: Auth still loading... waiting.");
+        return;
+      }
+
+      if (!user) {
+        console.log("DEBUG: Auth complete but no user found. Skipping room init.");
+        return;
+      }
+
+      if (!poll) {
+        console.log("DEBUG: User ready but poll data still fetching... waiting.");
+        return;
+      }
+
+      console.log("DEBUG: All conditions met. Calling createOrGetTripRoom for user:", user.uid);
+      try {
+        const id = await createOrGetTripRoom(poll.pollId, poll.tripName, user);
+        setRoomId(id);
+      } catch (err) {
+        console.error("DEBUG: Room initialization failed:", err);
+      }
+    };
+
+    initRoom();
+  }, [user, authLoading, poll]);
 
   if (loading) return <div className="poll-page-container"><h2>Loading Dashboards...</h2></div>;
   
