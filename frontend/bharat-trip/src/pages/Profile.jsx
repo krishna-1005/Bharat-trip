@@ -2,7 +2,8 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
-import PlaceImage from "../components/PlaceImage";
+import SavedTrips from "../components/SavedTrips";
+import SavedMaps from "../components/SavedMaps";
 import "../styles/profile.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
@@ -167,46 +168,26 @@ export default function Profile() {
           ))}
         </div>
 
+        {/* Section 1: Saved Trips (Finalized from Polls) */}
         <section className="pro-section">
           <div className="section-header">
-            <h2>Recent Adventures</h2>
-            <button className="view-all-btn" onClick={() => navigate("/trips")}>See All Trips →</button>
+            <h2>Saved Trips <span style={{ color: 'var(--text-dim)', fontSize: '1rem', fontWeight: '500' }}>(Finalized)</span></h2>
           </div>
+          <SavedTrips />
+        </section>
 
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Discovering your journeys...</p>
-            </div>
-          ) : dbTrips.length === 0 ? (
-            <div className="pro-empty">
-              <div className="pro-empty-icon">🌍</div>
-              <h3>The world is waiting</h3>
-              <p>Your journey list is empty. Let's start planning your next masterpiece.</p>
-              <button className="btn-premium primary" style={{ marginTop: '12px' }} onClick={() => navigate("/planner")}>Plan Now</button>
-            </div>
-          ) : (
-            <div className="pro-trips-grid">
-              {dbTrips.slice(0, 3).map((trip) => (
-                <div className="pro-trip-card" key={trip.id} onClick={() => handleViewTrip(trip)} style={{ cursor: 'pointer' }}>
-                  <div className="pro-trip-img-wrap">
-                    <PlaceImage 
-                      placeName={trip.title.includes("Trip") ? trip.location : trip.title} 
-                      city={trip.location} 
-                      className="pro-trip-img" 
-                    />
-                    <div className="pro-trip-badge">{trip.days} Days</div>
-                  </div>
-                  <div className="pro-trip-body">
-                    <h3 className="pro-trip-title">{trip.title}</h3>
-                    <div className="pro-trip-meta">
-                      <span>📍 {trip.location}</span>
-                      <span>💰 {formatPrice(trip.totalCost)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        {/* Section 2: Saved Maps / Plans (Existing) */}
+        <section className="pro-section">
+          <div className="section-header">
+            <h2>Saved Maps / Plans</h2>
+            <button className="view-all-btn" onClick={() => navigate("/trips")}>See All Plans →</button>
+          </div>
+          <SavedMaps 
+            dbTrips={dbTrips} 
+            loading={loading} 
+            handleViewTrip={handleViewTrip} 
+            formatPrice={formatPrice}
+          />
         </section>
       </div>
     </div>

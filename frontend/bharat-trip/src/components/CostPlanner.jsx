@@ -32,6 +32,26 @@ const CostPlanner = ({ destination }) => {
     }).format(amount);
   };
 
+  const handleSaveTrip = () => {
+    if (totalTripCost === 0) {
+      alert("Please enter costs before saving!");
+      return;
+    }
+
+    const newTrip = {
+      destination: destination || "Custom Trip",
+      totalCost: totalTripCost,
+      costPerPerson: costPerPerson,
+      numPeople: numPeople,
+      date: new Date().toISOString(),
+    };
+
+    const existingTrips = JSON.parse(localStorage.getItem("savedTrips") || "[]");
+    localStorage.setItem("savedTrips", JSON.stringify([...existingTrips, newTrip]));
+    
+    alert("Trip finalized and saved to your profile! ✨");
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -144,6 +164,14 @@ const CostPlanner = ({ destination }) => {
               <span>{formatCurrency(foodPerPerson)}</span>
             </div>
           </div>
+
+          <button 
+            className="btn-premium primary" 
+            style={{ marginTop: '24px', width: '100%' }}
+            onClick={handleSaveTrip}
+          >
+            Finalize & Save Trip 💾
+          </button>
         </div>
       </div>
     </motion.div>
