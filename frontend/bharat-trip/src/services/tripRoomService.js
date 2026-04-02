@@ -2,41 +2,32 @@ import {
   collection, 
   query, 
   where, 
+  orderBy,
+  onSnapshot,
   getDocs, 
   addDoc, 
+  doc,
+  updateDoc,
+  arrayUnion,
   serverTimestamp 
 } from "firebase/firestore";
 import { db } from "../firebase";
 
 /**
  * Robust function to create or fetch a Trip Room.
- * Includes extensive logging for debugging Firestore writes.
  */
 export const createOrGetTripRoom = async (pollId, tripName, user) => {
-  console.log("DEBUG: createOrGetTripRoom called with:", { pollId, tripName, userId: user?.uid });
-
-  if (!pollId || !user?.uid) {
-    console.error("DEBUG: Missing pollId or user.uid. Aborting.");
-    return null;
-  }
+  if (!pollId || !user?.uid) return null;
 
   try {
-    // 1. Check if room exists
     const roomsRef = collection(db, "tripRooms");
     const q = query(roomsRef, where("pollId", "==", pollId));
-    
-    console.log("DEBUG: Querying Firestore for existing room...");
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
-      const existingId = querySnapshot.docs[0].id;
-      console.log("DEBUG: Existing room found. ID:", existingId);
-      return existingId;
+      return querySnapshot.docs[0].id;
     }
 
-    // 2. Create new room if not found
-    console.log("DEBUG: No room found. Attempting to create new document...");
-    
     const newRoomData = {
       name: tripName || "Untitled Trip",
       createdBy: user.uid,
@@ -46,13 +37,71 @@ export const createOrGetTripRoom = async (pollId, tripName, user) => {
     };
 
     const docRef = await addDoc(roomsRef, newRoomData);
-    
-    console.log("DEBUG: ✅ SUCCESS! Document written to Firestore with ID:", docRef.id);
     return docRef.id;
-
   } catch (error) {
-    console.error("DEBUG: ❌ Firestore Write Error:", error.code, error.message);
-    // Common error code: 'permission-denied' means Firestore Rules are blocking the write
+    console.error("DEBUG: Firestore Write Error:", error);
     throw error;
   }
+};
+
+/**
+ * Safely adds a user to the Trip Room members list.
+ */
+export const addUserToRoom = async (roomId, user) => {
+  if (!roomId || !user?.uid) return;
+
+  try {
+    const roomRef = doc(db, "tripRooms", roomId);
+    await updateDoc(roomRef, {
+      members: arrayUnion(user.uid),
+      membersInfo: arrayUnion({
+        uid: user.uid,
+        name: user.displayName || user.name || "Traveler",
+        email: user.email || ""
+      })
+    });
+  } catch (error) {
+    console.error("DEBUG: Failed to update members:", error);
+  }
+};
+
+/**
+ * Logs a real-time activity inside a Trip Room.
+ */
+export const addActivity = async (roomId, type, message, user) => {
+  if (!roomId || !user?.uid) return;
+
+  try {
+    const activitiesRef = collection(db, "activities");
+    await addDoc(activitiesRef, {
+      roomId,
+      type,
+      message,
+      userId: user.uid,
+      userName: user.displayName || user.name || "A traveler",
+      timestamp: serverTimestamp()
+    });
+  } catch (error) {
+    console.error("DEBUG: Failed to log activity:", error);
+  }
+};
+
+/**
+ * Real-time listener for activities in a specific room.
+ */
+export const listenToActivities = (roomId, callback) => {
+  const activitiesRef = collection(db, "activities");
+  const q = query(
+    activitiesRef, 
+    where("roomId", "==", roomId),
+    orderBy("timestamp", "desc")
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const activities = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    callback(activities);
+  });
 };

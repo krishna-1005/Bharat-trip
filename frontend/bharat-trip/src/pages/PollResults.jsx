@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { createOrGetTripRoom } from "../services/tripRoomService";
+import { createOrGetTripRoom, addUserToRoom, addActivity } from "../services/tripRoomService";
+import ActivityFeed from "../components/ActivityFeed";
 import CostPlanner from "../components/CostPlanner";
 import "./poll.css";
 
@@ -59,6 +60,10 @@ export default function PollResults() {
       try {
         const id = await createOrGetTripRoom(poll.pollId, poll.tripName, user);
         setRoomId(id);
+        
+        // Add user to members and log 'join' activity
+        await addUserToRoom(id, user);
+        await addActivity(id, 'join', `${user.name || 'A traveler'} joined the trip room`, user);
       } catch (err) {
         console.error("DEBUG: Room initialization failed:", err);
       }
@@ -181,6 +186,9 @@ export default function PollResults() {
             );
           })}
         </div>
+
+        {/* --- ACTIVITY FEED SECTION --- */}
+        <ActivityFeed roomId={roomId} />
 
         {/* --- COST PLANNER SECTION --- */}
         <CostPlanner destination={winner?.name} />
