@@ -1,6 +1,7 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import MapView from "../components/Map/MapView";
 import PlaceImage from "../components/PlaceImage";
+import CategoryCostBreakdown from "../components/CategoryCostBreakdown";
 import "./results.css";
 import { useState, useEffect, useMemo, useContext, useCallback } from "react";
 import { useSettings } from "../context/SettingsContext";
@@ -349,6 +350,10 @@ function Results() {
                       <div className="day-circle">{dIdx + 1}</div>
                       <div className="day-info"><h3>{dayObj.day}</h3><span>{dayObj.places.length} Places</span></div>
                     </div>
+
+                    <CategoryCostBreakdown 
+                      dailyCost={dayObj.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0) || (plan.totalTripCost / (normalizedItinerary.length || 1))} 
+                    />
                     
                     <div className="stops-container-premium">
                       {dayObj.places.map((place, pIdx) => {
