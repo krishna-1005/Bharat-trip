@@ -39,6 +39,7 @@
 .sidebar-header-premium {
   padding: 30px;
   border-bottom: 1px solid var(--glass-border);
+  flex-shrink: 0;
 }
 
 .header-top-row {
@@ -125,6 +126,7 @@
 /* Sidebar Scroll Content */
 .sidebar-scroll-content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 30px;
   scrollbar-width: thin;
@@ -518,8 +520,12 @@
 /* Sidebar Footer */
 .sidebar-footer-premium {
   padding: 25px;
-  background: rgba(255, 255, 255, 0.02);
+  background: #080808;
   border-top: 1px solid var(--glass-border);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  backdrop-filter: blur(20px);
 }
 
 .footer-summary-row {
