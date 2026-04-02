@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
+import { createOrGetTripRoom } from "../services/tripRoomService";
 import CostPlanner from "../components/CostPlanner";
 import "./poll.css";
 
@@ -9,8 +11,10 @@ const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://local
 export default function PollResults() {
   const { pollId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [poll, setPoll] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [roomId, setRoomId] = useState(null);
 
   useEffect(() => {
     const fetchPoll = async () => {
@@ -19,6 +23,12 @@ export default function PollResults() {
         const data = await res.json();
         if (res.ok) {
           setPoll(data);
+          
+          // INITIALIZE TRIP ROOM
+          if (user && data) {
+            const id = await createOrGetTripRoom(data.pollId, data.tripName, user);
+            setRoomId(id);
+          }
         }
       } catch (err) {
         console.error(err);

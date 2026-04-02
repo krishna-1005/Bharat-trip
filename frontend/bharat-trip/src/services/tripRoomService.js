@@ -4,92 +4,55 @@ import {
   where, 
   getDocs, 
   addDoc, 
-  doc,
-  updateDoc,
-  arrayUnion,
   serverTimestamp 
 } from "firebase/firestore";
 import { db } from "../firebase";
 
 /**
- * Creates a new Trip Room or fetches an existing one based on pollId.
- * 
- * @param {string} pollId - The ID of the poll associated with the room.
- * @param {string} tripName - The name of the trip.
- * @param {Object} user - The current authenticated user object (must have uid).
- * @returns {Promise<string>} - The roomId (document ID).
+ * Robust function to create or fetch a Trip Room.
+ * Includes extensive logging for debugging Firestore writes.
  */
 export const createOrGetTripRoom = async (pollId, tripName, user) => {
+  console.log("DEBUG: createOrGetTripRoom called with:", { pollId, tripName, userId: user?.uid });
+
   if (!pollId || !user?.uid) {
-    throw new Error("Missing required parameters: pollId and user.uid are mandatory.");
+    console.error("DEBUG: Missing pollId or user.uid. Aborting.");
+    return null;
   }
 
   try {
-    // 1. Check if a room already exists for this pollId
+    // 1. Check if room exists
     const roomsRef = collection(db, "tripRooms");
     const q = query(roomsRef, where("pollId", "==", pollId));
+    
+    console.log("DEBUG: Querying Firestore for existing room...");
     const querySnapshot = await getDocs(q);
 
-    // 2. If exists → return existing roomId
     if (!querySnapshot.empty) {
-      // Assuming only one room per pollId
-      const existingRoom = querySnapshot.docs[0];
-      console.log("Existing Trip Room found:", existingRoom.id);
-      return existingRoom.id;
+      const existingId = querySnapshot.docs[0].id;
+      console.log("DEBUG: Existing room found. ID:", existingId);
+      return existingId;
     }
 
-    // 3. If not → create new room
+    // 2. Create new room if not found
+    console.log("DEBUG: No room found. Attempting to create new document...");
+    
     const newRoomData = {
       name: tripName || "Untitled Trip",
       createdBy: user.uid,
       members: [user.uid],
-      membersInfo: [{
-        uid: user.uid,
-        name: user.displayName || user.name || "Traveler",
-        email: user.email || ""
-      }],
       pollId: pollId,
       createdAt: serverTimestamp()
     };
 
     const docRef = await addDoc(roomsRef, newRoomData);
-    console.log("New Trip Room created with ID:", docRef.id);
-
-    // 4. Return roomId after creation
+    
+    console.log("DEBUG: ✅ SUCCESS! Document written to Firestore with ID:", docRef.id);
     return docRef.id;
+
   } catch (error) {
-    console.error("Error in createOrGetTripRoom:", error);
+    console.error("DEBUG: ❌ Firestore Write Error:", error.code, error.message);
+    // Common error code: 'permission-denied' means Firestore Rules are blocking the write
     throw error;
-  }
-};
-
-/**
- * Safely adds a user to the Trip Room's members list and tracks minimal info.
- * Uses arrayUnion to ensure no duplicates and atomic updates.
- * 
- * @param {string} roomId - The document ID of the trip room.
- * @param {Object} user - The current authenticated user object.
- */
-export const addUserToRoom = async (roomId, user) => {
-  if (!roomId || !user?.uid) return;
-
-  try {
-    const roomRef = doc(db, "tripRooms", roomId);
-
-    // arrayUnion automatically handles checking if the EXACT value already exists
-    // 1. Add UID to members (Core)
-    // 2. Add Info object to membersInfo (Bonus)
-    await updateDoc(roomRef, {
-      members: arrayUnion(user.uid),
-      membersInfo: arrayUnion({
-        uid: user.uid,
-        name: user.displayName || user.name || "Traveler",
-        email: user.email || ""
-      })
-    });
-
-    console.log(`User ${user.uid} membership verified in Room ${roomId}`);
-  } catch (error) {
-    console.error("Error in addUserToRoom:", error);
   }
 };
