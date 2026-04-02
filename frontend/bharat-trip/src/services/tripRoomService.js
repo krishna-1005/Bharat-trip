@@ -9,9 +9,34 @@ import {
   doc,
   updateDoc,
   arrayUnion,
-  serverTimestamp 
+  serverTimestamp,
+  limit
 } from "firebase/firestore";
 import { db } from "../firebase";
+
+/**
+ * Generates a random 6-character unique join code.
+ */
+const generateUniqueJoinCode = async () => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  let isUnique = false;
+  
+  while (!isUnique) {
+    code = "";
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    
+    // Check uniqueness in Firestore
+    const q = query(collection(db, "tripRooms"), where("joinCode", "==", code), limit(1));
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) {
+      isUnique = true;
+    }
+  }
+  return code;
+};
 
 /**
  * Robust function to create or fetch a Trip Room.
@@ -25,22 +50,59 @@ export const createOrGetTripRoom = async (pollId, tripName, user) => {
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
-      return querySnapshot.docs[0].id;
+      const doc = querySnapshot.docs[0];
+      return { id: doc.id, joinCode: doc.data().joinCode };
     }
+
+    // Generate a unique join code for the new room
+    const joinCode = await generateUniqueJoinCode();
 
     const newRoomData = {
       name: tripName || "Untitled Trip",
       createdBy: user.uid,
       members: [user.uid],
+      membersInfo: [{
+        uid: user.uid,
+        name: user.displayName || user.name || "Traveler",
+        email: user.email || ""
+      }],
       pollId: pollId,
+      joinCode: joinCode,
       createdAt: serverTimestamp()
     };
 
     const docRef = await addDoc(roomsRef, newRoomData);
-    return docRef.id;
+    return { id: docRef.id, joinCode: joinCode };
   } catch (error) {
     console.error("DEBUG: Firestore Write Error:", error);
     throw error;
+  }
+};
+
+/**
+ * Finds a Trip Room by its unique join code.
+ * @param {string} code - The uppercase join code.
+ * @returns {Promise<Object|null>} - Returns { roomId, pollId } or null.
+ */
+export const getRoomByCode = async (code) => {
+  if (!code) return null;
+  const cleanCode = code.trim().toUpperCase();
+  
+  try {
+    const roomsRef = collection(db, "tripRooms");
+    const q = query(roomsRef, where("joinCode", "==", cleanCode), limit(1));
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) return null;
+    
+    const roomData = snapshot.docs[0].data();
+    return {
+      roomId: snapshot.docs[0].id,
+      pollId: roomData.pollId
+    };
+  } catch (err) {
+    console.error("Error finding room by code:", err);
+    return null;
   }
 };
 

@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import { useSettings } from "../context/SettingsContext";
 import MinimalReviewSection from "../components/MinimalReviewSection";
 import PlaceImage from "../components/PlaceImage";
+import JoinByCode from "../components/JoinByCode";
 import "./home.css";
 
 import ThreeScene from "../components/ThreeScene";
@@ -590,6 +591,8 @@ const Home = () => {
             <p>Can't decide? Let your group vote on the best spot.</p>
           </motion.div>
         </div>
+
+        <JoinByCode />
 
         <div className="quick-start-bar">
           <div className="quick-start-info">
