@@ -18,6 +18,7 @@ const pollRoutes = require("./routes/pollRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 
 const app = express();
+const maintenanceMode = require("./middleware/maintenance");
 
 app.use(
   cors({
@@ -30,6 +31,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(maintenanceMode);
 
 /* ── MongoDB Connection ── */
 mongoose.connect(process.env.MONGO_URI)

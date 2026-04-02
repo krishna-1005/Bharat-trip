@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -29,6 +29,7 @@ import NearbyPlaces from "./components/NearbyPlaces";
 import PlaceDetails from "./pages/PlaceDetails";
 import SearchResults from "./pages/SearchResults";
 import DestinationDetails from "./pages/DestinationDetails";
+import Maintenance from "./pages/Maintenance";
 
 import TravelBot from "./components/TravelBot";
 
@@ -39,13 +40,45 @@ import "./styles/mobile.css";
 import CreatePoll from "./pages/CreatePoll";
 import VotePoll from "./pages/VotePoll";
 import PollResults from "./pages/PollResults";
+import { useState, useEffect } from "react";
+
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 function App() {
+  const [isMaintenance, setIsMaintenance] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const checkMaintenance = async () => {
+      try {
+        const res = await fetch(`${API}/api/admin/config/public`);
+        const config = await res.json();
+        if (config.maintenance_mode === true) {
+          setIsMaintenance(true);
+        }
+      } catch (err) {
+        console.error("Failed to check maintenance mode:", err);
+      }
+    };
+    checkMaintenance();
+  }, []);
+
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const isExcluded = currentPath.startsWith("/admin") || currentPath === "/login" || currentPath === "/maintenance";
+
+    if (isMaintenance && !isExcluded) {
+      navigate("/maintenance");
+    }
+  }, [isMaintenance, location.pathname, navigate]);
+
   return (
     <>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/maintenance" element={<Maintenance />} />
           <Route path="/create-poll" element={<CreatePoll />} />
           <Route path="/vote/:pollId" element={<VotePoll />} />
           <Route path="/poll-results/:pollId" element={<PollResults />} />

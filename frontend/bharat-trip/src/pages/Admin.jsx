@@ -277,6 +277,27 @@ export default function Admin() {
                       Update Visuals ✨
                     </button>
                   </div>
+
+                  <div className="config-card">
+                    <h3>Maintenance Mode</h3>
+                    <p className="dim-small">When active, users will see the "Under Maintenance" page and APIs will be restricted.</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <button 
+                        className={`btn-update ${config.maintenance_mode ? 'active' : ''}`}
+                        style={{ 
+                          backgroundColor: config.maintenance_mode ? '#ef4444' : '#10b981',
+                          width: '100%'
+                        }}
+                        onClick={async () => {
+                          const newValue = !config.maintenance_mode;
+                          await handleUpdateConfig("maintenance_mode", newValue);
+                          setConfig({ ...config, maintenance_mode: newValue });
+                        }}
+                      >
+                        {config.maintenance_mode ? 'Disable Maintenance Mode' : 'Enable Maintenance Mode'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
