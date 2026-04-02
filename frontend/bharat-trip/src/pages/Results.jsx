@@ -2,6 +2,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import MapView from "../components/Map/MapView";
 import PlaceImage from "../components/PlaceImage";
 import CategoryCostBreakdown from "../components/CategoryCostBreakdown";
+import BudgetPanel from "../components/BudgetPanel";
 import { calculateDistance, calculateTravelCost } from "../utils/travelUtils";
 import "./results.css";
 import { useState, useEffect, useMemo, useContext, useCallback } from "react";
@@ -420,46 +421,16 @@ function Results() {
                     </div>
                   </div>
                 ))}
+                {/* Spacing for floating budget panel */}
+                <div style={{ height: '120px' }}></div>
               </div>
             </div>
           )}
         </div>
 
         <div className="sidebar-footer-premium">
+          <BudgetPanel budgetData={budgetData} formatPrice={formatPrice} />
           <div className="footer-summary-row" style={{ flexDirection: 'column', gap: '10px' }}>
-            <div className="budget-scale-container">
-              <div className="budget-scale-labels">
-                <span className="budget-scale-label">Budget Precision</span>
-                <span className={`budget-scale-status ${budgetData.isOver ? 'over' : 'under'}`}>
-                  {budgetData.isOver ? 'Over Budget' : 'Within Budget'}
-                </span>
-              </div>
-              <div className="budget-scale-bar-wrapper">
-                <div className="budget-scale-bar-bg">
-                  <div 
-                    className={`budget-scale-bar-fill ${budgetData.isOver ? 'over' : ''}`} 
-                    style={{ width: `${budgetData.percent}%` }}
-                  ></div>
-                  <div 
-                    className="budget-target-marker" 
-                    style={{ left: `${budgetData.targetPercent}%` }}
-                  >
-                    <span className="target-marker-label">Goal</span>
-                  </div>
-                </div>
-              </div>
-              <div className="budget-scale-footer">
-                <div className="budget-value-group">
-                  <span className="value-label">Final Total</span>
-                  <span className="value-amount">{formatPrice(budgetData.total)}</span>
-                </div>
-                <div className="budget-value-group align-right">
-                  <span className="value-label">Target Budget</span>
-                  <span className="value-amount target">{formatPrice(budgetData.target)}</span>
-                </div>
-              </div>
-            </div>
-
             <div className="footer-action-group" style={{ width: '100%', justifyContent: 'stretch' }}>
               <button className="share-journey-btn" style={{ flex: 1 }} onClick={handleShare}>{shareStatus ? "✓ Link" : "Share"}</button>
               <button className="save-journey-btn" style={{ flex: 1 }} onClick={() => handleSaveTrip()} disabled={saving || saved}>{saved ? "✓ Saved" : "Save Plan"}</button>
