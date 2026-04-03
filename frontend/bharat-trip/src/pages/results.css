@@ -898,67 +898,71 @@
 /* Responsive Adjustments */
 @media (max-width: 900px) {
   .anchored-planner-root {
-    display: flex;
-    flex-direction: column-reverse; /* Map at TOP, Sidebar at BOTTOM */
+    display: block; /* Break flex to allow absolute children */
     height: 100%;
     width: 100%;
     overflow: hidden;
-    padding: 0 !important; /* Force remove any inherited padding */
+    padding: 0 !important;
     margin: 0;
-    background: #050505;
     position: relative;
+    background: #000;
   }
 
+  /* Map Foundation - Absolute Fill */
   .planner-map-foundation {
-    width: 100%;
-    flex: 1; /* PRIMARY FIX: Take all available space at the top */
-    position: relative;
-    z-index: 10;
-    display: flex;
-    background: #111;
-    min-height: 0;
-  }
-
-  .planner-map-foundation .map-container {
-    height: 100%;
-    width: 100%;
-    flex: 1;
-  }
-
-  .premium-itinerary-sidebar {
-    width: 100%;
-    height: 45vh; /* Stable height for the bottom sheet */
-    min-height: 250px;
-    border-right: none;
-    border-top: 1px solid var(--glass-border);
-    position: relative;
-    z-index: 1000;
-    border-radius: 24px 24px 0 0;
-    background: #080808;
-    box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0; /* Don't let it be squeezed by map */
-  }
-
-  /* Overlay mode when user wants full map */
-  .show-map-mobile .planner-map-foundation {
-    height: 100%;
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 500;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Lowest layer */
+    display: block;
+    background: #020617;
   }
 
+  .planner-map-foundation .map-container,
+  .planner-map-foundation .leaflet-container {
+    height: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Sidebar - Floating Bottom Sheet */
+  .premium-itinerary-sidebar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 50vh; /* Fixed percentage height */
+    max-height: 70vh;
+    z-index: 100; /* Above map */
+    background: rgba(8, 8, 8, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--glass-border);
+    border-radius: 24px 24px 0 0;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+  }
+
+  /* Minimized state */
+  .premium-itinerary-sidebar.hidden-mobile {
+    transform: translateY(calc(100% - 80px)); /* Shows only the drag-handle/header */
+  }
+
+  /* Full Screen Map Overrides */
   .show-map-mobile .premium-itinerary-sidebar {
-    height: 80px; 
-    overflow: hidden;
+    transform: translateY(100%); /* Completely hide sidebar if needed */
   }
 
   .sidebar-header-premium {
     padding: 15px 20px;
-    background: linear-gradient(to bottom, #0f172a, transparent);
+    background: linear-gradient(to bottom, #0f172a, rgba(15, 23, 42, 0));
     flex-shrink: 0;
+    cursor: pointer;
   }
 
   .sidebar-scroll-content {
@@ -967,6 +971,17 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+
+  /* Adjust floating controls to stay above the sheet */
+  .mobile-view-toggle {
+    bottom: calc(50vh + 20px);
+    transition: bottom 0.5s ease;
+  }
+
+  .premium-itinerary-sidebar.hidden-mobile ~ .mobile-view-toggle {
+    bottom: 100px;
+  }
+}
 
   /* Mobile Toggle for Map Expansion */
   .mobile-view-toggle {
