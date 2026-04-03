@@ -181,6 +181,48 @@ export const addUserToRoom = async (roomId, user) => {
 };
 
 /**
+ * Sends a message in a Trip Room.
+ */
+export const sendMessage = async (roomId, user, text) => {
+  if (!roomId || !user?.uid || !text.trim()) return;
+
+  try {
+    const messagesRef = collection(db, "messages");
+    await addDoc(messagesRef, {
+      roomId,
+      userId: user.uid,
+      userName: user.displayName || user.name || "Traveler",
+      text: text.trim(),
+      timestamp: serverTimestamp()
+    });
+  } catch (error) {
+    console.error("DEBUG: Failed to send message:", error);
+  }
+};
+
+/**
+ * Real-time listener for messages in a specific room.
+ */
+export const listenToMessages = (roomId, callback) => {
+  if (!roomId) return () => {};
+  const messagesRef = collection(db, "messages");
+  const q = query(
+    messagesRef, 
+    where("roomId", "==", roomId),
+    orderBy("timestamp", "asc"),
+    limit(50)
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const messages = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    callback(messages);
+  });
+};
+
+/**
  * Logs a real-time activity inside a Trip Room.
  */
 export const addActivity = async (roomId, type, message, user) => {

@@ -3,10 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { createOrGetTripRoom, addUserToRoom, addActivity, listenToRoom, updateRoomStatus } from "../services/tripRoomService";
-import ActivityFeed from "../components/ActivityFeed";
-import TripTimeline from "../components/TripTimeline";
 import CostPlanner from "../components/CostPlanner";
 import TripConfirmation from "../components/TripConfirmation";
+import TripChat from "../components/TripChat";
 import "./poll.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
@@ -279,8 +278,13 @@ export default function PollResults() {
             />
         )}
 
-        {/* --- ACTIVITY FEED SECTION --- */}
-        <ActivityFeed roomId={roomId} />
+        {/* --- TRIP CHAT SECTION --- */}
+        {roomId && user && (
+            <TripChat 
+                roomId={roomId} 
+                user={user} 
+            />
+        )}
 
         {/* --- COST PLANNER SECTION --- */}
         <CostPlanner destination={winner?.name} />
