@@ -211,8 +211,22 @@ export default function Admin() {
                   <div className="admin-stat-card">
                     <span className="stat-icon">👥</span>
                     <div className="stat-info">
-                      <span className="stat-label">Total Users</span>
+                      <span className="stat-label">Registered Users</span>
                       <span className="stat-value">{data.summary.totalRegisteredUsers}</span>
+                    </div>
+                  </div>
+                  <div className="admin-stat-card">
+                    <span className="stat-icon">👻</span>
+                    <div className="stat-info">
+                      <span className="stat-label">Guest Sessions</span>
+                      <span className="stat-value" style={{ color: '#fb923c' }}>{data.summary.guestCount || 0}</span>
+                    </div>
+                  </div>
+                  <div className="admin-stat-card">
+                    <span className="stat-icon">✨</span>
+                    <div className="stat-info">
+                      <span className="stat-label">Conversions</span>
+                      <span className="stat-value" style={{ color: '#10b981' }}>{data.summary.totalConversions || 0}</span>
                     </div>
                   </div>
                   <div className="admin-stat-card">
@@ -220,20 +234,6 @@ export default function Admin() {
                     <div className="stat-info">
                       <span className="stat-label">Plans Generated</span>
                       <span className="stat-value">{data.summary.totalPlansGenerated}</span>
-                    </div>
-                  </div>
-                  <div className="admin-stat-card">
-                    <span className="stat-icon">🔖</span>
-                    <div className="stat-info">
-                      <span className="stat-label">Saved Trips</span>
-                      <span className="stat-value">{data.summary.totalTripsSavedByUsers}</span>
-                    </div>
-                  </div>
-                  <div className="admin-stat-card">
-                    <span className="stat-icon">📊</span>
-                    <div className="stat-info">
-                      <span className="stat-label">Total Polls</span>
-                      <span className="stat-value">{data.summary.totalPolls}</span>
                     </div>
                   </div>
                 </div>

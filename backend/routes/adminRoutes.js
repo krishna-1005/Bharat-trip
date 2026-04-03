@@ -105,6 +105,14 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     const totalReviews = await ProjectReview.countDocuments();
     const totalPolls = await Poll.countDocuments();
 
+    // Fetch Guest vs Logged-in stats from Firestore
+    const trackedSnapshot = await db.collection("users").get();
+    const trackedData = trackedSnapshot.docs.map(doc => doc.data());
+    
+    const guestCount = trackedData.filter(u => u.userType === 'guest').length;
+    const trackedUserCount = trackedData.filter(u => u.userType === 'user').length;
+    const totalConversions = trackedData.filter(u => u.converted === true).length;
+
     const recentUsers = await User.find()
       .select("name email role createdAt")
       .sort({ createdAt: -1 })
@@ -125,7 +133,10 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
         totalPlansGenerated: totalUsageLogs,
         totalTripsSavedByUsers: totalSavedTrips,
         totalReviews,
-        totalPolls
+        totalPolls,
+        guestCount,
+        trackedUserCount,
+        totalConversions
       },
       recentRegisteredUsers: recentUsers,
       recentActivityLogs: recentUsage,
