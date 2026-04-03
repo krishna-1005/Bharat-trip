@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { generatePlan } from "../../services/api";
 import { useSettings } from "../../context/SettingsContext";
+import PlaceSearch from "../PlaceSearch";
 import "../Planner/plannerForm.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
@@ -11,17 +12,7 @@ function PlannerForm({ onPlanGenerated }) {
   const loc = useLocation();
   const [step, setStep] = useState(1);
   const [city, setCity] = useState("Bengaluru");
-  const [showSuggestions, setShowSuggestions] = useState(false);
-
-  const indianCities = [
-    "Bengaluru", "Mumbai", "Delhi", "Jaipur", "Goa", "Hyderabad", "Chennai", "Kolkata", 
-    "Agra", "Udaipur", "Varanasi", "Kochi", "Shimla", "Manali", "Rishikesh", "Amritsar", 
-    "Pune", "Ahmedabad", "Darjeeling", "Pondicherry", "Mysuru", "Chandigarh", "Lucknow"
-  ];
-
-  const filteredCities = indianCities.filter(c => 
-    c.toLowerCase().includes(city.toLowerCase()) && c.toLowerCase() !== city.toLowerCase()
-  );
+  const [coordinates, setCoordinates] = useState({ lat: 12.9716, lng: 77.5946 });
 
   useEffect(() => {
     const params = new URLSearchParams(loc.search);
@@ -44,6 +35,11 @@ function PlannerForm({ onPlanGenerated }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isPersonalizedPrefill, setIsPersonalizedPrefill] = useState(false);
+
+  const handlePlaceSelect = (place) => {
+    setCity(place.shortName);
+    setCoordinates({ lat: place.lat, lng: place.lng });
+  };
 
   // Prefill from user preferences
   useEffect(() => {
@@ -98,6 +94,8 @@ function PlannerForm({ onPlanGenerated }) {
         headers,
         body: JSON.stringify({ 
           city, 
+          lat: coordinates.lat,
+          lng: coordinates.lng,
           days, 
           budget: Math.round(budgetInINR), 
           interests, 
@@ -168,25 +166,10 @@ function PlannerForm({ onPlanGenerated }) {
             </div>
 
             <div className="pf-field">
-              <label className="pf-label">Destination</label>
-              <div style={{ position: 'relative' }}>
-                <input 
-                  type="text" 
-                  className="pf-city-input" 
-                  placeholder="Enter city name..." 
-                  value={city} 
-                  onChange={(e) => { setCity(e.target.value); setShowSuggestions(true); }}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                />
-                {showSuggestions && filteredCities.length > 0 && (
-                  <ul className="pf-suggestions">
-                    {filteredCities.map(c => (
-                      <li key={c} onMouseDown={() => { setCity(c); setShowSuggestions(false); }}>{c}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              <PlaceSearch 
+                initialValue={city} 
+                onSelect={handlePlaceSelect} 
+              />
             </div>
 
             <div className="pf-field">
