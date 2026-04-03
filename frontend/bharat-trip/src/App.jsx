@@ -41,6 +41,7 @@ import CreatePoll from "./pages/CreatePoll";
 import VotePoll from "./pages/VotePoll";
 import PollResults from "./pages/PollResults";
 import { useState, useEffect } from "react";
+import AuthModal from "./components/AuthModal";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
@@ -146,6 +147,8 @@ function App() {
           />
         </Route>
       </Routes>
+
+      <AuthModal />
 
       {/* AI Chatbot */}
       <TravelBot />

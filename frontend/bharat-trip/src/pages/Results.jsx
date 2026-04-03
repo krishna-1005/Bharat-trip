@@ -53,7 +53,7 @@ function Results() {
   const loc = useLocation();
   const { id: routeTripId } = useParams();
   const { formatPrice, t } = useSettings();
-  const { user } = useContext(AuthContext);
+  const { user, setShowAuthModal } = useContext(AuthContext);
 
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -165,7 +165,7 @@ function Results() {
     if (!isAutoSave) setSaving(true);
     try {
       if (!user) {
-        if (!isAutoSave) alert("Please login to save your trip plan.");
+        if (!isAutoSave) setShowAuthModal(true);
         return;
       }
       let token = localStorage.getItem("token");
@@ -201,7 +201,7 @@ function Results() {
     } finally {
       if (!isAutoSave) setSaving(false);
     }
-  }, [saving, saved, user, plan, tripTitle, navigate, isPublic]);
+  }, [saving, saved, user, plan, tripTitle, navigate, isPublic, setShowAuthModal]);
 
   useEffect(() => {
     if (!isGenerating) return;
@@ -243,7 +243,7 @@ function Results() {
   };
 
   const handleUnlock = () => {
-    navigate("/login", { state: { from: loc.pathname, plan } });
+    setShowAuthModal(true);
   };
 
   useEffect(() => {
