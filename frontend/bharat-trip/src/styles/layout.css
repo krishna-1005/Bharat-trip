@@ -17,6 +17,14 @@
   width: 100%;
 }
 
+.page-transition-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
 /* ================= FULL SCREEN MAP PAGE ================= */
 
 .full-screen-map-page {
@@ -34,6 +42,20 @@
   height: 100%;
   position: relative;
   min-height: 0;
+}
+
+.results-page-fixed {
+  padding: 0 !important;
+  height: 100%;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .results-page-fixed {
+    padding-top: 64px !important; /* Navbar height on mobile */
+  }
 }
 
 /* ================= STANDARD PAGES ================= */
