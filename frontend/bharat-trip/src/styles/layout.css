@@ -65,7 +65,7 @@
 
 @media (max-width: 900px) {
   .results-page-fixed {
-    padding-top: 64px !important; /* Navbar height on mobile */
+    /* Padding is already handled by .main-content */
   }
 }
 
