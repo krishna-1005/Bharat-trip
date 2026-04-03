@@ -16,9 +16,10 @@
   min-height: 0;
   position: relative;
   width: 100%;
-  /* Account for fixed bars in the layout flow */
+  height: 100%; /* Ensure full height propagation */
+  /* Account for fixed header in the layout flow */
   padding-top: 64px; 
-  padding-bottom: 80px;
+  padding-bottom: 0; 
 }
 
 @media (min-width: 901px) {

@@ -981,7 +981,6 @@
   .premium-itinerary-sidebar.hidden-mobile ~ .mobile-view-toggle {
     bottom: 100px;
   }
-}
 
   /* Mobile Toggle for Map Expansion */
   .mobile-view-toggle {
