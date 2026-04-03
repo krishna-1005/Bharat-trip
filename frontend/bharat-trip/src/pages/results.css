@@ -910,21 +910,26 @@
     background: #000;
   }
 
-  /* Map Foundation - Fills remaining space */
+  /* Map Foundation - True Full Screen Fill */
   .planner-map-foundation {
-    flex: 1 !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    position: relative !important;
     z-index: 1; /* Lowest layer */
-    display: block;
+    display: flex !important;
     background: #020617;
   }
 
   .planner-map-foundation .map-container,
   .planner-map-foundation .leaflet-container {
+    flex: 1 !important;
     height: 100% !important;
     width: 100% !important;
+    min-height: 100% !important;
   }
 
   /* Sidebar - Floating Bottom Sheet */

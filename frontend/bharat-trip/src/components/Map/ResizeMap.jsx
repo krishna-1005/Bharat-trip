@@ -5,12 +5,22 @@ function ResizeMap({ trigger }) {
   const map = useMap();
 
   useEffect(() => {
-    // Give layout time to settle, then force Leaflet to recalc
+    // Immediate recalc
+    map.invalidateSize();
+    
+    // Delayed recalc to allow for CSS transitions and layout settling
     const timer = setTimeout(() => {
       map.invalidateSize();
-    }, 300);
+    }, 500);
 
-    return () => clearTimeout(timer);
+    // Also handle window resize events specifically
+    const handleResize = () => map.invalidateSize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
   }, [map, trigger]);
 
   return null;
