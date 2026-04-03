@@ -5,6 +5,7 @@ const Trip = require("../models/Trip");
 const ProjectReview = require("../models/ProjectReview");
 const Poll = require("../models/Poll");
 const { protect, adminOnly } = require("../middleware/protect");
+const { admin, db } = require("../firebaseAdmin");
 
 const router = express.Router();
 
@@ -105,13 +106,23 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     const totalReviews = await ProjectReview.countDocuments();
     const totalPolls = await Poll.countDocuments();
 
-    // Fetch Guest vs Logged-in stats from Firestore
-    const trackedSnapshot = await db.collection("users").get();
-    const trackedData = trackedSnapshot.docs.map(doc => doc.data());
-    
-    const guestCount = trackedData.filter(u => u.userType === 'guest').length;
-    const trackedUserCount = trackedData.filter(u => u.userType === 'user').length;
-    const totalConversions = trackedData.filter(u => u.converted === true).length;
+    // Fetch Guest vs Logged-in stats from Firestore (with fallback)
+    let guestCount = 0;
+    let trackedUserCount = 0;
+    let totalConversions = 0;
+
+    try {
+      if (db) {
+        const trackedSnapshot = await db.collection("users").get();
+        const trackedData = trackedSnapshot.docs.map(doc => doc.data());
+        
+        guestCount = trackedData.filter(u => u.userType === 'guest').length;
+        trackedUserCount = trackedData.filter(u => u.userType === 'user').length;
+        totalConversions = trackedData.filter(u => u.converted === true).length;
+      }
+    } catch (fsErr) {
+      console.error("Firestore stats error (non-fatal):", fsErr.message);
+    }
 
     const recentUsers = await User.find()
       .select("name email role createdAt")
@@ -147,8 +158,6 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch stats" });
   }
 });
-
-const { admin, db } = require("../firebaseAdmin");
 
 /* USERS MANAGEMENT */
 router.get("/users", protect, verifyAdminEmail, async (req, res) => {
