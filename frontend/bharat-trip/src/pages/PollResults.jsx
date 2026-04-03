@@ -180,7 +180,7 @@ export default function PollResults() {
                 </div>
             </div>
 
-            {!isFinalized && isCreator && totalVotes >= 2 && (
+            {!isFinalized && isCreator && (totalVotes >= 2 || (poll.totalMembers === 1 && totalVotes >= 1)) && (
                 <button 
                     className="btn-premium outline" 
                     style={{ position: 'absolute', right: 0, top: 0, padding: '8px 16px', fontSize: '12px' }}
@@ -198,6 +198,12 @@ export default function PollResults() {
             totalMembers={poll.totalMembers} 
             totalVotes={totalVotes} 
         />
+
+        {!isFinalized && totalVotes < poll.totalMembers && (
+            <div style={{ textAlign: 'center', marginBottom: '20px', fontSize: '14px', color: 'var(--dash-muted)' }}>
+                ✨ Waiting for {poll.totalMembers - totalVotes} more member(s) to vote...
+            </div>
+        )}
 
         {/* --- STEP 2: WINNER HIGHLIGHT CARD --- */}
         <motion.div 

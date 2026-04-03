@@ -121,13 +121,11 @@ router.post("/vote", async (req, res) => {
     let shouldClose = false;
     let winner = null;
 
-    // RULE: Finalize when votesCount >= Math.ceil(totalMembers / 2) AND no tie
-    if (topOptions.length === 1) {
-        const threshold = Math.ceil(poll.totalMembers / 2);
-        if (totalVotes >= threshold || (poll.groupSize && totalVotes >= poll.groupSize)) {
-            shouldClose = true;
-            winner = topOptions[0].name;
-        }
+    // RULE: Auto-finalize ONLY when EVERYONE has voted (totalVotes >= totalMembers)
+    // AND there is a clear winner (topOptions.length === 1)
+    if (topOptions.length === 1 && totalVotes >= poll.totalMembers) {
+        shouldClose = true;
+        winner = topOptions[0].name;
     }
 
     if (shouldClose) {
@@ -156,14 +154,18 @@ router.post("/finalize-now", async (req, res) => {
     }
 
     const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
-    if (totalVotes < 2) {
-      return res.status(400).json({ error: "At least 2 votes are required to finalize." });
+    
+    // Require at least 2 votes to finalize manually (unless totalMembers is 1)
+    if (totalVotes < 2 && poll.totalMembers > 1) {
+      return res.status(400).json({ error: "At least 2 votes are required to finalize manually for group trips." });
+    } else if (totalVotes < 1) {
+      return res.status(400).json({ error: "At least 1 vote is required to finalize." });
     }
 
     const maxVotes = Math.max(...poll.options.map(o => o.votes));
     const topOptions = poll.options.filter(o => o.votes === maxVotes);
 
-    // Pick the first highest voted option
+    // Pick the highest voted option. In case of tie, pick the first one.
     poll.isClosed = true;
     poll.winner = topOptions[0].name;
 
