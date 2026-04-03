@@ -898,39 +898,50 @@
 /* Responsive Adjustments */
 @media (max-width: 900px) {
   .anchored-planner-root {
-    flex-direction: column;
-    overflow: hidden;
-    padding: 0; /* Remove fixed paddings */
+    display: flex;
+    flex-direction: column-reverse; /* Map at TOP, Sidebar at BOTTOM */
     height: 100%;
-    position: relative;
-  }
-
-  .premium-itinerary-sidebar {
     width: 100%;
-    height: 60%; /* Use percentage height */
-    border-right: none;
-    border-top: 1px solid var(--glass-border);
-    position: relative; /* Not fixed, let flex handle it */
-    z-index: 1000;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    border-radius: 30px 30px 0 0;
-    margin-top: -30px; /* Slight overlap for premium look */
-    background: #080808;
-  }
-
-  .premium-itinerary-sidebar.hidden-mobile {
-    transform: translateY(calc(100% - 100px));
+    overflow: hidden;
+    padding: 0 !important; /* Force remove any inherited padding */
+    margin: 0;
+    background: #050505;
+    position: relative;
   }
 
   .planner-map-foundation {
     width: 100%;
-    height: 40%; /* Percentage height */
+    flex: 1; /* PRIMARY FIX: Take all available space at the top */
     position: relative;
     z-index: 10;
     display: flex;
-    flex-shrink: 0;
+    background: #111;
+    min-height: 0;
   }
 
+  .planner-map-foundation .map-container {
+    height: 100%;
+    width: 100%;
+    flex: 1;
+  }
+
+  .premium-itinerary-sidebar {
+    width: 100%;
+    height: 45vh; /* Stable height for the bottom sheet */
+    min-height: 250px;
+    border-right: none;
+    border-top: 1px solid var(--glass-border);
+    position: relative;
+    z-index: 1000;
+    border-radius: 24px 24px 0 0;
+    background: #080808;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0; /* Don't let it be squeezed by map */
+  }
+
+  /* Overlay mode when user wants full map */
   .show-map-mobile .planner-map-foundation {
     height: 100%;
     position: absolute;
@@ -940,20 +951,21 @@
   }
 
   .show-map-mobile .premium-itinerary-sidebar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 100px;
-    z-index: 1000;
+    height: 80px; 
+    overflow: hidden;
   }
 
   .sidebar-header-premium {
-    padding: 20px;
+    padding: 15px 20px;
     background: linear-gradient(to bottom, #0f172a, transparent);
+    flex-shrink: 0;
   }
 
   .sidebar-scroll-content {
+    flex: 1;
     padding: 20px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Mobile Toggle for Map Expansion */

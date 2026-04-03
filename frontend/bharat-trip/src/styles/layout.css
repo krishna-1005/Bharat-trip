@@ -4,7 +4,8 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Lock to viewport height */
+  height: 100vh;
+  height: 100dvh; /* Use dynamic viewport height for mobile */
   overflow: hidden;
 }
 
@@ -15,6 +16,16 @@
   min-height: 0;
   position: relative;
   width: 100%;
+  /* Account for fixed bars in the layout flow */
+  padding-top: 64px; 
+  padding-bottom: 80px;
+}
+
+@media (min-width: 901px) {
+  .main-content {
+    padding-top: 80px; /* Desktop navbar height */
+    padding-bottom: 0; /* No bottom nav on desktop */
+  }
 }
 
 .page-transition-wrapper {
