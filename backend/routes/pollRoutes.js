@@ -8,6 +8,7 @@ const { protect } = require("../middleware/protect");
 
 // Create a new poll
 router.post("/create", async (req, res) => {
+  console.time(`Poll Creation: ${req.body.tripName}`);
   try {
     const { tripName, options, groupSize, totalMembers, userId } = req.body;
     if (!tripName || !options || options.length < 2) {
@@ -30,11 +31,15 @@ router.post("/create", async (req, res) => {
       createdBy: userId || undefined
     });
 
+    console.log(`DEBUG: Saving new poll: ${pollId}`);
     await newPoll.save();
+    console.log(`DEBUG: Poll saved successfully: ${pollId}`);
     res.status(201).json({ pollId });
   } catch (error) {
     console.error("Poll Creation Error:", error);
     res.status(500).json({ error: error.message || "Server error creating poll." });
+  } finally {
+    console.timeEnd(`Poll Creation: ${req.body.tripName}`);
   }
 });
 

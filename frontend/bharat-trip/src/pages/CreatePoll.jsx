@@ -59,6 +59,7 @@ export default function CreatePoll() {
   const createPoll = async () => {
     setLoading(true);
     try {
+      console.log("DEBUG: Starting poll creation...");
       const payload = { 
         tripName, 
         totalMembers,
@@ -73,15 +74,20 @@ export default function CreatePoll() {
       });
       const data = await res.json();
       if (res.ok) {
+        console.log("DEBUG: Poll created successfully:", data.pollId);
         setCreatedPollId(data.pollId);
-        setPollCreated(true);
+        // Small delay to ensure database consistency before redirect or showing success
+        setTimeout(() => {
+          setPollCreated(true);
+          setLoading(false);
+        }, 500);
       } else {
         alert(data.error || "Failed to create poll.");
+        setLoading(false);
       }
     } catch (err) {
-      console.error(err);
-      alert("Server error.");
-    } finally {
+      console.error("Poll Creation Error:", err);
+      alert("Server error. Please check your connection.");
       setLoading(false);
     }
   };

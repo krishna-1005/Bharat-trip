@@ -6,6 +6,7 @@ import { createOrGetTripRoom, addUserToRoom, addActivity, listenToRoom, updateRo
 import CostPlanner from "../components/CostPlanner";
 import TripConfirmation from "../components/TripConfirmation";
 import TripChat from "../components/TripChat";
+import TripTimeline from "../components/TripTimeline";
 import "./poll.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
