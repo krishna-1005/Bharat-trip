@@ -61,6 +61,8 @@ const TripChat = ({ roomId, user }) => {
 
     const text = inputText;
     setInputText("");
+    
+    console.log(`DEBUG: Sending message to room [${roomId}] by user [${user.uid}]`);
     await sendMessage(roomId, user, text);
   };
 

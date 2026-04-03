@@ -218,7 +218,10 @@ export const listenToMessages = (roomId, callback) => {
       id: doc.id,
       ...doc.data()
     }));
+    console.log(`DEBUG: [${roomId}] Messages received:`, messages.length);
     callback(messages);
+  }, (error) => {
+    console.error("DEBUG: Chat Listener Error:", error);
   });
 };
 

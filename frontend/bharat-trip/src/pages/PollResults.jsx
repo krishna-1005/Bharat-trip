@@ -282,6 +282,7 @@ export default function PollResults() {
         {/* --- TRIP CHAT SECTION --- */}
         {roomId && user && (
             <TripChat 
+                key={roomId}
                 roomId={roomId} 
                 user={user} 
             />
