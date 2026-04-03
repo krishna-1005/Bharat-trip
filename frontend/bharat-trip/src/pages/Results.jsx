@@ -219,7 +219,9 @@ function Results() {
 
   const normalizedItinerary = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
+    // If it's already an array, use it directly (aligns with backend update)
     if (Array.isArray(plan.itinerary)) return plan.itinerary;
+    // Fallback for old object-based structure
     return Object.entries(plan.itinerary).map(([dayLabel, dayData]) => ({
       day: dayLabel,
       ...dayData
@@ -227,10 +229,47 @@ function Results() {
   }, [plan]);
 
   const allPlaces = useMemo(() => {
-    return normalizedItinerary.flatMap(d => (d.places || []).map(p => ({ ...p, dayLabel: d.day })));
+    return normalizedItinerary.flatMap(d => (d.places || []).map(p => ({ ...p, dayLabel: d.label || d.day })));
   }, [normalizedItinerary]);
 
-  const getBestVisitTimeFallback = (category, index) => {
+  const handleAddPlace = (dayLabel) => {
+    const newPlaceName = window.prompt("Enter the name of the place to add:");
+    if (!newPlaceName) return;
+
+    setPlan(prev => {
+      const newItinerary = Array.isArray(prev.itinerary) ? [...prev.itinerary] : { ...prev.itinerary };
+
+      const updateDay = (dayObj) => {
+        const newPlace = {
+          name: newPlaceName,
+          category: "Other",
+          rating: 4.5,
+          reviews: 100,
+          estimatedCost: 200,
+          timeHours: 2,
+          tag: "Added by you",
+          reason: "Manually added stop."
+        };
+        return { ...dayObj, places: [...(dayObj.places || []), newPlace] };
+      };
+
+      if (Array.isArray(newItinerary)) {
+        const dayIdx = newItinerary.findIndex(d => (d.label || d.day) === dayLabel);
+        if (dayIdx !== -1) {
+          newItinerary[dayIdx] = updateDay(newItinerary[dayIdx]);
+        }
+      } else {
+        if (newItinerary[dayLabel]) {
+          newItinerary[dayLabel] = updateDay(newItinerary[dayLabel]);
+        }
+      }
+
+      return { ...prev, itinerary: newItinerary };
+    });
+  };
+
+  const handleSkip = (dayLabel, placeName) => {
+
     const cat = (category || "").toLowerCase();
     const isEven = index % 2 === 0;
     if (["nature", "park", "garden", "hill", "lake", "beach"].some(kw => cat.includes(kw))) {
@@ -365,7 +404,19 @@ function Results() {
                   <div key={dIdx} className="premium-day-section">
                     <div className="day-header-premium">
                       <div className="day-circle">{dIdx + 1}</div>
-                      <div className="day-info"><h3>{dayObj.day}</h3><span>{dayObj.places.length} Places</span></div>
+                      <div className="day-info">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                          <h3>{dayObj.label || dayObj.day}</h3>
+                          <button 
+                            className="add-place-btn-minimal" 
+                            onClick={() => handleAddPlace(dayObj.label || dayObj.day)}
+                            title="Add a custom stop to this day"
+                          >
+                            + Add Stop
+                          </button>
+                        </div>
+                        <span>{dayObj.places?.length || 0} Places</span>
+                      </div>
                     </div>
 
                     <CategoryCostBreakdown 

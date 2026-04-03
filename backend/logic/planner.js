@@ -238,12 +238,12 @@ async function generatePlan({
   prioritizedPool = prioritizedPool.slice(0, maxPlacesNeeded);
 
   /* STEP 5: BALANCED DISTRIBUTION */
-  const itinerary = {};
+  const itineraryDays = [];
   const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
   const usedPlaceNames = new Set();
   let accumulatedTotalCost = 0;
   
-  for (let day = 1; day <= days; day++) {
+  for (let dayNum = 1; dayNum <= days; dayNum++) {
     let dayHours = 0;
     let dayCost = 0;
     const validPlaces = [];
@@ -259,10 +259,7 @@ async function generatePlan({
       const t = p.timeHours || 2;
       const placeCost = (p.avgCost || 200) * tMult;
 
-      // STRICTER BUDGET CHECK: 
-      // Ensure (total accumulated cost + current day cost + this place + remaining days' meals) 
-      // does not exceed totalBudget.
-      const remainingDays = days - day;
+      const remainingDays = days - dayNum;
       const projectedFutureMealCosts = remainingDays * meal;
       
       const canAfford = (accumulatedTotalCost + dayCost + placeCost + meal + projectedFutureMealCosts) <= totalBudget;
@@ -293,19 +290,22 @@ async function generatePlan({
       return { ...p, userReviews };
     }));
 
-    itinerary[`Day ${day}`] = {
+    itineraryDays.push({
+      day: dayNum,
+      label: `Day ${dayNum}`,
       places: enrichedPlaces,
       estimatedHours: dayHours,
       estimatedCost: actualDayCost,
       dayMealCost: meal
-    };
+    });
   }
 
   const finalTotalCost = Math.round(accumulatedTotalCost);
 
   return { 
     city, 
-    itinerary, 
+    days: parseInt(days),
+    itinerary: itineraryDays, 
     coordinates: coords,
     totalBudget,
     totalTripCost: finalTotalCost,
