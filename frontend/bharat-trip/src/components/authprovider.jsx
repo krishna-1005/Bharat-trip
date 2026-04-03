@@ -18,6 +18,7 @@ export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [guestId, setGuestId] = useState(getGuestId());
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const trackActivity = useCallback(async (u, action = "page_view") => {
     try {
@@ -52,6 +53,8 @@ export default function AuthProvider({ children }) {
         };
         setUser(userData);
         trackActivity(userData, "login_detected");
+        // Automatically close modal when user is authenticated
+        setShowAuthModal(false);
       } else {
         setUser(null);
         trackActivity(null, "guest_session");
@@ -65,6 +68,7 @@ export default function AuthProvider({ children }) {
   const login = useCallback((userData) => {
     setUser({ ...userData, userType: "user" });
     trackActivity(userData, "manual_login");
+    setShowAuthModal(false);
   }, [trackActivity]);
 
   const logout = useCallback(() => {
@@ -78,7 +82,16 @@ export default function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, updateUser, guestId }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      login, 
+      logout, 
+      updateUser, 
+      guestId,
+      showAuthModal,
+      setShowAuthModal
+    }}>
       {children}
     </AuthContext.Provider>
   );
