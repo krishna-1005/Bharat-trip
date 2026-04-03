@@ -904,34 +904,44 @@
 
   .premium-itinerary-sidebar {
     width: 100%;
-    height: 65vh;
+    height: 55vh;
     border-right: none;
     border-top: 1px solid var(--glass-border);
     position: fixed;
     bottom: 0;
     left: 0;
+    z-index: 1000;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     border-radius: 30px 30px 0 0;
     transform: translateY(0);
   }
 
   .premium-itinerary-sidebar.hidden-mobile {
-    transform: translateY(calc(65vh - 120px));
+    transform: translateY(calc(55vh - 80px));
   }
 
   .planner-map-foundation {
     width: 100%;
-    height: 35vh;
+    height: 45vh;
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 10;
+    z-index: 10; /* Lower than sidebar but visible */
     display: block;
   }
 
+  .planner-map-foundation .map-container {
+    height: 100%;
+    width: 100%;
+  }
+
   .show-map-mobile .planner-map-foundation {
-    height: 100vh;
-    z-index: 2000;
+    height: calc(100vh - 80px);
+    z-index: 10;
+  }
+
+  .show-map-mobile .premium-itinerary-sidebar {
+    transform: translateY(calc(55vh - 80px));
   }
 
   .sidebar-header-premium {

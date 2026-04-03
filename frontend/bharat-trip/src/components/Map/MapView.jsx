@@ -202,7 +202,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
           />
         )}
 
-        <ResizeMap trigger={plan} />
+        <ResizeMap trigger={activePlace} />
 
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

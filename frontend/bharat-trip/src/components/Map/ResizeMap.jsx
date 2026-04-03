@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useMap } from "react-leaflet";
 
-function ResizeMap() {
+function ResizeMap({ trigger }) {
   const map = useMap();
 
   useEffect(() => {
@@ -11,7 +11,7 @@ function ResizeMap() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [map]);
+  }, [map, trigger]);
 
   return null;
 }
