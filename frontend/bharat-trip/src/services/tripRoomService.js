@@ -181,6 +181,52 @@ export const addUserToRoom = async (roomId, user) => {
 };
 
 /**
+ * Safely adds or updates a user in the Trip Room with a selected persona.
+ */
+export const addUserWithPersonaToRoom = async (roomId, user, persona, isGuest = false) => {
+  if (!roomId || !user?.id) return;
+
+  try {
+    const roomRef = doc(db, "tripRooms", roomId);
+    
+    // Fetch current room data to check for existing member
+    const q = query(collection(db, "tripRooms"), where("__name__", "==", roomId), limit(1));
+    const roomSnap = await getDocs(q);
+    
+    if (roomSnap.empty) return;
+    const roomData = roomSnap.docs[0].data();
+    const membersInfo = roomData.membersInfo || [];
+    
+    const existingIndex = membersInfo.findIndex(m => m.uid === user.id);
+    const newMemberData = {
+      uid: user.id,
+      name: user.name || "Traveler",
+      persona: persona,
+      isGuest: isGuest,
+      joinedAt: new Date().toISOString()
+    };
+
+    if (existingIndex > -1) {
+      // Update existing member's persona
+      membersInfo[existingIndex] = newMemberData;
+      await updateDoc(roomRef, {
+        membersInfo: membersInfo
+      });
+    } else {
+      // Add as new member
+      await updateDoc(roomRef, {
+        members: arrayUnion(user.id),
+        membersInfo: arrayUnion(newMemberData),
+        [`confirmations.${user.id}`]: "pending"
+      });
+    }
+  } catch (error) {
+    console.error("DEBUG: Failed to update user with persona:", error);
+    throw error;
+  }
+};
+
+/**
  * Sends a message in a Trip Room.
  */
 export const sendMessage = async (roomId, user, text) => {

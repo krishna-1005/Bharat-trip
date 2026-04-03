@@ -302,6 +302,14 @@ function Results() {
   };
 
   const [sidebarTab, setSidebarTab] = useState(isExecuting ? "live" : "plan");
+  const [activePlace, setActivePlace] = useState(null);
+
+  const handleStopClick = (place) => {
+    setActivePlace(place);
+    if (isMobile) {
+      setShowMapOnMobile(true);
+    }
+  };
 
   const budgetData = useMemo(() => {
     const total = plan?.totalTripCost || 0;
@@ -460,7 +468,12 @@ function Results() {
                             const travelCost = distance !== null ? calculateTravelCost(distance) : null;
 
                             return (
-                              <div key={currentIdx} className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}>
+                              <div 
+                                key={currentIdx} 
+                                className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}
+                                onClick={() => handleStopClick(place)}
+                                style={{ cursor: 'pointer' }}
+                              >
                                 <div className="stop-marker-v2">{isVisited && <span className="visited-tick">✓</span>}</div>
                                 <div className="stop-card-inner">
                                   <div className="stop-top-row">
@@ -522,7 +535,13 @@ function Results() {
       )}
 
       <div className="planner-map-foundation">
-        <MapView plan={plan} isTracking={isTracking} currentIndex={currentIndex} userLocation={userLocation} />
+        <MapView 
+          plan={plan} 
+          isTracking={isTracking} 
+          currentIndex={currentIndex} 
+          userLocation={userLocation}
+          activePlace={activePlace}
+        />
         <div className="floating-map-controls">
           <button className={`map-control-btn ${isTracking ? "active" : ""}`} onClick={() => setIsTracking(!isTracking)}>📍</button>
         </div>

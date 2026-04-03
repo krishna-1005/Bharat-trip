@@ -1,0 +1,134 @@
+.persona-selection-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 5, 0.9);
+  backdrop-filter: blur(15px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.persona-selection-card {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 30px;
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.5);
+  animation: personaFadeIn 0.5s ease-out;
+}
+
+@keyframes personaFadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.persona-selection-card h2 {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #94a3b8;
+  margin-bottom: 40px;
+  font-size: 16px;
+}
+
+.persona-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.persona-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 25px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+}
+
+.persona-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.persona-card.active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+  transform: scale(1.05);
+}
+
+.persona-emoji {
+  font-size: 40px;
+  margin-bottom: 15px;
+}
+
+.persona-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.persona-card p {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.selection-tick {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #3b82f6;
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.persona-loading {
+  margin-top: 30px;
+  color: #3b82f6;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@media (max-width: 768px) {
+  .persona-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .persona-selection-card {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .persona-grid {
+    grid-template-columns: 1fr;
+  }
+}

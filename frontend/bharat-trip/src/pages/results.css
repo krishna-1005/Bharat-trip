@@ -870,61 +870,72 @@
 @media (max-width: 900px) {
   .anchored-planner-root {
     flex-direction: column;
+    overflow: hidden;
   }
 
   .premium-itinerary-sidebar {
     width: 100%;
+    height: 65vh;
     border-right: none;
+    border-top: 1px solid var(--glass-border);
+    position: fixed;
+    bottom: 0;
+    left: 0;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 30px 30px 0 0;
+    transform: translateY(0);
   }
 
   .premium-itinerary-sidebar.hidden-mobile {
-    display: none;
+    transform: translateY(calc(65vh - 120px));
   }
 
   .planner-map-foundation {
     width: 100%;
-    height: 100vh;
+    height: 35vh;
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 50;
-    display: none;
+    z-index: 10;
+    display: block;
   }
 
   .show-map-mobile .planner-map-foundation {
-    display: block;
+    height: 100vh;
+    z-index: 2000;
   }
 
   .sidebar-header-premium {
     padding: 20px;
+    background: linear-gradient(to bottom, #0f172a, transparent);
   }
 
   .sidebar-scroll-content {
     padding: 20px;
   }
 
-  .tt-main-title {
-    font-size: 1.8rem;
-  }
-
-  /* Mobile Toggle for Map/Itinerary */
+  /* Mobile Toggle for Map Expansion */
   .mobile-view-toggle {
     position: fixed;
-    bottom: 90px;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 140px;
+    right: 20px;
     z-index: 2100;
     background: var(--accent-blue);
     color: white;
-    padding: 12px 24px;
-    border-radius: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
     border: none;
     font-weight: 800;
     box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .premium-stop-card-v2.active {
+    border-left: 4px solid var(--accent-blue);
+    background: rgba(59, 130, 246, 0.1);
   }
 }

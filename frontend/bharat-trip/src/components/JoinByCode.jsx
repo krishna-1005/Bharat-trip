@@ -22,8 +22,8 @@ const JoinByCode = () => {
     try {
       const room = await getRoomByCode(code);
       if (room) {
-        // Redirect to the vote page for this poll
-        navigate(`/vote/${room.pollId}`);
+        // Redirect to the persona selection / waiting room
+        navigate(`/trip-room/${room.roomId}`);
       } else {
         setError('Invalid code. Please check and try again.');
       }
