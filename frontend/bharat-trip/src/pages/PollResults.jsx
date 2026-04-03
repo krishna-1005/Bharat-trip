@@ -6,6 +6,7 @@ import { createOrGetTripRoom, addUserToRoom, addActivity, listenToRoom, updateRo
 import ActivityFeed from "../components/ActivityFeed";
 import TripTimeline from "../components/TripTimeline";
 import CostPlanner from "../components/CostPlanner";
+import TripConfirmation from "../components/TripConfirmation";
 import "./poll.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
@@ -262,6 +263,15 @@ export default function PollResults() {
             );
           })}
         </div>
+
+        {/* --- TRIP CONFIRMATION SECTION --- */}
+        {isFinalized && (
+            <TripConfirmation 
+                roomId={roomId} 
+                user={user} 
+                roomData={room} 
+            />
+        )}
 
         {/* --- ACTIVITY FEED SECTION --- */}
         <ActivityFeed roomId={roomId} />

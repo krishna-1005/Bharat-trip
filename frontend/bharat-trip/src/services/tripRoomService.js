@@ -66,6 +66,9 @@ export const createOrGetTripRoom = async (pollId, tripName, user) => {
         name: user.displayName || user.name || "Traveler",
         email: user.email || ""
       }],
+      confirmations: {
+        [user.uid]: "pending"
+      },
       pollId: pollId,
       joinCode: joinCode,
       status: "polling",
@@ -119,6 +122,21 @@ export const updateRoomStatus = async (roomId, status) => {
 };
 
 /**
+ * Updates a member's confirmation status.
+ */
+export const updateMemberConfirmation = async (roomId, userId, status) => {
+  if (!roomId || !userId) return;
+  try {
+    const roomRef = doc(db, "tripRooms", roomId);
+    await updateDoc(roomRef, {
+      [`confirmations.${userId}`]: status
+    });
+  } catch (err) {
+    console.error("Error updating confirmation:", err);
+  }
+};
+
+/**
  * Real-time listener for room data (including status).
  */
 export const listenToRoom = (roomId, callback) => {
@@ -138,13 +156,24 @@ export const addUserToRoom = async (roomId, user) => {
 
   try {
     const roomRef = doc(db, "tripRooms", roomId);
+    const roomSnap = await getDocs(query(collection(db, "tripRooms"), where("__name__", "==", roomId), limit(1)));
+    
+    if (roomSnap.empty) return;
+    const roomData = roomSnap.docs[0].data();
+    
+    // Only add if not already a member to avoid overwriting confirmation status
+    if (roomData.members && roomData.members.includes(user.uid)) {
+      return;
+    }
+
     await updateDoc(roomRef, {
       members: arrayUnion(user.uid),
       membersInfo: arrayUnion({
         uid: user.uid,
         name: user.displayName || user.name || "Traveler",
         email: user.email || ""
-      })
+      }),
+      [`confirmations.${user.uid}`]: "pending"
     });
   } catch (error) {
     console.error("DEBUG: Failed to update members:", error);
