@@ -898,10 +898,8 @@
 /* Responsive Adjustments */
 @media (max-width: 900px) {
   .anchored-planner-root {
-    display: flex !important;
-    flex-direction: column !important;
-    height: calc(100dvh - 64px) !important; /* Total height minus navbar */
-    min-height: calc(100dvh - 64px) !important;
+    display: block !important;
+    height: 100dvh !important;
     width: 100% !important;
     overflow: hidden !important;
     padding: 0 !important;
@@ -910,15 +908,14 @@
     background: #000;
   }
 
-  /* Map Foundation - Force fill parent */
+  /* Map Foundation - True Full Screen Fill Base Layer */
   .planner-map-foundation {
     position: absolute !important;
-    inset: 0 !important; /* Anchors to top, bottom, left, right: 0 */
+    inset: 0 !important;
     width: 100% !important;
     height: 100% !important;
     z-index: 1; 
     display: flex !important;
-    flex-direction: column !important;
     background: #020617;
   }
 
@@ -930,79 +927,137 @@
     min-height: 100% !important;
   }
 
-  /* Sidebar - Floating Bottom Sheet */
+  /* Sidebar - Floating Drawer Mode */
   .premium-itinerary-sidebar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 50vh; /* Fixed percentage height */
-    max-height: 70vh;
-    z-index: 100; /* Above map */
-    background: rgba(8, 8, 8, 0.95);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--glass-border);
-    border-radius: 24px 24px 0 0;
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 80dvh !important; /* Drawer Height */
+    max-height: 80dvh !important;
+    z-index: 1000 !important;
+    background: rgba(10, 15, 25, 0.85) !important;
+    backdrop-filter: blur(30px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(150%) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 32px 32px 0 0 !important;
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-shadow: 0 -15px 50px rgba(0,0,0,0.8) !important;
+    padding-top: 10px;
   }
 
-  /* Minimized state */
+  /* Drawer Handle */
+  .drawer-handle {
+    width: 40px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    margin: 10px auto 15px;
+    flex-shrink: 0;
+    cursor: grab;
+  }
+
+  /* Minimized Drawer state */
   .premium-itinerary-sidebar.hidden-mobile {
-    transform: translateY(calc(100% - 80px)); /* Shows only the drag-handle/header */
-  }
-
-  /* Full Screen Map Overrides */
-  .show-map-mobile .premium-itinerary-sidebar {
-    transform: translateY(100%); /* Completely hide sidebar if needed */
+    transform: translateY(calc(80dvh - 120px)) !important; /* Only shows header area */
   }
 
   .sidebar-header-premium {
-    padding: 15px 20px;
-    background: linear-gradient(to bottom, #0f172a, rgba(15, 23, 42, 0));
-    flex-shrink: 0;
-    cursor: pointer;
+    padding: 10px 25px 20px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .header-top-row {
+    margin-bottom: 15px !important;
   }
 
   .sidebar-scroll-content {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    flex: 1 !important;
+    padding: 20px 25px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 150px !important; /* Space for footer */
   }
 
-  /* Adjust floating controls to stay above the sheet */
+  /* Floating Overlay Buttons */
   .mobile-view-toggle {
-    bottom: calc(50vh + 20px);
-    transition: bottom 0.5s ease;
+    position: fixed !important;
+    bottom: 40px !important;
+    right: 20px !important;
+    z-index: 2000 !important;
+    background: var(--accent-blue) !important;
+    color: white !important;
+    padding: 12px 24px !important;
+    border-radius: 30px !important;
+    border: none !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 
-  .premium-itinerary-sidebar.hidden-mobile ~ .mobile-view-toggle {
-    bottom: 100px;
+  .show-map-mobile .mobile-view-toggle {
+    bottom: 40px !important; /* Keep visible when map is main focus */
   }
 
-  /* Mobile Toggle for Map Expansion */
-  .mobile-view-toggle {
-    position: fixed;
-    bottom: 140px;
-    right: 20px;
-    z-index: 2100;
-    background: var(--accent-blue);
-    color: white;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: none;
-    font-weight: 800;
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
+  .sidebar-footer-premium {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: rgba(10, 15, 25, 0.95) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding: 20px 25px calc(20px + env(safe-area-inset-bottom)) !important;
+    z-index: 10 !important;
   }
+
+  /* Controls Positioning on Map */
+  .floating-map-controls {
+    top: 80px !important; /* Below navbar */
+    right: 15px !important;
+  }
+  .focused-stop-card {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 24px !important;
+    padding: 20px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .focused-stop-img {
+    height: 180px !important;
+    border-radius: 16px !important;
+    margin-bottom: 15px !important;
+  }
+
+  .exec-progress-summary {
+    display: flex !important;
+    justify-content: space-around !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    padding: 15px !important;
+    border-radius: 20px !important;
+    margin-bottom: 25px !important;
+  }
+
+  .exec-stat-val {
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    color: var(--accent-blue) !important;
+  }
+
+  .exec-stat-label {
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    opacity: 0.6 !important;
+  }
+}
 
   .premium-stop-card-v2.active {
     border-left: 4px solid var(--accent-blue);

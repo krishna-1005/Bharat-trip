@@ -391,6 +391,7 @@ function Results() {
   return (
     <div className={`anchored-planner-root results-page-fixed ${showMapOnMobile ? 'show-map-mobile' : ''}`}>
       <aside className={`premium-itinerary-sidebar ${showMapOnMobile ? 'hidden-mobile' : ''}`}>
+        {isMobile && <div className="drawer-handle" onClick={() => setShowMapOnMobile(!showMapOnMobile)}></div>}
         <div className="sidebar-header-premium">
           <div className="header-top-row">
             <div className="premium-brand"><div className="brand-dot"></div><span className="brand-text">Bharat Trip</span></div>
@@ -552,7 +553,7 @@ function Results() {
         </div>
       </aside>
 
-      {isMobile && activePlace && (
+      {isMobile && activePlace && !showMapOnMobile && (
         <button 
           className="mobile-floating-navigate-cta"
           onClick={() => handleShowRoute(activePlace)}
