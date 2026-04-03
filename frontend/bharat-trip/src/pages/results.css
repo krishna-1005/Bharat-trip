@@ -14,7 +14,7 @@
 
 .anchored-planner-root {
   display: flex;
-  height: 100vh;
+  height: 100%; /* Relative to flex parent (main-content) */
   width: 100vw;
   background: #050505;
   color: var(--text-primary);
@@ -900,6 +900,8 @@
   .anchored-planner-root {
     flex-direction: column;
     overflow: hidden;
+    padding-top: 64px; /* Navbar height */
+    padding-bottom: 80px; /* BottomNav height + offset */
   }
 
   .premium-itinerary-sidebar {

@@ -1,72 +1,82 @@
 /* ================= ROOT LAYOUT ================= */
 
-/* We NO LONGER apply global overflow: hidden here. 
-   Scrolling is now native. */
 .app {
   width: 100%;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh; /* Lock to viewport height */
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+  width: 100%;
+}
+
+/* ================= FULL SCREEN MAP PAGE ================= */
+
+.full-screen-map-page {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.full-screen-map-page .map-wrapper {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  min-height: 0;
 }
 
 /* ================= STANDARD PAGES ================= */
 
 .page {
   width: 100%;
-  min-height: 100vh;
-  /* Increased padding-top for extra safety against overlap */
-  padding: 140px 5% 60px; 
+  height: 100%;
+  padding: 80px 5% 80px; 
   background: var(--bg-main);
   color: var(--text-main);
   display: flex;
   flex-direction: column;
-}
-
-.page h1 {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 800;
-  margin-bottom: 24px;
-}
-
-.page p {
-  color: var(--text-dim);
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin-bottom: 30px;
-  max-width: 800px;
+  overflow-y: auto;
 }
 
 /* ================= PLANNER / MAP SPECIFIC LAYOUT ================= */
 
-/* The planner page needs to lock the screen to 100vh for the map */
 .planner-page {
   display: flex;
-  height: 100vh;
-  width: 100vw;
-  padding-top: 80px; /* Accounts for navbar */
-  overflow: hidden; /* Only lock overflow HERE, not globally */
+  height: 100%;
+  width: 100%;
   background: var(--bg-main);
 }
 
 .planner-wrapper {
   width: 420px;
   min-width: 420px;
+  height: 100%;
   background: var(--bg-card);
   border-right: 1px solid var(--border-main);
   padding: 30px;
   overflow-y: auto;
   z-index: 10;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .map-wrapper {
   flex: 1;
   height: 100%;
-  min-width: 0;
+  width: 100%;
   position: relative;
   background: #000;
   z-index: 2;
-  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .map-anim {
@@ -165,23 +175,24 @@
 
   .planner-page {
     flex-direction: column;
-    overflow-y: auto;
-    height: auto;
+    overflow: hidden;
+    height: 100%;
   }
 
   .planner-wrapper {
     width: 100%;
     min-width: 100%;
-    height: auto;
+    height: 40vh; /* Takes 40% height on mobile */
     border-right: none;
     border-bottom: 1px solid var(--border-main);
     padding: 20px;
+    overflow-y: auto;
   }
 
   .map-wrapper {
     width: 100%;
-    height: 400px;
-    min-height: 400px;
+    flex: 1; /* Fills remaining space */
+    min-height: 0;
   }
 
   .map-info-bar {

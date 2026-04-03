@@ -69,10 +69,3 @@
     display: none;
   }
 }
-
-/* Add padding to the app to prevent content being covered by bottom nav on mobile */
-@media (max-width: 900px) {
-  .app {
-    padding-bottom: 90px;
-  }
-}
