@@ -121,10 +121,19 @@ router.post("/vote", async (req, res) => {
     let shouldClose = false;
     let winner = null;
 
-    // RULE: Auto-finalize ONLY when EVERYONE has voted (totalVotes >= totalMembers)
-    // AND there is a clear winner (topOptions.length === 1)
-    if (topOptions.length === 1 && totalVotes >= poll.totalMembers) {
+    // RULE 1: Finalize if a majority is reached (e.g., 2/3, 3/5, 6/10)
+    // A majority means it's mathematically impossible for any other option to win.
+    const majorityThreshold = Math.floor(poll.totalMembers / 2) + 1;
+
+    // RULE 2: Finalize if everyone has voted
+    const everyoneVoted = totalVotes >= poll.totalMembers;
+
+    if (maxVotes >= majorityThreshold && topOptions.length === 1) {
         shouldClose = true;
+        winner = topOptions[0].name;
+    } else if (everyoneVoted) {
+        shouldClose = true;
+        // In case of a tie after everyone voted, we pick the first top option
         winner = topOptions[0].name;
     }
 
