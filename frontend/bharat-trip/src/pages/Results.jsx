@@ -311,6 +311,13 @@ function Results() {
     }
   };
 
+  const handleShowRoute = (place) => {
+    if (!place) return;
+    const { lat, lng, name } = place;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${name}`;
+    window.open(url, "_blank");
+  };
+
   const budgetData = useMemo(() => {
     const total = plan?.totalTripCost || 0;
     const target = plan?.totalBudget || 0;
@@ -498,6 +505,15 @@ function Results() {
                                         <span className="stop-pill-v2">{place.category}</span>
                                         <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
                                       </div>
+
+                                      {!isMobile && (
+                                        <button 
+                                          className="show-route-inline-btn"
+                                          onClick={(e) => { e.stopPropagation(); handleShowRoute(place); }}
+                                        >
+                                          🗺️ Show Route
+                                        </button>
+                                      )}
                                     </div>
                                   </div>
                                   {isCurrent && <button className="premium-action-btn" style={{ marginTop: '15px', width: '100%' }} onClick={() => handleVisited(currentIdx)}>Mark Visited →</button>}
@@ -527,6 +543,15 @@ function Results() {
           </div>
         </div>
       </aside>
+
+      {isMobile && activePlace && (
+        <button 
+          className="mobile-floating-navigate-cta"
+          onClick={() => handleShowRoute(activePlace)}
+        >
+          🚀 Navigate to {activePlace.name}
+        </button>
+      )}
 
       {isMobile && (
         <button className="mobile-view-toggle" onClick={() => setShowMapOnMobile(!showMapOnMobile)}>
