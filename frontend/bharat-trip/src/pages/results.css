@@ -900,27 +900,25 @@
   .anchored-planner-root {
     display: flex !important;
     flex-direction: column !important;
-    height: calc(100vh - 64px) !important;
-    height: calc(100dvh - 64px) !important;
+    height: calc(100dvh - 64px) !important; /* Total height minus navbar */
+    min-height: calc(100dvh - 64px) !important;
     width: 100% !important;
     overflow: hidden !important;
     padding: 0 !important;
     margin: 0 !important;
-    position: relative;
+    position: relative !important;
     background: #000;
   }
 
-  /* Map Foundation - True Full Screen Fill */
+  /* Map Foundation - Force fill parent */
   .planner-map-foundation {
     position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
+    inset: 0 !important; /* Anchors to top, bottom, left, right: 0 */
     width: 100% !important;
     height: 100% !important;
-    z-index: 1; /* Lowest layer */
+    z-index: 1; 
     display: flex !important;
+    flex-direction: column !important;
     background: #020617;
   }
 
