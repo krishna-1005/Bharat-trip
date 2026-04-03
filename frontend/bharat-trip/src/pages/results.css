@@ -898,25 +898,24 @@
 /* Responsive Adjustments */
 @media (max-width: 900px) {
   .anchored-planner-root {
-    display: block; /* Break flex to allow absolute children */
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
+    display: flex !important;
+    flex-direction: column !important;
+    height: calc(100vh - 64px) !important;
+    height: calc(100dvh - 64px) !important;
+    width: 100% !important;
+    overflow: hidden !important;
     padding: 0 !important;
-    margin: 0;
+    margin: 0 !important;
     position: relative;
     background: #000;
   }
 
-  /* Map Foundation - Absolute Fill */
+  /* Map Foundation - Fills remaining space */
   .planner-map-foundation {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
+    flex: 1 !important;
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
     z-index: 1; /* Lowest layer */
     display: block;
     background: #020617;

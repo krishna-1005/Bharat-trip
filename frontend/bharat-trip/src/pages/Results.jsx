@@ -346,6 +346,14 @@ function Results() {
 
   if (loading) return <div className="res-loading-screen"><div className="res-spinner"></div><h2>Initializing Odyssey...</h2></div>;
 
+  useEffect(() => {
+    // Force a window resize event to trigger Leaflet's invalidateSize
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [showMapOnMobile, plan]);
+
   if (isGenerating && plan) {
     return (
       <div className="ai-gen-overlay">
