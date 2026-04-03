@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { createOrGetTripRoom, addUserToRoom, addActivity, listenToRoom, updateRoomStatus } from "../services/tripRoomService";
+import { createOrGetTripRoom, addUserToRoom, addActivity, listenToRoom, updateRoomStatus, finalizeBlueprint } from "../services/tripRoomService";
 import CostPlanner from "../components/CostPlanner";
 import TripConfirmation from "../components/TripConfirmation";
 import TripChat from "../components/TripChat";
 import TripTimeline from "../components/TripTimeline";
+import TripBlueprint from "../components/TripBlueprint";
 import "./poll.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
@@ -121,6 +122,27 @@ export default function PollResults() {
     }
   };
 
+  const handleGenerateBlueprint = async () => {
+    if (!roomId || !winner) return;
+    
+    // In a real app, we might fetch the detailed itinerary from the planner state or API
+    // For this blueprint, we'll use the winner and basic poll data.
+    const blueprintData = {
+      destination: winner.name,
+      budget: winner.estimatedCost || 15000, // Fallback if not set
+      itinerary: [
+        { title: "Arrival & Sightseeing", description: `Welcome to ${winner.name}. Check-in and explore local markets.` },
+        { title: "Main Landmarks", description: `Visit the top-rated spots in ${winner.name} as voted by the group.` },
+        { title: "Leisure & Departure", description: "Final souvenirs and travel back home." }
+      ]
+    };
+
+    if (window.confirm(`Generate Final Trip Blueprint for ${winner.name}? This will lock the plan.`)) {
+      await finalizeBlueprint(roomId, blueprintData);
+      await addActivity(roomId, 'blueprint', `Trip Blueprint for ${winner.name} has been generated! 📄`, user);
+    }
+  };
+
   if (loading) return <div className="poll-page-container"><h2>Loading Dashboards...</h2></div>;
   
   if (!poll) return (
@@ -227,56 +249,62 @@ export default function PollResults() {
         </motion.div>
 
         {/* --- STEP 3 & 4: RESULTS VISUAL & OPTION CARDS --- */}
-        <div className="results-grid">
-          {sortedOptions.map((opt, i) => {
-            const percentage = Math.round((opt.votes / totalVotes) * 100);
-            const isWinner = opt.name === winner.name;
+        {!room?.blueprintGenerated ? (
+          <>
+            <div className="results-grid">
+              {sortedOptions.map((opt, i) => {
+                const percentage = Math.round((opt.votes / totalVotes) * 100);
+                const isWinner = opt.name === winner.name;
 
-            return (
-              <motion.div 
-                key={opt.name} 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="dashboard-option-card"
-              >
-                <div className="option-main-info">
-                  <div className="option-name-group">
-                    <span className="option-name">{opt.name}</span>
-                    <div className="option-tags">
-                        {opt.tags?.slice(0, 2).map(t => <span key={t} className="dash-tag">{t}</span>)}
-                    </div>
-                  </div>
-                  <div className="option-score">
-                    <div className="option-percentage">{percentage}%</div>
-                    <div className="option-votes-count">{opt.votes} votes</div>
-                  </div>
-                </div>
-
-                <div className="dash-progress-container">
+                return (
                   <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${percentage}%` }}
-                    transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
-                    className="dash-progress-fill"
-                    style={{ 
-                        background: isWinner ? 'var(--dash-primary)' : '#334155',
-                        boxShadow: isWinner ? '0 0 15px rgba(59, 130, 246, 0.3)' : 'none'
-                    }}
-                  />
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                    key={opt.name} 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="dashboard-option-card"
+                  >
+                    <div className="option-main-info">
+                      <div className="option-name-group">
+                        <span className="option-name">{opt.name}</span>
+                        <div className="option-tags">
+                            {opt.tags?.slice(0, 2).map(t => <span key={t} className="dash-tag">{t}</span>)}
+                        </div>
+                      </div>
+                      <div className="option-score">
+                        <div className="option-percentage">{percentage}%</div>
+                        <div className="option-votes-count">{opt.votes} votes</div>
+                      </div>
+                    </div>
 
-        {/* --- TRIP CONFIRMATION SECTION --- */}
-        {isFinalized && (
-            <TripConfirmation 
-                roomId={roomId} 
-                user={user} 
-                roomData={room} 
-            />
+                    <div className="dash-progress-container">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${percentage}%` }}
+                        transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
+                        className="dash-progress-fill"
+                        style={{ 
+                            background: isWinner ? 'var(--dash-primary)' : '#334155',
+                            boxShadow: isWinner ? '0 0 15px rgba(59, 130, 246, 0.3)' : 'none'
+                        }}
+                      />
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* --- TRIP CONFIRMATION SECTION --- */}
+            {isFinalized && (
+                <TripConfirmation 
+                    roomId={roomId} 
+                    user={user} 
+                    roomData={room} 
+                />
+            )}
+          </>
+        ) : (
+          <TripBlueprint roomId={roomId} roomData={room} />
         )}
 
         {/* --- TRIP CHAT SECTION --- */}
@@ -299,16 +327,37 @@ export default function PollResults() {
             className="dashboard-cta"
         >
             <div className="cta-text">
-                <h3>Ready to finalize?</h3>
-                <p>Plan your trip based on these group preferences.</p>
+                <h3>{room?.blueprintGenerated ? "Trip Plan Locked 🔒" : "Ready to finalize?"}</h3>
+                <p>{room?.blueprintGenerated ? "Your final blueprint is ready for execution." : "Plan your trip based on these group preferences."}</p>
             </div>
-            <button 
-                className="btn-premium primary" 
-                style={{ height: '54px', padding: '0 32px', fontSize: '1rem' }}
-                onClick={() => navigate("/planner", { state: { prefilledCity: winner.name } })}
-            >
-                Plan Trip to {winner.name} ✨
-            </button>
+            {!room?.blueprintGenerated ? (
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <button 
+                        className="btn-premium primary" 
+                        style={{ height: '54px', padding: '0 32px', fontSize: '1rem' }}
+                        onClick={() => navigate("/planner", { state: { prefilledCity: winner.name } })}
+                    >
+                        Plan Trip ✨
+                    </button>
+                    {isFinalized && isCreator && (
+                        <button 
+                            className="btn-premium outline" 
+                            style={{ height: '54px', padding: '0 32px', fontSize: '1rem', background: '#0f172a', color: 'white', border: 'none' }}
+                            onClick={handleGenerateBlueprint}
+                        >
+                            Generate Blueprint 📄
+                        </button>
+                    )}
+                </div>
+            ) : (
+                <button 
+                    className="btn-premium outline" 
+                    style={{ height: '54px', padding: '0 32px', fontSize: '1rem' }}
+                    onClick={() => window.print()}
+                >
+                    Print Plan 📄
+                </button>
+            )}
         </motion.div>
 
         {/* Sharing Section */}

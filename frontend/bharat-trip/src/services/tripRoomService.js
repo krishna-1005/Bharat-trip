@@ -247,6 +247,57 @@ export const addActivity = async (roomId, type, message, user) => {
 };
 
 /**
+ * Finalizes the Trip Blueprint, locking the plan.
+ */
+export const finalizeBlueprint = async (roomId, blueprintData) => {
+  if (!roomId) return;
+  try {
+    const roomRef = doc(db, "tripRooms", roomId);
+    await updateDoc(roomRef, {
+      status: "finalized",
+      finalized: true,
+      blueprintGenerated: true,
+      blueprint: {
+        ...blueprintData,
+        generatedAt: serverTimestamp(),
+        checklist: [
+          { id: 1, task: "Book Flights/Trains", completed: false },
+          { id: 2, task: "Confirm Accommodation", completed: false },
+          { id: 3, task: "Pack Essentials", completed: false },
+          { id: 4, task: "Check Weather Forecast", completed: false },
+          { id: 5, task: "Share Final Itinerary with Group", completed: true }
+        ]
+      }
+    });
+  } catch (err) {
+    console.error("Error finalizing blueprint:", err);
+  }
+};
+
+/**
+ * Toggles a checklist item in the blueprint.
+ */
+export const toggleChecklistItem = async (roomId, itemId, completed) => {
+  if (!roomId) return;
+  try {
+    const roomRef = doc(db, "tripRooms", roomId);
+    // Note: For simplicity in this demo, we fetch and update the whole array.
+    // In a production app, you might use a subcollection or specific index update.
+    const snap = await getDocs(query(collection(db, "tripRooms"), where("__name__", "==", roomId), limit(1)));
+    if (snap.empty) return;
+    const data = snap.docs[0].data();
+    const newChecklist = data.blueprint.checklist.map(item => 
+      item.id === itemId ? { ...item, completed } : item
+    );
+    await updateDoc(roomRef, {
+      "blueprint.checklist": newChecklist
+    });
+  } catch (err) {
+    console.error("Error toggling checklist item:", err);
+  }
+};
+
+/**
  * Real-time listener for activities in a specific room.
  */
 export const listenToActivities = (roomId, callback) => {
