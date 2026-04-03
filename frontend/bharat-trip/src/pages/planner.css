@@ -37,193 +37,161 @@
 
 /* --- THE GRID --- */
 .planner-container {
-  max-width: 1100px;
+  max-width: 1200px;
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 440px;
   gap: 80px;
   position: relative;
   z-index: 10;
-  align-items: center;
+  align-items: flex-start;
+  padding: 40px;
+  margin: 0 auto;
 }
 
-/* --- LEFT SIDE: THE MOOD --- */
-.planner-tagline {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: #3b82f6;
-  margin-bottom: 16px;
-  display: block;
+/* Left Side Styles */
+.planner-intro-section {
+    text-align: left;
 }
 
-.planner-main-title {
-  font-size: clamp(2.5rem, 5vw, 3.8rem);
-  font-weight: 800;
-  line-height: 1;
-  margin-bottom: 24px;
-  letter-spacing: var(--tracking-tight);
+.tt-main-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    text-align: left;
+    margin: 20px 0;
 }
 
-.planner-main-title em {
-    font-style: italic;
-    color: #3b82f6;
+.tt-subtitle {
+    text-align: left;
+    margin: 0 0 40px 0;
+    max-width: 500px;
 }
 
-.planner-subtitle {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: rgba(255,255,255,0.5);
-  margin-bottom: 48px;
-  max-width: 460px;
-}
-
-/* Mood Selection */
+/* Mood Selection Refinements */
 .persona-selector {
     border-top: 1px solid rgba(255,255,255,0.08);
-    padding-top: 32px;
+    padding-top: 30px;
 }
 
 .persona-title {
     font-size: 10px;
-    font-weight: 800;
-    letter-spacing: var(--tracking-wide);
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 2px;
+    font-weight: 900;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.25);
     margin-bottom: 20px;
 }
 
 .persona-tabs {
     display: flex;
-    gap: 32px;
+    gap: 30px;
+    margin: 20px 0;
 }
 
 .persona-tab {
     background: none;
     border: none;
     color: rgba(255,255,255,0.3);
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     cursor: pointer;
-    transition: 0.4s;
-    padding: 0;
-    position: relative;
+    padding: 0 0 10px 0;
+    border-bottom: 2px solid transparent;
+    transition: 0.3s;
+    white-space: nowrap;
 }
 
-.persona-tab.active { color: #fff; }
-.persona-tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 0; width: 100%; height: 1px;
-    background: #3b82f6;
+.persona-tab.active {
+    color: #fff;
+    border-bottom-color: #3b82f6;
 }
 
 .persona-tip {
-    font-size: 14px;
-    color: rgba(255,255,255,0.6);
-    margin-bottom: 32px;
-    line-height: 1.6;
     font-style: italic;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 30px;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 .featured-mini-list {
     display: flex;
-    gap: 16px;
+    gap: 20px;
 }
 
 .mini-spot-card {
     flex: 1;
-    max-width: 130px;
-    cursor: pointer;
+    max-width: 150px;
 }
 
 .mini-spot-img-wrap {
-    aspect-ratio: 3/4;
-    border-radius: 8px;
+    border-radius: 15px;
     overflow: hidden;
+    height: 180px;
     margin-bottom: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    position: relative;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .mini-spot-img-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.mini-spot-card:hover .mini-spot-img-wrap img {
-    transform: scale(1.15);
 }
 
 .mini-spot-name {
     display: block;
-    font-size: 15px;
     font-weight: 700;
+    font-size: 14px;
     color: #fff;
-    margin-bottom: 2px;
 }
 
 .mini-spot-type {
     font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
-    color: rgba(255, 255, 255, 0.4);
-    font-weight: 700;
-}
-
-/* --- RIGHT SIDE: COMPACT CARD --- */
-.planner-glass-card {
-  background: rgba(12, 12, 12, 0.85);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  padding: 36px;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.8);
-}
-
-.planner-form-header {
-    text-align: center;
-    margin-bottom: 32px;
-}
-
-.planner-form-header h3 {
-    font-size: 26px;
-    font-weight: 800;
-}
-
-.planner-form-header p {
-    font-size: 12px;
     color: rgba(255,255,255,0.4);
-    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Trust Badges */
+.planner-trust-badges {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    marginTop: 30px;
+}
+
+.trust-item {
+    font-size: 10px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 2px;
 }
 
 /* --- RESPONSIVE --- */
 @media (max-width: 1100px) {
-    .planner-onboarding-page { padding: 40px 20px 100px; }
-    .planner-container { grid-template-columns: 1fr; gap: 60px; }
-    .planner-intro-section { text-align: center; }
-    .planner-subtitle { margin-left: auto; margin-right: auto; }
-    .persona-tabs { 
-        justify-content: flex-start; 
-        overflow-x: auto; 
-        padding-bottom: 15px;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
+    .planner-onboarding-page { padding: 40px 0 100px; }
+    .planner-container { 
+        grid-template-columns: 1fr; 
+        gap: 60px; 
+        padding: 20px;
+        max-width: 600px;
     }
-    .persona-tabs::-webkit-scrollbar { display: none; }
-    .persona-tab { white-space: nowrap; font-size: 18px; }
-    .featured-mini-list { justify-content: center; flex-wrap: wrap; }
-    .planner-glass-card { width: 100%; max-width: 100%; padding: 24px; }
+    .planner-intro-section, .tt-main-title, .tt-subtitle { text-align: center; margin-left: auto; margin-right: auto; }
+    .persona-tabs { 
+        justify-content: center; 
+        overflow-x: auto; 
+        padding-bottom: 10px;
+    }
+    .featured-mini-list { justify-content: center; }
+    .planner-glass-card { width: 100%; padding: 24px; border-radius: 24px; }
 }
 
 @media (max-width: 600px) {
-    .planner-main-title { font-size: 2.2rem; }
-    .persona-tabs { gap: 20px; }
-    .mini-spot-card { max-width: 110px; }
+    .planner-container { padding: 15px; }
+    .planner-main-title { font-size: 2rem; }
+    .tt-main-title { font-size: 2.2rem; }
+    .persona-tabs { gap: 15px; }
+    .persona-tab { font-size: 16px; }
+    .mini-spot-card { max-width: 120px; }
+    .mini-spot-img-wrap { height: 150px; }
 }
+

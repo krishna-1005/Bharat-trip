@@ -5,7 +5,8 @@
     width: 100%;
     background: #020202;
     color: #fff;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     position: relative;
     display: flex;
     justify-content: center;
