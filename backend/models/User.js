@@ -40,6 +40,12 @@ const userSchema = new mongoose.Schema(
     default: "user"
   },
 
+  userType: {
+    type: String,
+    enum: ["guest", "user"],
+    default: "user"
+  },
+
   /* NOTIFICATION SETTINGS */
   preferences: {
     emailAlerts: { type: Boolean, default: true },

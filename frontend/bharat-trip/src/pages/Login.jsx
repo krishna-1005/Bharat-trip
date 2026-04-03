@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { auth } from "../firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
@@ -7,11 +7,15 @@ import "./auth.css";
 
 function Login() {
   const navigate      = useNavigate();
+  const loc           = useLocation();
   const { login }     = useContext(AuthContext);
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
+
+  const redirectPath = loc.state?.from || "/";
+  const redirectState = loc.state?.plan ? { plan: loc.state.plan } : null;
 
   /* ── GOOGLE LOGIN ── */
   const handleGoogleLogin = async () => {
@@ -21,7 +25,6 @@ function Login() {
       const result   = await signInWithPopup(auth, provider);
       const u        = result.user;
 
-      // store via AuthContext so navbar + ProtectedRoute work correctly
       login({
         id:    u.uid,
         name:  u.displayName,
@@ -30,7 +33,7 @@ function Login() {
         token: await u.getIdToken(),
       });
 
-      navigate("/");
+      navigate(redirectPath, { state: redirectState });
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -58,9 +61,8 @@ function Login() {
         return;
       }
 
-      // store via AuthContext
       login({ ...data.user, token: data.token });
-      navigate("/");
+      navigate(redirectPath, { state: redirectState });
 
     } catch {
       setError("Cannot connect to server. Make sure backend is running.");

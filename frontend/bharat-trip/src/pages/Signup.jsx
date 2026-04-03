@@ -1,16 +1,12 @@
 import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
-
-
 function Signup() {
-  
-  /* API URL from environment */
   const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
-  console.log(API);
   
   const navigate        = useNavigate();
+  const loc             = useLocation();
   const { login }       = useContext(AuthContext);
 
   const [name, setName] = useState("");
@@ -18,6 +14,9 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
+
+  const redirectPath = loc.state?.from || "/";
+  const redirectState = loc.state?.plan ? { plan: loc.state.plan } : null;
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -32,7 +31,6 @@ function Signup() {
       });
 
       let data;
-
       try {
         data = await res.json();
       } catch {
@@ -45,7 +43,7 @@ function Signup() {
       }
 
       login({ ...data.user, token: data.token });
-      navigate("/");
+      navigate(redirectPath, { state: redirectState });
     } catch (err) {
       console.error(err);
       setError("Cannot connect to server.");

@@ -11,6 +11,7 @@ export default function Admin() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("dashboard");
   const [users, setUsers] = useState([]);
+  const [trackedUsers, setTrackedUsers] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [config, setConfig] = useState({});
   const [broadcastMsg, setBroadcastMsg] = useState("");
@@ -59,6 +60,7 @@ export default function Admin() {
 
   useEffect(() => {
     if (activeTab === "users") fetchData("users", setUsers);
+    if (activeTab === "intelligence") fetchData("tracked-users", setTrackedUsers);
     if (activeTab === "reviews") fetchData("reviews", setReviews);
     if (activeTab === "media") fetchData("config", setConfig);
   }, [activeTab]);
@@ -139,11 +141,69 @@ export default function Admin() {
               <h1>System <span className="gradient-text">Intelligence</span></h1>
               <div className="admin-nav-tabs">
                 <button className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>Dashboard</button>
-                <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>Users</button>
+                <button className={activeTab === 'intelligence' ? 'active' : ''} onClick={() => setActiveTab('intelligence')}>Analytics</button>
+                <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>Registered</button>
                 <button className={activeTab === 'reviews' ? 'active' : ''} onClick={() => setActiveTab('reviews')}>Reviews</button>
-                <button className={activeTab === 'media' ? 'active' : ''} onClick={() => setActiveTab('media')}>Media & CMS</button>
+                <button className={activeTab === 'media' ? 'active' : ''} onClick={() => setActiveTab('media')}>CMS</button>
               </div>
             </header>
+
+            {activeTab === 'intelligence' && (
+              <div className="admin-intelligence-wrap">
+                <div className="admin-tables-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                  <section className="admin-section">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                      <h2 style={{ margin: 0 }}>Logged-in Users</h2>
+                      <span className="tag-blue">{trackedUsers.filter(u => u.userType === 'user').length} Active</span>
+                    </div>
+                    <div className="admin-table-wrap">
+                      <table className="admin-table">
+                        <thead><tr><th>User</th><th>Actions</th><th>Last Active</th></tr></thead>
+                        <tbody>
+                          {trackedUsers.filter(u => u.userType === 'user').map((u, i) => (
+                            <tr key={i}>
+                              <td>
+                                <div className="bold">{u.email || "Unknown"}</div>
+                                <div className="dim-small" style={{ color: u.converted ? '#10b981' : '#94a3b8' }}>
+                                  {u.converted ? "✨ Converted from Guest" : "Direct User"}
+                                </div>
+                              </td>
+                              <td className="bold">{u.actionsCount || 0}</td>
+                              <td className="dim">{new Date(u.lastActive).toLocaleDateString()}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+
+                  <section className="admin-section">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                      <h2 style={{ margin: 0 }}>Guest Sessions</h2>
+                      <span className="tag-orange" style={{ background: 'rgba(249, 115, 22, 0.1)', color: '#fb923c', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '700' }}>
+                        {trackedUsers.filter(u => u.userType === 'guest').length} Researching
+                      </span>
+                    </div>
+                    <div className="admin-table-wrap">
+                      <table className="admin-table">
+                        <thead><tr><th>Guest ID</th><th>Actions</th><th>Status</th></tr></thead>
+                        <tbody>
+                          {trackedUsers.filter(u => u.userType === 'guest').map((u, i) => (
+                            <tr key={i}>
+                              <td className="dim-small" title={u.userId}>{u.userId?.substring(0, 15)}...</td>
+                              <td className="bold">{u.actionsCount || 0}</td>
+                              <td>
+                                <span className="tag-blue">{u.lastAction || "browsing"}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            )}
 
             {activeTab === 'dashboard' && data && (
               <>

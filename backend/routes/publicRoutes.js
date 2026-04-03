@@ -2,6 +2,59 @@ const express = require("express");
 const router = express.Router();
 const UsageLog = require("../models/UsageLog");
 const Trip = require("../models/Trip");
+const { db } = require("../firebaseAdmin");
+
+/* ── TRACKING ── */
+router.post("/track", async (req, res) => {
+  try {
+    const { userId, userType, guestId, action } = req.body;
+    
+    // id can be userId (if logged in) or guestId (if guest)
+    const id = userId || guestId;
+    if (!id) return res.status(400).json({ error: "No ID provided" });
+
+    const userRef = db.collection("users").doc(id);
+    const doc = await userRef.get();
+
+    if (!doc.exists) {
+      // Create new tracking doc
+      await userRef.set({
+        userId: id,
+        userType: userType || "guest",
+        actionsCount: 1,
+        createdAt: new Date(),
+        lastActive: new Date(),
+        converted: false,
+        email: req.body.email || null,
+        lastAction: action || "init"
+      });
+    } else {
+      // Update existing
+      const data = doc.data();
+      const updates = {
+        actionsCount: (data.actionsCount || 0) + 1,
+        lastActive: new Date(),
+        lastAction: action || data.lastAction
+      };
+      
+      if (req.body.email) updates.email = req.body.email;
+
+      // Handle conversion: guest -> user
+      if (userType === "user" && data.userType === "guest") {
+        updates.userType = "user";
+        updates.converted = true;
+        updates.originalGuestId = data.userId;
+      }
+
+      await userRef.update(updates);
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Tracking error:", err);
+    res.status(500).json({ error: "Failed to track activity" });
+  }
+});
 
 /* GET /api/public/recent-activity - Real-time planning pulse */
 router.get("/recent-activity", async (req, res) => {

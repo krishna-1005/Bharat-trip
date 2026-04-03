@@ -23,6 +23,31 @@ const THINKING_MESSAGES = [
   "Finalizing High-Fidelity Odyssey..."
 ];
 
+// Fallback for timing logic if not provided by backend
+const getBestVisitTimeFallback = (category, index) => {
+  const cat = (category || "").toLowerCase();
+  const isEven = index % 2 === 0;
+  if (["nature", "park", "garden", "hill", "lake", "beach"].some(kw => cat.includes(kw))) {
+    return { time: isEven ? "Morning" : "Evening", reason: "Pleasant weather and soft sunlight" };
+  }
+  if (["temple", "church", "mosque", "spiritual", "monument", "museum", "history", "cultural"].some(kw => cat.includes(kw))) {
+    return { time: "Morning", reason: "Peaceful atmosphere and fewer crowds" };
+  }
+  if (["cafe", "restaurant", "dining", "food", "bakery"].some(kw => cat.includes(kw))) {
+    return { time: isEven ? "Afternoon" : "Evening", reason: "Ideal for a relaxed meal" };
+  }
+  return { time: ["Morning", "Afternoon", "Evening"][index % 3], reason: "Great time to explore" };
+};
+
+const LockedDayOverlay = ({ onUnlock, dayCount }) => (
+  <div className="locked-day-overlay">
+    <div className="lock-icon-wrap">🔒</div>
+    <h3>Itinerary Locked</h3>
+    <p>Unlock your personalized {dayCount}-day journey with a free account.</p>
+    <button className="unlock-cta-btn" onClick={onUnlock}>Unlock Full Plan in 1 Click</button>
+  </div>
+);
+
 function Results() {
   const navigate = useNavigate();
   const loc = useLocation();
@@ -217,11 +242,19 @@ function Results() {
     setSidebarTab("live");
   };
 
+  const handleUnlock = () => {
+    navigate("/login", { state: { from: loc.pathname, plan } });
+  };
+
+  useEffect(() => {
+    if (plan && !user && !plan.isShared) {
+      localStorage.setItem("tripPlan", JSON.stringify(plan));
+    }
+  }, [plan, user]);
+
   const normalizedItinerary = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
-    // If it's already an array, use it directly (aligns with backend update)
     if (Array.isArray(plan.itinerary)) return plan.itinerary;
-    // Fallback for old object-based structure
     return Object.entries(plan.itinerary).map(([dayLabel, dayData]) => ({
       day: dayLabel,
       ...dayData
@@ -266,22 +299,6 @@ function Results() {
 
       return { ...prev, itinerary: newItinerary };
     });
-  };
-
-  const handleSkip = (dayLabel, placeName) => {
-
-    const cat = (category || "").toLowerCase();
-    const isEven = index % 2 === 0;
-    if (["nature", "park", "garden", "hill", "lake", "beach"].some(kw => cat.includes(kw))) {
-      return { time: isEven ? "Morning" : "Evening", reason: "Pleasant weather and soft sunlight" };
-    }
-    if (["temple", "church", "mosque", "spiritual", "monument", "museum", "history", "cultural"].some(kw => cat.includes(kw))) {
-      return { time: "Morning", reason: "Peaceful atmosphere and fewer crowds" };
-    }
-    if (["cafe", "restaurant", "dining", "food", "bakery"].some(kw => cat.includes(kw))) {
-      return { time: isEven ? "Afternoon" : "Evening", reason: "Ideal for a relaxed meal" };
-    }
-    return { time: ["Morning", "Afternoon", "Evening"][index % 3], reason: "Great time to explore" };
   };
 
   const [sidebarTab, setSidebarTab] = useState(isExecuting ? "live" : "plan");
@@ -400,78 +417,86 @@ function Results() {
               </div>
 
               <div className="premium-itinerary-list">
-                {normalizedItinerary.map((dayObj, dIdx) => (
-                  <div key={dIdx} className="premium-day-section">
-                    <div className="day-header-premium">
-                      <div className="day-circle">{dIdx + 1}</div>
-                      <div className="day-info">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                          <h3>{dayObj.label || dayObj.day}</h3>
-                          <button 
-                            className="add-place-btn-minimal" 
-                            onClick={() => handleAddPlace(dayObj.label || dayObj.day)}
-                            title="Add a custom stop to this day"
-                          >
-                            + Add Stop
-                          </button>
+                {normalizedItinerary.map((dayObj, dIdx) => {
+                  const isLocked = !user && dIdx > 0;
+                  return (
+                    <div key={dIdx} className={`premium-day-section ${isLocked ? 'is-locked' : ''}`}>
+                      {isLocked && <LockedDayOverlay onUnlock={handleUnlock} dayCount={normalizedItinerary.length} />}
+                      
+                      <div className={isLocked ? 'blurred-day-container' : ''}>
+                        <div className="day-header-premium">
+                          <div className="day-circle">{dIdx + 1}</div>
+                          <div className="day-info">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                              <h3>{dayObj.label || dayObj.day}</h3>
+                              <button 
+                                className="add-place-btn-minimal" 
+                                onClick={() => handleAddPlace(dayObj.label || dayObj.day)}
+                                disabled={isLocked}
+                                title="Add a custom stop to this day"
+                              >
+                                + Add Stop
+                              </button>
+                            </div>
+                            <span>{dayObj.places?.length || 0} Places</span>
+                          </div>
                         </div>
-                        <span>{dayObj.places?.length || 0} Places</span>
-                      </div>
-                    </div>
 
-                    <CategoryCostBreakdown 
-                      dailyCost={dayObj.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0) || (plan.totalTripCost / (normalizedItinerary.length || 1))} 
-                    />
-                    
-                    <div className="stops-container-premium">
-                      {dayObj.places.map((place, pIdx) => {
-                        let globalIdx = 0;
-                        for (let i = 0; i < dIdx; i++) globalIdx += (normalizedItinerary[i]?.places.length || 0);
-                        const currentIdx = globalIdx + pIdx;
-                        const isVisited = currentIdx < currentIndex;
-                        const isCurrent = currentIdx === currentIndex;
-                        const timing = place.bestTime ? { time: place.bestTime, reason: place.timeReason } : getBestVisitTimeFallback(place.category, currentIdx);
+                        <CategoryCostBreakdown 
+                          dailyCost={dayObj.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0) || (plan.totalTripCost / (normalizedItinerary.length || 1))} 
+                        />
+                        
+                        <div className="stops-container-premium">
+                          {dayObj.places.map((place, pIdx) => {
+                            let globalIdx = 0;
+                            for (let i = 0; i < dIdx; i++) globalIdx += (normalizedItinerary[i]?.places.length || 0);
+                            const currentIdx = globalIdx + pIdx;
+                            const isVisited = currentIdx < currentIndex;
+                            const isCurrent = currentIdx === currentIndex;
+                            const timing = place.bestTime ? { time: place.bestTime, reason: place.timeReason } : getBestVisitTimeFallback(place.category, currentIdx);
 
-                        // Calculate distance and cost
-                        const distance = userLocation ? calculateDistance(userLocation.lat, userLocation.lng, place.lat, place.lng) : null;
-                        const travelCost = distance !== null ? calculateTravelCost(distance) : null;
+                            // Calculate distance and cost
+                            const distance = userLocation ? calculateDistance(userLocation.lat, userLocation.lng, place.lat, place.lng) : null;
+                            const travelCost = distance !== null ? calculateTravelCost(distance) : null;
 
-                        return (
-                          <div key={currentIdx} className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}>
-                            <div className="stop-marker-v2">{isVisited && <span className="visited-tick">✓</span>}</div>
-                            <div className="stop-card-inner">
-                              <div className="stop-top-row">
-                                <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
-                                <div className="stop-details-v2">
-                                  <div className="stop-title-row">
-                                    <h4>{place.name}</h4>
-                                    {!isVisited && <button className="skip-btn" onClick={() => handleSkip(dayObj.day, place.name)}>✕</button>}
-                                  </div>
-                                  <div className="stop-timing-info" style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                                    <span style={{ color: 'var(--accent-blue)', fontWeight: '700' }}>🕒 {timing.time}</span> • {timing.reason}
-                                  </div>
-                                  
-                                  {distance !== null && (
-                                    <div className="stop-travel-info" style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '8px', display: 'flex', gap: '10px' }}>
-                                      <span>📍 {distance} km away</span>
-                                      <span style={{ color: 'var(--accent-green)' }}>🚗 {formatPrice(travelCost)} travel cost</span>
+                            return (
+                              <div key={currentIdx} className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}>
+                                <div className="stop-marker-v2">{isVisited && <span className="visited-tick">✓</span>}</div>
+                                <div className="stop-card-inner">
+                                  <div className="stop-top-row">
+                                    <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
+                                    <div className="stop-details-v2">
+                                      <div className="stop-title-row">
+                                        <h4>{place.name}</h4>
+                                        {!isVisited && <button className="skip-btn" onClick={() => handleSkip(dayObj.day, place.name)}>✕</button>}
+                                      </div>
+                                      <div className="stop-timing-info" style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                                        <span style={{ color: 'var(--accent-blue)', fontWeight: '700' }}>🕒 {timing.time}</span> • {timing.reason}
+                                      </div>
+                                      
+                                      {distance !== null && (
+                                        <div className="stop-travel-info" style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '8px', display: 'flex', gap: '10px' }}>
+                                          <span>📍 {distance} km away</span>
+                                          <span style={{ color: 'var(--accent-green)' }}>🚗 {formatPrice(travelCost)} travel cost</span>
+                                        </div>
+                                      )}
+
+                                      <div className="stop-pills-v2">
+                                        <span className="stop-pill-v2">{place.category}</span>
+                                        <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
+                                      </div>
                                     </div>
-                                  )}
-
-                                  <div className="stop-pills-v2">
-                                    <span className="stop-pill-v2">{place.category}</span>
-                                    <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
                                   </div>
+                                  {isCurrent && <button className="premium-action-btn" style={{ marginTop: '15px', width: '100%' }} onClick={() => handleVisited(currentIdx)}>Mark Visited →</button>}
                                 </div>
                               </div>
-                              {isCurrent && <button className="premium-action-btn" style={{ marginTop: '15px', width: '100%' }} onClick={() => handleVisited(currentIdx)}>Mark Visited →</button>}
-                            </div>
-                          </div>
-                        );
-                      })}
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {/* Spacing for floating budget panel */}
                 <div style={{ height: '120px' }}></div>
               </div>

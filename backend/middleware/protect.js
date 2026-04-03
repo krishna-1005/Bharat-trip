@@ -1,4 +1,4 @@
-const admin = require("../firebaseAdmin");
+const { admin } = require("../firebaseAdmin");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 

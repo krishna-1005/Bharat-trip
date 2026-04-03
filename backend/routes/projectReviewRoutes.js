@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const ProjectReview = require("../models/ProjectReview");
 const User = require("../models/User");
-const admin = require("../firebaseAdmin");
+const { admin } = require("../firebaseAdmin");
 
 // Public route to get all project reviews
 router.get("/", async (req, res) => {

@@ -63,9 +63,38 @@ function getBestVisitTime(category, index) {
   };
 }
 
+/* ── FALLBACK GENERATOR ── */
+function generateFallbacks(city, count) {
+  const templates = [
+    { name: "Local Market", category: "Shopping", tags: ["local", "market"], timeHours: 2, avgCost: 100 },
+    { name: "City Park", category: "Nature", tags: ["park", "relaxing"], timeHours: 1.5, avgCost: 0 },
+    { name: "Food Street", category: "Food", tags: ["street food", "local"], timeHours: 2, avgCost: 300 },
+    { name: "Central Mall", category: "Shopping", tags: ["mall", "modern"], timeHours: 3, avgCost: 500 },
+    { name: "Ancient Temple", category: "Spiritual", tags: ["temple", "historic"], timeHours: 1, avgCost: 0 },
+    { name: "Art Gallery", category: "Culture", tags: ["art", "museum"], timeHours: 2, avgCost: 200 }
+  ];
+
+  const results = [];
+  for (let i = 0; i < count; i++) {
+    const template = templates[i % templates.length];
+    results.push({
+      ...template,
+      name: `${city} ${template.name}`,
+      city: city,
+      lat: 0, // Should be filled by caller if needed
+      lng: 0,
+      rating: 4.2 + (i % 5) * 0.1,
+      tag: "Popular Spot",
+      isPersonalized: false,
+      source: "fallback"
+    });
+  }
+  return results;
+}
+
 function plannerEngine(places, { city, days, interests, budget, userPreferences = {} }) {
   // 1. Initial Filtering
-  let candidates = places.filter(p => p.city.toLowerCase() === city.toLowerCase());
+  let candidates = places.filter(p => p.city && p.city.toLowerCase() === city.toLowerCase());
 
   const {
     interests: userInterests = [],
@@ -127,12 +156,25 @@ function plannerEngine(places, { city, days, interests, budget, userPreferences 
   // 4. Sort by Score
   candidates.sort((a, b) => b.score - a.score);
 
+  // 4.1 Ensure minimum places
+  const minRequired = days * 3;
+  if (candidates.length < minRequired) {
+    const needed = minRequired - candidates.length;
+    const fallbacks = generateFallbacks(city, needed);
+    candidates = [...candidates, ...fallbacks];
+  }
+
   // 5. Distribute across days
-  const perDay = Math.ceil(candidates.length / days);
   const itinerary = {};
+  const usedNames = new Set();
 
   for (let i = 0; i < days; i++) {
-    const dayPlaces = candidates.slice(i * perDay, (i + 1) * perDay);
+    const remainingDays = days - i;
+    const remainingPool = candidates.filter(c => !usedNames.has(c.name));
+    const targetCount = Math.max(3, Math.ceil(remainingPool.length / remainingDays));
+    
+    const dayPlaces = remainingPool.slice(0, targetCount);
+    dayPlaces.forEach(p => usedNames.add(p.name));
 
     itinerary[`Day ${i + 1}`] = {
       places: dayPlaces.map((p, idx) => {
@@ -145,7 +187,7 @@ function plannerEngine(places, { city, days, interests, budget, userPreferences 
           lat: p.lat,
           lng: p.lng,
           rating: p.rating,
-          tag: p.tag,
+          tag: p.tag || "Top Choice",
           isPersonalized: p.isPersonalized,
           bestTime: timing.time,
           timeReason: timing.reason
@@ -155,7 +197,9 @@ function plannerEngine(places, { city, days, interests, budget, userPreferences 
   }
 
   // 6. Total cost
-  const totalCost = candidates.reduce((sum, p) => sum + (p.cost || p.estimatedCost || 0), 0);
+  const totalCost = candidates
+    .filter(p => usedNames.has(p.name))
+    .reduce((sum, p) => sum + (p.cost || p.estimatedCost || 0), 0);
 
   return {
     itinerary,

@@ -137,6 +137,8 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
   }
 });
 
+const { admin, db } = require("../firebaseAdmin");
+
 /* USERS MANAGEMENT */
 router.get("/users", protect, verifyAdminEmail, async (req, res) => {
   try {
@@ -144,6 +146,17 @@ router.get("/users", protect, verifyAdminEmail, async (req, res) => {
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: "Error fetching users" });
+  }
+});
+
+router.get("/tracked-users", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const usersSnapshot = await db.collection("users").orderBy("lastActive", "desc").limit(100).get();
+    const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json(users);
+  } catch (err) {
+    console.error("Error fetching tracked users:", err);
+    res.status(500).json({ error: "Error fetching tracked users" });
   }
 });
 

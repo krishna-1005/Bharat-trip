@@ -3,7 +3,7 @@ const generatePlan = require("../logic/planner");
 const { protect } = require("../middleware/protect");
 const Trip         = require("../models/Trip");
 const UsageLog     = require("../models/UsageLog");
-const admin        = require("../firebaseAdmin");
+const { admin } = require("../firebaseAdmin");
 const User         = require("../models/User");
 const jwt          = require("jsonwebtoken");
 

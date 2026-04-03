@@ -176,6 +176,34 @@ function enrichPlace(p, index) {
   };
 }
 
+/* ── FALLBACK GENERATOR ── */
+function generateFallbacks(city, coords, count) {
+  const fallbacks = [
+    { name: "Local Market", category: "Shopping", tags: ["local", "market", "authentic"], timeHours: 2, avgCost: 100 },
+    { name: "City Park", category: "Nature", tags: ["park", "relaxing", "greenery"], timeHours: 1.5, avgCost: 0 },
+    { name: "Food Street", category: "Food", tags: ["street food", "local flavors", "evening"], timeHours: 2, avgCost: 300 },
+    { name: "Central Mall", category: "Shopping", tags: ["mall", "modern", "branded"], timeHours: 3, avgCost: 500 },
+    { name: "Ancient Temple", category: "Culture", tags: ["temple", "historic", "spiritual"], timeHours: 1, avgCost: 0 },
+    { name: "Art Gallery", category: "Culture", tags: ["art", "museum", "creativity"], timeHours: 2, avgCost: 200 },
+    { name: "Riverside Walk", category: "Nature", tags: ["river", "scenic", "peaceful"], timeHours: 1, avgCost: 0 },
+    { name: "Heritage Walk", category: "Culture", tags: ["history", "walking tour", "architecture"], timeHours: 2.5, avgCost: 0 }
+  ];
+
+  const results = [];
+  for (let i = 0; i < count; i++) {
+    const template = fallbacks[i % fallbacks.length];
+    results.push({
+      ...template,
+      name: `${city} ${template.name}`,
+      lat: coords.lat + (Math.random() - 0.5) * 0.05,
+      lng: coords.lng + (Math.random() - 0.5) * 0.05,
+      source: "fallback",
+      area: city
+    });
+  }
+  return results;
+}
+
 /* ── MAIN FUNCTION ── */
 async function generatePlan({
   city,
@@ -234,7 +262,21 @@ async function generatePlan({
     })
     .sort((a, b) => b.score - a.score);
 
-  const maxPlacesNeeded = days * 6;
+  // Ensure minimum places for balanced distribution
+  const minRequired = days * 3;
+  if (prioritizedPool.length < minRequired) {
+    const needed = minRequired - prioritizedPool.length;
+    const fallbacks = generateFallbacks(city, coords, needed).map((p, idx) => {
+      const enriched = enrichPlace(p, prioritizedPool.length + idx);
+      return {
+        ...enriched,
+        score: 5 // Default score for fallbacks
+      };
+    });
+    prioritizedPool = [...prioritizedPool, ...fallbacks];
+  }
+
+  const maxPlacesNeeded = Math.max(minRequired, days * 6);
   prioritizedPool = prioritizedPool.slice(0, maxPlacesNeeded);
 
   /* STEP 5: BALANCED DISTRIBUTION */
@@ -253,18 +295,22 @@ async function generatePlan({
     // Calculate per-day meal cost
     const meal = Math.min(perDayBudget * 0.25, 800) * tMult;
     
+    // Balanced target: distribute remaining places over remaining days
+    const remainingDays = days - dayNum + 1;
+    const targetCount = Math.max(3, Math.ceil(remainingPool.length / remainingDays));
+    
     for (const p of remainingPool) {
-      if (validPlaces.length >= 4) break;
+      if (validPlaces.length >= targetCount || validPlaces.length >= 6) break;
       
       const t = p.timeHours || 2;
       const placeCost = (p.avgCost || 200) * tMult;
 
-      const remainingDays = days - dayNum;
-      const projectedFutureMealCosts = remainingDays * meal;
+      const projectedFutureMealCosts = (remainingDays - 1) * meal;
       
       const canAfford = (accumulatedTotalCost + dayCost + placeCost + meal + projectedFutureMealCosts) <= totalBudget;
 
-      if (dayHours + t <= MAX_HOURS_PER_DAY && (canAfford || validPlaces.length < 1)) {
+      // Force add if below minimum 3 places per day to prevent empty/sparse days
+      if ((dayHours + t <= MAX_HOURS_PER_DAY && canAfford) || validPlaces.length < 3) {
         dayHours += t;
         dayCost += placeCost;
 
