@@ -81,7 +81,10 @@ function Results() {
   const [multiCityContext, setMultiCityContext] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const [sidebarTab, setSidebarTab] = useState(isExecuting ? "live" : "plan");
+  const [activePlace, setActivePlace] = useState(null);
   const [showMapOnMobile, setShowMapOnMobile] = useState(false);
+  
   const isMobile = window.innerWidth <= 900;
 
   useEffect(() => {
@@ -225,6 +228,12 @@ function Results() {
     }
   }, [isGenerating, genStep, user, plan, loc.state, saved, saving, handleSaveTrip]);
 
+  useEffect(() => {
+    if (plan && !user && !plan.isShared) {
+      localStorage.setItem("tripPlan", JSON.stringify(plan));
+    }
+  }, [plan, user]);
+
   const handleSkip = (dayLabel, placeName) => {
     setPlan(prev => {
       const isArr = Array.isArray(prev.itinerary);
@@ -253,12 +262,6 @@ function Results() {
   const handleUnlock = () => {
     setShowAuthModal(true);
   };
-
-  useEffect(() => {
-    if (plan && !user && !plan.isShared) {
-      localStorage.setItem("tripPlan", JSON.stringify(plan));
-    }
-  }, [plan, user]);
 
   const normalizedItinerary = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
@@ -353,14 +356,6 @@ function Results() {
   };
 
   if (loading) return <div className="res-loading-screen"><div className="res-spinner"></div><h2>Initializing Odyssey...</h2></div>;
-
-  useEffect(() => {
-    // Force a window resize event to trigger Leaflet's invalidateSize
-    const timer = setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [showMapOnMobile, plan]);
 
   if (isGenerating && plan) {
     return (
