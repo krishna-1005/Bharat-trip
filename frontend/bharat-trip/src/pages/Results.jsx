@@ -14,13 +14,12 @@ import { AnimatePresence, motion } from "framer-motion";
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 const THINKING_MESSAGES = [
-  "Initializing Neural Path Optimization...",
-  "Synchronizing Geospatial Datasets...",
-  "Analyzing User Preference Vectors...",
-  "Executing Multi-Objective Route Balancing...",
-  "Applying Climatic Alignment Algorithms...",
-  "Synthesizing Local Narrative Layers...",
-  "Finalizing High-Fidelity Odyssey..."
+  "AI is analyzing your travel preferences...",
+  "Crafting a bespoke itinerary for you...",
+  "Our AI engine is optimizing your route...",
+  "Synchronizing local narrative layers...",
+  "Finalizing your high-fidelity odyssey...",
+  "Almost there! AI is polishing your plan..."
 ];
 
 // Fallback for timing logic if not provided by backend
@@ -401,19 +400,76 @@ function Results() {
   if (loading) return <div className="res-loading-screen"><div className="res-spinner"></div><h2>Initializing Odyssey...</h2></div>;
 
   if (isGenerating && plan) {
+    const dataStreamLines = [
+      "GET /api/v1/geo-coordinates/fetch",
+      "SCANNING: Historical Site Databases",
+      "OPTIMIZING: Travel Time Efficiency [8.4s]",
+      "MATCHING: User Preference Vectors...",
+      "FETCHING: Current Weather API",
+      "ROUTE: A* Algorithm Execution",
+      "COMPRESSING: Itinerary JSON"
+    ];
+
     return (
       <div className="ai-gen-overlay">
         <AnimatePresence mode="wait">
           {genStep === "thinking" && (
-            <motion.div key="thinking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="ai-gen-content">
-              <div className="ai-pulse-ring"><div className="ai-pulse-dot"></div></div>
-              <motion.h2 key={messageIdx}>{THINKING_MESSAGES[messageIdx]}</motion.h2>
-              <div className="ai-loading-bar-wrap"><motion.div className="ai-loading-bar-fill" initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 2 }} /></div>
+            <motion.div 
+              key="thinking" 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="ai-gen-content"
+            >
+              <div className="ai-brain-core">
+                <div className="ai-pulse-ring ai-ring-1"></div>
+                <div className="ai-pulse-ring ai-ring-2"></div>
+                <div className="ai-pulse-ring ai-ring-3"></div>
+                <div className="ai-core-dot"></div>
+              </div>
+
+              <div className="ai-status-container">
+                <motion.h2 key={messageIdx}>
+                  {THINKING_MESSAGES[messageIdx]}
+                </motion.h2>
+                <div className="ai-loading-bar-wrap">
+                  <motion.div 
+                    className="ai-loading-bar-fill" 
+                    initial={{ width: "0%" }} 
+                    animate={{ width: "100%" }} 
+                    transition={{ duration: 3, ease: "easeInOut" }} 
+                  />
+                </div>
+                <div className="ai-data-stream">
+                  <motion.span
+                    key={messageIdx}
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {dataStreamLines[messageIdx % dataStreamLines.length]}
+                  </motion.span>
+                </div>
+              </div>
             </motion.div>
           )}
           {genStep === "summary" && (
-            <motion.div key="summary" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="ai-gen-summary-box">
-              <span className="ai-sparkle-tag">✨ AI Insight</span>
+            <motion.div 
+              key="summary" 
+              initial={{ opacity: 0, scale: 0.95 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              className="ai-gen-summary-box"
+            >
+              <div className="ai-success-icon-wrap">
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                >
+                  ✓
+                </motion.span>
+              </div>
+              <span className="ai-sparkle-tag">✨ Analysis Complete</span>
               <h2>Itinerary Ready</h2>
               <p className="ai-summary-text-large">{plan.summary}</p>
               <div className="ai-countdown-loader"></div>
