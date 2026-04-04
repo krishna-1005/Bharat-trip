@@ -28,6 +28,7 @@
   flex-direction: column;
   position: relative;
   width: 100%;
+  min-height: 0;
   /* Account for fixed header in the layout flow */
   padding-top: 64px; 
   padding-bottom: 0; 

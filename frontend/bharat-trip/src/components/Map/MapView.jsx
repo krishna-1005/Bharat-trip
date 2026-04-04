@@ -137,7 +137,8 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
     ? allPlaces 
     : (plan?.itinerary?.[days[activeDay - 1]]?.places || []), [activeDay, allPlaces, plan?.itinerary, days]);
 
-  const firstTarget = targetPlaces[0];
+  // Target the current stop for live routing
+  const currentTarget = allPlaces[currentIndex] || targetPlaces[0];
 
   // pathHistory logic needs userLocation
   useEffect(() => {
@@ -150,11 +151,11 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
   }, [isTracking, userLocation]);
 
   useEffect(() => {
-    if (isTracking && userLocation && firstTarget) {
+    if (isTracking && userLocation && currentTarget) {
       const fetchRoute = async () => {
         try {
           const res = await fetch(
-            `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${firstTarget.lng},${firstTarget.lat}?overview=full&geometries=geojson`
+            `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${currentTarget.lng},${currentTarget.lat}?overview=full&geometries=geojson`
           );
           const data = await res.json();
           if (data.routes && data.routes.length > 0) {
@@ -167,7 +168,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
       };
       fetchRoute();
     }
-  }, [isTracking, userLocation?.lat, userLocation?.lng, firstTarget?.lat, firstTarget?.lng]);
+  }, [isTracking, userLocation?.lat, userLocation?.lng, currentTarget?.lat, currentTarget?.lng]);
 
   if (!plan || !plan.itinerary) return null;
 
@@ -243,15 +244,15 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
                 pathOptions={{ color: '#3b82f6', weight: 5, opacity: 0.8 }}
               >
                 <Tooltip permanent direction="center" className="route-tooltip">
-                  Navigating to {firstTarget?.name}
+                  Navigating to {currentTarget?.name}
                 </Tooltip>
               </Polyline>
             )}
 
             {/* Fallback to direct line if OSRM fails */}
-            {roadRoute.length === 0 && firstTarget && (
+            {roadRoute.length === 0 && currentTarget && (
               <Polyline 
-                positions={[[userLocation.lat, userLocation.lng], [firstTarget.lat, firstTarget.lng]]}
+                positions={[[userLocation.lat, userLocation.lng], [currentTarget.lat, currentTarget.lng]]}
                 pathOptions={{ color: '#3b82f6', weight: 4, opacity: 0.8, dashArray: '1, 10' }}
               />
             )}

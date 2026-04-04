@@ -9,7 +9,7 @@ import ScrollToTop from "./ScrollToTop";
 export default function Layout() {
   const location = useLocation();
   const isHomePage = location.pathname === "/" || location.pathname === "";
-  const isFixedLayout = location.pathname.includes("/results") || location.pathname.includes("/planner") || location.pathname.includes("/map");
+  const isFixedLayout = location.pathname.includes("/results") || location.pathname.includes("/map");
 
   return (
     <div className={`app ${isFixedLayout ? "fixed-layout" : ""}`}>

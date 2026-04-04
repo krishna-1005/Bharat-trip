@@ -84,8 +84,45 @@ function Results() {
   const [sidebarTab, setSidebarTab] = useState(isExecuting ? "live" : "plan");
   const [activePlace, setActivePlace] = useState(null);
   const [showMapOnMobile, setShowMapOnMobile] = useState(false);
+  const [isGuidanceMode, setIsGuidanceMode] = useState(false);
   
   const isMobile = window.innerWidth <= 900;
+
+  useEffect(() => {
+    let watchId = null;
+    if (isTracking && navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            heading: position.coords.heading
+          });
+        },
+        (error) => console.warn("Location tracking error:", error),
+        { enableHighAccuracy: true, maximumAge: 10000 }
+      );
+    } else if (!isTracking && !userLocation && navigator.geolocation) {
+      // Get initial position once if not tracking
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        }
+      );
+    }
+
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [isTracking]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     // Force a window resize event to trigger Leaflet's invalidateSize
@@ -94,25 +131,6 @@ function Results() {
     }, 500);
     return () => clearTimeout(timer);
   }, [showMapOnMobile, plan]);
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error) => console.warn("Geolocation access denied or error:", error)
-      );
-    }
-  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(loc.search);
@@ -572,8 +590,12 @@ function Results() {
           plan={plan} 
           isTracking={isTracking} 
           currentIndex={currentIndex} 
+          setCurrentIndex={setCurrentIndex}
           userLocation={userLocation}
           activePlace={activePlace}
+          isGuidanceMode={isGuidanceMode}
+          setIsGuidanceMode={setIsGuidanceMode}
+          onHover={setActivePlace}
         />
         <div className="floating-map-controls">
           <button className={`map-control-btn ${isTracking ? "active" : ""}`} onClick={() => setIsTracking(!isTracking)}>📍</button>

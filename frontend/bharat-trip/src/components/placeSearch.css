@@ -61,7 +61,7 @@
 .search-item-info {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .search-item-name {
@@ -74,7 +74,7 @@
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.4);
   white-space: nowrap;
-  overflow: hidden;
+  overflow: auto;
   text-overflow: ellipsis;
 }
 
