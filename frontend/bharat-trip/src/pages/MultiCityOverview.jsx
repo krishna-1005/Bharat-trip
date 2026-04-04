@@ -84,8 +84,8 @@ const MultiCityOverview = () => {
 
   if (generating) {
     return (
-      <div className="planner-container" style={{ paddingTop: '150px', textAlign: 'center' }}>
-        <div className="res-spinner" style={{ margin: '0 auto 20px' }}></div>
+      <div className="planner-container" style={{ paddingTop: '150px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <div className="res-spinner"></div>
         <h2 className="planner-title">Crafting your multi-city odyssey...</h2>
         <p className="planner-subtitle">Generating tailored itineraries for each destination.</p>
       </div>

@@ -64,8 +64,8 @@ export default function Exploration() {
 
         <section className="pro-section">
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '100px' }}>
-               <div className="res-spinner" style={{ margin: '0 auto' }}></div>
+            <div style={{ textAlign: 'center', padding: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+               <div className="res-spinner"></div>
                <p>Fetching public archives...</p>
             </div>
           ) : trips.length === 0 ? (

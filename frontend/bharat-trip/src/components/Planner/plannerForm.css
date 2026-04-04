@@ -403,6 +403,23 @@
     border: none;
     cursor: pointer;
     transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pf-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: pf-spin 0.6s linear infinite;
+}
+
+@keyframes pf-spin {
+  to { transform: rotate(360deg); }
 }
 
 .pf-secondary-btn {

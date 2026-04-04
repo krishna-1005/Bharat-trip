@@ -144,16 +144,17 @@ function Results() {
 
     const fetchSharedTrip = async (id) => {
       try {
+        setLoading(true);
         const res = await fetch(`${API}/api/public/trips/${id}`);
         const data = await res.json();
-        if (res.ok) {
+        if (res.ok && data.trip) {
           const t = data.trip;
           const formattedPlan = {
             id: t._id,
             city: t.destination || "India",
             coordinates: t.coordinates,
             days: t.days,
-            itinerary: t.itinerary,
+            itinerary: t.itinerary || [],
             isShared: true,
             totalTripCost: t.totalTripCost,
             totalBudget: t.totalBudget,
@@ -163,6 +164,8 @@ function Results() {
           };
           setPlan(formattedPlan);
           setTripTitle(t.title);
+        } else {
+          console.error("Shared trip not found or error:", data.error);
         }
       } catch (err) {
         console.error("Error fetching shared trip:", err);
@@ -174,24 +177,39 @@ function Results() {
     if (sharedTripId) {
       fetchSharedTrip(sharedTripId);
     } else if (loc.state?.plan) {
-      setPlan(loc.state.plan);
-      if (loc.state?.multiCityContext) {
-        setMultiCityContext(loc.state.multiCityContext);
+      try {
+        setPlan(loc.state.plan);
+        if (loc.state?.multiCityContext) {
+          setMultiCityContext(loc.state.multiCityContext);
+        }
+        if (loc.state?.isNew) {
+          setIsGenerating(true);
+          setCurrentIndex(0);
+          localStorage.setItem("tripCurrentIndex", 0);
+          // Also reset execution state for new trips
+          setIsExecuting(false);
+          localStorage.setItem("tripExecuting", "false");
+          setSidebarTab("plan");
+        } else {
+          setIsGenerating(false);
+        }
+      } catch (err) {
+        console.error("Error setting plan from state:", err);
+      } finally {
+        setLoading(false);
       }
-      if (loc.state?.isNew) {
-        setIsGenerating(true);
-        setCurrentIndex(0);
-        localStorage.setItem("tripCurrentIndex", 0);
-      } else {
-        setIsGenerating(false);
-      }
-      setLoading(false);
     } else {
-      const savedPlanStr = localStorage.getItem("tripPlan");
-      if (savedPlanStr) {
-        setPlan(JSON.parse(savedPlanStr));
+      try {
+        const savedPlanStr = localStorage.getItem("tripPlan");
+        if (savedPlanStr && savedPlanStr !== "undefined") {
+          setPlan(JSON.parse(savedPlanStr));
+        }
+      } catch (err) {
+        console.error("Error parsing saved plan:", err);
+        localStorage.removeItem("tripPlan");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
   }, [loc.search, loc.state, routeTripId]);
 
@@ -414,6 +432,7 @@ function Results() {
 
   const currentStop = allPlaces[currentIndex];
   const nextStop = allPlaces[currentIndex + 1];
+  const stopsLeft = Math.max(0, allPlaces.length - currentIndex);
 
   return (
     <div className={`anchored-planner-root results-page-fixed ${isMobile ? `mobile-view-${mobileView}` : ''}`}>
@@ -484,7 +503,7 @@ function Results() {
                 <div className="execution-mode-focused animate-in">
                   <div className="exec-progress-summary">
                     <div className="exec-stat"><span className="exec-stat-val">{currentIndex}</span><span className="exec-stat-label">Visited</span></div>
-                    <div className="exec-stat"><span className="exec-stat-val">{allPlaces.length - currentIndex}</span><span className="exec-stat-label">Left</span></div>
+                    <div className="exec-stat"><span className="exec-stat-val">{stopsLeft}</span><span className="exec-stat-label">Left</span></div>
                     <div className="exec-progress-track"><div className="exec-progress-fill" style={{ width: `${progressPercent}%` }}></div></div>
                   </div>
 

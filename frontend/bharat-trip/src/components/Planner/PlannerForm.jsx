@@ -103,10 +103,21 @@ function PlannerForm({ onPlanGenerated }) {
           pace 
         })
       });
+
       const data = await res.json();
-      if (onPlanGenerated && data.plan?.itinerary) onPlanGenerated(data.plan);
-    } catch {
-      setError("We encountered an issue. Please try again.");
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to generate plan");
+      }
+
+      if (onPlanGenerated && data.plan?.itinerary) {
+        onPlanGenerated(data.plan);
+      } else {
+        setError("Plan generation failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Plan Gen Error:", err);
+      setError(err.message || "We encountered an issue. Please try again.");
     } finally {
       setLoading(false);
     }
