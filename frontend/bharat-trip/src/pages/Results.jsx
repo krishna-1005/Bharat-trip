@@ -266,10 +266,24 @@ function Results() {
 
   useEffect(() => {
     if (!isGenerating) return;
+    
+    // Safety timeout: force close overlay after 6 seconds if it gets stuck
+    const safetyTimer = setTimeout(() => {
+      setIsGenerating(false);
+      setGenStep("done");
+      setLoading(false);
+    }, 6000);
+
     const msgInterval = setInterval(() => setMessageIdx((prev) => (prev + 1) % THINKING_MESSAGES.length), 600);
     const summaryTimeout = setTimeout(() => { setGenStep("summary"); clearInterval(msgInterval); }, 1500);
     const doneTimeout = setTimeout(() => { setIsGenerating(false); setGenStep("done"); }, 3500);
-    return () => { clearInterval(msgInterval); clearTimeout(summaryTimeout); clearTimeout(doneTimeout); };
+    
+    return () => { 
+      clearInterval(msgInterval); 
+      clearTimeout(summaryTimeout); 
+      clearTimeout(doneTimeout); 
+      clearTimeout(safetyTimer);
+    };
   }, [isGenerating]);
 
   useEffect(() => {
