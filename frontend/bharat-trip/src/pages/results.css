@@ -935,6 +935,7 @@
     background: #000 !important;
     position: fixed !important;
     inset: 0 !important;
+    z-index: 500 !important;
   }
 
   /* Map Foundation - Top Layer (40%) */

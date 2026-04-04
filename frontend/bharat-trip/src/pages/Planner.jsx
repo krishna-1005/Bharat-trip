@@ -15,6 +15,12 @@ function Planner() {
   const [activePersona, setActivePersona] = useState('explorer');
 
   const handlePlanGenerated = (generatedPlan) => {
+    // Persist to localStorage immediately to prevent loss on mobile navigation
+    try {
+      localStorage.setItem("tripPlan", JSON.stringify(generatedPlan));
+    } catch (err) {
+      console.warn("Could not save plan to localStorage:", err);
+    }
     navigate("/results", { state: { plan: generatedPlan, isNew: true } });
   };
 

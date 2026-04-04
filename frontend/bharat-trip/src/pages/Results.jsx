@@ -71,7 +71,8 @@ function Results() {
   const [isTracking, setIsTracking] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(() => {
     const savedIdx = localStorage.getItem("tripCurrentIndex");
-    return savedIdx ? parseInt(savedIdx, 10) : 0;
+    const parsed = savedIdx ? parseInt(savedIdx, 10) : 0;
+    return isNaN(parsed) ? 0 : parsed;
   });
   const [isPublic, setIsPublic] = useState(false);
   const [isExecuting, setIsExecuting] = useState(() => {
@@ -87,7 +88,13 @@ function Results() {
   const [isGuidanceMode, setIsGuidanceMode] = useState(false);
   const [mobileView, setMobileView] = useState("plan"); // 'plan' or 'map'
   
-  const isMobile = window.innerWidth <= 900;
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 900);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     // If we were executing, default to live/map view on mobile? 
@@ -116,7 +123,8 @@ function Results() {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           });
-        }
+        },
+        (err) => console.warn("Geolocation initial error:", err)
       );
     }
 
@@ -136,7 +144,7 @@ function Results() {
       window.dispatchEvent(new Event('resize'));
     }, 500);
     return () => clearTimeout(timer);
-  }, [showMapOnMobile, plan]);
+  }, [showMapOnMobile, plan, mobileView]);
 
   useEffect(() => {
     const params = new URLSearchParams(loc.search);
@@ -258,9 +266,9 @@ function Results() {
 
   useEffect(() => {
     if (!isGenerating) return;
-    const msgInterval = setInterval(() => setMessageIdx((prev) => (prev + 1) % THINKING_MESSAGES.length), 700);
-    const summaryTimeout = setTimeout(() => { setGenStep("summary"); clearInterval(msgInterval); }, 2000);
-    const doneTimeout = setTimeout(() => { setIsGenerating(false); setGenStep("done"); }, 4500);
+    const msgInterval = setInterval(() => setMessageIdx((prev) => (prev + 1) % THINKING_MESSAGES.length), 600);
+    const summaryTimeout = setTimeout(() => { setGenStep("summary"); clearInterval(msgInterval); }, 1500);
+    const doneTimeout = setTimeout(() => { setIsGenerating(false); setGenStep("done"); }, 3500);
     return () => { clearInterval(msgInterval); clearTimeout(summaryTimeout); clearTimeout(doneTimeout); };
   }, [isGenerating]);
 
@@ -272,7 +280,11 @@ function Results() {
 
   useEffect(() => {
     if (plan && !user && !plan.isShared) {
-      localStorage.setItem("tripPlan", JSON.stringify(plan));
+      try {
+        localStorage.setItem("tripPlan", JSON.stringify(plan));
+      } catch (err) {
+        console.warn("Storage quota exceeded, could not persist plan", err);
+      }
     }
   }, [plan, user]);
 
