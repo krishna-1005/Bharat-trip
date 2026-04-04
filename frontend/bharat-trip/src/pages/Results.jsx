@@ -85,6 +85,14 @@ function Results() {
   const isMobile = window.innerWidth <= 900;
 
   useEffect(() => {
+    // Force a window resize event to trigger Leaflet's invalidateSize
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [showMapOnMobile, plan]);
+
+  useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
