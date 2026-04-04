@@ -108,10 +108,31 @@ function Results() {
 
   useEffect(() => {
     if (!isGenerating) return;
-    const msgInterval = setInterval(() => setMessageIdx(prev => (prev + 1) % THINKING_MESSAGES.length), 800);
-    const summaryTimeout = setTimeout(() => setGenStep("summary"), 2000);
-    const doneTimeout = setTimeout(() => setIsGenerating(false), 5000);
-    return () => { clearInterval(msgInterval); clearTimeout(summaryTimeout); clearTimeout(doneTimeout); };
+    
+    // Safety: always clear generating state after a maximum of 8 seconds
+    const maxSafetyTimeout = setTimeout(() => {
+      console.log("Forcing isGenerating to false after safety timeout");
+      setIsGenerating(false);
+    }, 8000);
+
+    const msgInterval = setInterval(() => {
+      setMessageIdx(prev => (prev + 1) % THINKING_MESSAGES.length);
+    }, 1200);
+
+    const summaryTimeout = setTimeout(() => {
+      setGenStep("summary");
+    }, 2500);
+
+    const doneTimeout = setTimeout(() => {
+      setIsGenerating(false);
+    }, 5500);
+
+    return () => { 
+      clearInterval(msgInterval); 
+      clearTimeout(summaryTimeout); 
+      clearTimeout(doneTimeout);
+      clearTimeout(maxSafetyTimeout);
+    };
   }, [isGenerating]);
 
   // ── HANDLERS ──
@@ -155,17 +176,51 @@ function Results() {
   // ── MEMOS ──
   const normalizedItinerary = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
-    return Array.isArray(plan.itinerary) ? plan.itinerary : Object.entries(plan.itinerary).map(([day, data]) => ({ day, ...data }));
+    try {
+      return Array.isArray(plan.itinerary) 
+        ? plan.itinerary 
+        : Object.entries(plan.itinerary).map(([day, data]) => ({ day, ...data }));
+    } catch (e) {
+      console.error("Failed to normalize itinerary:", e);
+      return [];
+    }
   }, [plan]);
 
-  const allPlaces = useMemo(() => normalizedItinerary.flatMap(d => (d.places || []).map(p => ({ ...p, day: d.day }))), [normalizedItinerary]);
+  const allPlaces = useMemo(() => {
+    try {
+      return normalizedItinerary.flatMap(d => (d?.places || []).map(p => ({ ...p, day: d?.day })));
+    } catch (e) {
+      console.error("Failed to flatten allPlaces:", e);
+      return [];
+    }
+  }, [normalizedItinerary]);
+
+  // ── RECOVERY LOGIC ──
+  // Ensure currentIndex is valid whenever allPlaces changes
+  useEffect(() => {
+    if (allPlaces.length > 0 && currentIndex >= allPlaces.length) {
+      setCurrentIndex(0);
+      localStorage.setItem("tripCurrentIndex", 0);
+    }
+  }, [allPlaces, currentIndex]);
 
   const budgetData = useMemo(() => {
-    if (!plan) return { total: 0, target: 0, percent: 0, isOver: false };
-    const total = plan.totalTripCost || 0;
-    const target = plan.totalBudget || 0;
+    if (!plan) return { total: 0, target: 0, percent: 0, isOver: false, targetPercent: 100 };
+    const total = Number(plan.totalTripCost) || 0;
+    const target = Number(plan.totalBudget) || 0;
     const max = Math.max(total, target, 1);
-    return { total, target, percent: (total / max) * 100, isOver: total > target };
+    
+    // Ensure we don't have NaN in the final object
+    const percent = (total / max) * 100;
+    const targetPercent = (target / max) * 100;
+
+    return { 
+      total, 
+      target, 
+      percent: isNaN(percent) ? 0 : percent, 
+      isOver: total > target,
+      targetPercent: isNaN(targetPercent) ? 100 : targetPercent
+    };
   }, [plan]);
 
   // ── RENDERS ──

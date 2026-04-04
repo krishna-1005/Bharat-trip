@@ -4,6 +4,8 @@ const UsageLog = require("../models/UsageLog");
 const Trip = require("../models/Trip");
 const { db } = require("../firebaseAdmin");
 
+let firestoreEnabled = true;
+
 /* ── TRACKING ── */
 router.post("/track", async (req, res) => {
   try {
@@ -13,13 +15,23 @@ router.post("/track", async (req, res) => {
     const id = userId || guestId;
     if (!id) return res.status(400).json({ error: "No ID provided" });
 
-    if (!db) {
-      console.warn("Tracking skipped: Firestore 'db' not initialized.");
+    if (!db || !firestoreEnabled) {
+      console.warn("Tracking skipped: Firestore not available or disabled due to auth error.");
       return res.status(200).json({ success: false, message: "Firestore not available" });
     }
 
     const userRef = db.collection("users").doc(id);
-    const doc = await userRef.get();
+    let doc;
+    try {
+      doc = await userRef.get();
+    } catch (dbErr) {
+      if (dbErr.code === 16 || dbErr.message.includes("UNAUTHENTICATED")) {
+        console.error("❌ Firestore Authentication Error. Disabling tracking.");
+        firestoreEnabled = false;
+        return res.status(200).json({ success: false, message: "Tracking disabled due to auth error" });
+      }
+      throw dbErr; // Re-throw other DB errors to be caught by outer catch
+    }
 
     if (!doc.exists) {
       // Create new tracking doc
