@@ -43,18 +43,25 @@ function ZoomControls() {
 function FitBounds({ places, userLocation }) {
   const map = useMap();
   useEffect(() => {
-    if (!places.length && !userLocation) return;
+    if (!places || (!places.length && !userLocation)) return;
     const bounds = [];
     places.forEach(p => {
+      if (!p) return;
       const lat = Number(p.lat);
       const lng = Number(p.lng);
-      if (!isNaN(lat) && !isNaN(lng)) bounds.push([lat, lng]);
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        bounds.push([lat, lng]);
+      }
     });
-    if (userLocation && !isNaN(userLocation.lat) && !isNaN(userLocation.lng)) {
-      bounds.push([userLocation.lat, userLocation.lng]);
+    if (userLocation && Number.isFinite(Number(userLocation.lat)) && Number.isFinite(Number(userLocation.lng))) {
+      bounds.push([Number(userLocation.lat), Number(userLocation.lng)]);
     }
     if (bounds.length > 0) {
-      try { map.fitBounds(bounds, { padding: [50, 50] }); } catch (err) {}
+      try { 
+        map.fitBounds(bounds, { padding: [50, 50] }); 
+      } catch (err) {
+        console.warn("FitBounds failed:", err);
+      }
     }
   }, [places, userLocation, map]);
   return null;
@@ -63,8 +70,12 @@ function FitBounds({ places, userLocation }) {
 function ChangeView({ center }) {
   const map = useMap();
   useEffect(() => {
-    if (center && Array.isArray(center) && !isNaN(center[0]) && !isNaN(center[1])) {
-      try { map.setView(center, map.getZoom()); } catch (err) {}
+    if (center && Array.isArray(center) && Number.isFinite(center[0]) && Number.isFinite(center[1])) {
+      try { 
+        map.setView(center, map.getZoom() || 12); 
+      } catch (err) {
+        console.warn("SetView failed:", err);
+      }
     }
   }, [center, map]);
   return null;
@@ -74,26 +85,37 @@ function MapView({ plan, currentIndex, userLocation, isTracking, activePlace, on
   const allPlaces = useMemo(() => {
     if (!plan?.itinerary) return [];
     const days = Array.isArray(plan.itinerary) ? plan.itinerary : Object.values(plan.itinerary);
-    return days.flatMap(d => d.places || []).filter(p => p && !isNaN(Number(p.lat)) && !isNaN(Number(p.lng)));
+    return days
+      .filter(d => d && (d.places || d.length)) // Handle both day objects and direct place arrays
+      .flatMap(d => d.places || (Array.isArray(d) ? d : []))
+      .filter(p => p && Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lng)));
   }, [plan]);
 
   const initialCenter = useMemo(() => {
-    if (plan?.coordinates && !isNaN(Number(plan.coordinates.lat)) && !isNaN(Number(plan.coordinates.lng))) {
+    if (plan?.coordinates && Number.isFinite(Number(plan.coordinates.lat)) && Number.isFinite(Number(plan.coordinates.lng))) {
       return [Number(plan.coordinates.lat), Number(plan.coordinates.lng)];
     }
-    if (allPlaces.length > 0) return [Number(allPlaces[0].lat), Number(allPlaces[0].lng)];
-    return [12.9716, 77.5946]; // Bangalore
+    if (allPlaces.length > 0) {
+      const first = allPlaces[0];
+      return [Number(first.lat), Number(first.lng)];
+    }
+    return [12.9716, 77.5946]; // Bangalore fallback
   }, [plan, allPlaces]);
 
   // FINAL SAFETY CHECK
-  const safeInitialCenter = initialCenter.map(n => isNaN(n) ? 0 : n);
+  const safeInitialCenter = initialCenter.map(n => (n === null || !Number.isFinite(n)) ? 0 : n);
   if (safeInitialCenter[0] === 0) safeInitialCenter[0] = 12.9716;
   if (safeInitialCenter[1] === 0) safeInitialCenter[1] = 77.5946;
+
+  useEffect(() => {
+    if (allPlaces.length === 0 && plan) {
+      console.warn("MapView: No valid places found in itinerary", plan.itinerary);
+    }
+  }, [allPlaces, plan]);
 
   return (
     <div className="map-container" style={{ height: '100%', width: '100%' }}>
       <MapContainer
-        key={`${safeInitialCenter[0]}-${safeInitialCenter[1]}`}
         center={safeInitialCenter}
         zoom={12}
         zoomControl={false}
@@ -133,8 +155,8 @@ function MapView({ plan, currentIndex, userLocation, isTracking, activePlace, on
           />
         )}
 
-        {userLocation && !isNaN(userLocation.lat) && !isNaN(userLocation.lng) && (
-          <Marker position={[userLocation.lat, userLocation.lng]} icon={createUserIcon(userLocation.heading)}>
+        {userLocation && Number.isFinite(Number(userLocation.lat)) && Number.isFinite(Number(userLocation.lng)) && (
+          <Marker position={[Number(userLocation.lat), Number(userLocation.lng)]} icon={createUserIcon(userLocation.heading)}>
             <Tooltip direction="top">You are here</Tooltip>
           </Marker>
         )}
