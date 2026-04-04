@@ -26,12 +26,12 @@ function Results() {
   const navigate = useNavigate();
   const loc = useLocation();
   const { id: routeTripId } = useParams();
-  const { formatPrice, t } = useSettings();
+  const { formatPrice } = useSettings();
   const { user, setShowAuthModal } = useContext(AuthContext);
 
   const isMapViewRoute = loc.pathname === "/map";
 
-  // STATE
+  // ── STATE ──
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -52,7 +52,7 @@ function Results() {
   const [isTracking, setIsTracking] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
 
-  // EFFECTS
+  // ── EFFECTS ──
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 900);
     window.addEventListener("resize", handleResize);
@@ -70,8 +70,7 @@ function Results() {
           const res = await fetch(`${API}/api/public/trips/${sharedId}`);
           const data = await res.json();
           if (res.ok && data.trip) {
-            const fetched = { ...data.trip, itinerary: data.trip.itinerary || [], isShared: true };
-            setPlan(fetched);
+            setPlan({ ...data.trip, itinerary: data.trip.itinerary || [], isShared: true });
             setTripTitle(data.trip.title || "");
             return;
           }
@@ -90,7 +89,7 @@ function Results() {
           }
         }
       } catch (err) {
-        console.error("Critical loading error:", err);
+        console.error("Plan loading error:", err);
       } finally {
         setLoading(false);
       }
@@ -112,7 +111,7 @@ function Results() {
     return () => { clearInterval(msgInterval); clearTimeout(summaryTimeout); clearTimeout(doneTimeout); };
   }, [isGenerating]);
 
-  // HANDLERS
+  // ── HANDLERS ──
   const handleVisited = (idx) => {
     setCurrentIndex(idx + 1);
     localStorage.setItem("tripCurrentIndex", idx + 1);
@@ -138,7 +137,11 @@ function Results() {
         })
       });
       if (res.ok) setSaved(true);
-    } catch (err) { console.error(err); } finally { setSaving(true); }
+    } catch (err) { 
+      console.error(err); 
+    } finally { 
+      setSaving(false); 
+    }
   };
 
   const handleShare = async () => {
@@ -150,7 +153,7 @@ function Results() {
     } catch (err) { alert(url); }
   };
 
-  // MEMOS
+  // ── MEMOS ──
   const normalizedItinerary = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
     return Array.isArray(plan.itinerary) ? plan.itinerary : Object.entries(plan.itinerary).map(([day, data]) => ({ day, ...data }));
@@ -166,16 +169,16 @@ function Results() {
     return { total, target, percent: (total / max) * 100 };
   }, [plan]);
 
-  // RENDERS
+  // ── RENDERS ──
   if (loading) return (
-    <div className="ai-gen-overlay">
+    <div className="ai-gen-overlay center-fixed">
       <div className="premium-pulse-ring"></div>
-      <h2 className="ai-loader-text">Analyzing Your Preferences...</h2>
+      <h2 className="ai-loader-text">Loading Your Odyssey...</h2>
     </div>
   );
 
   if (isGenerating && plan) return (
-    <div className="ai-gen-overlay">
+    <div className="ai-gen-overlay center-fixed">
       <AnimatePresence mode="wait">
         {genStep === "thinking" ? (
           <motion.div key="think" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="ai-loader-container">
@@ -184,8 +187,8 @@ function Results() {
           </motion.div>
         ) : (
           <motion.div key="sum" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="ai-gen-summary-box">
-            <span className="ai-sparkle-badge">✨ AI Optimized</span>
-            <h2>Odyssey Ready</h2>
+            <span className="ai-sparkle-badge">✨ AI Complete</span>
+            <h2 style={{ color: '#fff', fontSize: '28px', margin: '15px 0' }}>Odyssey Initialized</h2>
             <p className="ai-summary-text-large">{plan.summary}</p>
             <div className="ai-countdown-loader"></div>
           </motion.div>
@@ -196,8 +199,8 @@ function Results() {
 
   if (!plan) return (
     <div className="res-empty" style={{height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px'}}>
-      <h2>Plan Not Found</h2>
-      <button className="primary-action-btn" onClick={() => navigate("/")}>Return to Planner</button>
+      <h2>No plan found</h2>
+      <button className="primary-action-btn" onClick={() => navigate("/")}>Go Back Home</button>
     </div>
   );
 
@@ -224,7 +227,7 @@ function Results() {
               <span className="insight-label">AI TRAVEL INSIGHT</span>
             </div>
             <p className="insight-text">
-              {currentStop ? `Tip: Visiting ${currentStop.name} now is ideal for avoiding the heavy afternoon crowds.` : "You've successfully completed your odyssey!"}
+              {currentStop ? `Tip: ${currentStop.name} is stunning right now. Head to the higher vantage points for the best panoramics!` : "Odyssey finished. Ready for the next one?"}
             </p>
           </div>
 
@@ -238,12 +241,12 @@ function Results() {
               <h3 className="card-title-premium">{currentStop.name}</h3>
               <p className="description-text">{currentStop.reason}</p>
               <div className="card-actions-grid">
-                <button className="action-main-btn" onClick={() => handleVisited(currentIndex)}>Visited</button>
+                <button className="action-main-btn" onClick={() => handleVisited(currentIndex)}>Mark Visited</button>
                 <button className="action-sub-btn" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentStop.lat},${currentStop.lng}`, '_blank')}>Navigate</button>
               </div>
             </div>
           ) : (
-            <div style={{textAlign:'center', padding:'40px 0'}}><h2>Odyssey Complete! 🏁</h2></div>
+            <div style={{textAlign:'center', padding:'40px 0'}}><h2>Trip Finished! 🏁</h2></div>
           )}
 
           {nextStop && (
@@ -260,7 +263,7 @@ function Results() {
     );
   }
 
-  // DESKTOP & MOBILE ITINERARY VIEW
+  // DEFAULT VIEW
   return (
     <div className={`anchored-planner-root ${isMobile ? "mobile-itinerary-mode" : ""}`}>
       <aside className="premium-itinerary-sidebar">
