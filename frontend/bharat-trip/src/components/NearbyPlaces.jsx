@@ -50,12 +50,20 @@ export default function NearbyPlaces() {
     );
   }, []);
 
-  if (!location) return (
+  const getValidLatLng = (lat, lng) => {
+    const nLat = parseFloat(lat);
+    const nLng = parseFloat(lng);
+    return (Number.isFinite(nLat) && Number.isFinite(nLng)) ? [nLat, nLng] : null;
+  };
+
+  if (!location || !getValidLatLng(location.lat, location.lng)) return (
     <div style={{ padding: "50px", textAlign: "center" }}>
       <h2>📍 Getting your location...</h2>
       <p>If prompted, please allow location access to see places near you.</p>
     </div>
   );
+
+  const safeCenter = getValidLatLng(location.lat, location.lng) || [12.9716, 77.5946];
 
   return (
     <div className="nearby-wrap">
@@ -66,7 +74,7 @@ export default function NearbyPlaces() {
       </div>
 
       <MapContainer
-        center={[location.lat, location.lng]}
+        center={safeCenter}
         zoom={14}
         style={{ height: "600px", width: "100%" }}
       >
@@ -76,29 +84,33 @@ export default function NearbyPlaces() {
         />
 
         {/* User Location Marker */}
-        <Marker position={[location.lat, location.lng]}>
+        <Marker position={safeCenter}>
           <Popup>You are here</Popup>
         </Marker>
 
         {/* Nearby Places Markers */}
-        {places.map((place, i) => (
-          <Marker
-            key={i}
-            position={[Number(place.lat), Number(place.lng)]}
-          >
-            <Popup>
-              <div style={{ minWidth: "150px" }}>
-                <b style={{ color: "#2563eb" }}>{place.name}</b><br/>
-                <span style={{ fontSize: "12px", color: "#666" }}>
-                  Category: {place.category}<br/>
-                  Distance: {place.distance?.toFixed(2)} km
-                </span>
-                <br/>
-                <small style={{ color: "#999" }}>Source: {place.source}</small>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {places.map((place, i) => {
+          const pos = getValidLatLng(place.lat, place.lng);
+          if (!pos) return null;
+          return (
+            <Marker
+              key={i}
+              position={pos}
+            >
+              <Popup>
+                <div style={{ minWidth: "150px" }}>
+                  <b style={{ color: "#2563eb" }}>{place.name}</b><br/>
+                  <span style={{ fontSize: "12px", color: "#666" }}>
+                    Category: {place.category}<br/>
+                    Distance: {typeof place.distance === 'number' ? place.distance.toFixed(2) : 'N/A'} km
+                  </span>
+                  <br/>
+                  <small style={{ color: "#999" }}>Source: {place.source}</small>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );

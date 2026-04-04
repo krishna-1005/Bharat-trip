@@ -34,10 +34,7 @@ function Results() {
   // ── STATE ──
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
-  
-  // FIXED: Initialize isGenerating immediately to prevent Map race conditions
   const [isGenerating, setIsGenerating] = useState(() => loc.state?.isNew || false);
-  
   const [genStep, setGenStep] = useState("thinking");
   const [messageIdx, setMessageIdx] = useState(0);
   const [tripTitle, setTripTitle] = useState("");
@@ -46,15 +43,57 @@ function Results() {
   const [shareStatus, setShareStatus] = useState(false);
   
   const [currentIndex, setCurrentIndex] = useState(() => {
-    const savedIdx = localStorage.getItem("tripCurrentIndex");
-    const parsed = parseInt(savedIdx, 10);
-    return isNaN(parsed) ? 0 : parsed;
+    try {
+      const savedIdx = localStorage.getItem("tripCurrentIndex");
+      const parsed = parseInt(savedIdx, 10);
+      return isNaN(parsed) ? 0 : parsed;
+    } catch (e) {
+      return 0;
+    }
   });
 
   const [activePlace, setActivePlace] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
-  const [isTracking, setIsTracking] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
+
+  // ── MEMOS ──
+  const normalizedItinerary = useMemo(() => {
+    if (!plan || !plan.itinerary) return [];
+    try {
+      return Array.isArray(plan.itinerary) 
+        ? plan.itinerary 
+        : Object.entries(plan.itinerary).map(([day, data]) => ({ day, ...data }));
+    } catch (e) {
+      console.error("Failed to normalize itinerary:", e);
+      return [];
+    }
+  }, [plan]);
+
+  const allPlaces = useMemo(() => {
+    try {
+      return normalizedItinerary.flatMap(d => (d?.places || []).map(p => ({ ...p, day: d?.day })));
+    } catch (e) {
+      console.error("Failed to flatten allPlaces:", e);
+      return [];
+    }
+  }, [normalizedItinerary]);
+
+  const budgetData = useMemo(() => {
+    if (!plan) return { total: 0, target: 0, percent: 0, isOver: false, targetPercent: 100 };
+    const total = Number(plan.totalTripCost || plan.totalCost) || 0;
+    const target = Number(plan.totalBudget) || 0;
+    const max = Math.max(total, target, 1);
+    const percent = (total / max) * 100;
+    const targetPercent = (target / max) * 100;
+
+    return { 
+      total, 
+      target, 
+      percent: isNaN(percent) ? 0 : percent, 
+      isOver: total > target,
+      targetPercent: isNaN(targetPercent) ? 100 : targetPercent
+    };
+  }, [plan]);
 
   // ── EFFECTS ──
   useEffect(() => {
@@ -74,8 +113,9 @@ function Results() {
           const res = await fetch(`${API}/api/public/trips/${sharedId}`);
           const data = await res.json();
           if (res.ok && data.trip) {
-            setPlan({ ...data.trip, itinerary: data.trip.itinerary || [], isShared: true });
-            setTripTitle(data.trip.title || "");
+            const p = data.trip;
+            setPlan({ ...p, itinerary: p.itinerary || [] });
+            setTripTitle(p.title || "");
             return;
           }
         }
@@ -101,32 +141,11 @@ function Results() {
   }, [loc.state, routeTripId, loc.search]);
 
   useEffect(() => {
-    if (plan && !user && !plan.isShared) {
-      try { localStorage.setItem("tripPlan", JSON.stringify(plan)); } catch(e) {}
-    }
-  }, [plan, user]);
-
-  useEffect(() => {
     if (!isGenerating) return;
-    
-    // Safety: always clear generating state after a maximum of 8 seconds
-    const maxSafetyTimeout = setTimeout(() => {
-      console.log("Forcing isGenerating to false after safety timeout");
-      setIsGenerating(false);
-    }, 8000);
-
-    const msgInterval = setInterval(() => {
-      setMessageIdx(prev => (prev + 1) % THINKING_MESSAGES.length);
-    }, 1200);
-
-    const summaryTimeout = setTimeout(() => {
-      setGenStep("summary");
-    }, 2500);
-
-    const doneTimeout = setTimeout(() => {
-      setIsGenerating(false);
-    }, 5500);
-
+    const maxSafetyTimeout = setTimeout(() => setIsGenerating(false), 8000);
+    const msgInterval = setInterval(() => setMessageIdx(prev => (prev + 1) % THINKING_MESSAGES.length), 1200);
+    const summaryTimeout = setTimeout(() => setGenStep("summary"), 2500);
+    const doneTimeout = setTimeout(() => setIsGenerating(false), 5500);
     return () => { 
       clearInterval(msgInterval); 
       clearTimeout(summaryTimeout); 
@@ -137,8 +156,9 @@ function Results() {
 
   // ── HANDLERS ──
   const handleVisited = (idx) => {
-    setCurrentIndex(idx + 1);
-    localStorage.setItem("tripCurrentIndex", idx + 1);
+    const nextIdx = idx + 1;
+    setCurrentIndex(nextIdx);
+    localStorage.setItem("tripCurrentIndex", nextIdx);
   };
 
   const handleSaveTrip = async () => {
@@ -155,7 +175,7 @@ function Results() {
           city: plan.city,
           days: plan.days || 1,
           itinerary: plan.itinerary,
-          totalCost: plan.totalTripCost,
+          totalCost: plan.totalTripCost || plan.totalCost,
           totalBudget: plan.totalBudget,
           summary: plan.summary
         })
@@ -165,7 +185,7 @@ function Results() {
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/trip/${plan?.id || routeTripId}`;
+    const url = `${window.location.origin}/trip/${plan?.id || routeTripId || ''}`;
     try {
       await navigator.clipboard.writeText(url);
       setShareStatus(true);
@@ -173,66 +193,18 @@ function Results() {
     } catch (err) { alert(url); }
   };
 
-  // ── MEMOS ──
-  const normalizedItinerary = useMemo(() => {
-    if (!plan || !plan.itinerary) return [];
-    try {
-      return Array.isArray(plan.itinerary) 
-        ? plan.itinerary 
-        : Object.entries(plan.itinerary).map(([day, data]) => ({ day, ...data }));
-    } catch (e) {
-      console.error("Failed to normalize itinerary:", e);
-      return [];
-    }
-  }, [plan]);
-
-  const allPlaces = useMemo(() => {
-    try {
-      return normalizedItinerary.flatMap(d => (d?.places || []).map(p => ({ ...p, day: d?.day })));
-    } catch (e) {
-      console.error("Failed to flatten allPlaces:", e);
-      return [];
-    }
-  }, [normalizedItinerary]);
-
-  // ── RECOVERY LOGIC ──
-  // Ensure currentIndex is valid whenever allPlaces changes
-  useEffect(() => {
-    if (allPlaces.length > 0 && currentIndex >= allPlaces.length) {
-      setCurrentIndex(0);
-      localStorage.setItem("tripCurrentIndex", 0);
-    }
-  }, [allPlaces, currentIndex]);
-
-  const budgetData = useMemo(() => {
-    if (!plan) return { total: 0, target: 0, percent: 0, isOver: false, targetPercent: 100 };
-    const total = Number(plan.totalTripCost) || 0;
-    const target = Number(plan.totalBudget) || 0;
-    const max = Math.max(total, target, 1);
-    
-    // Ensure we don't have NaN in the final object
-    const percent = (total / max) * 100;
-    const targetPercent = (target / max) * 100;
-
-    return { 
-      total, 
-      target, 
-      percent: isNaN(percent) ? 0 : percent, 
-      isOver: total > target,
-      targetPercent: isNaN(targetPercent) ? 100 : targetPercent
-    };
-  }, [plan]);
-
   // ── RENDERS ──
   if (loading) return (
-    <div className="ai-gen-overlay center-fixed">
-      <div className="premium-pulse-ring"></div>
-      <h2 className="ai-loader-text">Loading Your Odyssey...</h2>
+    <div className="ai-gen-overlay">
+      <div className="premium-pulse-ring">
+        <div className="brand-glow-dot"></div>
+      </div>
+      <h2 className="ai-loader-text">Summoning Your Odyssey...</h2>
     </div>
   );
 
   if (isGenerating && plan) return (
-    <div className="ai-gen-overlay center-fixed">
+    <div className="ai-gen-overlay">
       <AnimatePresence mode="wait">
         {genStep === "thinking" ? (
           <motion.div key="think" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="ai-loader-container">
@@ -241,8 +213,8 @@ function Results() {
           </motion.div>
         ) : (
           <motion.div key="sum" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="ai-gen-summary-box">
-            <span className="ai-sparkle-badge">✨ AI Complete</span>
-            <h2 style={{ color: '#fff', fontSize: '28px', margin: '15px 0' }}>Odyssey Ready</h2>
+            <span className="ai-sparkle-badge">✨ AI Synthesis Complete</span>
+            <h2 style={{ color: '#fff', fontSize: '32px', margin: '20px 0', fontWeight: 800 }}>Your Odyssey is Ready</h2>
             <p className="ai-summary-text-large">{plan.summary}</p>
             <div className="ai-countdown-loader"></div>
           </motion.div>
@@ -254,127 +226,136 @@ function Results() {
   if (!plan) return (
     <div className="res-empty" style={{height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px'}}>
       <h2>No plan found</h2>
-      <button className="primary-action-btn" onClick={() => navigate("/")}>Return to Planner</button>
+      <button className="primary-action-btn" onClick={() => navigate("/planner")}>Return to Planner</button>
     </div>
   );
 
   const currentStop = allPlaces[currentIndex];
   const nextStop = allPlaces[currentIndex + 1];
-  const progress = Math.round((currentIndex / (allPlaces.length || 1)) * 100);
 
-  // MOBILE MAP VIEW
-  if (isMobile && isMapViewRoute) {
-    return (
-      <div className="anchored-planner-root mobile-map-mode">
-        <div className="map-half">
-          <MapView plan={plan} currentIndex={currentIndex} activePlace={activePlace} onHover={setActivePlace} isTracking={isTracking} userLocation={userLocation} />
-          <button className="back-to-itin-btn" onClick={() => navigate("/results")}>📋 VIEW PLAN</button>
-          <div className="map-stats-overlay">
-            <div className="stat-pill">📍 {allPlaces.length - currentIndex} Left</div>
-          </div>
-        </div>
-
-        <div className="live-guide-half">
-          <div className="ai-insight-box">
-            <div className="insight-header">
-              <span className="ai-brain-icon">🧠</span>
-              <span className="insight-label">AI TRAVEL INSIGHT</span>
-            </div>
-            <p className="insight-text">
-              {currentStop ? `Tip: ${currentStop.name} is stunning right now. Head to the higher vantage points for the best panoramic views!` : "You've successfully completed your odyssey!"}
-            </p>
-          </div>
-
-          {currentStop ? (
-            <div className="focus-card-premium">
-              <div className="status-indicator-row">
-                <span className="live-dot-pulse"></span>
-                <span className="status-label">NOW VISITING</span>
-              </div>
-              <PlaceImage placeName={currentStop.name} city={plan.city} className="card-hero-img" />
-              <h3 className="card-title-premium">{currentStop.name}</h3>
-              <p className="description-text">{currentStop.reason}</p>
-              <div className="card-actions-grid">
-                <button className="action-main-btn" onClick={() => handleVisited(currentIndex)}>Visited</button>
-                <button className="action-sub-btn" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentStop.lat},${currentStop.lng}`, '_blank')}>Navigate</button>
-              </div>
-            </div>
-          ) : (
-            <div style={{textAlign:'center', padding:'40px 0'}}><h2>Odyssey Complete! 🏁</h2></div>
-          )}
-
-          {nextStop && (
-            <div className="next-stop-card-upgraded">
-              <span className="next-tag">UP NEXT</span>
-              <div className="next-content-inner">
-                <PlaceImage placeName={nextStop.name} city={plan.city} className="next-img" />
-                <h4>{nextStop.name}</h4>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // DEFAULT VIEW
   return (
-    <div className={`anchored-planner-root ${isMobile ? "mobile-itinerary-mode" : ""}`}>
+    <div className="anchored-planner-root">
       <aside className="premium-itinerary-sidebar">
         <div className="sidebar-header-premium">
           <div className="header-top-row">
-            <div className="premium-brand"><div className="brand-glow-dot"></div><span className="brand-text">Bharat Trip</span></div>
-            <button className="back-control" onClick={() => navigate("/planner")}>← Edit</button>
+            <div className="premium-brand">
+              <div className="brand-glow-dot"></div>
+              <span className="brand-text">Bharat Trip</span>
+            </div>
+            <button className="back-control" onClick={() => navigate("/planner")}>← Edit Plan</button>
           </div>
-          <h1>{tripTitle || `${plan.city} Odyssey`}</h1>
+          <motion.h1 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {tripTitle || `${plan.city} Odyssey`}
+          </motion.h1>
         </div>
 
         <div className="sidebar-scroll-content">
-          <BudgetPanel budgetData={budgetData} formatPrice={formatPrice} />
-          {normalizedItinerary.map((day, dIdx) => (
-            <div key={dIdx} className="premium-day-section">
-              <div className="day-title-row">
-                <div className="day-badge">{dIdx + 1}</div>
-                <h3>Day {dIdx + 1}: {day.day}</h3>
+          <motion.div 
+            className="trip-overview-premium"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="stat-label-small">Experience Overview</div>
+            <div className="overview-stats">
+              <div className="stat-box">
+                <span className="stat-label-small">Duration</span>
+                <span className="stat-value-mid">{plan.days} Days</span>
               </div>
-              {day.places?.map((place, pIdx) => {
-                const gIdx = allPlaces.indexOf(place);
-                return (
-                  <div key={pIdx} className={`premium-stop-card-v2 ${gIdx === currentIndex ? "active" : ""} ${gIdx < currentIndex ? "visited" : ""}`}>
-                    <div className="stop-card-image-wrap">
-                      <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
-                    </div>
-                    <div className="stop-info-v2">
-                      <div style={{display:'flex', justifyContent:'space-between'}}>
-                        <span className="stop-tag-v2">{place.category}</span>
-                        <span style={{fontSize:'12px', fontWeight:'700', color:'var(--accent-success)'}}>₹{place.estimatedCost}</span>
-                      </div>
-                      <h4>{place.name}</h4>
-                      <p className="stop-reason-text">{place.reason}</p>
-                    </div>
-                  </div>
-                );
-              })}
+              <div className="stat-box">
+                <span className="stat-label-small">Stops</span>
+                <span className="stat-value-mid">{allPlaces.length} Places</span>
+              </div>
+              <div className="stat-box">
+                <span className="stat-label-small">Budget</span>
+                <span className="stat-value-mid">{formatPrice(budgetData.total)}</span>
+              </div>
             </div>
-          ))}
+          </motion.div>
+
+          <BudgetPanel budgetData={budgetData} formatPrice={formatPrice} variant="inline" />
+          
+          <div className="itinerary-days-container">
+            {normalizedItinerary.map((day, dIdx) => (
+              <motion.div 
+                key={dIdx} 
+                className="premium-day-section"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + dIdx * 0.1 }}
+              >
+                <div className="day-title-row">
+                  <div className="day-badge">{dIdx + 1}</div>
+                  <h3>Day {dIdx + 1}: {day.day || day.title || `Exploration`}</h3>
+                </div>
+                <div className="day-stops-list">
+                  {day.places?.map((place, pIdx) => {
+                    const gIdx = allPlaces.indexOf(place);
+                    const isActive = gIdx === currentIndex;
+                    const isVisited = gIdx < currentIndex;
+                    return (
+                      <motion.div 
+                        key={pIdx} 
+                        className={`premium-stop-card-v3 ${isActive ? "active" : ""} ${isVisited ? "visited" : ""}`}
+                        whileHover={{ x: 8 }}
+                        onMouseEnter={() => setActivePlace(place)}
+                        onMouseLeave={() => setActivePlace(null)}
+                        onClick={() => {
+                          setActivePlace(place);
+                          if (isMobile) navigate("/map");
+                        }}
+                      >
+                        <div className="stop-image-wrap-v3">
+                          <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v3" />
+                          {isVisited && <div className="visited-check-v3">✓</div>}
+                        </div>
+                        <div className="stop-info-v3">
+                          <div className="stop-meta-v3">
+                            <span className="stop-tag-v3">{place.category}</span>
+                            <span className="stop-cost-v3">{formatPrice(place.estimatedCost || 0)}</span>
+                          </div>
+                          <h4>{place.name}</h4>
+                          <p className="stop-reason-v3">{place.reason}</p>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
         <div className="sidebar-footer-premium">
-          {!isMobile && (
+          {!isMobile ? (
             <div className="action-btn-group">
-              <button className="primary-action-btn" onClick={handleSaveTrip} disabled={saved || saving}>{saved ? "Saved ✓" : "Save Journey"}</button>
-              <button className="secondary-action-btn" onClick={handleShare}>Share</button>
+              <button className="primary-action-btn" onClick={handleSaveTrip} disabled={saved || saving}>
+                {saving ? "Saving..." : saved ? "Journey Saved ✓" : "Save to Profile"}
+              </button>
+              <button className="secondary-action-btn" onClick={handleShare}>
+                {shareStatus ? "Link Copied!" : "Share Journey"}
+              </button>
             </div>
-          )}
-          {isMobile && (
-            <button className="mobile-view-switcher" onClick={() => navigate("/map")}>🗺️ START GUIDED TRIP</button>
+          ) : (
+            <button className="mobile-view-switcher" onClick={() => navigate("/map")}>
+              🗺️ Open Interactive Map
+            </button>
           )}
         </div>
       </aside>
 
       {!isMobile && (
         <main className="planner-map-foundation">
-          <MapView plan={plan} currentIndex={currentIndex} activePlace={activePlace} onHover={setActivePlace} isTracking={isTracking} userLocation={userLocation} />
+          <MapView 
+            plan={plan} 
+            currentIndex={currentIndex} 
+            activePlace={activePlace} 
+            onHover={setActivePlace} 
+            userLocation={userLocation} 
+          />
         </main>
       )}
     </div>

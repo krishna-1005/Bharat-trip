@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const BudgetPanel = ({ budgetData, formatPrice }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const BudgetPanel = ({ budgetData, formatPrice, variant = "floating" }) => {
+  const [isExpanded, setIsExpanded] = useState(variant === "inline");
+
+  const isInline = variant === "inline";
 
   return (
-    <div className="budget-floating-wrapper">
+    <div className={isInline ? "budget-inline-wrapper" : "budget-floating-wrapper"}>
       <motion.div 
-        className={`budget-floating-card ${isExpanded ? 'expanded' : 'compact'}`}
+        className={`budget-card-premium ${isExpanded ? 'expanded' : 'compact'} ${isInline ? 'inline' : 'floating'}`}
         initial={false}
         animate={{ 
           height: isExpanded ? 'auto' : '70px',
@@ -17,13 +19,13 @@ const BudgetPanel = ({ budgetData, formatPrice }) => {
         {/* Compact Header - Always Visible */}
         <div 
           className="budget-compact-header" 
-          onClick={() => setIsExpanded(!isExpanded)}
-          style={{ cursor: 'pointer' }}
+          onClick={() => !isInline && setIsExpanded(!isExpanded)}
+          style={{ cursor: isInline ? 'default' : 'pointer' }}
         >
           <div className="budget-summary-info">
             <span className={`budget-status-dot ${budgetData.isOver ? 'over' : 'under'}`}></span>
             <div className="budget-text-group">
-              <span className="budget-main-label">Budget Precision</span>
+              <span className="budget-main-label">{budgetData.isOver ? 'Budget Alert' : 'Budget Precision'}</span>
               <span className="budget-main-value">
                 {formatPrice(budgetData.total)} 
                 <span className="budget-slash"> / </span>
@@ -32,14 +34,16 @@ const BudgetPanel = ({ budgetData, formatPrice }) => {
             </div>
           </div>
           
-          <div className="budget-toggle-icon">
-            <motion.span
-              animate={{ rotate: isExpanded ? 180 : 0 }}
-              style={{ display: 'inline-block' }}
-            >
-              ▲
-            </motion.span>
-          </div>
+          {!isInline && (
+            <div className="budget-toggle-icon">
+              <motion.span
+                animate={{ rotate: isExpanded ? 180 : 0 }}
+                style={{ display: 'inline-block' }}
+              >
+                ▲
+              </motion.span>
+            </div>
+          )}
         </div>
 
         {/* Expanded Content */}
@@ -71,12 +75,14 @@ const BudgetPanel = ({ budgetData, formatPrice }) => {
                     animate={{ width: `${Math.min(budgetData.percent, 100)}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
                   ></motion.div>
-                  <div 
-                    className="budget-target-marker" 
-                    style={{ left: `${budgetData.targetPercent}%` }}
-                  >
-                    <span className="target-marker-label">Goal</span>
-                  </div>
+                  {budgetData.targetPercent < 100 && (
+                    <div 
+                      className="budget-target-marker" 
+                      style={{ left: `${budgetData.targetPercent}%` }}
+                    >
+                      <span className="target-marker-label">Goal</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -107,18 +113,28 @@ const BudgetPanel = ({ budgetData, formatPrice }) => {
           pointer-events: none;
         }
 
-        .budget-floating-card {
+        .budget-inline-wrapper {
+          margin-bottom: 32px;
+          width: 100%;
+        }
+
+        .budget-card-premium {
           pointer-events: auto;
-          background: rgba(15, 15, 15, 0.85);
+          background: rgba(255, 255, 255, 0.03);
           backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 20px;
-          padding: 0 20px;
-          overflow: auto;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 24px;
+          padding: 0 24px;
+          overflow: hidden;
           box-shadow: 0 10px 40px rgba(0,0,0,0.4);
           width: 100%;
-          max-width: 400px;
-          margin: 0 auto;
+          box-sizing: border-box;
+        }
+
+        .budget-card-premium.inline {
+          background: rgba(255, 255, 255, 0.02);
+          backdrop-filter: none;
+          box-shadow: none;
         }
 
         .budget-compact-header {
@@ -150,15 +166,15 @@ const BudgetPanel = ({ budgetData, formatPrice }) => {
         }
 
         .budget-main-label {
-          font-size: 11px;
+          font-size: 10px;
           text-transform: uppercase;
           letter-spacing: 1px;
           color: rgba(255,255,255,0.5);
-          font-weight: 700;
+          font-weight: 800;
         }
 
         .budget-main-value {
-          font-size: 15px;
+          font-size: 16px;
           font-weight: 800;
           color: #fff;
         }
@@ -170,7 +186,7 @@ const BudgetPanel = ({ budgetData, formatPrice }) => {
 
         .budget-target-small {
           color: rgba(255,255,255,0.4);
-          font-size: 13px;
+          font-size: 14px;
         }
 
         .budget-toggle-icon {
@@ -179,13 +195,13 @@ const BudgetPanel = ({ budgetData, formatPrice }) => {
         }
 
         .budget-expanded-content {
-          padding-bottom: 20px;
+          padding-bottom: 24px;
         }
 
         .budget-divider {
           height: 1px;
           background: rgba(255,255,255,0.05);
-          margin-bottom: 15px;
+          margin-bottom: 20px;
         }
 
         .budget-detailed-status {
@@ -195,7 +211,7 @@ const BudgetPanel = ({ budgetData, formatPrice }) => {
         }
 
         .detailed-status-text {
-          font-size: 12px;
+          font-size: 13px;
           font-weight: 800;
         }
 
@@ -203,16 +219,60 @@ const BudgetPanel = ({ budgetData, formatPrice }) => {
         .detailed-status-text.over { color: #ef4444; }
 
         .detailed-percent-text {
-          font-size: 11px;
+          font-size: 12px;
           color: rgba(255,255,255,0.5);
-          font-weight: 600;
+          font-weight: 700;
+        }
+
+        .budget-scale-bar-wrapper {
+          margin: 15px 0 25px;
+        }
+
+        .budget-scale-bar-bg {
+          height: 8px;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 10px;
+          position: relative;
+          overflow: visible;
+        }
+
+        .budget-scale-bar-fill {
+          height: 100%;
+          background: linear-gradient(to right, #3b82f6, #8b5cf6);
+          border-radius: 10px;
+          box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .budget-scale-bar-fill.over {
+          background: linear-gradient(to right, #ef4444, #f59e0b);
+          box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .budget-target-marker {
+          position: absolute;
+          top: -4px;
+          width: 2px;
+          height: 16px;
+          background: #fff;
+          z-index: 5;
+        }
+
+        .target-marker-label {
+          position: absolute;
+          top: -18px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 9px;
+          font-weight: 900;
+          text-transform: uppercase;
+          color: #fff;
+          white-space: nowrap;
         }
 
         .budget-stats-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 15px;
-          margin-top: 20px;
+          gap: 20px;
         }
 
         .budget-stat-item {
@@ -224,11 +284,12 @@ const BudgetPanel = ({ budgetData, formatPrice }) => {
           font-size: 10px;
           color: rgba(255,255,255,0.4);
           text-transform: uppercase;
-          margin-bottom: 4px;
+          margin-bottom: 6px;
+          font-weight: 800;
         }
 
         .stat-value {
-          font-size: 14px;
+          font-size: 15px;
           font-weight: 800;
         }
 
@@ -237,7 +298,7 @@ const BudgetPanel = ({ budgetData, formatPrice }) => {
 
         @media (max-width: 900px) {
           .budget-floating-wrapper {
-            bottom: 160px; /* Above mobile navigation */
+            bottom: 120px;
           }
         }
       `}} />

@@ -41,12 +41,37 @@ import "./styles/mobile.css";
 import CreatePoll from "./pages/CreatePoll";
 import VotePoll from "./pages/VotePoll";
 import PollResults from "./pages/PollResults";
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, Component } from "react";
 import AuthModal from "./components/AuthModal";
 import { AuthContext } from "./context/AuthContext";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 const ADMIN_EMAILS = ["bharattrip@gmail.com", "krishkulkarni1005@gmail.com"];
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: "20px", background: "#1a1a1a", color: "white", height: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <h1>Something went wrong.</h1>
+          <p>{this.state.error?.message}</p>
+          <button onClick={() => window.location.reload()} style={{ padding: "10px 20px", background: "var(--accent-blue)", border: "none", borderRadius: "8px", color: "white", cursor: "pointer" }}>Reload Page</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function App() {
   const [isMaintenance, setIsMaintenance] = useState(false);
@@ -84,8 +109,9 @@ function App() {
 
   return (
     <>
-      <Routes>
-        <Route element={<Layout />}>
+      <ErrorBoundary>
+        <Routes>
+          <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/maintenance" element={<Maintenance />} />
           <Route path="/create-poll" element={<CreatePoll />} />
@@ -119,7 +145,6 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/results" element={<Results />} />
           <Route path="/map" element={<Results />} />
-          <Route path="/trip/:id" element={<Results />} />
           <Route path="/trip/:id" element={<Results />} />
           <Route path="/trip-room/:roomId" element={<TripRoom />} />
           <Route path="/sample-plan" element={<SamplePlan />} />
@@ -157,6 +182,7 @@ function App() {
           />
         </Route>
       </Routes>
+      </ErrorBoundary>
 
       <AuthModal />
 
