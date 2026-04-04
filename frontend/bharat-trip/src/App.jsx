@@ -120,6 +120,7 @@ function App() {
           <Route path="/results" element={<Results />} />
           <Route path="/map" element={<Results />} />
           <Route path="/trip/:id" element={<Results />} />
+          <Route path="/trip/:id" element={<Results />} />
           <Route path="/trip-room/:roomId" element={<TripRoom />} />
           <Route path="/sample-plan" element={<SamplePlan />} />
           <Route path="/explore/:city" element={<DestinationDetails />} />
