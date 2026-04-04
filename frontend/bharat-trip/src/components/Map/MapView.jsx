@@ -58,7 +58,7 @@ function FitBounds({ places, userLocation, activePlace }) {
   const map = useMap();
 
   useEffect(() => {
-    if (activePlace && activePlace.lat && activePlace.lng) {
+    if (activePlace && !isNaN(activePlace.lat) && !isNaN(activePlace.lng)) {
       map.setView([Number(activePlace.lat), Number(activePlace.lng)], 15, { animate: true });
       return;
     }
@@ -68,12 +68,12 @@ function FitBounds({ places, userLocation, activePlace }) {
     const bounds = [];
 
     places.forEach(p => {
-      if (p.lat && p.lng && !isNaN(p.lat) && !isNaN(p.lng)) {
+      if (p.lat !== undefined && p.lng !== undefined && !isNaN(p.lat) && !isNaN(p.lng) && p.lat !== null && p.lng !== null) {
         bounds.push([Number(p.lat), Number(p.lng)]);
       }
     });
 
-    if (userLocation && userLocation.lat && userLocation.lng) {
+    if (userLocation && !isNaN(userLocation.lat) && !isNaN(userLocation.lng)) {
       bounds.push([Number(userLocation.lat), Number(userLocation.lng)]);
     }
 
@@ -93,7 +93,7 @@ function FitBounds({ places, userLocation, activePlace }) {
 function FollowUser({ location }) {
   const map = useMap();
   useEffect(() => {
-    if (location) {
+    if (location && !isNaN(location.lat) && !isNaN(location.lng)) {
       map.setView([location.lat, location.lng], map.getZoom(), { animate: true });
     }
   }, [location, map]);
@@ -103,7 +103,7 @@ function FollowUser({ location }) {
 function ChangeView({ center }) {
   const map = useMap();
   useEffect(() => {
-    if (center && !isNaN(center[0]) && !isNaN(center[1])) {
+    if (center && Array.isArray(center) && !isNaN(center[0]) && !isNaN(center[1])) {
       try {
         map.setView(center, map.getZoom());
       } catch (err) {
@@ -120,29 +120,33 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
   const [roadRoute, setRoadRoute] = useState([]);
   
   const allPlaces = useMemo(() => {
-    const days = plan?.itinerary ? Object.keys(plan.itinerary) : [];
-    return days.flatMap(d => plan.itinerary[d]?.places || []);
+    if (!plan?.itinerary) return [];
+    const days = Object.keys(plan.itinerary);
+    return days.flatMap(d => plan.itinerary[d]?.places || []).filter(p => p && !isNaN(p.lat) && !isNaN(p.lng));
   }, [plan?.itinerary]);
 
   const initialCenter = useMemo(() => {
-    if (plan?.coordinates && !isNaN(plan.coordinates.lat) && !isNaN(plan.coordinates.lng)) {
+    if (plan?.coordinates && !isNaN(plan.coordinates.lat) && !isNaN(plan.coordinates.lng) && plan.coordinates.lat !== null) {
       return [Number(plan.coordinates.lat), Number(plan.coordinates.lng)];
     }
     return [12.9716, 77.5946]; // Default to Bangalore
-  }, [plan?.coordinates?.lat, plan?.coordinates?.lng]);
+  }, [plan?.coordinates]);
 
   const days = useMemo(() => plan?.itinerary ? Object.keys(plan.itinerary) : [], [plan?.itinerary]);
 
-  const targetPlaces = useMemo(() => activeDay === "all" 
-    ? allPlaces 
-    : (plan?.itinerary?.[days[activeDay - 1]]?.places || []), [activeDay, allPlaces, plan?.itinerary, days]);
+  const targetPlaces = useMemo(() => {
+    const list = activeDay === "all" 
+      ? allPlaces 
+      : (plan?.itinerary?.[days[activeDay - 1]]?.places || []);
+    return list.filter(p => p && !isNaN(p.lat) && !isNaN(p.lng));
+  }, [activeDay, allPlaces, plan?.itinerary, days]);
 
   // Target the current stop for live routing
   const currentTarget = allPlaces[currentIndex] || targetPlaces[0];
 
   // pathHistory logic needs userLocation
   useEffect(() => {
-    if (isTracking && userLocation) {
+    if (isTracking && userLocation && !isNaN(userLocation.lat)) {
       setPathHistory(prev => [...prev, [userLocation.lat, userLocation.lng]]);
     } else if (!isTracking) {
       setPathHistory([]);
@@ -151,7 +155,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
   }, [isTracking, userLocation]);
 
   useEffect(() => {
-    if (isTracking && userLocation && currentTarget) {
+    if (isTracking && userLocation && currentTarget && !isNaN(userLocation.lat) && !isNaN(currentTarget.lat)) {
       const fetchRoute = async () => {
         try {
           const res = await fetch(
@@ -181,13 +185,11 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
   };
 
   const currentPlace = allPlaces[currentIndex];
-  const nextPlace = allPlaces[currentIndex + 1];
-  const thenPlace = allPlaces[currentIndex + 2];
 
   return (
     <div className="map-container">
       <MapContainer
-        key={`${plan.city}-${plan.coordinates?.lat}-${plan.coordinates?.lng}`}
+        key={`${plan.city}-${initialCenter[0]}-${initialCenter[1]}`}
         center={initialCenter}
         zoom={11}
         zoomControl={false}
@@ -195,7 +197,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
         style={{ height: "100%", width: "100%" }}
       >
         <ChangeView center={initialCenter} />
-        {isTracking && userLocation && <FollowUser location={userLocation} />}
+        {isTracking && userLocation && !isNaN(userLocation.lat) && <FollowUser location={userLocation} />}
         {!isTracking && (
           <FitBounds 
             places={isGuidanceMode ? [] : allPlaces} 
@@ -216,8 +218,6 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
           isGuidanceMode={isGuidanceMode} 
         />
 
-        {/* Guidance UI is now handled in Results.jsx layout */}
-
         {!isGuidanceMode && (
           <MapLegend
             days={days}
@@ -227,7 +227,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
         )}
 
         {/* Live Tracking Routes */}
-        {isTracking && userLocation && (
+        {isTracking && userLocation && !isNaN(userLocation.lat) && (
           <>
             {/* Traveled Path (Breadcrumbs) */}
             {pathHistory.length > 1 && (
@@ -237,7 +237,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
               />
             )}
             
-            {/* Connection to first destination (Real Road Route) */}
+            {/* Connection to target (Real Road Route) */}
             {roadRoute.length > 0 && (
               <Polyline 
                 positions={roadRoute}
@@ -246,7 +246,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
             )}
 
             {/* Fallback to direct line if OSRM fails */}
-            {roadRoute.length === 0 && currentTarget && (
+            {roadRoute.length === 0 && currentTarget && !isNaN(currentTarget.lat) && (
               <Polyline 
                 positions={[[userLocation.lat, userLocation.lng], [currentTarget.lat, currentTarget.lng]]}
                 pathOptions={{ color: '#3b82f6', weight: 4, opacity: 0.8, dashArray: '1, 10' }}
@@ -260,13 +260,12 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
           let globalIdxCounter = 0;
           return days.map((day, idx) => {
             if (activeDay !== "all" && activeDay !== idx + 1) {
-              // We still need to increment the counter for skipped days to keep it in sync
               const skippedPlacesCount = plan.itinerary[day]?.places?.length || 0;
               globalIdxCounter += skippedPlacesCount;
               return null;
             }
 
-            const places = plan.itinerary[day]?.places || [];
+            const places = (plan.itinerary[day]?.places || []).filter(p => p && !isNaN(p.lat) && !isNaN(p.lng));
             const positions = places.map(p => [p.lat, p.lng]);
 
             return (
@@ -316,16 +315,16 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
               const isCurrent = i === currentIndex;
               const isNext = i === currentIndex + 1;
               
-              let color = "rgba(148, 163, 184, 0.3)"; // Dim gray for future
+              let color = "rgba(148, 163, 184, 0.3)";
               let isActive = false;
 
               if (isVisited) {
-                color = "#10b981"; // Green for visited
+                color = "#10b981";
               } else if (isCurrent) {
-                color = "#3b82f6"; // Blue for current
+                color = "#3b82f6";
                 isActive = true;
               } else if (isNext) {
-                color = "#10b981"; // Green for next preview
+                color = "#10b981";
                 isActive = true;
               }
 
@@ -338,7 +337,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
               );
             })}
 
-            {currentIndex < allPlaces.length - 1 && (
+            {currentIndex < allPlaces.length - 1 && allPlaces[currentIndex] && allPlaces[currentIndex + 1] && (
               <Polyline
                 positions={[
                   [allPlaces[currentIndex].lat, allPlaces[currentIndex].lng],
@@ -356,7 +355,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
           </>
         )}
 
-        {userLocation && (
+        {userLocation && !isNaN(userLocation.lat) && !isNaN(userLocation.lng) && (
           <Marker 
             position={[userLocation.lat, userLocation.lng]} 
             icon={createUserIcon(userLocation.heading)}
