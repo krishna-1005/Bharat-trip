@@ -34,13 +34,17 @@ function Results() {
   // ── STATE ──
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isGenerating, setIsGenerating] = useState(false);
+  
+  // FIXED: Initialize isGenerating immediately to prevent Map race conditions
+  const [isGenerating, setIsGenerating] = useState(() => loc.state?.isNew || false);
+  
   const [genStep, setGenStep] = useState("thinking");
   const [messageIdx, setMessageIdx] = useState(0);
   const [tripTitle, setTripTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [shareStatus, setShareStatus] = useState(false);
+  
   const [currentIndex, setCurrentIndex] = useState(() => {
     const savedIdx = localStorage.getItem("tripCurrentIndex");
     const parsed = parseInt(savedIdx, 10);
@@ -79,7 +83,6 @@ function Results() {
         if (loc.state?.plan) {
           setPlan(loc.state.plan);
           setTripTitle(loc.state.plan.title || "");
-          if (loc.state?.isNew) setIsGenerating(true);
         } else {
           const savedPlanStr = localStorage.getItem("tripPlan");
           if (savedPlanStr && savedPlanStr !== "undefined") {
@@ -137,11 +140,7 @@ function Results() {
         })
       });
       if (res.ok) setSaved(true);
-    } catch (err) { 
-      console.error(err); 
-    } finally { 
-      setSaving(false); 
-    }
+    } catch (err) { console.error(err); } finally { setSaving(false); }
   };
 
   const handleShare = async () => {
@@ -162,11 +161,11 @@ function Results() {
   const allPlaces = useMemo(() => normalizedItinerary.flatMap(d => (d.places || []).map(p => ({ ...p, day: d.day }))), [normalizedItinerary]);
 
   const budgetData = useMemo(() => {
-    if (!plan) return { total: 0, target: 0, percent: 0 };
+    if (!plan) return { total: 0, target: 0, percent: 0, isOver: false };
     const total = plan.totalTripCost || 0;
     const target = plan.totalBudget || 0;
     const max = Math.max(total, target, 1);
-    return { total, target, percent: (total / max) * 100 };
+    return { total, target, percent: (total / max) * 100, isOver: total > target };
   }, [plan]);
 
   // ── RENDERS ──
@@ -188,7 +187,7 @@ function Results() {
         ) : (
           <motion.div key="sum" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="ai-gen-summary-box">
             <span className="ai-sparkle-badge">✨ AI Complete</span>
-            <h2 style={{ color: '#fff', fontSize: '28px', margin: '15px 0' }}>Odyssey Initialized</h2>
+            <h2 style={{ color: '#fff', fontSize: '28px', margin: '15px 0' }}>Odyssey Ready</h2>
             <p className="ai-summary-text-large">{plan.summary}</p>
             <div className="ai-countdown-loader"></div>
           </motion.div>
@@ -200,7 +199,7 @@ function Results() {
   if (!plan) return (
     <div className="res-empty" style={{height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px'}}>
       <h2>No plan found</h2>
-      <button className="primary-action-btn" onClick={() => navigate("/")}>Go Back Home</button>
+      <button className="primary-action-btn" onClick={() => navigate("/")}>Return to Planner</button>
     </div>
   );
 
@@ -227,7 +226,7 @@ function Results() {
               <span className="insight-label">AI TRAVEL INSIGHT</span>
             </div>
             <p className="insight-text">
-              {currentStop ? `Tip: ${currentStop.name} is stunning right now. Head to the higher vantage points for the best panoramics!` : "Odyssey finished. Ready for the next one?"}
+              {currentStop ? `Tip: ${currentStop.name} is stunning right now. Head to the higher vantage points for the best panoramic views!` : "You've successfully completed your odyssey!"}
             </p>
           </div>
 
@@ -241,12 +240,12 @@ function Results() {
               <h3 className="card-title-premium">{currentStop.name}</h3>
               <p className="description-text">{currentStop.reason}</p>
               <div className="card-actions-grid">
-                <button className="action-main-btn" onClick={() => handleVisited(currentIndex)}>Mark Visited</button>
+                <button className="action-main-btn" onClick={() => handleVisited(currentIndex)}>Visited</button>
                 <button className="action-sub-btn" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentStop.lat},${currentStop.lng}`, '_blank')}>Navigate</button>
               </div>
             </div>
           ) : (
-            <div style={{textAlign:'center', padding:'40px 0'}}><h2>Trip Finished! 🏁</h2></div>
+            <div style={{textAlign:'center', padding:'40px 0'}}><h2>Odyssey Complete! 🏁</h2></div>
           )}
 
           {nextStop && (
