@@ -6,22 +6,45 @@ const ScrollToTop = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const currentScroll = window.pageYOffset;
+      // Check window scroll (standard pages)
+      const winScroll = window.pageYOffset;
+      const winHeight = document.documentElement.scrollHeight - window.innerHeight;
+      
+      // Check for fixed sidebar scroll (results/planner pages)
+      const sidebar = document.querySelector('.sidebar-scroll-content');
+      const sidebarScroll = sidebar ? sidebar.scrollTop : 0;
+      const sidebarHeight = sidebar ? (sidebar.scrollHeight - sidebar.clientHeight) : 0;
+
+      // Use whichever is currently active
+      const currentScroll = winScroll || sidebarScroll;
+      const totalScroll = winHeight > 0 ? winHeight : (sidebarHeight > 0 ? sidebarHeight : 1);
+      
       const progress = (currentScroll / totalScroll) * 100;
       setScrollProgress(progress);
       setIsVisible(currentScroll > 300);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, true); // Capture phase to catch nested scrolls
+    
+    // Also add listener specifically to sidebar if it exists
+    const sidebar = document.querySelector('.sidebar-scroll-content');
+    if (sidebar) sidebar.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true);
+      if (sidebar) sidebar.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+    // Scroll window
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Scroll sidebar if in fixed layout
+    const sidebar = document.querySelector('.sidebar-scroll-content');
+    if (sidebar) {
+      sidebar.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (

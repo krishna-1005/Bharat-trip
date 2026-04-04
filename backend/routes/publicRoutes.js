@@ -13,6 +13,11 @@ router.post("/track", async (req, res) => {
     const id = userId || guestId;
     if (!id) return res.status(400).json({ error: "No ID provided" });
 
+    if (!db) {
+      console.warn("Tracking skipped: Firestore 'db' not initialized.");
+      return res.status(200).json({ success: false, message: "Firestore not available" });
+    }
+
     const userRef = db.collection("users").doc(id);
     const doc = await userRef.get();
 

@@ -312,9 +312,6 @@ function Results() {
     });
   };
 
-  const [sidebarTab, setSidebarTab] = useState(isExecuting ? "live" : "plan");
-  const [activePlace, setActivePlace] = useState(null);
-
   const handleStopClick = (place) => {
     setActivePlace(place);
     if (isMobile) {

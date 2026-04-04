@@ -114,11 +114,31 @@ function ChangeView({ center }) {
   return null;
 }
 
-function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode, currentIndex, setCurrentIndex, userLocation }) {
+function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode, currentIndex, setCurrentIndex, userLocation, activePlace }) {
   const [activeDay, setActiveDay] = useState("all");
   const [pathHistory, setPathHistory] = useState([]);
   const [roadRoute, setRoadRoute] = useState([]);
   
+  const allPlaces = useMemo(() => {
+    const days = plan?.itinerary ? Object.keys(plan.itinerary) : [];
+    return days.flatMap(d => plan.itinerary[d]?.places || []);
+  }, [plan?.itinerary]);
+
+  const initialCenter = useMemo(() => {
+    if (plan?.coordinates && !isNaN(plan.coordinates.lat) && !isNaN(plan.coordinates.lng)) {
+      return [Number(plan.coordinates.lat), Number(plan.coordinates.lng)];
+    }
+    return [12.9716, 77.5946]; // Default to Bangalore
+  }, [plan?.coordinates?.lat, plan?.coordinates?.lng]);
+
+  const days = useMemo(() => plan?.itinerary ? Object.keys(plan.itinerary) : [], [plan?.itinerary]);
+
+  const targetPlaces = useMemo(() => activeDay === "all" 
+    ? allPlaces 
+    : (plan?.itinerary?.[days[activeDay - 1]]?.places || []), [activeDay, allPlaces, plan?.itinerary, days]);
+
+  const firstTarget = targetPlaces[0];
+
   // pathHistory logic needs userLocation
   useEffect(() => {
     if (isTracking && userLocation) {
@@ -128,18 +148,6 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
       setRoadRoute([]);
     }
   }, [isTracking, userLocation]);
-
-  // Memoize allPlaces so FitBounds doesn't re-trigger on every render (like hover)
-  const allPlaces = useMemo(() => {
-    const days = plan?.itinerary ? Object.keys(plan.itinerary) : [];
-    return days.flatMap(d => plan.itinerary[d]?.places || []);
-  }, [plan?.itinerary]);
-
-  const days = plan?.itinerary ? Object.keys(plan.itinerary) : [];
-  const targetPlaces = activeDay === "all" 
-    ? allPlaces 
-    : (plan.itinerary[days[activeDay - 1]]?.places || []);
-  const firstTarget = targetPlaces[0];
 
   useEffect(() => {
     if (isTracking && userLocation && firstTarget) {
@@ -162,13 +170,6 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
   }, [isTracking, userLocation?.lat, userLocation?.lng, firstTarget?.lat, firstTarget?.lng]);
 
   if (!plan || !plan.itinerary) return null;
-
-  const initialCenter = useMemo(() => {
-    if (plan.coordinates && !isNaN(plan.coordinates.lat) && !isNaN(plan.coordinates.lng)) {
-      return [Number(plan.coordinates.lat), Number(plan.coordinates.lng)];
-    }
-    return [12.9716, 77.5946]; // Default to Bangalore
-  }, [plan.coordinates?.lat, plan.coordinates?.lng]);
 
   const handleNextLocation = () => {
     if (currentIndex < allPlaces.length - 1) {
