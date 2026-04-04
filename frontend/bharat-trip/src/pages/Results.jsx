@@ -389,9 +389,8 @@ function Results() {
   const progressPercent = Math.round((currentIndex / (allPlaces.length || 1)) * 100);
 
   return (
-    <div className={`anchored-planner-root results-page-fixed ${showMapOnMobile ? 'show-map-mobile' : ''}`}>
-      <aside className={`premium-itinerary-sidebar ${showMapOnMobile ? 'hidden-mobile' : ''}`}>
-        {isMobile && <div className="drawer-handle" onClick={() => setShowMapOnMobile(!showMapOnMobile)}></div>}
+    <div className="anchored-planner-root results-page-fixed">
+      <aside className="premium-itinerary-sidebar">
         <div className="sidebar-header-premium">
           <div className="header-top-row">
             <div className="premium-brand"><div className="brand-dot"></div><span className="brand-text">Bharat Trip</span></div>
