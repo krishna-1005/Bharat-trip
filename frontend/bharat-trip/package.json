@@ -13,6 +13,7 @@
     "@hello-pangea/dnd": "^18.0.1",
     "@react-three/drei": "^9.105.6",
     "@react-three/fiber": "^8.16.8",
+    "axios": "^1.14.0",
     "firebase": "^12.10.0",
     "framer-motion": "^12.38.0",
     "leaflet": "^1.9.4",
