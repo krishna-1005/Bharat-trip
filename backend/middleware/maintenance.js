@@ -1,4 +1,7 @@
 const SystemConfig = require("../models/SystemConfig");
+const { admin } = require("../firebaseAdmin");
+
+const ADMIN_EMAILS = ["bharattrip@gmail.com", "krishkulkarni1005@gmail.com"];
 
 const maintenanceMode = async (req, res, next) => {
   try {
@@ -7,17 +10,31 @@ const maintenanceMode = async (req, res, next) => {
     // 3. Skip check for health check and ping routes
     const skippedPaths = [
       "/api/admin",
-      "/api/auth", // Optionally allow login so admins can authenticate
-      "/api/public/config", // Assuming this will be used for public config
-      "/api/admin/config/public", // The existing public config route
+      "/api/auth",
+      "/api/public/config",
+      "/api/admin/config/public",
       "/ping",
       "/"
     ];
 
-    const isSkipped = skippedPaths.some(path => req.path.startsWith(path));
+    const isSkippedPath = skippedPaths.some(path => req.path.startsWith(path));
 
-    if (isSkipped) {
+    if (isSkippedPath) {
       return next();
+    }
+
+    // 4. Check if the request is from an admin (Admin bypass)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      try {
+        const decoded = await admin.auth().verifyIdToken(token);
+        if (decoded.email && ADMIN_EMAILS.includes(decoded.email.toLowerCase())) {
+          return next(); // Admin detected, skip maintenance check
+        }
+      } catch (authErr) {
+        // Token might be invalid or expired, proceed to normal maintenance check
+      }
     }
 
     // Check database for maintenance_mode flag

@@ -41,15 +41,18 @@ import "./styles/mobile.css";
 import CreatePoll from "./pages/CreatePoll";
 import VotePoll from "./pages/VotePoll";
 import PollResults from "./pages/PollResults";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import AuthModal from "./components/AuthModal";
+import { AuthContext } from "./context/AuthContext";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
+const ADMIN_EMAILS = ["bharattrip@gmail.com", "krishkulkarni1005@gmail.com"];
 
 function App() {
   const [isMaintenance, setIsMaintenance] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, loading } = useContext(AuthContext);
 
   useEffect(() => {
     const checkMaintenance = async () => {
@@ -67,13 +70,17 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const currentPath = location.pathname;
-    const isExcluded = currentPath.startsWith("/admin") || currentPath === "/login" || currentPath === "/maintenance";
+    if (loading) return; // Wait for auth to initialize before deciding
 
-    if (isMaintenance && !isExcluded) {
+    const currentPath = location.pathname;
+    const isExcludedPath = currentPath.startsWith("/admin") || currentPath === "/login" || currentPath === "/maintenance";
+    
+    const isAdmin = user && (user.role === "admin" || ADMIN_EMAILS.includes(user.email?.toLowerCase()));
+
+    if (isMaintenance && !isExcludedPath && !isAdmin) {
       navigate("/maintenance");
     }
-  }, [isMaintenance, location.pathname, navigate]);
+  }, [isMaintenance, location.pathname, navigate, user, loading]);
 
   return (
     <>

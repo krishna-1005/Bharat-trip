@@ -85,8 +85,14 @@ function Results() {
   const [activePlace, setActivePlace] = useState(null);
   const [showMapOnMobile, setShowMapOnMobile] = useState(false);
   const [isGuidanceMode, setIsGuidanceMode] = useState(false);
+  const [mobileView, setMobileView] = useState("plan"); // 'plan' or 'map'
   
   const isMobile = window.innerWidth <= 900;
+
+  useEffect(() => {
+    // If we were executing, default to live/map view on mobile? 
+    // User asked for Itinerary first, so we stay on 'plan'.
+  }, []);
 
   useEffect(() => {
     let watchId = null;
@@ -406,177 +412,237 @@ function Results() {
 
   const progressPercent = Math.round((currentIndex / (allPlaces.length || 1)) * 100);
 
+  const currentStop = allPlaces[currentIndex];
+  const nextStop = allPlaces[currentIndex + 1];
+
   return (
-    <div className="anchored-planner-root results-page-fixed">
+    <div className={`anchored-planner-root results-page-fixed ${isMobile ? `mobile-view-${mobileView}` : ''}`}>
       <aside className="premium-itinerary-sidebar">
-        <div className="sidebar-header-premium">
-          <div className="header-top-row">
-            <div className="premium-brand"><div className="brand-dot"></div><span className="brand-text">Bharat Trip</span></div>
-            <button className="back-control" onClick={() => navigate("/planner")}>← Edit</button>
-          </div>
-          
-          <div className="trip-hero-info">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-              <h1 style={{ fontSize: '22px' }}>{tripTitle || `${normalizedItinerary.length} Days in ${plan.city}`}</h1>
-              {!isExecuting && <button className="start-trip-btn" onClick={handleStartTrip}>🚀 Guide Me</button>}
+        {isMobile && mobileView === "map" ? (
+          /* Specialized Map-Mode Itinerary (Below Map) */
+          <div className="compact-live-itinerary">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--text-muted)' }}>📍 LIVE PROGRESS</span>
+              <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--accent-blue)' }}>{progressPercent}%</span>
             </div>
-            
-            <div className="sidebar-mode-tabs">
-              <button className={`mode-tab ${sidebarTab === 'plan' ? 'active' : ''}`} onClick={() => setSidebarTab('plan')}>📋 Plan</button>
-              <button className={`mode-tab ${sidebarTab === 'live' ? 'active' : ''}`} onClick={() => { setSidebarTab('live'); if(!isExecuting) handleStartTrip(); }}>🧭 Live</button>
-            </div>
-          </div>
-        </div>
 
-        <div className="sidebar-scroll-content">
-          {sidebarTab === 'live' ? (
-            <div className="execution-mode-focused animate-in">
-              <div className="exec-progress-summary">
-                <div className="exec-stat"><span className="exec-stat-val">{currentIndex}</span><span className="exec-stat-label">Visited</span></div>
-                <div className="exec-stat"><span className="exec-stat-val">{allPlaces.length - currentIndex}</span><span className="exec-stat-label">Left</span></div>
-                <div className="exec-progress-track"><div className="exec-progress-fill" style={{ width: `${progressPercent}%` }}></div></div>
-              </div>
-
-              {currentIndex < allPlaces.length ? (
-                <div className="focused-stop-card current">
-                  <span className="stop-status-tag current">CURRENT STOP</span>
-                  <PlaceImage placeName={allPlaces[currentIndex].name} city={plan.city} className="focused-stop-img" />
-                  <div className="focused-stop-body">
-                    <h2>{allPlaces[currentIndex].name}</h2>
-                    <button className="exec-action-btn complete" onClick={() => handleVisited(currentIndex)}>✅ Completed</button>
-                  </div>
+            {currentStop ? (
+              <div className="simple-stop-card active">
+                <PlaceImage placeName={currentStop.name} city={plan.city} className="simple-img" />
+                <div className="simple-info">
+                  <span className="simple-label">Current Stop</span>
+                  <div className="simple-name">{currentStop.name}</div>
                 </div>
-              ) : (
-                <div className="focused-stop-card completed"><h2>Trip Completed! 🎉</h2><button className="pf-secondary-btn" onClick={() => setSidebarTab('plan')}>View Full Plan</button></div>
-              )}
-            </div>
-          ) : (
-            <div className="plan-mode-content animate-in">
-              <div className="journey-progress-card">
-                <div className="progress-header"><span className="progress-label">Journey Progress</span><span className="progress-val">{progressPercent}%</span></div>
-                <div className="progress-track-premium"><div className="progress-fill-premium" style={{ width: `${progressPercent}%` }}></div></div>
+                <button 
+                  className="pf-primary-btn" 
+                  style={{ marginLeft: 'auto', padding: '10px 15px', fontSize: '12px' }}
+                  onClick={() => handleVisited(currentIndex)}
+                >
+                  Done
+                </button>
               </div>
+            ) : (
+              <div className="simple-stop-card">
+                <div className="simple-name">Journey Completed! 🎉</div>
+              </div>
+            )}
 
-              <div className="premium-itinerary-list">
-                {normalizedItinerary.map((dayObj, dIdx) => {
-                  const isLocked = !user && dIdx > 0;
-                  return (
-                    <div key={dIdx} className={`premium-day-section ${isLocked ? 'is-locked' : ''}`}>
-                      {isLocked && <LockedDayOverlay onUnlock={handleUnlock} dayCount={normalizedItinerary.length} />}
-                      
-                      <div className={isLocked ? 'blurred-day-container' : ''}>
-                        <div className="day-header-premium">
-                          <div className="day-circle">{dIdx + 1}</div>
-                          <div className="day-info">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                              <h3>{dayObj.label || dayObj.day}</h3>
-                              <button 
-                                className="add-place-btn-minimal" 
-                                onClick={() => handleAddPlace(dayObj.label || dayObj.day)}
-                                disabled={isLocked}
-                                title="Add a custom stop to this day"
-                              >
-                                + Add Stop
-                              </button>
-                            </div>
-                            <span>{dayObj.places?.length || 0} Places</span>
-                          </div>
-                        </div>
+            {nextStop && (
+              <div className="simple-stop-card next">
+                <PlaceImage placeName={nextStop.name} city={plan.city} className="simple-img" />
+                <div className="simple-info">
+                  <span className="simple-label" style={{ color: 'var(--accent-purple)' }}>Next Up</span>
+                  <div className="simple-name">{nextStop.name}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Full Itinerary Sidebar (Standard Desktop or Mobile Itinerary View) */
+          <>
+            <div className="sidebar-header-premium">
+              <div className="header-top-row">
+                <div className="premium-brand"><div className="brand-dot"></div><span className="brand-text">Bharat Trip</span></div>
+                <button className="back-control" onClick={() => navigate("/planner")}>← Edit</button>
+              </div>
+              
+              <div className="trip-hero-info">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
+                  <h1 style={{ fontSize: '22px' }}>{tripTitle || `${normalizedItinerary.length} Days in ${plan.city}`}</h1>
+                  {!isExecuting && <button className="start-trip-btn" onClick={handleStartTrip}>🚀 Guide Me</button>}
+                </div>
+                
+                <div className="sidebar-mode-tabs">
+                  <button className={`mode-tab ${sidebarTab === 'plan' ? 'active' : ''}`} onClick={() => setSidebarTab('plan')}>📋 Plan</button>
+                  <button className={`mode-tab ${sidebarTab === 'live' ? 'active' : ''}`} onClick={() => { setSidebarTab('live'); if(!isExecuting) handleStartTrip(); }}>🧭 Live</button>
+                </div>
+              </div>
+            </div>
 
-                        <CategoryCostBreakdown 
-                          dailyCost={dayObj.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0) || (plan.totalTripCost / (normalizedItinerary.length || 1))} 
-                        />
-                        
-                        <div className="stops-container-premium">
-                          {dayObj.places.map((place, pIdx) => {
-                            let globalIdx = 0;
-                            for (let i = 0; i < dIdx; i++) globalIdx += (normalizedItinerary[i]?.places.length || 0);
-                            const currentIdx = globalIdx + pIdx;
-                            const isVisited = currentIdx < currentIndex;
-                            const isCurrent = currentIdx === currentIndex;
-                            const timing = place.bestTime ? { time: place.bestTime, reason: place.timeReason } : getBestVisitTimeFallback(place.category, currentIdx);
+            <div className="sidebar-scroll-content">
+              {sidebarTab === 'live' ? (
+                <div className="execution-mode-focused animate-in">
+                  <div className="exec-progress-summary">
+                    <div className="exec-stat"><span className="exec-stat-val">{currentIndex}</span><span className="exec-stat-label">Visited</span></div>
+                    <div className="exec-stat"><span className="exec-stat-val">{allPlaces.length - currentIndex}</span><span className="exec-stat-label">Left</span></div>
+                    <div className="exec-progress-track"><div className="exec-progress-fill" style={{ width: `${progressPercent}%` }}></div></div>
+                  </div>
 
-                            // Calculate distance and cost
-                            const distance = userLocation ? calculateDistance(userLocation.lat, userLocation.lng, place.lat, place.lng) : null;
-                            const travelCost = distance !== null ? calculateTravelCost(distance) : null;
-
-                            return (
-                              <div 
-                                key={currentIdx} 
-                                className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}
-                                onClick={() => handleStopClick(place)}
-                                style={{ cursor: 'pointer' }}
-                              >
-                                <div className="stop-marker-v2">{isVisited && <span className="visited-tick">✓</span>}</div>
-                                <div className="stop-card-inner">
-                                  <div className="stop-top-row">
-                                    <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
-                                    <div className="stop-details-v2">
-                                      <div className="stop-title-row">
-                                        <h4>{place.name}</h4>
-                                        {!isVisited && <button className="skip-btn" onClick={() => handleSkip(dayObj.day, place.name)}>✕</button>}
-                                      </div>
-                                      <div className="stop-timing-info" style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                                        <span style={{ color: 'var(--accent-blue)', fontWeight: '700' }}>🕒 {timing.time}</span> • {timing.reason}
-                                      </div>
-                                      
-                                      {distance !== null && (
-                                        <div className="stop-travel-info" style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '8px', display: 'flex', gap: '10px' }}>
-                                          <span>📍 {distance} km away</span>
-                                          <span style={{ color: 'var(--accent-green)' }}>🚗 {formatPrice(travelCost)} travel cost</span>
-                                        </div>
-                                      )}
-
-                                      <div className="stop-pills-v2">
-                                        <span className="stop-pill-v2">{place.category}</span>
-                                        <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
-                                      </div>
-
-                                      {dayObj.places[pIdx + 1] && (
-                                        <div className="next-stop-hint" style={{ fontSize: '10px', color: 'var(--accent-purple)', marginTop: '8px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                          ➔ Next: {dayObj.places[pIdx + 1].name}
-                                        </div>
-                                      )}
-
-                                      {!isMobile && (
-                                        <button 
-                                          className="show-route-inline-btn"
-                                          onClick={(e) => { e.stopPropagation(); handleShowRoute(place); }}
-                                        >
-                                          🗺️ Show Route
-                                        </button>
-                                      )}
-                                    </div>
-                                  </div>
-                                  {isCurrent && <button className="premium-action-btn" style={{ marginTop: '15px', width: '100%' }} onClick={() => handleVisited(currentIdx)}>Mark Visited →</button>}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
+                  {currentIndex < allPlaces.length ? (
+                    <div className="focused-stop-card current">
+                      <span className="stop-status-tag current">CURRENT STOP</span>
+                      <PlaceImage placeName={allPlaces[currentIndex].name} city={plan.city} className="focused-stop-img" />
+                      <div className="focused-stop-body">
+                        <h2>{allPlaces[currentIndex].name}</h2>
+                        <button className="exec-action-btn complete" onClick={() => handleVisited(currentIndex)}>✅ Completed</button>
                       </div>
                     </div>
-                  );
-                })}
-                {/* Spacing for floating budget panel */}
-                <div style={{ height: '120px' }}></div>
+                  ) : (
+                    <div className="focused-stop-card completed"><h2>Trip Completed! 🎉</h2><button className="pf-secondary-btn" onClick={() => setSidebarTab('plan')}>View Full Plan</button></div>
+                  )}
+                </div>
+              ) : (
+                <div className="plan-mode-content animate-in">
+                  <div className="journey-progress-card">
+                    <div className="progress-header"><span className="progress-label">Journey Progress</span><span className="progress-val">{progressPercent}%</span></div>
+                    <div className="progress-track-premium"><div className="progress-fill-premium" style={{ width: `${progressPercent}%` }}></div></div>
+                  </div>
+
+                  <div className="premium-itinerary-list">
+                    {normalizedItinerary.map((dayObj, dIdx) => {
+                      const isLocked = !user && dIdx > 0;
+                      return (
+                        <div key={dIdx} className={`premium-day-section ${isLocked ? 'is-locked' : ''}`}>
+                          {isLocked && <LockedDayOverlay onUnlock={handleUnlock} dayCount={normalizedItinerary.length} />}
+                          
+                          <div className={isLocked ? 'blurred-day-container' : ''}>
+                            <div className="day-header-premium">
+                              <div className="day-circle">{dIdx + 1}</div>
+                              <div className="day-info">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                  <h3>{dayObj.label || dayObj.day}</h3>
+                                  <button 
+                                    className="add-place-btn-minimal" 
+                                    onClick={() => handleAddPlace(dayObj.label || dayObj.day)}
+                                    disabled={isLocked}
+                                    title="Add a custom stop to this day"
+                                  >
+                                    + Add Stop
+                                  </button>
+                                </div>
+                                <span>{dayObj.places?.length || 0} Places</span>
+                              </div>
+                            </div>
+
+                            <CategoryCostBreakdown 
+                              dailyCost={dayObj.places.reduce((sum, p) => sum + (p.estimatedCost || 0), 0) || (plan.totalTripCost / (normalizedItinerary.length || 1))} 
+                            />
+                            
+                            <div className="stops-container-premium">
+                              {dayObj.places.map((place, pIdx) => {
+                                let globalIdx = 0;
+                                for (let i = 0; i < dIdx; i++) globalIdx += (normalizedItinerary[i]?.places.length || 0);
+                                const currentIdx = globalIdx + pIdx;
+                                const isVisited = currentIdx < currentIndex;
+                                const isCurrent = currentIdx === currentIndex;
+                                const timing = place.bestTime ? { time: place.bestTime, reason: place.timeReason } : getBestVisitTimeFallback(place.category, currentIdx);
+
+                                // Calculate distance and cost
+                                const distance = userLocation ? calculateDistance(userLocation.lat, userLocation.lng, place.lat, place.lng) : null;
+                                const travelCost = distance !== null ? calculateTravelCost(distance) : null;
+
+                                return (
+                                  <div 
+                                    key={currentIdx} 
+                                    className={`premium-stop-card-v2 ${isVisited ? "visited" : ""} ${isCurrent ? "active" : "upcoming"}`}
+                                    onClick={() => handleStopClick(place)}
+                                    style={{ cursor: 'pointer' }}
+                                  >
+                                    <div className="stop-marker-v2">{isVisited && <span className="visited-tick">✓</span>}</div>
+                                    <div className="stop-card-inner">
+                                      <div className="stop-top-row">
+                                        <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
+                                        <div className="stop-details-v2">
+                                          <div className="stop-title-row">
+                                            <h4>{place.name}</h4>
+                                            {!isVisited && <button className="skip-btn" onClick={() => handleSkip(dayObj.day, place.name)}>✕</button>}
+                                          </div>
+                                          <div className="stop-timing-info" style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                                            <span style={{ color: 'var(--accent-blue)', fontWeight: '700' }}>🕒 {timing.time}</span> • {timing.reason}
+                                          </div>
+                                          
+                                          {distance !== null && (
+                                            <div className="stop-travel-info" style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '8px', display: 'flex', gap: '10px' }}>
+                                              <span>📍 {distance} km away</span>
+                                              <span style={{ color: 'var(--accent-green)' }}>🚗 {formatPrice(travelCost)} travel cost</span>
+                                            </div>
+                                          )}
+
+                                          <div className="stop-pills-v2">
+                                            <span className="stop-pill-v2">{place.category}</span>
+                                            <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
+                                          </div>
+
+                                          {dayObj.places[pIdx + 1] && (
+                                            <div className="next-stop-hint" style={{ fontSize: '10px', color: 'var(--accent-purple)', marginTop: '8px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                              ➔ Next: {dayObj.places[pIdx + 1].name}
+                                            </div>
+                                          )}
+
+                                          {!isMobile && (
+                                            <button 
+                                              className="show-route-inline-btn"
+                                              onClick={(e) => { e.stopPropagation(); handleShowRoute(place); }}
+                                            >
+                                              🗺️ Show Route
+                                            </button>
+                                          )}
+                                        </div>
+                                      </div>
+                                      {isCurrent && <button className="premium-action-btn" style={{ marginTop: '15px', width: '100%' }} onClick={() => handleVisited(currentIdx)}>Mark Visited →</button>}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {/* Spacing for floating budget panel */}
+                    <div style={{ height: '120px' }}></div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="sidebar-footer-premium">
+              <BudgetPanel budgetData={budgetData} formatPrice={formatPrice} />
+              <div className="footer-summary-row" style={{ flexDirection: 'column', gap: '10px' }}>
+                <div className="footer-action-group" style={{ width: '100%', justifyContent: 'stretch' }}>
+                  <button className="share-journey-btn" style={{ flex: 1 }} onClick={handleShare}>{shareStatus ? "✓ Link" : "Share"}</button>
+                  <button className="save-journey-btn" style={{ flex: 1 }} onClick={() => handleSaveTrip()} disabled={saving || saved}>{saved ? "✓ Saved" : "Save Plan"}</button>
+                </div>
               </div>
             </div>
-          )}
-        </div>
-
-        <div className="sidebar-footer-premium">
-          <BudgetPanel budgetData={budgetData} formatPrice={formatPrice} />
-          <div className="footer-summary-row" style={{ flexDirection: 'column', gap: '10px' }}>
-            <div className="footer-action-group" style={{ width: '100%', justifyContent: 'stretch' }}>
-              <button className="share-journey-btn" style={{ flex: 1 }} onClick={handleShare}>{shareStatus ? "✓ Link" : "Share"}</button>
-              <button className="save-journey-btn" style={{ flex: 1 }} onClick={() => handleSaveTrip()} disabled={saving || saved}>{saved ? "✓ Saved" : "Save Plan"}</button>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </aside>
 
-      {isMobile && activePlace && (
+      {isMobile && (
+        <button 
+          className="mobile-view-switcher"
+          onClick={() => setMobileView(mobileView === "plan" ? "map" : "plan")}
+        >
+          {mobileView === "plan" ? (
+            <><span style={{ fontSize: '18px' }}>🗺️</span> Explore on Map</>
+          ) : (
+            <><span style={{ fontSize: '18px' }}>📋</span> Back to Itinerary</>
+          )}
+        </button>
+      )}
+
+      {isMobile && activePlace && mobileView === "map" && (
         <button 
           className="mobile-floating-navigate-cta"
           onClick={() => handleShowRoute(activePlace)}

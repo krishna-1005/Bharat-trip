@@ -1031,17 +1031,94 @@
     flex-shrink: 0 !important;
   }
 
-  /* Floating Navigate CTA */
-  .mobile-floating-navigate-cta {
+  /* Floating View Toggle Button */
+  .mobile-view-switcher {
     position: fixed !important;
     bottom: 90px !important;
-    left: 20px !important;
-    right: 20px !important;
-    z-index: 1000 !important;
-    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)) !important;
-    border-radius: 20px !important;
-    padding: 16px !important;
-    font-weight: 900 !important;
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 3000 !important;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+    color: white !important;
+    padding: 14px 28px !important;
+    border-radius: 100px !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    letter-spacing: 1px !important;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    white-space: nowrap !important;
   }
-}
+
+  /* Plan View Mode (Mobile) */
+  .anchored-planner-root.mobile-view-plan .planner-map-foundation {
+    display: none !important;
+  }
+  .anchored-planner-root.mobile-view-plan .premium-itinerary-sidebar {
+    height: 100vh !important;
+    width: 100vw !important;
+  }
+
+  /* Map View Mode (Mobile) */
+  .anchored-planner-root.mobile-view-map .planner-map-foundation {
+    height: 50vh !important;
+    order: 1 !important;
+  }
+  .anchored-planner-root.mobile-view-map .premium-itinerary-sidebar {
+    height: 50vh !important;
+    order: 2 !important;
+    background: #000 !important;
+  }
+
+  /* Simplified Map-View Itinerary */
+  .compact-live-itinerary {
+    padding: 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important;
+    background: #000 !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+  }
+
+  .simple-stop-card {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 20px !important;
+    padding: 15px !important;
+    display: flex !important;
+    gap: 15px !important;
+    align-items: center !important;
+  }
+
+  .simple-stop-card.next {
+    opacity: 0.7 !important;
+    border-style: dashed !important;
+    transform: scale(0.95) !important;
+  }
+
+  .simple-label {
+    font-size: 10px !important;
+    font-weight: 900 !important;
+    color: var(--accent-blue) !important;
+    text-transform: uppercase !important;
+    display: block !important;
+    margin-bottom: 4px !important;
+  }
+
+  .simple-name {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+  }
+
+  .simple-img {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 12px !important;
+    object-fit: cover !important;
+  }
+  }

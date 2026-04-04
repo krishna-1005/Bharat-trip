@@ -242,11 +242,7 @@ function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode,
               <Polyline 
                 positions={roadRoute}
                 pathOptions={{ color: '#3b82f6', weight: 5, opacity: 0.8 }}
-              >
-                <Tooltip permanent direction="center" className="route-tooltip">
-                  Navigating to {currentTarget?.name}
-                </Tooltip>
-              </Polyline>
+              />
             )}
 
             {/* Fallback to direct line if OSRM fails */}
