@@ -898,7 +898,8 @@
 /* Responsive Adjustments */
 @media (max-width: 900px) {
   .anchored-planner-root {
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
     height: 100dvh !important;
     width: 100% !important;
     overflow: hidden !important;
@@ -908,15 +909,16 @@
     background: #000;
   }
 
-  /* Map Foundation - True Full Screen Fill Base Layer */
+  /* Map Foundation - Fixed 40vh on top */
   .planner-map-foundation {
-    position: absolute !important;
-    inset: 0 !important;
+    position: relative !important;
     width: 100% !important;
-    height: 100% !important;
-    z-index: 1; 
+    height: 40vh !important;
+    flex: none !important;
+    z-index: 5; 
     display: flex !important;
     background: #020617;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .planner-map-foundation .map-container,
@@ -927,42 +929,49 @@
     min-height: 100% !important;
   }
 
-  /* Sidebar - Floating Drawer Mode */
+  /* Sidebar - Scrollable Section Below Map */
   .premium-itinerary-sidebar {
-    position: absolute !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
+    position: relative !important;
     width: 100% !important;
-    height: 80dvh !important; /* Drawer Height */
-    max-height: 80dvh !important;
-    z-index: 1000 !important;
-    background: rgba(10, 15, 25, 0.85) !important;
-    backdrop-filter: blur(30px) saturate(150%) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(150%) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 32px 32px 0 0 !important;
-    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    flex: 1 !important;
+    height: auto !important;
+    max-height: none !important;
+    z-index: 10 !important;
+    background: #000 !important;
+    border-top: none !important;
+    border-radius: 0 !important;
+    transition: none !important;
     display: flex !important;
     flex-direction: column !important;
-    box-shadow: 0 -15px 50px rgba(0,0,0,0.8) !important;
-    padding-top: 10px;
+    box-shadow: none !important;
+    padding-top: 0;
+    overflow-y: auto !important;
   }
 
-  /* Drawer Handle */
-  .drawer-handle {
-    width: 40px;
-    height: 5px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    margin: 10px auto 15px;
-    flex-shrink: 0;
-    cursor: grab;
-  }
-
-  /* Minimized Drawer state */
+  /* Disable Drawer Transitions/Transforms on Mobile Split View */
   .premium-itinerary-sidebar.hidden-mobile {
-    transform: translateY(calc(80dvh - 120px)) !important; /* Only shows header area */
+    transform: none !important;
+    display: flex !important; /* Keep visible in split view */
+  }
+
+  .drawer-handle {
+    display: none !important; /* Not needed in fixed split view */
+  }
+
+  .sidebar-scroll-content {
+    padding: 15px 20px !important;
+    overflow-y: visible !important; /* Parent aside handles scrolling */
+  }
+
+  .premium-itinerary-list {
+    padding-left: 20px;
+    border-left: 1px dashed rgba(255, 255, 255, 0.1);
+    margin-left: 15px;
+    gap: 30px;
+  }
+
+  .stop-marker-v2 {
+    left: -26px !important;
   }
 
   .sidebar-header-premium {

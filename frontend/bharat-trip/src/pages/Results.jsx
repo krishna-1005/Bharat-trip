@@ -515,6 +515,12 @@ function Results() {
                                         <span className="stop-pill-v2">{formatPrice(place.estimatedCost || 200)}</span>
                                       </div>
 
+                                      {dayObj.places[pIdx + 1] && (
+                                        <div className="next-stop-hint" style={{ fontSize: '10px', color: 'var(--accent-purple)', marginTop: '8px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                          ➔ Next: {dayObj.places[pIdx + 1].name}
+                                        </div>
+                                      )}
+
                                       {!isMobile && (
                                         <button 
                                           className="show-route-inline-btn"
