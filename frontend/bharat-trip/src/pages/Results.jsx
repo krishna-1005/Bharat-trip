@@ -36,9 +36,16 @@ function Results() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [genStep, setGenStep] = useState("thinking");
   const [messageIdx, setMessageIdx] = useState(0);
+  
+  // FIXED: Added missing state declarations
+  const [tripTitle, setTripTitle] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
   const [currentIndex, setCurrentIndex] = useState(() => {
     const savedIdx = localStorage.getItem("tripCurrentIndex");
-    return savedIdx ? parseInt(savedIdx, 10) : 0;
+    const parsed = parseInt(savedIdx, 10);
+    return isNaN(parsed) ? 0 : parsed;
   });
 
   const [activePlace, setActivePlace] = useState(null);
@@ -55,18 +62,48 @@ function Results() {
   useEffect(() => {
     const loadPlan = async () => {
       setLoading(true);
+      const params = new URLSearchParams(loc.search);
+      const sharedId = params.get("sharedTripId") || routeTripId;
+
       try {
+        if (sharedId) {
+          const res = await fetch(`${API}/api/public/trips/${sharedId}`);
+          const data = await res.json();
+          if (res.ok && data.trip) {
+            setPlan({ ...data.trip, itinerary: data.trip.itinerary || [], isShared: true });
+            setTripTitle(data.trip.title);
+            return;
+          }
+        }
+
         if (loc.state?.plan) {
           setPlan(loc.state.plan);
           if (loc.state?.isNew) setIsGenerating(true);
         } else {
-          const saved = localStorage.getItem("tripPlan");
-          if (saved && saved !== "undefined") setPlan(JSON.parse(saved));
+          const savedPlan = localStorage.getItem("tripPlan");
+          if (savedPlan && savedPlan !== "undefined") {
+            setPlan(JSON.parse(savedPlan));
+          }
         }
-      } catch (err) { console.error(err); } finally { setLoading(false); }
+      } catch (err) { 
+        console.error("Plan loading error:", err); 
+      } finally { 
+        setLoading(false); 
+      }
     };
     loadPlan();
-  }, [loc.state]);
+  }, [loc.state, routeTripId, loc.search]);
+
+  // Save to localStorage when plan changes
+  useEffect(() => {
+    if (plan && !user && !plan.isShared) {
+      try {
+        localStorage.setItem("tripPlan", JSON.stringify(plan));
+      } catch (e) {
+        console.warn("Could not save to localStorage", e);
+      }
+    }
+  }, [plan, user]);
 
   useEffect(() => {
     if (!isGenerating) return;
@@ -88,7 +125,15 @@ function Results() {
 
   const allPlaces = useMemo(() => normalizedItinerary.flatMap(d => (d.places || []).map(p => ({ ...p, day: d.day }))), [normalizedItinerary]);
 
-  if (loading) return <div className="ai-gen-overlay"><div className="premium-pulse-ring"></div><h2 className="ai-loader-text">Loading...</h2></div>;
+  const budgetData = useMemo(() => {
+    if (!plan) return { total: 0, target: 0, percent: 0 };
+    const total = plan.totalTripCost || 0;
+    const target = plan.totalBudget || 0;
+    const max = Math.max(total, target, 1);
+    return { total, target, percent: (total / max) * 100 };
+  }, [plan]);
+
+  if (loading) return <div className="ai-gen-overlay"><div className="premium-pulse-ring"></div><h2 className="ai-loader-text">Loading Odyssey...</h2></div>;
 
   if (isGenerating && plan) return (
     <div className="ai-gen-overlay">
@@ -100,8 +145,8 @@ function Results() {
           </motion.div>
         ) : (
           <motion.div key="sum" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="ai-gen-summary-box">
-            <span className="ai-sparkle-badge">✨ AI Ready</span>
-            <h2>Journey Initialized</h2>
+            <span className="ai-sparkle-badge">✨ AI Complete</span>
+            <h2>Your Journey is Ready</h2>
             <p className="ai-summary-text-large">{plan.summary}</p>
             <div className="ai-countdown-loader"></div>
           </motion.div>
@@ -110,11 +155,18 @@ function Results() {
     </div>
   );
 
+  if (!plan) return (
+    <div className="res-empty" style={{height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px'}}>
+      <h2>No trip plan found</h2>
+      <button className="primary-action-btn" onClick={() => navigate("/")}>Go Back Home</button>
+    </div>
+  );
+
   const currentStop = allPlaces[currentIndex];
   const nextStop = allPlaces[currentIndex + 1];
   const progress = Math.round((currentIndex / (allPlaces.length || 1)) * 100);
 
-  // ── RENDER MOBILE MAP VIEW (HIGH-FIDELITY HUB) ──
+  // ── RENDER MOBILE MAP VIEW ──
   if (isMobile && isMapViewRoute) {
     return (
       <div className="anchored-planner-root mobile-map-mode">
@@ -123,13 +175,12 @@ function Results() {
           <button className="back-to-itin-btn" onClick={() => navigate("/results")}>📋 VIEW PLAN</button>
           
           <div className="map-stats-overlay">
-            <div className="stat-pill">📍 {allPlaces.length - currentIndex} Stays Left</div>
+            <div className="stat-pill">📍 {allPlaces.length - currentIndex} Left</div>
             <div className="stat-pill">🕒 45m Estimated</div>
           </div>
         </div>
 
         <div className="live-guide-half">
-          {/* AI INSIGHT: Glassmorphic Overlay */}
           <motion.div initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="ai-insight-box">
             <div className="insight-header">
               <span className="ai-brain-icon">🧠</span>
@@ -140,7 +191,6 @@ function Results() {
             </p>
           </motion.div>
 
-          {/* CURRENT STOP: Focus Card */}
           {currentStop ? (
             <div className="focus-card-premium">
               <div className="status-indicator-row">
@@ -150,12 +200,6 @@ function Results() {
               
               <PlaceImage placeName={currentStop.name} city={plan.city} className="card-hero-img" />
               <h3 className="card-title-premium">{currentStop.name}</h3>
-              
-              <div className="card-meta-row">
-                <span className="meta-pill-premium">{currentStop.category}</span>
-                <span className="meta-pill-premium success">₹{currentStop.estimatedCost}</span>
-              </div>
-
               <p className="description-text">{currentStop.reason}</p>
 
               <div className="card-actions-grid">
@@ -165,13 +209,11 @@ function Results() {
             </div>
           ) : (
             <div className="focus-card-premium" style={{textAlign:'center', padding: '40px 20px'}}>
-              <div style={{fontSize: '40px', marginBottom:'15px'}}>🏆</div>
-              <h2>Odyssey Finished!</h2>
-              <button className="action-main-btn" style={{width:'100%', marginTop:'20px'}} onClick={() => navigate("/")}>Plan New Journey</button>
+              <h2>Trip Finished! 🏁</h2>
+              <button className="action-main-btn" style={{width:'100%', marginTop:'20px'}} onClick={() => navigate("/")}>Plan New Odyssey</button>
             </div>
           )}
 
-          {/* NEXT UP: Minimal Preview */}
           {nextStop && (
             <div className="next-stop-card-upgraded">
               <div className="next-label-group">
@@ -191,7 +233,7 @@ function Results() {
     );
   }
 
-  // DEFAULT VIEW
+  // ── DEFAULT VIEW (ITINERARY) ──
   return (
     <div className={`anchored-planner-root ${isMobile ? "mobile-itinerary-mode" : ""}`}>
       <aside className="premium-itinerary-sidebar">
@@ -204,7 +246,7 @@ function Results() {
         </div>
 
         <div className="sidebar-scroll-content">
-          <BudgetPanel budgetData={{total: plan.totalTripCost, target: plan.totalBudget, percent: 70}} formatPrice={formatPrice} />
+          <BudgetPanel budgetData={budgetData} formatPrice={formatPrice} />
           {normalizedItinerary.map((day, dIdx) => (
             <div key={dIdx} className="premium-day-section">
               <div className="day-title-row">
