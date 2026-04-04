@@ -558,18 +558,12 @@ function Results() {
         </div>
       </aside>
 
-      {isMobile && activePlace && !showMapOnMobile && (
+      {isMobile && activePlace && (
         <button 
           className="mobile-floating-navigate-cta"
           onClick={() => handleShowRoute(activePlace)}
         >
           🚀 Navigate to {activePlace.name}
-        </button>
-      )}
-
-      {isMobile && (
-        <button className="mobile-view-toggle" onClick={() => setShowMapOnMobile(!showMapOnMobile)}>
-          {showMapOnMobile ? "📋 View Plan" : "🗺️ View Map"}
         </button>
       )}
 

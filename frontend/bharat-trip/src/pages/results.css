@@ -900,25 +900,25 @@
 @media (max-width: 900px) {
   .anchored-planner-root {
     display: flex !important;
-    flex-direction: column !important; /* Stack them vertically */
+    flex-direction: column !important;
     height: 100vh !important;
     width: 100vw !important;
     overflow: hidden !important;
     background: #000 !important;
-    position: fixed !important; /* Locks the whole app to the screen */
-    top: 0;
-    left: 0;
+    position: fixed !important;
+    inset: 0 !important;
   }
 
-  /* 1. MAP AT THE TOP (40%) */
+  /* Map Foundation - Top Layer (40%) */
   .planner-map-foundation {
-    order: 1 !important; /* Forces map to top even if it's lower in JSX */
+    order: 1 !important;
     height: 40vh !important;
     width: 100% !important;
+    flex: none !important;
     position: relative !important;
-    flex-shrink: 0 !important; /* Prevents it from being squeezed */
+    background: #000 !important;
     z-index: 5 !important;
-    background: #111 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
 
   .map-container, .leaflet-container {
@@ -926,44 +926,122 @@
     width: 100% !important;
   }
 
-  /* 2. ITINERARY AT THE BOTTOM (60%) */
+  /* Sidebar - Bottom Layer (60%) */
   .premium-itinerary-sidebar {
     order: 2 !important;
     height: 60vh !important;
     width: 100% !important;
-    position: relative !important;
+    flex: 1 !important;
+    background: #05070a !important;
     display: flex !important;
     flex-direction: column !important;
-    flex-grow: 1 !important;
-    background: #050505 !important;
-    border-top: 1px solid var(--glass-border) !important;
-    border-right: none !important;
+    overflow: hidden !important;
+    border: none !important;
+    box-shadow: 0 -20px 40px rgba(0,0,0,0.8) !important;
     z-index: 10 !important;
-    overflow: hidden !important; /* Header stays, content scrolls */
-    transform: none !important; /* Kills the drawer effect */
-  }
-
-  /* 3. ENSURE SCROLLING WORKS INSIDE */
-  .sidebar-scroll-content {
-    flex: 1 !important;
-    overflow-y: auto !important; /* This is the actual scrollable part */
-    padding: 20px !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
-  /* 4. CLEAN UP HIDDEN ELEMENTS */
-  .premium-itinerary-sidebar.hidden-mobile {
-    display: flex !important; /* Override the 'hidden' state */
     transform: none !important;
   }
 
-  .drawer-handle, .mobile-view-toggle {
+  .sidebar-header-premium {
+    padding: 15px 20px !important;
+    background: #05070a !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    flex-shrink: 0 !important;
+  }
+
+  .sidebar-scroll-content {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding: 20px !important;
+    background: #05070a !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Ultra Premium Sleek Cards */
+  .premium-stop-card-v2 {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 24px !important;
+    padding: 20px !important;
+    margin-bottom: 25px !important;
+    backdrop-filter: blur(10px) !important;
+    transition: 0.3s !important;
+    position: relative !important;
+  }
+
+  .premium-stop-card-v2.active {
+    background: rgba(59, 130, 246, 0.08) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .stop-image-v2 {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 14px !important;
+    object-fit: cover !important;
+  }
+
+  .stop-title-row h4 {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #fff !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* Timing Pill on the right */
+  .stop-timing-info {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    padding: 4px 10px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: var(--accent-blue) !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    margin: 0 !important;
+  }
+
+  /* Vertical Timeline Line */
+  .premium-itinerary-list {
+    padding-left: 10px !important;
+    border-left: 1px dashed rgba(255, 255, 255, 0.1) !important;
+    margin-left: 10px !important;
+  }
+
+  .stop-marker-v2 {
+    left: -21px !important;
+    width: 10px !important;
+    height: 10px !important;
+    background: #000 !important;
+    border: 2px solid var(--accent-blue) !important;
+  }
+
+  /* Clean up */
+  .drawer-handle, .mobile-view-toggle, .mobile-only-handle {
     display: none !important;
   }
 
-  /* Fix for the bottom nav bar space */
   .sidebar-footer-premium {
-    padding-bottom: calc(70px + env(safe-area-inset-bottom)) !important; 
-    /* 70px accounts for your bottom icons */
+    padding: 15px 20px calc(80px + env(safe-area-inset-bottom)) !important;
+    background: #0a0c10 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Floating Navigate CTA */
+  .mobile-floating-navigate-cta {
+    position: fixed !important;
+    bottom: 90px !important;
+    left: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)) !important;
+    border-radius: 20px !important;
+    padding: 16px !important;
+    font-weight: 900 !important;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4) !important;
   }
 }
