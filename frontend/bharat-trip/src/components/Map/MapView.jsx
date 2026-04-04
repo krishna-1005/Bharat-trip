@@ -14,11 +14,7 @@ import { createLocationIcon } from "./markerIcons";
 import MapLegend from "./MapLegend";
 import ResizeMap from "./ResizeMap";
 import { DAY_COLORS } from "../../constants/dayColors";
-import PlaceTooltip from "./PlaceTooltip";
-import HoverPlaceCard from "./HoverPlaceCard";
-import PlaceImage from "../PlaceImage";
 import L from "leaflet";
-import GuidancePanel from "./GuidancePanel";
 
 // Create a special icon for user location with heading support
 const createUserIcon = (heading) => L.divIcon({
@@ -34,69 +30,33 @@ const createUserIcon = (heading) => L.divIcon({
   iconAnchor: [20, 20]
 });
 
-/* ---------- ZOOM CONTROLS ---------- */
-function ZoomControls({ onToggleGuidance, isGuidanceMode }) {
+function ZoomControls() {
   const map = useMap();
-
   return (
-    <div className="map-zoom-controls">
-      <button onClick={() => map.zoomIn()} title="Zoom In">+</button>
-      <button onClick={() => map.zoomOut()} title="Zoom Out">−</button>
-      <button 
-        onClick={onToggleGuidance} 
-        className={isGuidanceMode ? "active" : ""}
-        title={isGuidanceMode ? "Exit Guidance" : "Start Guidance"}
-        style={{ marginTop: '8px', fontSize: '18px' }}
-      >
-        {isGuidanceMode ? "⏹️" : "🧭"}
-      </button>
+    <div className="map-zoom-controls" style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <button onClick={() => map.zoomIn()} style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(0,0,0,0.6)', color: '#fff', border: '1px solid #fff2', fontSize: '20px', cursor: 'pointer', backdropFilter: 'blur(10px)' }}>+</button>
+      <button onClick={() => map.zoomOut()} style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(0,0,0,0.6)', color: '#fff', border: '1px solid #fff2', fontSize: '20px', cursor: 'pointer', backdropFilter: 'blur(10px)' }}>−</button>
     </div>
   );
 }
 
-function FitBounds({ places, userLocation, activePlace }) {
+function FitBounds({ places, userLocation }) {
   const map = useMap();
-
   useEffect(() => {
-    if (activePlace && !isNaN(activePlace.lat) && !isNaN(activePlace.lng)) {
-      map.setView([Number(activePlace.lat), Number(activePlace.lng)], 15, { animate: true });
-      return;
-    }
-
     if (!places.length && !userLocation) return;
-
     const bounds = [];
-
     places.forEach(p => {
-      if (p.lat !== undefined && p.lng !== undefined && !isNaN(p.lat) && !isNaN(p.lng) && p.lat !== null && p.lng !== null) {
-        bounds.push([Number(p.lat), Number(p.lng)]);
-      }
+      const lat = Number(p.lat);
+      const lng = Number(p.lng);
+      if (!isNaN(lat) && !isNaN(lng)) bounds.push([lat, lng]);
     });
-
     if (userLocation && !isNaN(userLocation.lat) && !isNaN(userLocation.lng)) {
-      bounds.push([Number(userLocation.lat), Number(userLocation.lng)]);
+      bounds.push([userLocation.lat, userLocation.lng]);
     }
-
     if (bounds.length > 0) {
-      try {
-        map.fitBounds(bounds, { padding: [80, 80] });
-      } catch (err) {
-        console.warn("Could not fit map bounds:", err);
-      }
+      try { map.fitBounds(bounds, { padding: [50, 50] }); } catch (err) {}
     }
-
-  }, [places, userLocation, map, activePlace]);
-
-  return null;
-}
-
-function FollowUser({ location }) {
-  const map = useMap();
-  useEffect(() => {
-    if (location && !isNaN(location.lat) && !isNaN(location.lng)) {
-      map.setView([location.lat, location.lng], map.getZoom(), { animate: true });
-    }
-  }, [location, map]);
+  }, [places, userLocation, map]);
   return null;
 }
 
@@ -104,268 +64,80 @@ function ChangeView({ center }) {
   const map = useMap();
   useEffect(() => {
     if (center && Array.isArray(center) && !isNaN(center[0]) && !isNaN(center[1])) {
-      try {
-        map.setView(center, map.getZoom());
-      } catch (err) {
-        console.warn("Error setting map view:", err);
-      }
+      try { map.setView(center, map.getZoom()); } catch (err) {}
     }
   }, [center, map]);
   return null;
 }
 
-function MapView({ plan, isTracking, onHover, isGuidanceMode, setIsGuidanceMode, currentIndex, setCurrentIndex, userLocation, activePlace }) {
-  const [activeDay, setActiveDay] = useState("all");
-  const [pathHistory, setPathHistory] = useState([]);
-  const [roadRoute, setRoadRoute] = useState([]);
-  
+function MapView({ plan, currentIndex, userLocation, isTracking, activePlace, onHover }) {
   const allPlaces = useMemo(() => {
     if (!plan?.itinerary) return [];
-    const days = Object.keys(plan.itinerary);
-    return days.flatMap(d => plan.itinerary[d]?.places || []).filter(p => p && !isNaN(p.lat) && !isNaN(p.lng));
-  }, [plan?.itinerary]);
+    const days = Array.isArray(plan.itinerary) ? plan.itinerary : Object.values(plan.itinerary);
+    return days.flatMap(d => d.places || []).filter(p => p && !isNaN(Number(p.lat)) && !isNaN(Number(p.lng)));
+  }, [plan]);
 
   const initialCenter = useMemo(() => {
-    if (plan?.coordinates && !isNaN(plan.coordinates.lat) && !isNaN(plan.coordinates.lng) && plan.coordinates.lat !== null) {
+    if (plan?.coordinates && !isNaN(Number(plan.coordinates.lat)) && !isNaN(Number(plan.coordinates.lng))) {
       return [Number(plan.coordinates.lat), Number(plan.coordinates.lng)];
     }
-    return [12.9716, 77.5946]; // Default to Bangalore
-  }, [plan?.coordinates]);
+    if (allPlaces.length > 0) return [Number(allPlaces[0].lat), Number(allPlaces[0].lng)];
+    return [12.9716, 77.5946]; // Bangalore
+  }, [plan, allPlaces]);
 
-  const days = useMemo(() => plan?.itinerary ? Object.keys(plan.itinerary) : [], [plan?.itinerary]);
-
-  const targetPlaces = useMemo(() => {
-    const list = activeDay === "all" 
-      ? allPlaces 
-      : (plan?.itinerary?.[days[activeDay - 1]]?.places || []);
-    return list.filter(p => p && !isNaN(p.lat) && !isNaN(p.lng));
-  }, [activeDay, allPlaces, plan?.itinerary, days]);
-
-  // Target the current stop for live routing
-  const currentTarget = allPlaces[currentIndex] || targetPlaces[0];
-
-  // pathHistory logic needs userLocation
-  useEffect(() => {
-    if (isTracking && userLocation && !isNaN(userLocation.lat)) {
-      setPathHistory(prev => [...prev, [userLocation.lat, userLocation.lng]]);
-    } else if (!isTracking) {
-      setPathHistory([]);
-      setRoadRoute([]);
-    }
-  }, [isTracking, userLocation]);
-
-  useEffect(() => {
-    if (isTracking && userLocation && currentTarget && !isNaN(userLocation.lat) && !isNaN(currentTarget.lat)) {
-      const fetchRoute = async () => {
-        try {
-          const res = await fetch(
-            `https://router.project-osrm.org/route/v1/driving/${userLocation.lng},${userLocation.lat};${currentTarget.lng},${currentTarget.lat}?overview=full&geometries=geojson`
-          );
-          const data = await res.json();
-          if (data.routes && data.routes.length > 0) {
-            const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-            setRoadRoute(coords);
-          }
-        } catch (err) {
-          console.error("Routing error:", err);
-        }
-      };
-      fetchRoute();
-    }
-  }, [isTracking, userLocation?.lat, userLocation?.lng, currentTarget?.lat, currentTarget?.lng]);
-
-  if (!plan || !plan.itinerary) return null;
-
-  const handleNextLocation = () => {
-    if (currentIndex < allPlaces.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    } else {
-      setCurrentIndex(allPlaces.length); // Completion state
-    }
-  };
-
-  const currentPlace = allPlaces[currentIndex];
+  // FINAL SAFETY CHECK
+  const safeInitialCenter = initialCenter.map(n => isNaN(n) ? 0 : n);
+  if (safeInitialCenter[0] === 0) safeInitialCenter[0] = 12.9716;
+  if (safeInitialCenter[1] === 0) safeInitialCenter[1] = 77.5946;
 
   return (
-    <div className="map-container">
+    <div className="map-container" style={{ height: '100%', width: '100%' }}>
       <MapContainer
-        key={`${plan.city}-${initialCenter[0]}-${initialCenter[1]}`}
-        center={initialCenter}
-        zoom={11}
+        key={`${safeInitialCenter[0]}-${safeInitialCenter[1]}`}
+        center={safeInitialCenter}
+        zoom={12}
         zoomControl={false}
-        scrollWheelZoom
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: '100%', width: '100%' }}
       >
-        <ChangeView center={initialCenter} />
-        {isTracking && userLocation && !isNaN(userLocation.lat) && <FollowUser location={userLocation} />}
-        {!isTracking && (
-          <FitBounds 
-            places={isGuidanceMode ? [] : allPlaces} 
-            userLocation={userLocation} 
-            activePlace={isGuidanceMode ? allPlaces[currentIndex] : null}
-          />
-        )}
-
+        <ChangeView center={safeInitialCenter} />
+        <FitBounds places={allPlaces} userLocation={userLocation} />
         <ResizeMap trigger={activePlace} />
-
+        
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          attribution='&copy; OpenStreetMap contributors'
         />
 
-        <ZoomControls 
-          onToggleGuidance={() => setIsGuidanceMode(!isGuidanceMode)} 
-          isGuidanceMode={isGuidanceMode} 
-        />
+        <ZoomControls />
 
-        {!isGuidanceMode && (
-          <MapLegend
-            days={days}
-            activeDay={activeDay}
-            setActiveDay={setActiveDay}
+        {allPlaces.map((p, i) => {
+          const isVisited = i < currentIndex;
+          const isCurrent = i === currentIndex;
+          return (
+            <Marker
+              key={`${p.name}-${i}`}
+              position={[Number(p.lat), Number(p.lng)]}
+              icon={createLocationIcon(isCurrent ? "#3b82f6" : "#64748b", isCurrent, isVisited)}
+              eventHandlers={{
+                mouseover: () => onHover?.(p),
+                mouseout: () => onHover?.(null)
+              }}
+            />
+          );
+        })}
+
+        {currentIndex < allPlaces.length - 1 && (
+          <Polyline 
+            positions={allPlaces.map(p => [Number(p.lat), Number(p.lng)])}
+            pathOptions={{ color: '#3b82f6', weight: 3, dashArray: '5, 10', opacity: 0.5 }}
           />
-        )}
-
-        {/* Live Tracking Routes */}
-        {isTracking && userLocation && !isNaN(userLocation.lat) && (
-          <>
-            {/* Traveled Path (Breadcrumbs) */}
-            {pathHistory.length > 1 && (
-              <Polyline 
-                positions={pathHistory} 
-                pathOptions={{ color: '#3b82f6', weight: 3, dashArray: '5, 10', opacity: 0.6 }} 
-              />
-            )}
-            
-            {/* Connection to target (Real Road Route) */}
-            {roadRoute.length > 0 && (
-              <Polyline 
-                positions={roadRoute}
-                pathOptions={{ color: '#3b82f6', weight: 5, opacity: 0.8 }}
-              />
-            )}
-
-            {/* Fallback to direct line if OSRM fails */}
-            {roadRoute.length === 0 && currentTarget && !isNaN(currentTarget.lat) && (
-              <Polyline 
-                positions={[[userLocation.lat, userLocation.lng], [currentTarget.lat, currentTarget.lng]]}
-                pathOptions={{ color: '#3b82f6', weight: 4, opacity: 0.8, dashArray: '1, 10' }}
-              />
-            )}
-          </>
-        )}
-
-        {/* Standard Mode Rendering */}
-        {!isGuidanceMode && (() => {
-          let globalIdxCounter = 0;
-          return days.map((day, idx) => {
-            if (activeDay !== "all" && activeDay !== idx + 1) {
-              const skippedPlacesCount = plan.itinerary[day]?.places?.length || 0;
-              globalIdxCounter += skippedPlacesCount;
-              return null;
-            }
-
-            const places = (plan.itinerary[day]?.places || []).filter(p => p && !isNaN(p.lat) && !isNaN(p.lng));
-            const positions = places.map(p => [p.lat, p.lng]);
-
-            return (
-              <Fragment key={`day-${idx}`}>
-                {positions.length > 1 && (
-                  <Polyline
-                    positions={positions}
-                    pathOptions={{
-                      color: DAY_COLORS[idx],
-                      weight: 4,
-                      opacity: 0.7
-                    }}
-                  />
-                )}
-
-                {places.map((p, i) => {
-                  const pGlobalIdx = globalIdxCounter++;
-                  const isVisited = pGlobalIdx < currentIndex;
-                  const isCurrent = pGlobalIdx === currentIndex;
-
-                  return (
-                    <Marker
-                      key={`${day}-${i}`}
-                      position={[p.lat, p.lng]}
-                      icon={createLocationIcon(
-                        isCurrent ? "#3b82f6" : DAY_COLORS[idx],
-                        isCurrent || activeDay === idx + 1,
-                        isVisited
-                      )}
-                      eventHandlers={{
-                        mouseover: () => onHover(p),
-                        mouseout: () => onHover(null),
-                      }}
-                    />
-                  );
-                })}
-              </Fragment>
-            );
-          });
-        })()}
-
-        {/* Guidance Mode Rendering */}
-        {isGuidanceMode && (
-          <>
-            {allPlaces.map((p, i) => {
-              const isVisited = i < currentIndex;
-              const isCurrent = i === currentIndex;
-              const isNext = i === currentIndex + 1;
-              
-              let color = "rgba(148, 163, 184, 0.3)";
-              let isActive = false;
-
-              if (isVisited) {
-                color = "#10b981";
-              } else if (isCurrent) {
-                color = "#3b82f6";
-                isActive = true;
-              } else if (isNext) {
-                color = "#10b981";
-                isActive = true;
-              }
-
-              return (
-                <Marker
-                  key={`guidance-${i}`}
-                  position={[p.lat, p.lng]}
-                  icon={createLocationIcon(color, isActive, isVisited)}
-                />
-              );
-            })}
-
-            {currentIndex < allPlaces.length - 1 && allPlaces[currentIndex] && allPlaces[currentIndex + 1] && (
-              <Polyline
-                positions={[
-                  [allPlaces[currentIndex].lat, allPlaces[currentIndex].lng],
-                  [allPlaces[currentIndex + 1].lat, allPlaces[currentIndex + 1].lng]
-                ]}
-                pathOptions={{
-                  color: "#3b82f6",
-                  weight: 6,
-                  opacity: 0.9,
-                  dashArray: "1, 12",
-                  lineCap: "round"
-                }}
-              />
-            )}
-          </>
         )}
 
         {userLocation && !isNaN(userLocation.lat) && !isNaN(userLocation.lng) && (
-          <Marker 
-            position={[userLocation.lat, userLocation.lng]} 
-            icon={createUserIcon(userLocation.heading)}
-          >
-            <Tooltip direction="top" offset={[0, -10]} opacity={1}>
-              You are here
-            </Tooltip>
+          <Marker position={[userLocation.lat, userLocation.lng]} icon={createUserIcon(userLocation.heading)}>
+            <Tooltip direction="top">You are here</Tooltip>
           </Marker>
         )}
-
       </MapContainer>
     </div>
   );

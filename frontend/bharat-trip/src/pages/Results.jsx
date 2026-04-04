@@ -26,22 +26,21 @@ function Results() {
   const navigate = useNavigate();
   const loc = useLocation();
   const { id: routeTripId } = useParams();
-  const { formatPrice } = useSettings();
-  const { user } = useContext(AuthContext);
+  const { formatPrice, t } = useSettings();
+  const { user, setShowAuthModal } = useContext(AuthContext);
 
   const isMapViewRoute = loc.pathname === "/map";
 
+  // STATE
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [genStep, setGenStep] = useState("thinking");
   const [messageIdx, setMessageIdx] = useState(0);
-  
-  // FIXED: Added missing state declarations
   const [tripTitle, setTripTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-
+  const [shareStatus, setShareStatus] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(() => {
     const savedIdx = localStorage.getItem("tripCurrentIndex");
     const parsed = parseInt(savedIdx, 10);
@@ -53,6 +52,7 @@ function Results() {
   const [isTracking, setIsTracking] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
 
+  // EFFECTS
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 900);
     window.addEventListener("resize", handleResize);
@@ -70,38 +70,37 @@ function Results() {
           const res = await fetch(`${API}/api/public/trips/${sharedId}`);
           const data = await res.json();
           if (res.ok && data.trip) {
-            setPlan({ ...data.trip, itinerary: data.trip.itinerary || [], isShared: true });
-            setTripTitle(data.trip.title);
+            const fetched = { ...data.trip, itinerary: data.trip.itinerary || [], isShared: true };
+            setPlan(fetched);
+            setTripTitle(data.trip.title || "");
             return;
           }
         }
 
         if (loc.state?.plan) {
           setPlan(loc.state.plan);
+          setTripTitle(loc.state.plan.title || "");
           if (loc.state?.isNew) setIsGenerating(true);
         } else {
-          const savedPlan = localStorage.getItem("tripPlan");
-          if (savedPlan && savedPlan !== "undefined") {
-            setPlan(JSON.parse(savedPlan));
+          const savedPlanStr = localStorage.getItem("tripPlan");
+          if (savedPlanStr && savedPlanStr !== "undefined") {
+            const parsed = JSON.parse(savedPlanStr);
+            setPlan(parsed);
+            setTripTitle(parsed.title || "");
           }
         }
-      } catch (err) { 
-        console.error("Plan loading error:", err); 
-      } finally { 
-        setLoading(false); 
+      } catch (err) {
+        console.error("Critical loading error:", err);
+      } finally {
+        setLoading(false);
       }
     };
     loadPlan();
   }, [loc.state, routeTripId, loc.search]);
 
-  // Save to localStorage when plan changes
   useEffect(() => {
     if (plan && !user && !plan.isShared) {
-      try {
-        localStorage.setItem("tripPlan", JSON.stringify(plan));
-      } catch (e) {
-        console.warn("Could not save to localStorage", e);
-      }
+      try { localStorage.setItem("tripPlan", JSON.stringify(plan)); } catch(e) {}
     }
   }, [plan, user]);
 
@@ -113,11 +112,45 @@ function Results() {
     return () => { clearInterval(msgInterval); clearTimeout(summaryTimeout); clearTimeout(doneTimeout); };
   }, [isGenerating]);
 
+  // HANDLERS
   const handleVisited = (idx) => {
     setCurrentIndex(idx + 1);
     localStorage.setItem("tripCurrentIndex", idx + 1);
   };
 
+  const handleSaveTrip = async () => {
+    if (saving || saved || !plan) return;
+    if (!user) { setShowAuthModal(true); return; }
+    setSaving(true);
+    try {
+      const token = await auth.currentUser?.getIdToken(true);
+      const res = await fetch(`${API}/api/profile/trips`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          title: tripTitle || `${plan.city} Trip`,
+          city: plan.city,
+          days: plan.days || 1,
+          itinerary: plan.itinerary,
+          totalCost: plan.totalTripCost,
+          totalBudget: plan.totalBudget,
+          summary: plan.summary
+        })
+      });
+      if (res.ok) setSaved(true);
+    } catch (err) { console.error(err); } finally { setSaving(true); }
+  };
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/trip/${plan?.id || routeTripId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareStatus(true);
+      setTimeout(() => setShareStatus(false), 2000);
+    } catch (err) { alert(url); }
+  };
+
+  // MEMOS
   const normalizedItinerary = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
     return Array.isArray(plan.itinerary) ? plan.itinerary : Object.entries(plan.itinerary).map(([day, data]) => ({ day, ...data }));
@@ -133,7 +166,13 @@ function Results() {
     return { total, target, percent: (total / max) * 100 };
   }, [plan]);
 
-  if (loading) return <div className="ai-gen-overlay"><div className="premium-pulse-ring"></div><h2 className="ai-loader-text">Loading Odyssey...</h2></div>;
+  // RENDERS
+  if (loading) return (
+    <div className="ai-gen-overlay">
+      <div className="premium-pulse-ring"></div>
+      <h2 className="ai-loader-text">Analyzing Your Preferences...</h2>
+    </div>
+  );
 
   if (isGenerating && plan) return (
     <div className="ai-gen-overlay">
@@ -145,8 +184,8 @@ function Results() {
           </motion.div>
         ) : (
           <motion.div key="sum" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="ai-gen-summary-box">
-            <span className="ai-sparkle-badge">✨ AI Complete</span>
-            <h2>Your Journey is Ready</h2>
+            <span className="ai-sparkle-badge">✨ AI Optimized</span>
+            <h2>Odyssey Ready</h2>
             <p className="ai-summary-text-large">{plan.summary}</p>
             <div className="ai-countdown-loader"></div>
           </motion.div>
@@ -157,8 +196,8 @@ function Results() {
 
   if (!plan) return (
     <div className="res-empty" style={{height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px'}}>
-      <h2>No trip plan found</h2>
-      <button className="primary-action-btn" onClick={() => navigate("/")}>Go Back Home</button>
+      <h2>Plan Not Found</h2>
+      <button className="primary-action-btn" onClick={() => navigate("/")}>Return to Planner</button>
     </div>
   );
 
@@ -166,30 +205,28 @@ function Results() {
   const nextStop = allPlaces[currentIndex + 1];
   const progress = Math.round((currentIndex / (allPlaces.length || 1)) * 100);
 
-  // ── RENDER MOBILE MAP VIEW ──
+  // MOBILE MAP VIEW
   if (isMobile && isMapViewRoute) {
     return (
       <div className="anchored-planner-root mobile-map-mode">
         <div className="map-half">
           <MapView plan={plan} currentIndex={currentIndex} activePlace={activePlace} onHover={setActivePlace} isTracking={isTracking} userLocation={userLocation} />
           <button className="back-to-itin-btn" onClick={() => navigate("/results")}>📋 VIEW PLAN</button>
-          
           <div className="map-stats-overlay">
             <div className="stat-pill">📍 {allPlaces.length - currentIndex} Left</div>
-            <div className="stat-pill">🕒 45m Estimated</div>
           </div>
         </div>
 
         <div className="live-guide-half">
-          <motion.div initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="ai-insight-box">
+          <div className="ai-insight-box">
             <div className="insight-header">
               <span className="ai-brain-icon">🧠</span>
               <span className="insight-label">AI TRAVEL INSIGHT</span>
             </div>
             <p className="insight-text">
-              {currentStop ? `Tip: ${currentStop.name} is stunning right now. Head to the higher vantage points for the best panoramic views of ${plan.city}!` : "Odyssey completed. Ready for the next one?"}
+              {currentStop ? `Tip: Visiting ${currentStop.name} now is ideal for avoiding the heavy afternoon crowds.` : "You've successfully completed your odyssey!"}
             </p>
-          </motion.div>
+          </div>
 
           {currentStop ? (
             <div className="focus-card-premium">
@@ -197,34 +234,24 @@ function Results() {
                 <span className="live-dot-pulse"></span>
                 <span className="status-label">NOW VISITING</span>
               </div>
-              
               <PlaceImage placeName={currentStop.name} city={plan.city} className="card-hero-img" />
               <h3 className="card-title-premium">{currentStop.name}</h3>
               <p className="description-text">{currentStop.reason}</p>
-
               <div className="card-actions-grid">
-                <button className="action-main-btn" onClick={() => handleVisited(currentIndex)}>Mark Visited</button>
+                <button className="action-main-btn" onClick={() => handleVisited(currentIndex)}>Visited</button>
                 <button className="action-sub-btn" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentStop.lat},${currentStop.lng}`, '_blank')}>Navigate</button>
               </div>
             </div>
           ) : (
-            <div className="focus-card-premium" style={{textAlign:'center', padding: '40px 20px'}}>
-              <h2>Trip Finished! 🏁</h2>
-              <button className="action-main-btn" style={{width:'100%', marginTop:'20px'}} onClick={() => navigate("/")}>Plan New Odyssey</button>
-            </div>
+            <div style={{textAlign:'center', padding:'40px 0'}}><h2>Odyssey Complete! 🏁</h2></div>
           )}
 
           {nextStop && (
             <div className="next-stop-card-upgraded">
-              <div className="next-label-group">
-                <span className="next-tag">UP NEXT</span>
-                <span className="time-tag">~15m away</span>
-              </div>
+              <span className="next-tag">UP NEXT</span>
               <div className="next-content-inner">
                 <PlaceImage placeName={nextStop.name} city={plan.city} className="next-img" />
-                <div className="next-info">
-                  <h4>{nextStop.name}</h4>
-                </div>
+                <h4>{nextStop.name}</h4>
               </div>
             </div>
           )}
@@ -233,7 +260,7 @@ function Results() {
     );
   }
 
-  // ── DEFAULT VIEW (ITINERARY) ──
+  // DESKTOP & MOBILE ITINERARY VIEW
   return (
     <div className={`anchored-planner-root ${isMobile ? "mobile-itinerary-mode" : ""}`}>
       <aside className="premium-itinerary-sidebar">
@@ -251,33 +278,46 @@ function Results() {
             <div key={dIdx} className="premium-day-section">
               <div className="day-title-row">
                 <div className="day-badge">{dIdx + 1}</div>
-                <div className="day-label-group"><h3>Day {dIdx + 1}: {day.day}</h3></div>
+                <h3>Day {dIdx + 1}: {day.day}</h3>
               </div>
-              {day.places?.map((place, pIdx) => (
-                <div key={pIdx} className="premium-stop-card-v2">
-                  <div className="stop-card-image-wrap"><PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" /></div>
-                  <div className="stop-info-v2">
-                    <div style={{display:'flex', justifyContent:'space-between', marginBottom:'10px'}}>
-                      <span className="stop-tag-v2">{place.category}</span>
-                      <span style={{fontSize:'12px', fontWeight:'700', color:'var(--accent-success)'}}>₹{place.estimatedCost}</span>
+              {day.places?.map((place, pIdx) => {
+                const gIdx = allPlaces.indexOf(place);
+                return (
+                  <div key={pIdx} className={`premium-stop-card-v2 ${gIdx === currentIndex ? "active" : ""} ${gIdx < currentIndex ? "visited" : ""}`}>
+                    <div className="stop-card-image-wrap">
+                      <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v2" />
                     </div>
-                    <h4>{place.name}</h4>
-                    <p className="stop-reason-text">{place.reason}</p>
+                    <div className="stop-info-v2">
+                      <div style={{display:'flex', justifyContent:'space-between'}}>
+                        <span className="stop-tag-v2">{place.category}</span>
+                        <span style={{fontSize:'12px', fontWeight:'700', color:'var(--accent-success)'}}>₹{place.estimatedCost}</span>
+                      </div>
+                      <h4>{place.name}</h4>
+                      <p className="stop-reason-text">{place.reason}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ))}
         </div>
 
         <div className="sidebar-footer-premium">
-          <button className="mobile-view-switcher" onClick={() => navigate("/map")}>🗺️ START GUIDED TRIP</button>
+          {!isMobile && (
+            <div className="action-btn-group">
+              <button className="primary-action-btn" onClick={handleSaveTrip} disabled={saved || saving}>{saved ? "Saved ✓" : "Save Journey"}</button>
+              <button className="secondary-action-btn" onClick={handleShare}>Share</button>
+            </div>
+          )}
+          {isMobile && (
+            <button className="mobile-view-switcher" onClick={() => navigate("/map")}>🗺️ START GUIDED TRIP</button>
+          )}
         </div>
       </aside>
 
       {!isMobile && (
         <main className="planner-map-foundation">
-          <MapView plan={plan} currentIndex={currentIndex} activePlace={activePlace} onHover={setActivePlace} />
+          <MapView plan={plan} currentIndex={currentIndex} activePlace={activePlace} onHover={setActivePlace} isTracking={isTracking} userLocation={userLocation} />
         </main>
       )}
     </div>

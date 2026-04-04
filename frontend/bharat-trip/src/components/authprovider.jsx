@@ -22,21 +22,27 @@ export default function AuthProvider({ children }) {
 
   const trackActivity = useCallback(async (u, action = "page_view") => {
     try {
+      const gid = localStorage.getItem("bharat_trip_guest_id");
+      if (!gid) return; // Don't track if no guest ID yet
+
       const payload = {
         action,
         userType: u ? "user" : "guest",
-        userId: u?.id || u?.uid,
-        guestId: localStorage.getItem("bharat_trip_guest_id"),
-        email: u?.email
+        userId: u?.id || u?.uid || null,
+        guestId: gid,
+        email: u?.email || null,
+        timestamp: new Date().toISOString()
       };
-      
+
       const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-      await axios.post(`${API_URL}/api/public/track`, payload);
+      await axios.post(`${API_URL}/api/public/track`, payload, {
+        timeout: 3000 // Don't hang on slow tracking calls
+      });
     } catch (err) {
-      console.error("Failed to track:", err);
+      // Silently fail tracking to not disrupt user experience
+      console.debug("Analytics silent fail");
     }
   }, []);
-
   useEffect(() => {
     const gid = getGuestId();
     setGuestId(gid);
