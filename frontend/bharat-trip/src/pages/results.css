@@ -899,7 +899,7 @@
 @media (max-width: 900px) {
   .anchored-planner-root {
     display: flex !important;
-    flex-direction: column !important;
+    flex-direction: column-reverse !important; /* Map is at the end of DOM, so this puts it on top */
     height: 100dvh !important;
     width: 100% !important;
     overflow: hidden !important;
@@ -909,7 +909,7 @@
     background: #000;
   }
 
-  /* Map Foundation - Fixed 40vh on top */
+  /* Map Foundation - Fixed 40vh on top (since it's now first in column-reverse) */
   .planner-map-foundation {
     position: relative !important;
     width: 100% !important;
@@ -934,7 +934,7 @@
     position: relative !important;
     width: 100% !important;
     flex: 1 !important;
-    height: auto !important;
+    height: 60vh !important;
     max-height: none !important;
     z-index: 10 !important;
     background: #000 !important;
@@ -945,7 +945,7 @@
     flex-direction: column !important;
     box-shadow: none !important;
     padding-top: 0;
-    overflow-y: auto !important;
+    overflow: hidden !important; /* Content will scroll instead */
   }
 
   /* Disable Drawer Transitions/Transforms on Mobile Split View */
@@ -958,145 +958,105 @@
     display: none !important; /* Not needed in fixed split view */
   }
 
-  .sidebar-scroll-content {
-    padding: 15px 20px !important;
-    overflow-y: visible !important; /* Parent aside handles scrolling */
-  }
-
-  .premium-itinerary-list {
-    padding-left: 20px;
-    border-left: 1px dashed rgba(255, 255, 255, 0.1);
-    margin-left: 15px;
-    gap: 30px;
-  }
-
-  .stop-marker-v2 {
-    left: -26px !important;
-  }
-
   .sidebar-header-premium {
-    padding: 10px 25px 20px !important;
+    padding: 15px 20px !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    flex-shrink: 0 !important;
   }
 
   .header-top-row {
-    margin-bottom: 15px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .trip-hero-info {
+    margin-bottom: 5px !important;
   }
 
   .sidebar-scroll-content {
     flex: 1 !important;
-    padding: 20px 25px !important;
+    padding: 15px 20px !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
-    padding-bottom: 150px !important; /* Space for footer */
+    background: #000 !important;
+  }
+
+  .premium-itinerary-list {
+    padding-left: 15px;
+    border-left: 1px dashed rgba(255, 255, 255, 0.1);
+    margin-left: 10px;
+    gap: 25px;
+  }
+
+  .stop-marker-v2 {
+    left: -21px !important;
+  }
+
+  /* Timeline vertical line extension */
+  .stops-container-premium::before {
+    left: -17px !important;
   }
 
   /* Floating Overlay Buttons */
   .mobile-view-toggle {
     position: fixed !important;
-    bottom: 40px !important;
+    bottom: 30px !important;
     right: 20px !important;
     z-index: 2000 !important;
     background: var(--accent-blue) !important;
     color: white !important;
-    padding: 12px 24px !important;
-    border-radius: 30px !important;
+    padding: 10px 20px !important;
+    border-radius: 25px !important;
     border: none !important;
     font-weight: 800 !important;
-    font-size: 14px !important;
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5) !important;
+    font-size: 13px !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4) !important;
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
-    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  }
-
-  .show-map-mobile .mobile-view-toggle {
-    bottom: 40px !important; /* Keep visible when map is main focus */
+    gap: 6px !important;
   }
 
   .sidebar-footer-premium {
-    position: absolute !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: rgba(10, 15, 25, 0.95) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
-    padding: 20px 25px calc(20px + env(safe-area-inset-bottom)) !important;
-    z-index: 10 !important;
+    padding: 15px 20px calc(15px + env(safe-area-inset-bottom)) !important;
+    background: rgba(10, 15, 25, 0.98) !important;
+    position: relative !important; /* Flow with the sidebar flex */
+    flex-shrink: 0 !important;
+    z-index: 100 !important;
   }
 
   /* Controls Positioning on Map */
   .floating-map-controls {
-    top: 80px !important; /* Below navbar */
+    top: 20px !important; 
     right: 15px !important;
   }
-  .focused-stop-card {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 24px !important;
-    padding: 20px !important;
-    margin-bottom: 20px !important;
-  }
-
-  .focused-stop-img {
-    height: 180px !important;
-    border-radius: 16px !important;
-    margin-bottom: 15px !important;
-  }
-
-  .exec-progress-summary {
-    display: flex !important;
-    justify-content: space-around !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-    padding: 15px !important;
-    border-radius: 20px !important;
-    margin-bottom: 25px !important;
-  }
-
-  .exec-stat-val {
-    font-size: 20px !important;
-    font-weight: 900 !important;
-    color: var(--accent-blue) !important;
-  }
-
-  .exec-stat-label {
-    font-size: 10px !important;
-    text-transform: uppercase !important;
-    letter-spacing: 1px !important;
-    opacity: 0.6 !important;
-  }
-}
 
   .premium-stop-card-v2.active {
-    border-left: 4px solid var(--accent-blue);
-    background: rgba(59, 130, 246, 0.1);
+    border-left: 3px solid var(--accent-blue);
+    background: rgba(59, 130, 246, 0.08);
   }
 
   .mobile-floating-navigate-cta {
     position: fixed;
     bottom: 20px;
     left: 20px;
-    right: 80px; /* Leave space for map toggle */
+    right: 140px; 
     z-index: 2500;
     background: linear-gradient(135deg, #3b82f6, #8b5cf6);
     color: white;
-    padding: 16px 24px;
-    border-radius: 18px;
+    padding: 14px 20px;
+    border-radius: 15px;
     border: none;
     font-weight: 800;
-    font-size: 14px;
-    box-shadow: 0 12px 40px rgba(59, 130, 246, 0.5);
+    font-size: 13px;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    animation: slideUpIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    gap: 8px;
+    animation: slideUpIn 0.4s ease-out;
   }
 
   @keyframes slideUpIn {
-    from { transform: translateY(100px); opacity: 0; }
+    from { transform: translateY(50px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
 }
