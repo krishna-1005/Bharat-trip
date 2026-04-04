@@ -150,75 +150,53 @@ function Results() {
     const params = new URLSearchParams(loc.search);
     const sharedTripId = params.get("sharedTripId") || routeTripId;
 
-    const fetchSharedTrip = async (id) => {
+    const loadPlan = async () => {
+      setLoading(true);
+      
       try {
-        setLoading(true);
-        const res = await fetch(`${API}/api/public/trips/${id}`);
-        const data = await res.json();
-        if (res.ok && data.trip) {
-          const t = data.trip;
-          const formattedPlan = {
-            id: t._id,
-            city: t.destination || "India",
-            coordinates: t.coordinates,
-            days: t.days,
-            itinerary: t.itinerary || [],
-            isShared: true,
-            totalTripCost: t.totalTripCost,
-            totalBudget: t.totalBudget,
-            travelerType: t.travelerType,
-            pace: t.pace,
-            summary: t.summary || "A custom-crafted journey designed just for you."
-          };
-          setPlan(formattedPlan);
-          setTripTitle(t.title);
-        } else {
-          console.error("Shared trip not found or error:", data.error);
+        // Case 1: Shared Trip (via URL ID)
+        if (sharedTripId) {
+          const res = await fetch(`${API}/api/public/trips/${sharedTripId}`);
+          const data = await res.json();
+          if (res.ok && data.trip) {
+            setPlan({
+              ...data.trip,
+              id: data.trip._id,
+              city: data.trip.destination || "India",
+              itinerary: data.trip.itinerary || [],
+              isShared: true
+            });
+            setTripTitle(data.trip.title);
+            return;
+          }
+        }
+
+        // Case 2: Router State (Primary for new generations)
+        if (loc.state?.plan) {
+          setPlan(loc.state.plan);
+          if (loc.state?.isNew) {
+            setIsGenerating(true);
+            setCurrentIndex(0);
+          }
+          return;
+        }
+
+        // Case 3: LocalStorage Fallback (For refresh or lost mobile state)
+        const saved = localStorage.getItem("tripPlan");
+        if (saved && saved !== "undefined" && saved !== "null") {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.itinerary) {
+            setPlan(parsed);
+          }
         }
       } catch (err) {
-        console.error("Error fetching shared trip:", err);
+        console.error("Critical plan loading error:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    if (sharedTripId) {
-      fetchSharedTrip(sharedTripId);
-    } else if (loc.state?.plan) {
-      try {
-        setPlan(loc.state.plan);
-        if (loc.state?.multiCityContext) {
-          setMultiCityContext(loc.state.multiCityContext);
-        }
-        if (loc.state?.isNew) {
-          setIsGenerating(true);
-          setCurrentIndex(0);
-          localStorage.setItem("tripCurrentIndex", 0);
-          // Also reset execution state for new trips
-          setIsExecuting(false);
-          localStorage.setItem("tripExecuting", "false");
-          setSidebarTab("plan");
-        } else {
-          setIsGenerating(false);
-        }
-      } catch (err) {
-        console.error("Error setting plan from state:", err);
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      try {
-        const savedPlanStr = localStorage.getItem("tripPlan");
-        if (savedPlanStr && savedPlanStr !== "undefined") {
-          setPlan(JSON.parse(savedPlanStr));
-        }
-      } catch (err) {
-        console.error("Error parsing saved plan:", err);
-        localStorage.removeItem("tripPlan");
-      } finally {
-        setLoading(false);
-      }
-    }
+    loadPlan();
   }, [loc.search, loc.state, routeTripId]);
 
   const handleSaveTrip = useCallback(async (isAutoSave = false) => {
