@@ -1,6 +1,7 @@
 const path = require("path");
 const fetchOSMPlaces = require("../services/osmPlaces");
 const { generateReviews: fetchUserReviews } = require("../services/reviewService");
+const analyzeAndRefinePlan = require("../services/aiPlanner");
 
 /* ── CONFIG ── */
 const MAX_HOURS_PER_DAY = 8;
@@ -208,9 +209,10 @@ function generateFallbacks(city, coords, count) {
 async function generatePlan({
   city,
   days,
-  budget, // Now a number
+  budget, 
   interests,
   travelerType,
+  pace,
   userPreferences = {}
 }) {
   const coords = await getCityCoords(city);
@@ -222,7 +224,7 @@ async function generatePlan({
   let curatedPool = allPlacesPool.filter(p => {
     if (p.area && p.area.toLowerCase() === cleanCity) return true;
     const dist = getDistance(coords.lat, coords.lng, p.lat, p.lng);
-    return dist <= 40; // 40km radius for curated
+    return dist <= 40; 
   });
 
   /* STEP 2: HYBRID FETCH (OSM) */
@@ -232,7 +234,6 @@ async function generatePlan({
   if (osmCache.has(cacheKey)) {
     osmPool = osmCache.get(cacheKey);
   } else {
-    // Increase radius for larger cities or if curated pool is small
     const radius = curatedPool.length < 10 ? 15 : 10;
     osmPool = await fetchOSMPlaces(coords.lat, coords.lng, radius);
     osmCache.set(cacheKey, osmPool);
@@ -262,7 +263,6 @@ async function generatePlan({
     })
     .sort((a, b) => b.score - a.score);
 
-  // Ensure minimum places for balanced distribution
   const minRequired = days * 3;
   if (prioritizedPool.length < minRequired) {
     const needed = minRequired - prioritizedPool.length;
@@ -270,71 +270,71 @@ async function generatePlan({
       const enriched = enrichPlace(p, prioritizedPool.length + idx);
       return {
         ...enriched,
-        score: 5 // Default score for fallbacks
+        score: 5 
       };
     });
     prioritizedPool = [...prioritizedPool, ...fallbacks];
   }
 
   const maxPlacesNeeded = Math.max(minRequired, days * 6);
-  prioritizedPool = prioritizedPool.slice(0, maxPlacesNeeded);
+  const candidates = prioritizedPool.slice(0, maxPlacesNeeded);
 
-  /* STEP 5: BALANCED DISTRIBUTION */
+  /* STEP 6: AI REFINEMENT (The Personalization Magic) */
+  let aiItinerary = null;
+  try {
+    aiItinerary = await analyzeAndRefinePlan({
+      city,
+      days,
+      budget,
+      interests,
+      travelerType,
+      pace,
+      candidates,
+      userPreferences
+    });
+  } catch (err) {
+    console.warn("AI Refinement skipped or failed:", err.message);
+  }
+
+  /* STEP 7: BALANCED DISTRIBUTION */
   const itineraryDays = [];
   const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
   const usedPlaceNames = new Set();
   let accumulatedTotalCost = 0;
   
   for (let dayNum = 1; dayNum <= days; dayNum++) {
+    const meal = Math.min(perDayBudget * 0.25, 800) * tMult;
     let dayHours = 0;
     let dayCost = 0;
-    const validPlaces = [];
-
-    const remainingPool = prioritizedPool.filter(p => !usedPlaceNames.has(p.name));
     
-    // Calculate per-day meal cost
-    const meal = Math.min(perDayBudget * 0.25, 800) * tMult;
-    
-    // Balanced target: distribute remaining places over remaining days
-    const remainingDays = days - dayNum + 1;
-    const targetCount = Math.max(3, Math.ceil(remainingPool.length / remainingDays));
-    
-    for (const p of remainingPool) {
-      if (validPlaces.length >= targetCount || validPlaces.length >= 6) break;
-      
-      const t = p.timeHours || 2;
-      const placeCost = (p.avgCost || 200) * tMult;
-
-      const projectedFutureMealCosts = (remainingDays - 1) * meal;
-      
-      const canAfford = (accumulatedTotalCost + dayCost + placeCost + meal + projectedFutureMealCosts) <= totalBudget;
-
-      // Force add if below minimum 3 places per day to prevent empty/sparse days
-      if ((dayHours + t <= MAX_HOURS_PER_DAY && canAfford) || validPlaces.length < 3) {
-        dayHours += t;
-        dayCost += placeCost;
-
-        validPlaces.push({
-          ...p,
-          estimatedCost: placeCost,
-          reason: generateReason(p, interests, budget > 5000 ? "medium" : "low", validPlaces.length),
-          rating: generateRating(validPlaces.length),
-          reviews: generateReviews(validPlaces.length),
-          tag: generateTag(p, validPlaces.length),
-          priority: Math.round((p.score / 15) * 10) || 5
-        });
-        
-        usedPlaceNames.add(p.name);
-      }
+    // Attempt to use AI schedule for this day
+    let dayPlaces = [];
+    if (aiItinerary && aiItinerary[dayNum.toString()]) {
+      dayPlaces = aiItinerary[dayNum.toString()].map(aiP => {
+        const original = candidates.find(c => c.name.toLowerCase() === aiP.name.toLowerCase()) || aiP;
+        return {
+          ...original,
+          ...aiP,
+          estimatedCost: (original.avgCost || 200) * tMult
+        };
+      });
+    } else {
+      // Fallback distribution logic
+      const targetCount = 3;
+      const remaining = candidates.filter(p => !usedPlaceNames.has(p.name)).slice(0, targetCount);
+      dayPlaces = remaining.map(p => ({ ...p, estimatedCost: (p.avgCost || 200) * tMult }));
     }
 
-    const actualDayCost = dayCost + meal;
-    accumulatedTotalCost += actualDayCost;
-
-    const enrichedPlaces = await Promise.all(validPlaces.map(async (p) => {
+    const enrichedPlaces = await Promise.all(dayPlaces.map(async (p) => {
+      usedPlaceNames.add(p.name);
+      dayCost += p.estimatedCost;
+      dayHours += (p.timeHours || 2);
       const userReviews = await fetchUserReviews(p.name, p.category, city);
       return { ...p, userReviews };
     }));
+
+    const actualDayCost = dayCost + meal;
+    accumulatedTotalCost += actualDayCost;
 
     itineraryDays.push({
       day: dayNum,
@@ -357,7 +357,7 @@ async function generatePlan({
     totalTripCost: finalTotalCost,
     remainingBudget: Math.round(totalBudget - finalTotalCost),
     perDayBudget: Math.round(perDayBudget),
-    isPersonalized: Object.keys(userPreferences).length > 0,
+    isPersonalized: true,
     summary: generatePlanSummary({ city, days, totalBudget, totalTripCost: finalTotalCost, interests })
   };
 }

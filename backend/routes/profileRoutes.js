@@ -105,24 +105,46 @@ router.post("/trips", async (req, res) => {
     if (!title || !days)
       return res.status(400).json({ error: "title and days are required." });
 
-    // Correctly map itinerary objects to include the day label if missing
-    const formattedItinerary = Object.entries(itinerary || {}).map(([dayLabel, dayData]) => ({
-      day: dayLabel,
-      estimatedHours: dayData.estimatedHours || 0,
-      estimatedCost: dayData.estimatedCost || 0,
-      places: (dayData.places || []).map(p => ({
-        name: p.name,
-        lat: p.lat,
-        lng: p.lng,
-        estimatedCost: p.estimatedCost || p.avgCost || 0,
-        estimatedHours: p.estimatedHours || p.timeHours || 0,
-        category: p.category,
-        rating: p.rating,
-        reviews: p.reviews,
-        tag: p.tag,
-        userReviews: p.userReviews || []
-      }))
-    }));
+    // Correctly handle itinerary if it's an array (new format) or object (old format)
+    let formattedItinerary = [];
+    
+    if (Array.isArray(itinerary)) {
+      formattedItinerary = itinerary.map((dayData, idx) => ({
+        day: dayData.day || (idx + 1).toString(),
+        estimatedHours: dayData.estimatedHours || 0,
+        estimatedCost: dayData.estimatedCost || 0,
+        places: (dayData.places || []).map(p => ({
+          name: p.name,
+          lat: p.lat,
+          lng: p.lng,
+          estimatedCost: p.estimatedCost || p.avgCost || 0,
+          estimatedHours: p.estimatedHours || p.timeHours || 0,
+          category: p.category,
+          rating: p.rating,
+          reviews: p.reviews,
+          tag: p.tag,
+          userReviews: p.userReviews || []
+        }))
+      }));
+    } else if (typeof itinerary === 'object' && itinerary !== null) {
+      formattedItinerary = Object.entries(itinerary).map(([dayLabel, dayData]) => ({
+        day: dayLabel,
+        estimatedHours: dayData.estimatedHours || 0,
+        estimatedCost: dayData.estimatedCost || 0,
+        places: (dayData.places || []).map(p => ({
+          name: p.name,
+          lat: p.lat,
+          lng: p.lng,
+          estimatedCost: p.estimatedCost || p.avgCost || 0,
+          estimatedHours: p.estimatedHours || p.timeHours || 0,
+          category: p.category,
+          rating: p.rating,
+          reviews: p.reviews,
+          tag: p.tag,
+          userReviews: p.userReviews || []
+        }))
+      }));
+    }
 
     const trip = await Trip.create({
       userId: req.user._id,

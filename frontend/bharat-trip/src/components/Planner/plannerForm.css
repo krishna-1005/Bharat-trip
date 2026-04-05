@@ -432,8 +432,22 @@
 
 /* Responsive Adjustments */
 @media (max-width: 600px) {
+    .pf-wrap {
+        gap: 24px;
+        padding-bottom: 160px; /* Increased space for BottomNav and FABs */
+    }
+
+    .pf-step-header h2 {
+        font-size: 20px;
+    }
+
+    .pf-label {
+        font-size: 11px;
+    }
+
     .pf-selection-grid, .pf-interest-grid {
         grid-template-columns: 1fr;
+        gap: 10px;
     }
 
     .pf-choice-card {
@@ -447,29 +461,97 @@
         font-size: 24px;
     }
 
+    /* Currency Rail - make it more obvious it's a rail */
+    .pf-currency-rail {
+        padding: 0 4px 15px 4px;
+        margin-bottom: 15px;
+        mask-image: linear-gradient(to right, black 85%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    }
+
+    .pf-currency-chip {
+        padding: 10px 16px;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .pf-premium-budget-card {
+        padding: 20px;
+        border-radius: 20px;
+    }
+
+    .pf-budget-display {
+        margin: 10px 0 20px 0;
+        justify-content: center;
+        text-align: center;
+    }
+
     .pf-budget-numeric-input {
-        font-size: 32px;
-        width: 130px;
+        font-size: 42px;
+        width: 100%;
+        text-align: center !important;
+        max-width: none;
+        color: #3b82f6;
+        margin: 0 auto;
     }
 
     .pf-footer-sleek {
         flex-direction: column;
-        gap: 20px;
+        gap: 16px;
         text-align: center;
+        padding: 18px;
+        margin-top: 24px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        justify-content: center !important;
+        align-items: center !important;
+        display: flex !important;
     }
 
     .pf-btn-group {
         width: 100%;
+        flex-direction: row;
+        gap: 12px;
+        justify-content: center !important;
+        display: flex !important;
     }
 
     .pf-primary-btn {
         flex: 1;
-        width: 100%;
+        padding: 14px 20px;
+        font-size: 13px;
+        max-width: 180px;
+    }
+
+    .pf-secondary-btn {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 14px 10px;
+        font-size: 13px;
+        color: #fff;
+        max-width: 120px;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
     .pf-estimate-box {
-        display: flex;
-        flex-direction: column;
+        display: flex !important;
+        flex-direction: row;
         align-items: center;
+        justify-content: center !important;
+        gap: 10px;
+        width: 100%;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 12px;
+    }
+
+    .pf-est-label {
+        margin-bottom: 0;
+    }
+
+    .pf-est-val {
+        font-size: 18px;
     }
 }

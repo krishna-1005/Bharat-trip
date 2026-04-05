@@ -14,6 +14,8 @@ import { createLocationIcon } from "./markerIcons";
 import ResizeMap from "./ResizeMap";
 import L from "leaflet";
 
+import { DAY_COLORS } from "../../constants/dayColors";
+
 // ── HELPERS ──
 
 /**
@@ -126,13 +128,16 @@ function SafePolyline({ places }) {
 // ── MAIN COMPONENT ──
 
 function MapView({ plan, currentIndex, userLocation, activePlace, onHover }) {
-  // 1. Process places with strict validation
-  const allPlaces = useMemo(() => {
+  // 1. Process places with strict validation and day context
+  const allPlacesWithDay = useMemo(() => {
     if (!plan?.itinerary) return [];
     const days = Array.isArray(plan.itinerary) ? plan.itinerary : Object.values(plan.itinerary);
     return days
       .filter(d => d && (d.places || d.length))
-      .flatMap(d => d.places || (Array.isArray(d) ? d : []))
+      .flatMap((d, dayIdx) => {
+        const places = d.places || (Array.isArray(d) ? d : []);
+        return places.map(p => ({ ...p, dayIdx }));
+      })
       .filter(p => p && getSafeLatLng(p.lat, p.lng) !== null);
   }, [plan]);
 
@@ -141,13 +146,13 @@ function MapView({ plan, currentIndex, userLocation, activePlace, onHover }) {
     const planCoords = getSafeLatLng(plan?.coordinates?.lat, plan?.coordinates?.lng);
     if (planCoords) return planCoords;
 
-    if (allPlaces.length > 0) {
-      const first = getSafeLatLng(allPlaces[0].lat, allPlaces[0].lng);
+    if (allPlacesWithDay.length > 0) {
+      const first = getSafeLatLng(allPlacesWithDay[0].lat, allPlacesWithDay[0].lng);
       if (first) return first;
     }
 
     return [12.9716, 77.5946]; // Fallback to Bangalore
-  }, [plan, allPlaces]);
+  }, [plan, allPlacesWithDay]);
 
   // Final sanity check for MapContainer (Must never be NaN)
   const safeInitialCenter = [
@@ -168,30 +173,31 @@ function MapView({ plan, currentIndex, userLocation, activePlace, onHover }) {
           attribution='&copy; OpenStreetMap contributors'
         />
 
-        <MapController center={safeInitialCenter} places={allPlaces} userLocation={userLocation} />
+        <MapController center={safeInitialCenter} places={allPlacesWithDay} userLocation={userLocation} />
         <ResizeMap trigger={activePlace} />
         <ZoomControls />
-        <SafePolyline places={allPlaces} />
+        <SafePolyline places={allPlacesWithDay} />
 
         {/* Markers */}
-        {allPlaces.map((p, i) => {
+        {allPlacesWithDay.map((p, i) => {
           const pos = getSafeLatLng(p.lat, p.lng);
           if (!pos) return null;
 
           const isVisited = i < currentIndex;
           const isCurrent = i === currentIndex;
+          const dayColor = DAY_COLORS[p.dayIdx % DAY_COLORS.length];
           
           return (
             <Marker
               key={`${p.name}-${i}`}
               position={pos}
-              icon={createLocationIcon(isCurrent ? "#3b82f6" : "#64748b", isCurrent, isVisited)}
+              icon={createLocationIcon(isCurrent ? "#fff" : dayColor, isCurrent, isVisited)}
               eventHandlers={{
                 mouseover: () => onHover?.(p),
                 mouseout: () => onHover?.(null)
               }}
             >
-              <Tooltip direction="top">{p.name}</Tooltip>
+              <Tooltip direction="top">{p.name} (Day {p.dayIdx + 1})</Tooltip>
             </Marker>
           );
         })}

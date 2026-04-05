@@ -168,7 +168,7 @@
 
 /* --- RESPONSIVE --- */
 @media (max-width: 1100px) {
-    .planner-onboarding-page { padding: 40px 0 100px; }
+    .planner-onboarding-page { padding: 40px 0 180px; } /* Increased bottom padding */
     .planner-container { 
         grid-template-columns: 1fr; 
         gap: 60px; 

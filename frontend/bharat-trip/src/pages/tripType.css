@@ -262,6 +262,9 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
+    .tt-premium-root {
+        padding-bottom: 200px; /* Ensure space for bottom nav */
+    }
     .tt-selection-grid {
         flex-direction: column;
         align-items: center;
@@ -272,6 +275,6 @@
         height: auto;
     }
     .tt-container {
-        padding: 100px 20px;
+        padding: 100px 20px 200px; /* Increased bottom padding */
     }
 }

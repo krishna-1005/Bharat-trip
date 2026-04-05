@@ -14,12 +14,39 @@ import { AnimatePresence, motion } from "framer-motion";
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 const THINKING_MESSAGES = [
-  "AI is analyzing your travel preferences...",
-  "Crafting a bespoke itinerary for you...",
-  "Our AI engine is optimizing your route...",
-  "Synchronizing local narrative layers...",
-  "Finalizing your high-fidelity odyssey...",
-  "Almost there! AI is polishing your plan..."
+  "Scouting for hidden local gems...",
+  "Mapping out the most scenic routes...",
+  "Consulting local experts and datasets...",
+  "Balancing your daily travel pace...",
+  "Finding the best food and culture spots...",
+  "Optimizing your travel itinerary...",
+  "Selecting iconic landmarks for you...",
+  "Crafting your personalized odyssey...",
+  "Polishing your bespoke travel plan...",
+  "Finalizing your dream adventure..."
+];
+
+const INTERACTIVE_QUESTIONS = [
+  {
+    id: "morning",
+    question: "What's your ideal travel morning?",
+    options: ["Sunrise trek", "Lazy brunch", "Local markets", "Yoga session"]
+  },
+  {
+    id: "transport",
+    question: "Preferred way to get around?",
+    options: ["Walking", "Local Rickshaw", "Rental Bike", "Metro/Bus"]
+  },
+  {
+    id: "experience",
+    question: "Must-have travel experience?",
+    options: ["Street Food", "Historic Sites", "Nature/Parks", "Shopping"]
+  },
+  {
+    id: "packing",
+    question: "Packing style?",
+    options: ["Light & Fast", "Carry-all", "Tech-heavy", "Essentialist"]
+  }
 ];
 
 function Results() {
@@ -34,15 +61,36 @@ function Results() {
   // ── STATE ──
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isGenerating, setIsGenerating] = useState(() => loc.state?.isNew || false);
-  const [genStep, setGenStep] = useState("thinking");
+  const [isGenerating, setIsGenerating] = useState(() => {
+    const isNew = loc.state?.isNew || false;
+    if (isNew) {
+      // Clear the state so refresh doesn't trigger "isNew" logic again
+      window.history.replaceState({ ...loc.state, isNew: false }, "");
+    }
+    return isNew;
+  });
+  const [genStep, setGenStep] = useState("thinking"); // "thinking" | "summary"
+  const [apiStatus, setApiStatus] = useState("idle"); // "idle" | "requesting" | "success" | "error"
   const [messageIdx, setMessageIdx] = useState(0);
   const [tripTitle, setTripTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [shareStatus, setShareStatus] = useState(false);
-  
+
+  const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
+  const [userPreferences, setUserPreferences] = useState({
+    morning: "",
+    transport: "",
+    experience: "",
+    packing: ""
+  });
+  const [genProgress, setGenProgress] = useState(0);
+
   const [currentIndex, setCurrentIndex] = useState(() => {
+    if (loc.state?.isNew) {
+      localStorage.setItem("tripCurrentIndex", 0);
+      return 0;
+    }
     try {
       const savedIdx = localStorage.getItem("tripCurrentIndex");
       const parsed = parseInt(savedIdx, 10);
@@ -56,7 +104,31 @@ function Results() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
   const [userLocation, setUserLocation] = useState(null);
 
+  const [aiLogs, setAiLogs] = useState([]);
+
+  useEffect(() => {
+    if (!isGenerating) return;
+
+    const logInterval = setInterval(() => {
+        const logPrefixes = ["> [SCOUT]", "> [ROUTE]", "> [LOCAL]", "> [MAP]"];
+        const logMsgs = [
+            "Hidden cafe found in Old Town",
+            "Optimizing walking distance...",
+            "Checking local opening hours...",
+            "Scenic viewpoint added to Day 2",
+            "Matching budget with local prices",
+            "Selecting premium photo spots",
+            "Validating transit connections"
+        ];
+        const newLog = `${logPrefixes[Math.floor(Math.random()*logPrefixes.length)]} ${logMsgs[Math.floor(Math.random()*logMsgs.length)]}`;
+        setAiLogs(prev => [newLog, ...prev.slice(0, 5)]);
+    }, 2000);
+
+    return () => clearInterval(logInterval);
+  }, [isGenerating]);
+
   // ── MEMOS ──
+
   const normalizedItinerary = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
     try {
@@ -104,6 +176,12 @@ function Results() {
 
   useEffect(() => {
     const loadPlan = async () => {
+      // If we are generating a new plan, we don't "load" an existing one yet
+      if (isGenerating) {
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       const params = new URLSearchParams(loc.search);
       const sharedId = params.get("sharedTripId") || routeTripId;
@@ -138,23 +216,91 @@ function Results() {
       }
     };
     loadPlan();
-  }, [loc.state, routeTripId, loc.search]);
+  }, [loc.state, routeTripId, loc.search, isGenerating]);
 
+  // ── GENERATION LOGIC ──
+
+  const triggerPlanGeneration = useCallback(async (prefs) => {
+    if (apiStatus !== "idle" || !loc.state?.planParams) return;
+    
+    setApiStatus("requesting");
+    try {
+      const token = localStorage.getItem("token");
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetch(`${API}/api/plan/generate`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ 
+          ...loc.state.planParams,
+          userPreferences: prefs // Send the collected preferences
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to generate plan");
+
+      setPlan(data.plan);
+      setTripTitle(data.plan.title || "");
+      localStorage.setItem("tripPlan", JSON.stringify(data.plan));
+      setApiStatus("success");
+      setGenStep("summary");
+      
+      // Auto-exit generation mode after summary
+      setTimeout(() => setIsGenerating(false), 5000);
+    } catch (err) {
+      console.error("Generation error:", err);
+      setApiStatus("error");
+      // Fallback: stop generation mode so user can see error or return
+      setIsGenerating(false);
+    }
+  }, [loc.state, apiStatus]);
+
+  // Trigger API Call when quiz finishes OR timeout reaches
   useEffect(() => {
-    if (!isGenerating) return;
-    const maxSafetyTimeout = setTimeout(() => setIsGenerating(false), 8000);
-    const msgInterval = setInterval(() => setMessageIdx(prev => (prev + 1) % THINKING_MESSAGES.length), 1200);
-    const summaryTimeout = setTimeout(() => setGenStep("summary"), 2500);
-    const doneTimeout = setTimeout(() => setIsGenerating(false), 5500);
-    return () => { 
-      clearInterval(msgInterval); 
-      clearTimeout(summaryTimeout); 
-      clearTimeout(doneTimeout);
-      clearTimeout(maxSafetyTimeout);
-    };
-  }, [isGenerating]);
+    if (!isGenerating || apiStatus !== "idle") return;
+
+    // Timeout fallback (8 seconds)
+    const timeout = setTimeout(() => {
+      if (apiStatus === "idle") {
+        triggerPlanGeneration(userPreferences);
+      }
+    }, 10000);
+
+    // If all questions are answered, trigger immediately
+    const allAnswered = Object.values(userPreferences).every(v => v !== "");
+    if (allAnswered) {
+      triggerPlanGeneration(userPreferences);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [userPreferences, isGenerating, apiStatus, triggerPlanGeneration]);
+
+  // Visual Progress Simulation
+  useEffect(() => {
+    if (!isGenerating || apiStatus === "success") return;
+
+    const progressInterval = setInterval(() => {
+      setGenProgress(prev => {
+        if (prev >= 95 && apiStatus !== "success") return prev;
+        return Math.min(prev + 0.5, 100);
+      });
+      
+      setMessageIdx(prev => (prev + 1) % THINKING_MESSAGES.length);
+    }, 800);
+
+    return () => clearInterval(progressInterval);
+  }, [isGenerating, apiStatus]);
 
   // ── HANDLERS ──
+  const handleAnswer = (questionId, option) => {
+    setUserPreferences(prev => ({ ...prev, [questionId]: option }));
+    if (currentQuestionIdx < INTERACTIVE_QUESTIONS.length - 1) {
+      setCurrentQuestionIdx(prev => prev + 1);
+    }
+  };
+
   const handleVisited = (idx) => {
     const nextIdx = idx + 1;
     setCurrentIndex(nextIdx);
@@ -194,32 +340,99 @@ function Results() {
   };
 
   // ── RENDERS ──
-  if (loading) return (
+  if (loading || (isGenerating && genStep === "thinking")) return (
     <div className="ai-gen-overlay">
-      <div className="premium-pulse-ring">
-        <div className="brand-glow-dot"></div>
+      <div className="ai-gen-grid"></div>
+      
+      <div className="ai-gen-top-layout">
+        <div className="ai-neural-container">
+            <div className="ai-neural-core">
+                <div className="neural-orbit orbit-1"></div>
+                <div className="neural-orbit orbit-2"></div>
+                <div className="neural-orbit orbit-3"></div>
+                <div className="neural-center-glow"></div>
+                <div className="neural-brain-icon">🧭</div>
+            </div>
+
+            <div className="ai-status-panel">
+                <div className="ai-scan-line"></div>
+                <h2 className="ai-loader-text-v2">
+                    {THINKING_MESSAGES[messageIdx]}
+                </h2>
+                
+                <div className="ai-processing-log">
+                    {aiLogs.map((log, i) => (
+                        <motion.div 
+                            key={i}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1 - (i * 0.15), x: 0 }}
+                            className="ai-log-entry"
+                        >
+                            {log}
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        {/* INTERACTIVE QUIZ SECTION */}
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={currentQuestionIdx}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="ai-interactive-quiz"
+          >
+            <span className="quiz-badge">WHILE YOU WAIT</span>
+            <h3 className="quiz-question">{INTERACTIVE_QUESTIONS[currentQuestionIdx].question}</h3>
+            <div className="quiz-options">
+              {INTERACTIVE_QUESTIONS[currentQuestionIdx].options.map((opt, i) => (
+                <button 
+                  key={i} 
+                  className={`quiz-opt-btn ${userPreferences[INTERACTIVE_QUESTIONS[currentQuestionIdx].id] === opt ? "selected" : ""}`}
+                  onClick={() => handleAnswer(INTERACTIVE_QUESTIONS[currentQuestionIdx].id, opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <div className="quiz-dots">
+                {INTERACTIVE_QUESTIONS.map((_, i) => (
+                  <div key={i} className={`quiz-dot ${i === currentQuestionIdx ? "active" : ""} ${userPreferences[INTERACTIVE_QUESTIONS[i].id] ? "completed" : ""}`}></div>
+                ))}
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
-      <h2 className="ai-loader-text">Summoning Your Odyssey...</h2>
+      
+      <div className="ai-progress-wrap">
+          <div className="ai-progress-bar">
+              <motion.div 
+                className="ai-progress-fill"
+                initial={{ width: "0%" }}
+                animate={{ width: `${genProgress}%` }}
+              ></motion.div>
+          </div>
+          <span className="ai-perc-text">{Math.floor(genProgress)}% ANALYZING DESTINATIONS</span>
+      </div>
     </div>
   );
 
-  if (isGenerating && plan) return (
+  if (isGenerating && plan && genStep === "summary") return (
     <div className="ai-gen-overlay">
-      <AnimatePresence mode="wait">
-        {genStep === "thinking" ? (
-          <motion.div key="think" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="ai-loader-container">
-            <div className="premium-pulse-ring"></div>
-            <h2 className="ai-loader-text">{THINKING_MESSAGES[messageIdx]}</h2>
-          </motion.div>
-        ) : (
-          <motion.div key="sum" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="ai-gen-summary-box">
-            <span className="ai-sparkle-badge">✨ AI Synthesis Complete</span>
-            <h2 style={{ color: '#fff', fontSize: '32px', margin: '20px 0', fontWeight: 800 }}>Your Odyssey is Ready</h2>
-            <p className="ai-summary-text-large">{plan.summary}</p>
-            <div className="ai-countdown-loader"></div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="ai-gen-grid"></div>
+      <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="ai-gen-summary-box-v2">
+        <div className="ai-success-icon">✨</div>
+        <span className="ai-sparkle-badge-v2">Neural Synthesis Complete</span>
+        <h2>Your Odyssey is Ready</h2>
+        <div className="ai-summary-divider"></div>
+        <p className="ai-summary-text-v2">{plan.summary}</p>
+        <div className="ai-entry-button-wrap">
+            <div className="ai-countdown-loader-v2"></div>
+            <span>ENTERING ODYSSEY...</span>
+        </div>
+      </motion.div>
     </div>
   );
 
@@ -328,53 +541,64 @@ function Results() {
           <BudgetPanel budgetData={budgetData} formatPrice={formatPrice} variant="inline" />
           
           <div className="itinerary-days-container">
-            {normalizedItinerary.map((day, dIdx) => (
-              <motion.div 
-                key={dIdx} 
-                className="premium-day-section"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + dIdx * 0.1 }}
-              >
-                <div className="day-title-row">
-                  <div className="day-badge">{dIdx + 1}</div>
-                  <h3>Day {dIdx + 1}: {day.day || day.title || `Exploration`}</h3>
-                </div>
-                <div className="day-stops-list">
-                  {day.places?.map((place, pIdx) => {
-                    const gIdx = allPlaces.indexOf(place);
-                    const isActive = gIdx === currentIndex;
-                    const isVisited = gIdx < currentIndex;
-                    return (
-                      <motion.div 
-                        key={pIdx} 
-                        className={`premium-stop-card-v3 ${isActive ? "active" : ""} ${isVisited ? "visited" : ""}`}
-                        whileHover={{ x: 8 }}
-                        onMouseEnter={() => setActivePlace(place)}
-                        onMouseLeave={() => setActivePlace(null)}
-                        onClick={() => {
-                          setActivePlace(place);
-                          if (isMobile) navigate("/map");
-                        }}
-                      >
-                        <div className="stop-image-wrap-v3">
-                          <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v3" />
-                          {isVisited && <div className="visited-check-v3">✓</div>}
-                        </div>
-                        <div className="stop-info-v3">
-                          <div className="stop-meta-v3">
-                            <span className="stop-tag-v3">{place.category}</span>
-                            <span className="stop-cost-v3">{formatPrice(place.estimatedCost || 0)}</span>
+            {(() => {
+              let globalStopIdx = 0;
+              return normalizedItinerary.map((day, dIdx) => (
+                <motion.div 
+                  key={dIdx} 
+                  className="premium-day-section"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + dIdx * 0.1 }}
+                >
+                  <div className="day-title-row">
+                    <div className="day-badge">{dIdx + 1}</div>
+                    <h3>
+                      Day {dIdx + 1}: {
+                        (day.title && day.title !== (dIdx + 1).toString()) 
+                          ? day.title 
+                          : (day.day && day.day !== (dIdx + 1).toString()) 
+                            ? day.day 
+                            : `Exploration`
+                      }
+                    </h3>
+                  </div>
+                  <div className="day-stops-list">
+                    {day.places?.map((place, pIdx) => {
+                      const currentIdx = globalStopIdx++;
+                      const isActive = currentIdx === currentIndex;
+                      const isVisited = currentIdx < currentIndex;
+                      return (
+                        <motion.div 
+                          key={pIdx} 
+                          className={`premium-stop-card-v3 ${isActive ? "active" : ""} ${isVisited ? "visited" : ""}`}
+                          whileHover={{ x: 8 }}
+                          onMouseEnter={() => setActivePlace(place)}
+                          onMouseLeave={() => setActivePlace(null)}
+                          onClick={() => {
+                            setActivePlace(place);
+                            if (isMobile) navigate("/map");
+                          }}
+                        >
+                          <div className="stop-image-wrap-v3">
+                            <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v3" />
+                            {isVisited && <div className="visited-check-v3">✓</div>}
                           </div>
-                          <h4>{place.name}</h4>
-                          <p className="stop-reason-v3">{place.reason}</p>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            ))}
+                          <div className="stop-info-v3">
+                            <div className="stop-meta-v3">
+                              <span className="stop-tag-v3">{place.category}</span>
+                              <span className="stop-cost-v3">{formatPrice(place.estimatedCost || 0)}</span>
+                            </div>
+                            <h4>{place.name}</h4>
+                            <p className="stop-reason-v3">{place.reason}</p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              ));
+            })()}
           </div>
         </div>
 

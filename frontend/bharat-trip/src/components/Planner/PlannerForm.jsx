@@ -80,46 +80,27 @@ function PlannerForm({ onPlanGenerated }) {
       return;
     }
     setError("");
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+    
+    // Convert budget to INR before sending
+    const budgetInINR = toINR(Number(budget), currency);
+    
+    // Prepare the form data to be processed in Results.jsx
+    const queryParams = {
+      city,
+      lat: coordinates.lat,
+      lng: coordinates.lng,
+      days,
+      budget: Math.round(budgetInINR),
+      interests,
+      travelerType,
+      pace
+    };
 
-      // Convert budget to INR before sending to backend
-      const budgetInINR = toINR(Number(budget), currency);
-      
-      const res = await fetch(`${API}/api/plan/generate`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ 
-          city, 
-          lat: coordinates.lat,
-          lng: coordinates.lng,
-          days, 
-          budget: Math.round(budgetInINR), 
-          interests, 
-          travelerType, 
-          pace 
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to generate plan");
-      }
-
-      if (onPlanGenerated && data.plan?.itinerary) {
-        onPlanGenerated(data.plan);
-      } else {
-        setError("Plan generation failed. Please try again.");
-      }
-    } catch (err) {
-      console.error("Plan Gen Error:", err);
-      setError(err.message || "We encountered an issue. Please try again.");
-    } finally {
-      setLoading(false);
+    // Navigate to results with isNew: true and the form data
+    // Results.jsx will now handle the "Quiz + API Call" flow
+    if (onPlanGenerated) {
+      // We pass the parameters as state so Results.jsx can trigger the real generation
+      onPlanGenerated(null, queryParams); 
     }
   };
 

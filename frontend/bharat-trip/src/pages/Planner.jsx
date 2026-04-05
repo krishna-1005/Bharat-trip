@@ -14,14 +14,20 @@ function Planner() {
   const navigate = useNavigate();
   const [activePersona, setActivePersona] = useState('explorer');
 
-  const handlePlanGenerated = (generatedPlan) => {
-    // Persist to localStorage immediately to prevent loss on mobile navigation
-    try {
-      localStorage.setItem("tripPlan", JSON.stringify(generatedPlan));
-    } catch (err) {
-      console.warn("Could not save plan to localStorage:", err);
+  const handlePlanGenerated = (generatedPlan, planParams) => {
+    // If we have a direct plan (old flow), save it. 
+    // If we have params (new personalized flow), navigate with params.
+    if (generatedPlan) {
+      try {
+        localStorage.setItem("tripPlan", JSON.stringify(generatedPlan));
+      } catch (err) {
+        console.warn("Could not save plan to localStorage:", err);
+      }
+      navigate("/results", { state: { plan: generatedPlan, isNew: true } });
+    } else if (planParams) {
+      // New personalized flow: Results.jsx will handle the quiz and API call
+      navigate("/results", { state: { planParams, isNew: true } });
     }
-    navigate("/results", { state: { plan: generatedPlan, isNew: true } });
   };
 
   const personas = {
