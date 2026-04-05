@@ -183,7 +183,8 @@ function Results() {
       target, 
       percent: isNaN(percent) ? 0 : percent, 
       isOver: total > target,
-      targetPercent: isNaN(targetPercent) ? 100 : targetPercent
+      targetPercent: isNaN(targetPercent) ? 100 : targetPercent,
+      breakdown: plan.costBreakdown || null
     };
   }, [plan]);
 
@@ -678,8 +679,8 @@ function Results() {
                         Day {dIdx + 1}: {
                           (day.title && day.title !== (dIdx + 1).toString()) 
                             ? day.title 
-                            : (day.day && day.day !== (dIdx + 1).toString()) 
-                              ? day.day 
+                            : (day.label && day.label !== `Day ${dIdx + 1}`)
+                              ? day.label
                               : `Exploration`
                         }
                       </h3>

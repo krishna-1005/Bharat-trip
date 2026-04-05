@@ -1,14 +1,19 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
+import { AuthContext } from '../context/AuthContext';
+import { auth } from '../firebase';
 import { generatePlan } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import './planner.css';
 import '../components/Planner/plannerForm.css';
 
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
+
 const MultiCityOverview = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const { formatPrice } = useSettings();
   
   // State recovery logic
@@ -27,6 +32,39 @@ const MultiCityOverview = () => {
   const [generating, setGenerating] = useState(initialStructure.length > 0);
   const [genProgress, setGenProgress] = useState(0);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const handleSaveMultiCity = async () => {
+    if (saving || saved || !tripStructure.length) return;
+    setSaving(true);
+    try {
+      const token = await auth.currentUser?.getIdToken(true);
+      const res = await fetch(`${API}/api/profile/trips`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          title: `Multi-City Odyssey: ${tripStructure.map(s => s.city).join(' → ')}`,
+          city: tripStructure[0].city,
+          days: totalDays,
+          itinerary: tripStructure.map(s => ({ 
+            day: s.city, 
+            label: s.city,
+            places: s.plan?.itinerary?.flatMap(d => d.places) || [] 
+          })),
+          totalTripCost: totalBudget, // Or calculated
+          totalBudget: totalBudget,
+          isMultiCity: true,
+          summary: `A synchronized journey across ${tripStructure.length} cities.`
+        })
+      });
+      if (res.ok) setSaved(true);
+    } catch (err) {
+      console.error("Failed to save multi-city journey", err);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (initialStructure.length === 0) {
@@ -177,7 +215,28 @@ const MultiCityOverview = () => {
 
       <div className="planner-container" style={{ maxWidth: '1100px', margin: '0 auto', zIndex: 2, position: 'relative' }}>
         <header style={{ textAlign: 'center', marginBottom: '60px' }}>
-          <div className="tt-badge-ai">SYNC OVERVIEW</div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '20px' }}>
+            <div className="tt-badge-ai">SYNC OVERVIEW</div>
+            {user && !generating && (
+              <button 
+                onClick={handleSaveMultiCity}
+                disabled={saving || saved}
+                style={{
+                  background: saved ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+                  color: saved ? '#10b981' : 'var(--accent-blue)',
+                  border: `1px solid ${saved ? '#10b981' : 'var(--accent-blue)'}`,
+                  padding: '4px 15px',
+                  borderRadius: '100px',
+                  fontSize: '10px',
+                  fontWeight: '900',
+                  cursor: 'pointer',
+                  letterSpacing: '1px'
+                }}
+              >
+                {saving ? "SAVING..." : saved ? "PATH SYNCED ✓" : "SAVE SYNC PATH"}
+              </button>
+            )}
+          </div>
           <h1 className="tt-main-title" style={{ fontSize: '48px', marginBottom: '10px' }}>
             The <span>Odyssey</span> Path
           </h1>

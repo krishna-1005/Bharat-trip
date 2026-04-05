@@ -313,7 +313,18 @@ async function generatePlan({
   if (filteredPool.length === 0) filteredPool = cityPool;
 
   /* STEP 5: SCORING & ENRICHMENT */
-  const budgetTier = totalBudget > 10000 ? "high" : (totalBudget > 3000 ? "medium" : "low");
+  const dailyBudget = totalBudget / days;
+  
+  // Refined Tier Selection: 
+  // < 3000 total or < 1500/day -> low
+  // < 10000 total or < 4000/day -> medium
+  // else -> high
+  let budgetTier = "high";
+  if (totalBudget <= 3500 || dailyBudget <= 1500) {
+    budgetTier = "low";
+  } else if (totalBudget <= 12000 || dailyBudget <= 4000) {
+    budgetTier = "medium";
+  }
   let prioritizedPool = filteredPool
     .map((p, idx) => {
       const enriched = enrichPlace(p, idx);

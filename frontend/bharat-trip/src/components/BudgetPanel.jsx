@@ -98,6 +98,32 @@ const BudgetPanel = ({ budgetData, formatPrice, variant = "floating" }) => {
                   </span>
                 </div>
               </div>
+
+              {budgetData.breakdown && (
+                <div className="budget-breakdown-area">
+                  <div className="breakdown-header">
+                    <span>RESOURCE BREAKDOWN</span>
+                  </div>
+                  <div className="breakdown-items">
+                    <div className="breakdown-row">
+                      <span>🏨 Accommodation</span>
+                      <span>{formatPrice(budgetData.breakdown.hotel)}</span>
+                    </div>
+                    <div className="breakdown-row">
+                      <span>🍜 Food & Dining</span>
+                      <span>{formatPrice(budgetData.breakdown.food)}</span>
+                    </div>
+                    <div className="breakdown-row">
+                      <span>🚕 Transport</span>
+                      <span>{formatPrice(budgetData.breakdown.transport)}</span>
+                    </div>
+                    <div className="breakdown-row">
+                      <span>🎟️ Activities</span>
+                      <span>{formatPrice(budgetData.breakdown.activities)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -273,6 +299,7 @@ const BudgetPanel = ({ budgetData, formatPrice, variant = "floating" }) => {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 20px;
+          margin-bottom: 24px;
         }
 
         .budget-stat-item {
@@ -295,6 +322,35 @@ const BudgetPanel = ({ budgetData, formatPrice, variant = "floating" }) => {
 
         .stat-value.positive { color: #10b981; }
         .stat-value.negative { color: #ef4444; }
+
+        .budget-breakdown-area {
+          background: rgba(255,255,255,0.03);
+          border-radius: 16px;
+          padding: 16px;
+          border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .breakdown-header {
+          font-size: 9px;
+          font-weight: 900;
+          color: rgba(255,255,255,0.3);
+          letter-spacing: 1px;
+          margin-bottom: 12px;
+        }
+
+        .breakdown-items {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .breakdown-row {
+          display: flex;
+          justify-content: space-between;
+          font-size: 12px;
+          font-weight: 700;
+          color: rgba(255,255,255,0.7);
+        }
 
         @media (max-width: 900px) {
           .budget-floating-wrapper {
