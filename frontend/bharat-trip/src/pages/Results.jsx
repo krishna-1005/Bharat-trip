@@ -233,6 +233,55 @@ function Results() {
   const currentStop = allPlaces[currentIndex];
   const nextStop = allPlaces[currentIndex + 1];
 
+  // MOBILE MAP VIEW
+  if (isMobile && isMapViewRoute) {
+    return (
+      <div className="anchored-planner-root mobile-map-mode">
+        <div className="map-half">
+          <MapView plan={plan} currentIndex={currentIndex} activePlace={activePlace} onHover={setActivePlace} userLocation={userLocation} />
+          <button className="back-to-itin-btn" onClick={() => navigate("/results")}>📋 VIEW ITINERARY</button>
+        </div>
+
+        <div className="live-guide-half">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="ai-insight-box"
+          >
+            <div className="insight-header">
+              <span className="insight-label">✨ AI TRAVEL INSIGHT</span>
+            </div>
+            <p className="insight-text">
+              {currentStop ? `Tip: ${currentStop.name} is best experienced right now. Keep an eye out for local artisans nearby!` : "You've reached the end of your scheduled odyssey!"}
+            </p>
+          </motion.div>
+
+          {currentStop ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="focus-card-premium"
+            >
+              <div className="status-indicator-row">
+                <span className="live-dot-pulse"></span>
+                <span className="status-label">NOW VISITING</span>
+              </div>
+              <PlaceImage placeName={currentStop.name} city={plan.city} className="card-hero-img" />
+              <h3 className="card-title-premium">{currentStop.name}</h3>
+              <p className="description-text">{currentStop.reason}</p>
+              <div className="card-actions-grid">
+                <button className="action-main-btn" onClick={() => handleVisited(currentIndex)}>Visited</button>
+                <button className="action-sub-btn" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentStop.lat},${currentStop.lng}`, '_blank')}>Navigate</button>
+              </div>
+            </motion.div>
+          ) : (
+            <div style={{textAlign:'center', padding:'40px 0'}}><h2>Odyssey Complete! 🏁</h2></div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="anchored-planner-root">
       <aside className="premium-itinerary-sidebar">
