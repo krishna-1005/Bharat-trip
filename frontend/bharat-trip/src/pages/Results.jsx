@@ -62,7 +62,9 @@ function Results() {
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(() => {
-    const isNew = loc.state?.isNew || false;
+    // Only enter generation mode if it's a 'new' request AND we have params to generate from
+    const isNew = (loc.state?.isNew && loc.state?.planParams) || false;
+    
     if (isNew) {
       // Clear the state so refresh doesn't trigger "isNew" logic again
       window.history.replaceState({ ...loc.state, isNew: false }, "");
@@ -132,14 +134,32 @@ function Results() {
   const normalizedItinerary = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
     try {
-      return Array.isArray(plan.itinerary) 
+      const rawItin = Array.isArray(plan.itinerary) 
         ? plan.itinerary 
         : Object.entries(plan.itinerary).map(([day, data]) => ({ day, ...data }));
+
+      // Determine if we should apply distance filtering
+      // Only filter if user is within 100km of the destination city center
+      let shouldFilter = false;
+      if (userLocation && plan.coordinates) {
+        const distToCity = calculateDistance(
+          userLocation.lat, userLocation.lng, 
+          plan.coordinates.lat, plan.coordinates.lng
+        );
+        if (distToCity !== null && distToCity < 100) {
+          shouldFilter = true;
+        }
+      }
+
+      return rawItin.map(day => ({
+        ...day,
+        places: shouldFilter ? filterAndSortPlaces(day.places, userLocation) : day.places
+      }));
     } catch (e) {
       console.error("Failed to normalize itinerary:", e);
       return [];
     }
-  }, [plan]);
+  }, [plan, userLocation]);
 
   const allPlaces = useMemo(() => {
     try {
@@ -176,6 +196,16 @@ function Results() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Request user location for filtering
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (err) => console.warn("Geolocation denied, filtering disabled.", err)
+      );
+    }
+  }, []);
+
   useEffect(() => {
     const loadPlan = async () => {
       // If we are generating a new plan, we don't "load" an existing one yet
@@ -196,6 +226,7 @@ function Results() {
             const p = data.trip;
             setPlan({ ...p, itinerary: p.itinerary || [] });
             setTripTitle(p.title || "");
+            setLoading(false);
             return;
           }
         }

@@ -106,8 +106,8 @@ export const calculateTripCost = (plan, preferences = {}) => {
   };
 };
 
-const LOCAL_CATEGORIES = ["Shopping", "Street Food", "Markets", "Cafes", "Nightlife"];
-const DESTINATION_CATEGORIES = ["Nature", "Historic", "Landmarks", "Culture"];
+const LOCAL_CATEGORIES = ["shopping", "street food", "markets", "cafes", "nightlife", "food"];
+const DESTINATION_CATEGORIES = ["nature", "historic", "landmarks", "culture", "heritage", "museum", "park"];
 
 /**
  * Filters and sorts places based on category-specific distance rules.
@@ -117,43 +117,56 @@ const DESTINATION_CATEGORIES = ["Nature", "Historic", "Landmarks", "Culture"];
  */
 export const filterAndSortPlaces = (places, userLocation) => {
   if (!places || !Array.isArray(places)) return [];
-  if (!userLocation || !Number.isFinite(userLocation.lat) || !Number.isFinite(userLocation.lng)) {
-    return places; // Fallback: return all if no user location
+  
+  const nLat = Number(userLocation?.lat);
+  const nLng = Number(userLocation?.lng);
+
+  // Fallback: return all if no user location is provided or valid
+  if (!userLocation || !Number.isFinite(nLat) || !Number.isFinite(nLng)) {
+    return places; 
   }
 
-  return places
+  const enriched = places
     .map(place => {
-      const dist = calculateDistance(userLocation.lat, userLocation.lng, place.lat, place.lng);
-      
-      if (dist === null) {
-        console.warn(`BharatTrip: Skipping place "${place.name}" due to invalid coordinates.`);
-        return null;
-      }
-
+      const dist = calculateDistance(nLat, nLng, place.lat, place.lng);
       return { ...place, distanceToUser: dist };
-    })
+    });
+
+  // CRITICAL FIX: Only apply filtering if at least one place is within 100km.
+  // This ensures that if you are in a different city, we don't hide EVERYTHING.
+  const isNearbyCity = enriched.some(p => p.distanceToUser !== null && p.distanceToUser < 100);
+  
+  if (!isNearbyCity) {
+    return places; // User is far away, show full itinerary without filtering
+  }
+
+  return enriched
     .filter(place => {
-      if (!place) return false;
+      if (place.distanceToUser === null) return true; // Keep if we can't calculate distance
 
-      // 1. Local Categories: <= 5km
-      if (LOCAL_CATEGORIES.includes(place.category)) {
-        return place.distanceToUser <= 5;
+      const cat = (place.category || "").toLowerCase();
+
+      // 1. Local Categories: <= 10km
+      if (LOCAL_CATEGORIES.some(lc => cat.includes(lc))) {
+        return place.distanceToUser <= 10;
       }
 
-      // 2. Destination Categories: <= 50km
-      if (DESTINATION_CATEGORIES.includes(place.category)) {
-        return place.distanceToUser <= 50;
+      // 2. Destination Categories: <= 60km
+      if (DESTINATION_CATEGORIES.some(dc => cat.includes(dc))) {
+        return place.distanceToUser <= 60;
       }
 
-      // 3. Other categories: Default to 25km radius
-      return place.distanceToUser <= 25;
+      // 3. Other categories: Default to 40km radius
+      return place.distanceToUser <= 40;
     })
     .sort((a, b) => {
+      const catA = (a.category || "").toLowerCase();
+      const catB = (b.category || "").toLowerCase();
+      
       // For local categories, prioritize nearest first
-      if (LOCAL_CATEGORIES.includes(a.category) && LOCAL_CATEGORIES.includes(b.category)) {
-        return a.distanceToUser - b.distanceToUser;
+      if (LOCAL_CATEGORIES.some(lc => catA.includes(lc)) && LOCAL_CATEGORIES.some(lc => catB.includes(lc))) {
+        return (a.distanceToUser || 0) - (b.distanceToUser || 0);
       }
-      // Keep original order for destinations to preserve itinerary flow
       return 0; 
     });
 };
