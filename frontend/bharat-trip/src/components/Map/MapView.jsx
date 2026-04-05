@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createLocationIcon } from "./markerIcons";
 import ResizeMap from "./ResizeMap";
 import L from "leaflet";
+import { LocateControl } from "./LocateControl";
 
 import { DAY_COLORS } from "../../constants/dayColors";
 
@@ -46,7 +47,7 @@ const createUserIcon = (heading) => L.divIcon({
 
 // ── SUB-COMPONENTS ──
 
-function ZoomControls() {
+function MapActions({ setUserLocation }) {
   const map = useMap();
   return (
     <div className="map-zoom-controls" style={{ 
@@ -56,6 +57,9 @@ function ZoomControls() {
     }}>
       <button onClick={() => map.zoomIn()} style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(0,0,0,0.6)', color: '#fff', border: '1px solid #fff2', fontSize: '20px', cursor: 'pointer', backdropFilter: 'blur(10px)' }}>+</button>
       <button onClick={() => map.zoomOut()} style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(0,0,0,0.6)', color: '#fff', border: '1px solid #fff2', fontSize: '20px', cursor: 'pointer', backdropFilter: 'blur(10px)' }}>−</button>
+      <div style={{ marginTop: '10px' }}>
+        <LocateControl setUserPosition={setUserLocation} />
+      </div>
     </div>
   );
 }
@@ -127,7 +131,7 @@ function SafePolyline({ places }) {
 
 // ── MAIN COMPONENT ──
 
-function MapView({ plan, currentIndex, userLocation, activePlace, onHover }) {
+function MapView({ plan, currentIndex, userLocation, setUserLocation, activePlace, onHover }) {
   // 1. Process places with strict validation and day context
   const allPlacesWithDay = useMemo(() => {
     if (!plan?.itinerary) return [];
@@ -169,13 +173,13 @@ function MapView({ plan, currentIndex, userLocation, activePlace, onHover }) {
         style={{ height: '100%', width: '100%' }}
       >
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          attribution='&copy; OpenStreetMap contributors'
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         />
 
         <MapController center={safeInitialCenter} places={allPlacesWithDay} userLocation={userLocation} />
         <ResizeMap trigger={activePlace} />
-        <ZoomControls />
+        <MapActions setUserLocation={setUserLocation} />
         <SafePolyline places={allPlacesWithDay} />
 
         {/* Markers */}

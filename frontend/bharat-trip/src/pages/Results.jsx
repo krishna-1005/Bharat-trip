@@ -3,7 +3,7 @@ import MapView from "../components/Map/MapView";
 import PlaceImage from "../components/PlaceImage";
 import CategoryCostBreakdown from "../components/CategoryCostBreakdown";
 import BudgetPanel from "../components/BudgetPanel";
-import { calculateDistance, calculateTravelCost } from "../utils/travelUtils";
+import { calculateDistance, calculateTravelCost, filterAndSortPlaces } from "../utils/travelUtils";
 import "./results.css";
 import { useState, useEffect, useMemo, useContext, useCallback } from "react";
 import { useSettings } from "../context/SettingsContext";
@@ -167,6 +167,8 @@ function Results() {
     };
   }, [plan]);
 
+  const [guideMode, setGuideMode] = useState(false);
+
   // ── EFFECTS ──
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 900);
@@ -225,7 +227,7 @@ function Results() {
     
     setApiStatus("requesting");
     try {
-      const token = localStorage.getItem("token");
+      const token = await auth.currentUser?.getIdToken(true);
       const headers = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
@@ -307,28 +309,89 @@ function Results() {
     localStorage.setItem("tripCurrentIndex", nextIdx);
   };
 
-  const handleSaveTrip = async () => {
-    if (saving || saved || !plan) return;
-    if (!user) { setShowAuthModal(true); return; }
+  const handleSaveTrip = useCallback(async () => {
+    if (saving || saved) return;
+    
+    // Fallback: if plan state is lost but we have a pending one in localStorage
+    let planToSave = plan;
+    if (!planToSave) {
+      const pending = localStorage.getItem("pendingGuestTrip");
+      if (pending) {
+        try {
+          planToSave = JSON.parse(pending);
+        } catch (e) {
+          console.error("Failed to parse pending plan", e);
+        }
+      }
+    }
+
+    if (!planToSave) {
+      console.warn("Save attempted but no plan found.");
+      return;
+    }
+    
+    if (!user) { 
+      console.log("Guest mode: caching plan for lazy save");
+      localStorage.setItem("pendingGuestTrip", JSON.stringify(planToSave));
+      setShowAuthModal(true); 
+      return; 
+    }
+
     setSaving(true);
     try {
+      // Ensure we have a fresh token
       const token = await auth.currentUser?.getIdToken(true);
+      if (!token) {
+        console.error("Save failed: No Firebase token available.");
+        setSaving(false);
+        return;
+      }
+
+      console.log("Saving trip to profile...");
       const res = await fetch(`${API}/api/profile/trips`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { 
+          "Content-Type": "application/json", 
+          "Authorization": `Bearer ${token}` 
+        },
         body: JSON.stringify({
-          title: tripTitle || `${plan.city} Trip`,
-          city: plan.city,
-          days: plan.days || 1,
-          itinerary: plan.itinerary,
-          totalCost: plan.totalTripCost || plan.totalCost,
-          totalBudget: plan.totalBudget,
-          summary: plan.summary
+          title: tripTitle || `${planToSave.city} Trip`,
+          city: planToSave.city,
+          days: planToSave.days || 1,
+          itinerary: planToSave.itinerary,
+          totalCost: planToSave.totalTripCost || planToSave.totalCost,
+          totalBudget: planToSave.totalBudget,
+          summary: planToSave.summary
         })
       });
-      if (res.ok) setSaved(true);
-    } catch (err) { console.error(err); } finally { setSaving(false); }
-  };
+
+      const data = await res.json();
+
+      if (res.ok) {
+        console.log("Trip saved successfully:", data);
+        setSaved(true);
+        setSaving(false); // Immediate reset
+        localStorage.removeItem("pendingGuestTrip"); // Clear if saved
+      } else {
+        console.error("Backend save error:", data.error || "Unknown error");
+        setSaving(false);
+      }
+    } catch (err) { 
+      console.error("Save fetch error:", err); 
+      setSaving(false);
+    }
+  }, [saving, saved, plan, user, tripTitle, setShowAuthModal]);
+
+  // ── LAZY SAVE EFFECT ──
+  useEffect(() => {
+    if (user && !saved && !saving) {
+      const pending = localStorage.getItem("pendingGuestTrip");
+      if (pending) {
+        console.log("Detected pending guest trip, triggering auto-save...");
+        handleSaveTrip();
+      }
+    }
+  }, [user, saved, saving, handleSaveTrip]);
 
   const handleShare = async () => {
     const url = `${window.location.origin}/trip/${plan?.id || routeTripId || ''}`;
@@ -343,8 +406,12 @@ function Results() {
   if (loading || (isGenerating && genStep === "thinking")) return (
     <div className="ai-gen-overlay">
       <div className="ai-gen-grid"></div>
+      <div className="ai-gen-blobs">
+        <div className="gen-blob blob-1"></div>
+        <div className="gen-blob blob-2"></div>
+      </div>
       
-      <div className="ai-gen-top-layout">
+      <div className="ai-gen-centered-v2">
         <div className="ai-neural-container">
             <div className="ai-neural-core">
                 <div className="neural-orbit orbit-1"></div>
@@ -355,7 +422,6 @@ function Results() {
             </div>
 
             <div className="ai-status-panel">
-                <div className="ai-scan-line"></div>
                 <h2 className="ai-loader-text-v2">
                     {THINKING_MESSAGES[messageIdx]}
                 </h2>
@@ -420,10 +486,26 @@ function Results() {
   );
 
   if (isGenerating && plan && genStep === "summary") return (
-    <div className="ai-gen-overlay">
+    <div className="ai-gen-overlay summary-reveal">
       <div className="ai-gen-grid"></div>
-      <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="ai-gen-summary-box-v2">
-        <div className="ai-success-icon">✨</div>
+      <div className="ai-gen-blobs">
+        <div className="gen-blob blob-1"></div>
+        <div className="gen-blob blob-3"></div>
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+        animate={{ opacity: 1, scale: 1, y: 0 }} 
+        className="ai-gen-summary-box-v2"
+      >
+        <motion.div 
+          initial={{ rotate: -180, scale: 0 }}
+          animate={{ rotate: 0, scale: 1 }}
+          transition={{ type: "spring", damping: 15 }}
+          className="ai-success-icon"
+        >
+          ✨
+        </motion.div>
         <span className="ai-sparkle-badge-v2">Neural Synthesis Complete</span>
         <h2>Your Odyssey is Ready</h2>
         <div className="ai-summary-divider"></div>
@@ -451,8 +533,8 @@ function Results() {
     return (
       <div className="anchored-planner-root mobile-map-mode">
         <div className="map-half">
-          <MapView plan={plan} currentIndex={currentIndex} activePlace={activePlace} onHover={setActivePlace} userLocation={userLocation} />
-          <button className="back-to-itin-btn" onClick={() => navigate("/results")}>📋 VIEW ITINERARY</button>
+          <MapView plan={plan} currentIndex={currentIndex} activePlace={activePlace} onHover={setActivePlace} userLocation={userLocation} setUserLocation={setUserLocation} />
+          <button className="back-to-itin-btn" onClick={() => navigate("/results")}>✕ CLOSE MAP</button>
         </div>
 
         <div className="live-guide-half">
@@ -462,10 +544,10 @@ function Results() {
             className="ai-insight-box"
           >
             <div className="insight-header">
-              <span className="insight-label">✨ AI TRAVEL INSIGHT</span>
+              <span className="insight-label">✨ AI INSIGHT</span>
             </div>
             <p className="insight-text">
-              {currentStop ? `Tip: ${currentStop.name} is best experienced right now. Keep an eye out for local artisans nearby!` : "You've reached the end of your scheduled odyssey!"}
+              {currentStop ? `${currentStop.name} is best experienced right now. Keep an eye out for local artisans nearby!` : "You've reached the end of your scheduled odyssey!"}
             </p>
           </motion.div>
 
@@ -475,16 +557,12 @@ function Results() {
               animate={{ opacity: 1, scale: 1 }}
               className="focus-card-premium"
             >
-              <div className="status-indicator-row">
-                <span className="live-dot-pulse"></span>
-                <span className="status-label">NOW VISITING</span>
-              </div>
               <PlaceImage placeName={currentStop.name} city={plan.city} className="card-hero-img" />
               <h3 className="card-title-premium">{currentStop.name}</h3>
               <p className="description-text">{currentStop.reason}</p>
               <div className="card-actions-grid">
                 <button className="action-main-btn" onClick={() => handleVisited(currentIndex)}>Visited</button>
-                <button className="action-sub-btn" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentStop.lat},${currentStop.lng}`, '_blank')}>Navigate</button>
+                <button className="action-sub-btn" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentStop.lat},${currentStop.lng}`, '_blank')}>🛰️ Live Track</button>
               </div>
             </motion.div>
           ) : (
@@ -539,31 +617,57 @@ function Results() {
           </motion.div>
 
           <BudgetPanel budgetData={budgetData} formatPrice={formatPrice} variant="inline" />
+
+          <div className="guide-mode-toggle-wrap">
+            <button 
+              className={`guide-mode-btn ${guideMode ? "active" : ""}`}
+              onClick={() => setGuideMode(!guideMode)}
+            >
+              {guideMode ? "✨ Guide Me: ON" : "🧭 Enable Guide Mode"}
+            </button>
+          </div>
           
           <div className="itinerary-days-container">
             {(() => {
               let globalStopIdx = 0;
-              return normalizedItinerary.map((day, dIdx) => (
-                <motion.div 
-                  key={dIdx} 
-                  className="premium-day-section"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + dIdx * 0.1 }}
-                >
-                  <div className="day-title-row">
-                    <div className="day-badge">{dIdx + 1}</div>
-                    <h3>
-                      Day {dIdx + 1}: {
-                        (day.title && day.title !== (dIdx + 1).toString()) 
-                          ? day.title 
-                          : (day.day && day.day !== (dIdx + 1).toString()) 
-                            ? day.day 
-                            : `Exploration`
-                      }
-                    </h3>
-                  </div>
-                  <div className="day-stops-list">
+              return normalizedItinerary.map((day, dIdx) => {
+                const isLocked = !user && dIdx > 0;
+                
+                return (
+                  <motion.div 
+                    key={dIdx} 
+                    className={`premium-day-section ${isLocked ? "guest-locked" : ""}`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + dIdx * 0.1 }}
+                  >
+                    <div className="day-title-row">
+                      <div className="day-badge">{dIdx + 1}</div>
+                      <h3>
+                        Day {dIdx + 1}: {
+                          (day.title && day.title !== (dIdx + 1).toString()) 
+                            ? day.title 
+                            : (day.day && day.day !== (dIdx + 1).toString()) 
+                              ? day.day 
+                              : `Exploration`
+                        }
+                      </h3>
+                    </div>
+
+                    {isLocked && (
+                      <div className="glass-lock-overlay">
+                        <div className="lock-content">
+                          <span className="lock-icon">🔒</span>
+                          <h4>Full Odyssey Locked</h4>
+                          <p>Sign in to unlock the remaining {normalizedItinerary.length - 1} days and save this trip to your profile.</p>
+                          <button className="unlock-btn" onClick={() => handleSaveTrip()}>
+                            Unlock Full Itinerary
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="day-stops-list">
                     {day.places?.map((place, pIdx) => {
                       const currentIdx = globalStopIdx++;
                       const isActive = currentIdx === currentIndex;
@@ -583,23 +687,64 @@ function Results() {
                           <div className="stop-image-wrap-v3">
                             <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v3" />
                             {isVisited && <div className="visited-check-v3">✓</div>}
+                            {isActive && <div className="active-glow-v3"></div>}
                           </div>
                           <div className="stop-info-v3">
                             <div className="stop-meta-v3">
                               <span className="stop-tag-v3">{place.category}</span>
-                              <span className="stop-cost-v3">{formatPrice(place.estimatedCost || 0)}</span>
+                              <div className="stop-trust-v3">
+                                <span className="star-v3">⭐</span>
+                                <span className="rating-v3">{place.rating || "4.5"}</span>
+                                <span className="reviews-v3">({place.reviews || "1.2k"})</span>
+                              </div>
                             </div>
                             <h4>{place.name}</h4>
-                            <p className="stop-reason-v3">{place.reason}</p>
+                            
+                            <div className="stop-details-v3">
+                              <span className="detail-item-v3">🕒 {place.timeHours || 2}h visit</span>
+                              <span className="detail-item-v3">💰 {formatPrice(place.estimatedCost || 0)}</span>
+                            </div>
+
+                            <p className="stop-reason-v3">
+                              {guideMode && isActive ? (
+                                <span className="guide-insight">✨ {place.reason}</span>
+                              ) : place.reason}
+                            </p>
+
+                            {place.tags && place.tags.length > 0 && (
+                              <div className="stop-tags-list-v3">
+                                {place.tags.slice(0, 2).map((t, ti) => (
+                                  <span key={ti} className="mini-tag-v3">#{t}</span>
+                                ))}
+                              </div>
+                            )}
+
+                            {isActive && (
+                              <div className="stop-actions-v3">
+                                <button 
+                                  className="live-track-btn-v3" 
+                                  onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    window.open(`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`, '_blank');
+                                  }}
+                                >
+                                  🛰️ Live Track
+                                </button>
+                                <button className="mark-done-btn-v3" onClick={(e) => { e.stopPropagation(); handleVisited(currentIdx); }}>
+                                  Mark as Visited
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </motion.div>
                       );
                     })}
                   </div>
                 </motion.div>
-              ));
-            })()}
-          </div>
+              );
+            });
+          })()}
+        </div>
         </div>
 
         <div className="sidebar-footer-premium">
@@ -628,8 +773,22 @@ function Results() {
             activePlace={activePlace} 
             onHover={setActivePlace} 
             userLocation={userLocation} 
+            setUserLocation={setUserLocation} 
           />
         </main>
+      )}
+
+      {isMobile && !isMapViewRoute && (
+        <motion.button 
+          className="mobile-floating-map-btn"
+          onClick={() => navigate("/map")}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <span className="map-btn-icon">🗺️</span>
+          <span className="map-btn-text">View Map</span>
+        </motion.button>
       )}
     </div>
   );

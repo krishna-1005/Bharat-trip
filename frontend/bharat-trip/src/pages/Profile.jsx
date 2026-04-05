@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
+import { auth } from "../firebase";
 import SavedTrips from "../components/SavedTrips";
 import SavedMaps from "../components/SavedMaps";
 import "../styles/profile.css";
@@ -24,9 +25,10 @@ export default function Profile() {
   }, [user, navigate]);
 
   const fetchProfile = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
     try {
+      const token = await auth.currentUser?.getIdToken(true);
+      if (!token) return;
+      
       const res = await fetch(`${API}/api/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -40,7 +42,7 @@ export default function Profile() {
   const fetchTrips = async () => {
     if (!user) return;
     try {
-      const token = user.token || localStorage.getItem("token");
+      const token = await auth.currentUser?.getIdToken(true);
       if (!token) return;
 
       const res = await fetch(`${API}/api/profile/trips`, {

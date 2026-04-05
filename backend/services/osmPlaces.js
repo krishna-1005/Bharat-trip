@@ -2,12 +2,15 @@ const axios = require("axios");
 
 /**
  * Maps OSM tags to standard Bharat Trip categories.
- * Standard categories: Nature, Food, Culture, Shopping, Entertainment, Spiritual
+ * Standard categories: Nature, Food, Culture, Shopping, Adventure, Nightlife
  */
 function mapCategory(tags = {}) {
-  // SPIRITUAL
-  if (tags.amenity === "place_of_worship" || tags.religion) return "Spiritual";
+  // SPIRITUAL (Maps to Culture for trip themes)
+  if (tags.amenity === "place_of_worship" || tags.religion) return "Culture";
   
+  // NIGHTLIFE
+  if (tags.amenity === "pub" || tags.amenity === "bar" || tags.amenity === "nightclub") return "Nightlife";
+
   // CULTURE
   if (tags.tourism === "museum" || tags.tourism === "art_gallery" || tags.historic || tags.heritage) return "Culture";
   if (tags.amenity === "theatre" || tags.amenity === "library") return "Culture";
@@ -18,13 +21,13 @@ function mapCategory(tags = {}) {
   if (tags.tourism === "zoo" || tags.tourism === "aquarium") return "Nature";
 
   // FOOD
-  if (tags.amenity === "restaurant" || tags.amenity === "cafe" || tags.amenity === "food_court" || tags.amenity === "bar") return "Food";
+  if (tags.amenity === "restaurant" || tags.amenity === "cafe" || tags.amenity === "food_court") return "Food";
 
   // SHOPPING
   if (tags.shop || tags.amenity === "market" || tags.tourism === "marketplace") return "Shopping";
 
-  // ENTERTAINMENT
-  if (tags.leisure === "theme_park" || tags.leisure === "water_park" || tags.leisure === "stadium" || tags.leisure === "cinema") return "Entertainment";
+  // ADVENTURE / ENTERTAINMENT
+  if (tags.leisure === "theme_park" || tags.leisure === "water_park" || tags.leisure === "stadium" || tags.leisure === "cinema" || tags.leisure === "adventure_park") return "Adventure";
 
   // ATTRACTION FALLBACK
   if (tags.tourism === "attraction" || tags.tourism === "viewpoint") return "Culture";
@@ -64,11 +67,11 @@ async function fetchOSMPlaces(lat, lng, radiusKm = 10) {
     node["tourism"~"attraction|museum|viewpoint|art_gallery|zoo|aquarium"](${minLat},${minLng},${maxLat},${maxLng});
     way["tourism"~"attraction|museum|viewpoint|art_gallery|zoo|aquarium"](${minLat},${minLng},${maxLat},${maxLng});
     
-    node["leisure"~"park|garden|nature_reserve|theme_park|water_park"](${minLat},${minLng},${maxLat},${maxLng});
-    way["leisure"~"park|garden|nature_reserve|theme_park|water_park"](${minLat},${minLng},${maxLat},${maxLng});
+    node["leisure"~"park|garden|nature_reserve|theme_park|water_park|adventure_park|stadium"](${minLat},${minLng},${maxLat},${maxLng});
+    way["leisure"~"park|garden|nature_reserve|theme_park|water_park|adventure_park|stadium"](${minLat},${minLng},${maxLat},${maxLng});
 
-    node["amenity"~"restaurant|cafe|food_court|place_of_worship|theatre|market"](${minLat},${minLng},${maxLat},${maxLng});
-    way["amenity"~"restaurant|cafe|food_court|place_of_worship|theatre|market"](${minLat},${minLng},${maxLat},${maxLng});
+    node["amenity"~"restaurant|cafe|food_court|place_of_worship|theatre|market|pub|bar|nightclub"](${minLat},${minLng},${maxLat},${maxLng});
+    way["amenity"~"restaurant|cafe|food_court|place_of_worship|theatre|market|pub|bar|nightclub"](${minLat},${minLng},${maxLat},${maxLng});
 
     node["historic"](${minLat},${minLng},${maxLat},${maxLng});
     way["historic"](${minLat},${minLng},${maxLat},${maxLng});

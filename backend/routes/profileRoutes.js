@@ -102,15 +102,20 @@ router.post("/trips", async (req, res) => {
       travelerType, pace, summary 
     } = req.body;
 
-    if (!title || !days)
+    console.log(`[SAVE TRIP] Attempting to save trip: "${title}" for user: ${req.user._id}`);
+
+    if (!title || !days) {
+      console.warn("[SAVE TRIP] Validation failed: missing title or days");
       return res.status(400).json({ error: "title and days are required." });
+    }
 
     // Correctly handle itinerary if it's an array (new format) or object (old format)
     let formattedItinerary = [];
     
     if (Array.isArray(itinerary)) {
+      console.log(`[SAVE TRIP] Itinerary is array with ${itinerary.length} days`);
       formattedItinerary = itinerary.map((dayData, idx) => ({
-        day: dayData.day || (idx + 1).toString(),
+        day: (dayData.day || dayData.label || (idx + 1)).toString(),
         estimatedHours: dayData.estimatedHours || 0,
         estimatedCost: dayData.estimatedCost || 0,
         places: (dayData.places || []).map(p => ({
@@ -127,6 +132,7 @@ router.post("/trips", async (req, res) => {
         }))
       }));
     } else if (typeof itinerary === 'object' && itinerary !== null) {
+      console.log(`[SAVE TRIP] Itinerary is object with keys: ${Object.keys(itinerary)}`);
       formattedItinerary = Object.entries(itinerary).map(([dayLabel, dayData]) => ({
         day: dayLabel,
         estimatedHours: dayData.estimatedHours || 0,
@@ -148,6 +154,7 @@ router.post("/trips", async (req, res) => {
 
     const trip = await Trip.create({
       userId: req.user._id,
+      isGuest: false,
       title: title || "Custom Trip",
       destination: city || "Unknown",
       days: Number(days),
@@ -162,10 +169,12 @@ router.post("/trips", async (req, res) => {
       status: "upcoming"
     });
 
+    console.log(`[TRIP SAVED] Saved for user: ${req.user.email}, isGuest: ${trip.isGuest}`);
+    console.log(`[TRIP OBJECT]`, trip);
     res.status(201).json({ message: "Trip saved.", trip });
   } catch (err) {
     console.error("SAVE TRIP ERROR:", err);
-    res.status(500).json({ error: "Server error saving trip." });
+    res.status(500).json({ error: "Server error saving trip: " + err.message });
   }
 });
 

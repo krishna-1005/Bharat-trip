@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
+import { auth } from "../firebase";
 import PlaceImage from "../components/PlaceImage";
 import "../styles/profile.css";
 
@@ -25,7 +26,7 @@ export default function MyTrips() {
   const fetchTrips = async () => {
     if (!user) return;
     try {
-      const token = user.token || localStorage.getItem("token");
+      const token = await auth.currentUser?.getIdToken(true);
       if (!token) return;
 
       const res = await fetch(`${API}/api/profile/trips`, {
@@ -112,7 +113,7 @@ export default function MyTrips() {
     e.stopPropagation();
     if (!window.confirm("Are you sure you want to delete this journey?")) return;
     try {
-      const token = user.token || localStorage.getItem("token");
+      const token = await auth.currentUser?.getIdToken(true);
       const res = await fetch(`${API}/api/profile/trips/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },

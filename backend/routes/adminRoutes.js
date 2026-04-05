@@ -111,6 +111,10 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     let trackedUserCount = 0;
     let totalConversions = 0;
 
+    // Use MongoDB UsageLog as a reliable fallback for Guest sessions
+    const guestLogsCount = await UsageLog.countDocuments({ isGuest: true });
+    const trackedUserCountFromLogs = await UsageLog.countDocuments({ isGuest: false });
+
     try {
       if (db) {
         const trackedSnapshot = await db.collection("users").get();
@@ -123,6 +127,10 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     } catch (fsErr) {
       console.error("Firestore stats error (non-fatal):", fsErr.message);
     }
+
+    // Combine or fallback
+    const finalGuestCount = guestCount > 0 ? guestCount : guestLogsCount;
+    const finalTrackedCount = trackedUserCount > 0 ? trackedUserCount : trackedUserCountFromLogs;
 
     const recentUsers = await User.find()
       .select("name email role createdAt")
@@ -145,7 +153,7 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
         totalTripsSavedByUsers: totalSavedTrips,
         totalReviews,
         totalPolls,
-        guestCount,
+        guestCount: finalGuestCount,
         trackedUserCount,
         totalConversions
       },
@@ -171,12 +179,54 @@ router.get("/users", protect, verifyAdminEmail, async (req, res) => {
 
 router.get("/tracked-users", protect, verifyAdminEmail, async (req, res) => {
   try {
-    const usersSnapshot = await db.collection("users").orderBy("lastActive", "desc").limit(100).get();
-    const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.json(users);
+    let trackedUsers = [];
+    
+    // 1. Try fetching from Firestore
+    if (db) {
+      try {
+        const usersSnapshot = await db.collection("users").orderBy("lastActive", "desc").limit(100).get();
+        if (usersSnapshot && !usersSnapshot.empty) {
+          trackedUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        }
+      } catch (fsErr) {
+        console.warn("Firestore tracked-users warning (using fallback):", fsErr.message);
+      }
+    }
+
+    // 2. Supplement with UsageLog data for Guests if needed
+    const guestsInTracked = trackedUsers.filter(u => u.userType === 'guest').length;
+    if (guestsInTracked === 0) {
+      try {
+        const recentGuestLogs = await UsageLog.find({ userId: null })
+          .sort({ createdAt: -1 })
+          .limit(50);
+        
+        const guestFromLogs = recentGuestLogs.map(log => ({
+          userId: log.ipAddress || "Unknown IP",
+          userType: 'guest',
+          actionsCount: 1,
+          lastActive: log.createdAt,
+          lastAction: log.action,
+          isFromLog: true
+        }));
+
+        // Deduplicate guests by IP/userId
+        const seenIds = new Set(trackedUsers.map(u => u.userId));
+        guestFromLogs.forEach(g => {
+          if (!seenIds.has(g.userId)) {
+            trackedUsers.push(g);
+            seenIds.add(g.userId);
+          }
+        });
+      } catch (logErr) {
+        console.error("UsageLog fallback error:", logErr.message);
+      }
+    }
+
+    res.json(trackedUsers);
   } catch (err) {
-    console.error("Error fetching tracked users:", err);
-    res.status(500).json({ error: "Error fetching tracked users" });
+    console.error("Critical error in /tracked-users:", err);
+    res.status(500).json({ error: "System error: " + err.message });
   }
 });
 

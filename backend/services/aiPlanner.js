@@ -28,21 +28,23 @@ async function analyzeAndRefinePlan({
   const prompt = `
 Create a ${days}-day itinerary for ${city}.
 
-Interests: ${interests.join(", ")}
-Budget: ${budget} INR (total for ${travelerType})
-Traveler Type: ${travelerType}
-Trip Pace: ${pace}
+### TRIP CONSTRAINTS:
+- Interests: ${interests.join(", ")}
+- Total Budget: ${budget} INR (This MUST cover all activities for ALL ${travelerType} travelers).
+- Traveler Type: ${travelerType}
+- Trip Pace: ${pace}
 
 ${personalizationNote ? "### USER STYLE PREFERENCES:" + personalizationNote : ""}
 
 Please organize the following candidate places into a cohesive daily schedule:
-${JSON.stringify(candidates.map(p => ({ name: p.name, category: p.category, lat: p.lat, lng: p.lng })))}
+${JSON.stringify(candidates.map(p => ({ name: p.name, category: p.category, avgCost: p.avgCost })))}
 
-### INSTRUCTIONS:
-1. For each place, suggest a realistic "bestTime" to visit (Morning, Afternoon, Evening, or Night).
-2. Provide a "timeReason" (e.g., "Cool weather", "Fewer crowds", "Active nightlife", "Best lighting").
-3. IMPORTANT: Refine the "reason" for visiting each place to incorporate the User Style Preferences mentioned above where appropriate.
-4. If a user prefers walking, prioritize nearby spots. If they prefer sunrise treks, ensure Day 1 or 2 starts with an early outdoor activity.
+### CRITICAL INSTRUCTIONS:
+1. BUDGET ADHERENCE: The sum of "avgCost" for all suggested places (multiplied by the number of travelers) MUST stay below ${Math.round(budget * 0.8)} INR (leaving room for meals/transit).
+2. For each place, suggest a realistic "bestTime" to visit (Morning, Afternoon, Evening, or Night).
+3. Provide a "timeReason" (e.g., "Cool weather", "Fewer crowds", "Active nightlife", "Best lighting").
+4. IMPORTANT: Refine the "reason" for visiting each place to incorporate the User Style Preferences.
+5. If a user prefers walking, prioritize nearby spots. If they prefer sunrise treks, ensure Day 1 or 2 starts with an early outdoor activity.
 
 Return valid JSON:
 {
@@ -54,7 +56,7 @@ Return valid JSON:
     "lat": 0, 
     "lng": 0,
     "bestTime": "Morning",
-    "timeReason": "Cool weather and fewer crowds",
+    "timeReason": "...",
     "reason": "..."
   }]
 }

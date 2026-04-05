@@ -12,6 +12,7 @@ router.post("/", protect, async (req, res) => {
 
     const trip = await Trip.create({
       userId: req.user._id,
+      isGuest: false,
       title,
       destination,
       days,
@@ -21,6 +22,7 @@ router.post("/", protect, async (req, res) => {
       ...rest
     });
 
+    console.log(`[TRIP CREATED] User: ${req.user.email}, isGuest: ${trip.isGuest}`);
     res.status(201).json(trip);
 
   } catch (error) {

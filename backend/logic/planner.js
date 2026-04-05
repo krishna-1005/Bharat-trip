@@ -41,7 +41,7 @@ function getDistance(lat1, lon1, lat2, lon2) {
 }
 
 /* ── SCORING ENGINE ── */
-function calculateScore(place, interests, coords, budget, userPreferences = {}) {
+function calculateScore(place, interests, coords, budgetTier, userPreferences = {}, perDayBudget = 2000) {
   let score = 0;
   const interestSet = new Set(interests.map(i => i.toLowerCase()));
   
@@ -68,21 +68,24 @@ function calculateScore(place, interests, coords, budget, userPreferences = {}) 
   if (avoidedCategories.some(i => i.toLowerCase() === category)) score -= 10;
 
   const cost = place.avgCost || 200;
-  if (budget === "low" && cost < 200) score += 3;
-  if (budget === "medium" && cost < 500) score += 2;
+  
+  // Budget alignment (Aggressive penalties for over-budget places)
+  if (cost > perDayBudget * 0.6) score -= 25; 
+  else if (cost > perDayBudget * 0.4) score -= 10;
+  else if (cost < perDayBudget * 0.1) score += 8; 
+  
+  if (budgetTier === "low" && cost < 200) score += 5;
+  if (budgetTier === "medium" && cost < 500) score += 3;
 
   const dist = getDistance(coords.lat, coords.lng, place.lat, place.lng);
   if (dist < 5) score += 3;
   else if (dist < 15) score += 2;
 
-  const time = place.timeHours || 2;
-  if (time <= 2) score += 2;
-
   return score;
 }
 
 /* ── PRICE ── */
-function calculateDynamicPrice(place, budget) {
+function calculateDynamicPrice(place, budgetTier) {
   let base = place.avgCost;
 
   if (base == null || base === 0) {
@@ -93,7 +96,7 @@ function calculateDynamicPrice(place, budget) {
     low: 0.7,
     medium: 1,
     high: 2
-  }[budget] || 1;
+  }[budgetTier] || 1;
 
   return Math.round(base * mult);
 }
@@ -205,6 +208,62 @@ function generateFallbacks(city, coords, count) {
   return results;
 }
 
+/* ── DETERMINISTIC PRICING RULES ── */
+const COST_RULES = {
+  foodPerDay: 500,
+  hotelPerNight: {
+    low: 1000,
+    medium: 2500,
+    high: 5000
+  },
+  transportPerKm: 10,
+  activityBase: 100
+};
+
+/**
+ * Deterministically calculates the total trip cost.
+ */
+function calculateDeterministicTripCost(itinerary, days, budgetTier, travelerType) {
+  const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
+  const nights = Math.max(1, days);
+  
+  // 1. Hotel Cost
+  const hotelRate = COST_RULES.hotelPerNight[budgetTier] || COST_RULES.hotelPerNight.medium;
+  const totalHotel = hotelRate * nights * (tMult > 2 ? 2 : 1);
+
+  // 2. Food Cost
+  const totalFood = COST_RULES.foodPerDay * days * tMult;
+
+  // 3. Transport & Activities
+  let totalTransport = 0;
+  let totalActivities = 0;
+
+  itinerary.forEach((dayData) => {
+    const places = dayData.places || [];
+    
+    places.forEach((place) => {
+      const baseActivity = place.avgCost || COST_RULES.activityBase;
+      totalActivities += baseActivity * tMult;
+    });
+
+    for (let i = 0; i < places.length - 1; i++) {
+      const dist = getDistance(places[i].lat, places[i].lng, places[i+1].lat, places[i+1].lng) || 5;
+      totalTransport += dist * COST_RULES.transportPerKm;
+    }
+    totalTransport += 20 * COST_RULES.transportPerKm; // Daily base commute
+  });
+
+  return {
+    total: Math.round(totalHotel + totalFood + totalTransport + totalActivities),
+    breakdown: {
+      hotel: Math.round(totalHotel),
+      food: Math.round(totalFood),
+      transport: Math.round(totalTransport),
+      activities: Math.round(totalActivities)
+    }
+  };
+}
+
 /* ── MAIN FUNCTION ── */
 async function generatePlan({
   city,
@@ -219,6 +278,7 @@ async function generatePlan({
   const cleanCity = city.trim().toLowerCase();
   const totalBudget = Number(budget) || 5000;
   const perDayBudget = totalBudget / days;
+  const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
 
   /* STEP 1: CURATED POOL */
   let curatedPool = allPlacesPool.filter(p => {
@@ -253,12 +313,13 @@ async function generatePlan({
   if (filteredPool.length === 0) filteredPool = cityPool;
 
   /* STEP 5: SCORING & ENRICHMENT */
+  const budgetTier = totalBudget > 10000 ? "high" : (totalBudget > 3000 ? "medium" : "low");
   let prioritizedPool = filteredPool
     .map((p, idx) => {
       const enriched = enrichPlace(p, idx);
       return {
         ...enriched,
-        score: calculateScore(enriched, interests, coords, budget > 10000 ? "high" : (budget > 3000 ? "medium" : "low"), userPreferences)
+        score: calculateScore(enriched, interests, coords, budgetTier, userPreferences, perDayBudget / (tMult * 3))
       };
     })
     .sort((a, b) => b.score - a.score);
@@ -277,15 +338,43 @@ async function generatePlan({
   }
 
   const maxPlacesNeeded = Math.max(minRequired, days * 6);
-  const candidates = prioritizedPool.slice(0, maxPlacesNeeded);
+  
+  /* BALANCED SELECTION: Ensure each interest category is represented */
+  let candidates = [];
+  if (interests.length > 0) {
+    const poolsByInterest = interests.map(interest => {
+      const iLower = interest.toLowerCase();
+      return prioritizedPool.filter(p => 
+        p.category.toLowerCase() === iLower || 
+        (p.tags || []).some(t => t.toLowerCase() === iLower)
+      );
+    });
 
-  /* STEP 6: AI REFINEMENT (The Personalization Magic) */
+    // Interleave picks from each interest pool
+    for (let i = 0; i < maxPlacesNeeded; i++) {
+      for (const pool of poolsByInterest) {
+        if (pool[i] && !candidates.some(c => c.name === pool[i].name)) {
+          candidates.push(pool[i]);
+          if (candidates.length >= maxPlacesNeeded) break;
+        }
+      }
+      if (candidates.length >= maxPlacesNeeded) break;
+    }
+  }
+
+  // Fill remaining slots with the best overall places not already picked
+  if (candidates.length < maxPlacesNeeded) {
+    const remaining = prioritizedPool.filter(p => !candidates.some(c => c.name === p.name));
+    candidates = [...candidates, ...remaining.slice(0, maxPlacesNeeded - candidates.length)];
+  }
+
+  /* STEP 6: AI REFINEMENT */
   let aiItinerary = null;
   try {
     aiItinerary = await analyzeAndRefinePlan({
       city,
       days,
-      budget,
+      budget: totalBudget,
       interests,
       travelerType,
       pace,
@@ -296,57 +385,42 @@ async function generatePlan({
     console.warn("AI Refinement skipped or failed:", err.message);
   }
 
-  /* STEP 7: BALANCED DISTRIBUTION */
+  /* STEP 7: BUILD ITINERARY */
   const itineraryDays = [];
-  const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
   const usedPlaceNames = new Set();
-  let accumulatedTotalCost = 0;
   
   for (let dayNum = 1; dayNum <= days; dayNum++) {
-    const meal = Math.min(perDayBudget * 0.25, 800) * tMult;
-    let dayHours = 0;
-    let dayCost = 0;
-    
-    // Attempt to use AI schedule for this day
     let dayPlaces = [];
     if (aiItinerary && aiItinerary[dayNum.toString()]) {
       dayPlaces = aiItinerary[dayNum.toString()].map(aiP => {
         const original = candidates.find(c => c.name.toLowerCase() === aiP.name.toLowerCase()) || aiP;
-        return {
-          ...original,
-          ...aiP,
-          estimatedCost: (original.avgCost || 200) * tMult
-        };
+        return { ...original, ...aiP };
       });
     } else {
-      // Fallback distribution logic
       const targetCount = 3;
       const remaining = candidates.filter(p => !usedPlaceNames.has(p.name)).slice(0, targetCount);
-      dayPlaces = remaining.map(p => ({ ...p, estimatedCost: (p.avgCost || 200) * tMult }));
+      dayPlaces = remaining;
     }
 
     const enrichedPlaces = await Promise.all(dayPlaces.map(async (p) => {
       usedPlaceNames.add(p.name);
-      dayCost += p.estimatedCost;
-      dayHours += (p.timeHours || 2);
       const userReviews = await fetchUserReviews(p.name, p.category, city);
-      return { ...p, userReviews };
+      return { 
+        ...p, 
+        userReviews,
+        estimatedCost: p.avgCost || COST_RULES.activityBase // Deterministic per-place cost
+      };
     }));
-
-    const actualDayCost = dayCost + meal;
-    accumulatedTotalCost += actualDayCost;
 
     itineraryDays.push({
       day: dayNum,
       label: `Day ${dayNum}`,
-      places: enrichedPlaces,
-      estimatedHours: dayHours,
-      estimatedCost: actualDayCost,
-      dayMealCost: meal
+      places: enrichedPlaces
     });
   }
 
-  const finalTotalCost = Math.round(accumulatedTotalCost);
+  /* STEP 8: FINAL DETERMINISTIC COST CALCULATION */
+  const finalPricing = calculateDeterministicTripCost(itineraryDays, days, budgetTier, travelerType);
 
   return { 
     city, 
@@ -354,11 +428,12 @@ async function generatePlan({
     itinerary: itineraryDays, 
     coordinates: coords,
     totalBudget,
-    totalTripCost: finalTotalCost,
-    remainingBudget: Math.round(totalBudget - finalTotalCost),
-    perDayBudget: Math.round(perDayBudget),
+    totalTripCost: finalPricing.total,
+    costBreakdown: finalPricing.breakdown,
+    remainingBudget: Math.round(totalBudget - finalPricing.total),
+    perDayBudget: Math.round(totalBudget / days),
     isPersonalized: true,
-    summary: generatePlanSummary({ city, days, totalBudget, totalTripCost: finalTotalCost, interests })
+    summary: generatePlanSummary({ city, days, totalBudget, totalTripCost: finalPricing.total, interests })
   };
 }
 
@@ -402,7 +477,7 @@ async function getCityCoords(city) {
   return map["bengaluru"];
 }
 
-function generateReason(place, interests, budget, index) {
+function generateReason(place, interests, budgetTier, index) {
   const category = (place.category || "").toLowerCase();
   const interestSet = new Set(interests.map(i => i.toLowerCase()));
 
@@ -426,7 +501,7 @@ function generateReason(place, interests, budget, index) {
   const timeTag = getTimeOfDayTag(place, index);
   if (timeTag) parts.push(timeTag);
 
-  if ((place.avgCost || 200) < 200 && budget === "low") {
+  if ((place.avgCost || 200) < 200 && budgetTier === "low") {
     parts.push("budget-friendly");
   }
 

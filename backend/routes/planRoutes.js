@@ -58,13 +58,19 @@ router.post("/generate", async (req, res) => {
     // Log the planner usage
     try {
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-      await UsageLog.create({
+      const isGuest = !loggedUserId;
+      
+      const log = await UsageLog.create({
         action: "generate_plan",
         userId: loggedUserId,
+        isGuest: isGuest,
         details: { city, days, budget, interests },
         ipAddress: ip,
         userAgent: req.headers['user-agent']
       });
+
+      console.log(`[PLAN GENERATED] User: ${loggedUserId || "Guest"}, isGuest: ${isGuest}`);
+      console.log(`[USAGE LOG]`, log);
     } catch (logErr) {
       console.error("Failed to save usage log:", logErr.message);
     }

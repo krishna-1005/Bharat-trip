@@ -11,6 +11,10 @@ const usageLogSchema = new mongoose.Schema({
     ref: "User",
     default: null
   },
+  isGuest: {
+    type: Boolean,
+    default: true
+  },
   details: { 
     type: mongoose.Schema.Types.Mixed 
   },
