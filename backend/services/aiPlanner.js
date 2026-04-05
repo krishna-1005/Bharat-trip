@@ -26,39 +26,40 @@ async function analyzeAndRefinePlan({
   if (packing) personalizationNote += `\n- User's packing style is ${packing}.`;
 
   const prompt = `
-Create a ${days}-day itinerary for ${city}.
+Create a comprehensive ${days}-day travel itinerary for ${city}.
 
 ### TRIP CONSTRAINTS:
 - Interests: ${interests.join(", ")}
-- Total Budget: ${budget} INR (This MUST cover all activities for ALL ${travelerType} travelers).
+- Total Budget: ${budget} INR (Covers activities for ALL ${travelerType} travelers).
 - Traveler Type: ${travelerType}
-- Trip Pace: ${pace}
+- Trip Pace: ${pace} (Ensure the number of activities matches this pace).
 
 ${personalizationNote ? "### USER STYLE PREFERENCES:" + personalizationNote : ""}
 
-Please organize the following candidate places into a cohesive daily schedule:
+### CANDIDATE PLACES TO USE:
 ${JSON.stringify(candidates.map(p => ({ name: p.name, category: p.category, avgCost: p.avgCost })))}
 
 ### CRITICAL INSTRUCTIONS:
-1. BUDGET ADHERENCE: The sum of "avgCost" for all suggested places (multiplied by the number of travelers) MUST stay below ${Math.round(budget * 0.8)} INR (leaving room for meals/transit).
-2. For each place, suggest a realistic "bestTime" to visit (Morning, Afternoon, Evening, or Night).
-3. Provide a "timeReason" (e.g., "Cool weather", "Fewer crowds", "Active nightlife", "Best lighting").
-4. IMPORTANT: Refine the "reason" for visiting each place to incorporate the User Style Preferences.
-5. If a user prefers walking, prioritize nearby spots. If they prefer sunrise treks, ensure Day 1 or 2 starts with an early outdoor activity.
+1. VOLUME: You MUST include at least 3-4 diverse places/activities per day. Do not leave the user with empty time.
+2. BUDGET: The total "avgCost" of all suggested places MUST stay below ${Math.round(budget * 0.8)} INR.
+3. For each place, suggest a realistic "bestTime" (Morning, Afternoon, Evening, Night) and a "timeReason".
+4. Incorporation: Use the provided candidates as much as possible to build the days.
+5. Return ONLY valid JSON.
 
 Return valid JSON:
 {
-  "1": [{ 
-    "name": "", 
-    "category": "", 
-    "avgCost": 0, 
-    "timeHours": 2, 
-    "lat": 0, 
-    "lng": 0,
-    "bestTime": "Morning",
-    "timeReason": "...",
-    "reason": "..."
-  }]
+  "1": [
+    { 
+      "name": "Place Name", 
+      "category": "Category", 
+      "avgCost": 0, 
+      "timeHours": 2, 
+      "bestTime": "Morning",
+      "timeReason": "Reason for timing",
+      "reason": "Personalized reason why user will like this"
+    }
+  ],
+  "2": [...]
 }
 `;
 

@@ -677,7 +677,7 @@ function Results() {
                       <div className="day-badge">{dIdx + 1}</div>
                       <h3>
                         Day {dIdx + 1}: {
-                          (day.title && day.title !== (dIdx + 1).toString()) 
+                          (day.title && day.title.length > 2 && day.title !== (dIdx + 1).toString()) 
                             ? day.title 
                             : (day.label && day.label !== `Day ${dIdx + 1}`)
                               ? day.label

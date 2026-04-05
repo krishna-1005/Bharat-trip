@@ -545,27 +545,51 @@
     box-shadow: 0 -20px 40px rgba(0,0,0,0.5);
   }
 
-  .back-to-itin-btn {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    background: rgba(10, 15, 25, 0.8);
-    backdrop-filter: blur(10px);
-    color: #fff;
-    border: 1px solid var(--border-glass);
-    padding: 10px 16px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1px;
-  }
-
   .premium-itinerary-sidebar {
     width: 100%;
     height: auto;
     border-right: none;
     box-shadow: none;
+    padding: 20px;
+  }
+
+  /* Redesign stop cards for vertical mobile flow */
+  .premium-stop-card-v3 {
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+    border-radius: 24px;
+  }
+
+  .stop-image-wrap-v3 {
+    width: 100%;
+    height: 180px;
+    border-radius: 18px;
+  }
+
+  .stop-info-v3 h4 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .stop-details-v3 {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .stop-actions-v3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .live-track-btn-v3, .mark-done-btn-v3 {
+    padding: 14px 10px;
+    font-size: 12px;
+    font-weight: 800;
+    border-radius: 14px;
   }
 
   .sidebar-footer-premium {
@@ -601,37 +625,8 @@
     gap: 10px;
     cursor: pointer;
   }
-
-  .map-zoom-controls {
-    right: 15px !important;
-    top: 40% !important;
-  }
-
-  .ai-insight-box {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.1));
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    padding: 18px;
-    border-radius: 22px;
-    margin-bottom: 25px;
-  }
-  .insight-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .insight-label { font-size: 10px; font-weight: 900; color: var(--accent-primary); text-transform: uppercase; }
-  .insight-text { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.5; }
-
-  .focus-card-premium {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-glass);
-    border-radius: 30px;
-    padding: 20px;
-    margin-bottom: 30px;
-  }
-  .card-hero-img { width: 100%; height: 180px; border-radius: 20px; object-fit: cover; margin-bottom: 15px; }
-  .card-title-premium { font-size: 22px; font-weight: 800; margin-bottom: 8px; color: #fff; }
-  .description-text { font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 20px; }
-  .card-actions-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; }
-  .action-main-btn { background: var(--accent-primary); color: #fff; border: none; padding: 14px; border-radius: 14px; font-weight: 800; }
-  .action-sub-btn { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border-glass); padding: 14px; border-radius: 14px; }
 }
+
 
 /* ── AI GENERATION UPGRADE V3 (PREMIUM CENTERED) ── */
 .ai-gen-overlay {
