@@ -5,11 +5,11 @@
 
 :root {
   --bg-dark: var(--bg-main);
-  --bg-card: var(--glass);
-  --accent-blue: #3b82f6;
-  --text-main: var(--text-main);
-  --text-dim: var(--text-dim);
-  --border-main: var(--glass-border);
+  --bg-card-home: var(--glass);
+  --accent-blue-home: var(--accent-blue);
+  --text-main-home: var(--text-main);
+  --text-dim-home: var(--text-dim);
+  --border-main-home: var(--glass-border);
 }
 
 .home-redesign {
@@ -17,7 +17,7 @@
   color: var(--text-main);
   overflow-x: hidden;
   position: relative;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: background 0.4s ease, color 0.4s ease;
 }
 
 /* ── INTERACTIVE BACKGROUND ── */

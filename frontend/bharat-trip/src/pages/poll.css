@@ -2,26 +2,17 @@
    POLL PAGES — PREMIUM REFINED STYLES
 ============================================= */
 
-:root {
-    --dash-bg: #0B1220;
-    --dash-card: #111827;
-    --dash-primary: #3B82F6;
-    --dash-accent: #22C55E;
-    --dash-text: #ffffff;
-    --dash-muted: #9CA3AF;
-    --dash-border: rgba(255, 255, 255, 0.08);
-}
-
 .poll-page-container {
     min-height: 100vh;
     width: 100%;
-    background: var(--dash-bg);
+    background: var(--bg-main);
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 100px 24px 80px;
     box-sizing: border-box;
-    color: var(--dash-text);
+    color: var(--text-main);
+    transition: background 0.4s ease, color 0.4s ease;
 }
 
 .poll-dashboard-wrapper {
@@ -42,8 +33,8 @@
 }
 
 .vote-option-card {
-    background: var(--dash-card);
-    border: 1px solid var(--dash-border);
+    background: var(--bg-panel);
+    border: 1px solid var(--border-main);
     border-radius: 20px;
     overflow: hidden;
     cursor: pointer;
@@ -135,15 +126,15 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(11, 18, 32, 0.8);
+    background: var(--glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     padding: 20px 24px;
-    border-top: 1px solid var(--dash-border);
+    border-top: 1px solid var(--border-main);
     display: flex;
     justify-content: center;
     z-index: 1000;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 -10px 30px var(--shadow-main);
 }
 
 .vote-submit-btn {
@@ -151,7 +142,7 @@
     max-width: 500px;
     height: 56px;
     border-radius: 16px;
-    background: linear-gradient(90deg, #3B82F6, #2563EB);
+    background: linear-gradient(90deg, var(--accent-blue), #2563EB);
     color: white;
     font-size: 1.1rem;
     font-weight: 800;
@@ -195,7 +186,7 @@
 
 /* --- WINNER HIGHLIGHT --- */
 .winner-highlight-card {
-    background: linear-gradient(135deg, #1e293b 0%, #111827 100%);
+    background: linear-gradient(135deg, var(--bg-panel) 0%, var(--bg-main) 100%);
     border: 1px solid rgba(59, 130, 246, 0.3);
     border-radius: 24px;
     padding: 40px;

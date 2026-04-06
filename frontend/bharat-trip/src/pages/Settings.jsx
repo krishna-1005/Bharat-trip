@@ -13,6 +13,7 @@ export default function Settings() {
   const { 
     currency, setCurrency, 
     language, setLanguage,
+    theme, setTheme,
     t 
   } = useSettings();
 
@@ -131,10 +132,15 @@ export default function Settings() {
               <div className="setting-item">
                 <div className="setting-info">
                   <label>Appearance</label>
-                  <span>Dark mode is default</span>
+                  <span>{theme === 'dark' ? "Deep Space (Dark)" : "Ocean Breeze (Light)"}</span>
                 </div>
-                <select className="setting-select" disabled>
-                  <option>Deep Space (Dark)</option>
+                <select 
+                  className="setting-select" 
+                  value={theme}
+                  onChange={(e) => setTheme(e.target.value)}
+                >
+                  <option value="dark">Deep Space (Dark)</option>
+                  <option value="light">Ocean Breeze (Light)</option>
                 </select>
               </div>
             </div>

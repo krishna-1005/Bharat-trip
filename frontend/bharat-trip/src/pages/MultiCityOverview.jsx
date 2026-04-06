@@ -171,11 +171,11 @@ const MultiCityOverview = () => {
         alignItems: 'center', 
         justifyContent: 'center', 
         height: '100vh',
-        background: '#020617'
+        background: 'var(--bg-main)'
       }}>
         <div className="tt-bg-ambient">
-          <div className="tt-blob tt-blob-1" style={{ background: '#3b82f6', top: '20%', left: '20%' }}></div>
-          <div className="tt-blob tt-blob-2" style={{ background: '#8b5cf6', bottom: '20%', right: '20%' }}></div>
+          <div className="tt-blob tt-blob-1" style={{ background: 'var(--accent-blue)', top: '20%', left: '20%' }}></div>
+          <div className="tt-blob tt-blob-2" style={{ background: 'var(--accent-purple)', bottom: '20%', right: '20%' }}></div>
         </div>
         
         <div className="ai-neural-container" style={{ marginBottom: '40px' }}>
@@ -252,9 +252,9 @@ const MultiCityOverview = () => {
             gap: '12px',
             flexWrap: 'wrap',
             padding: '20px',
-            background: 'rgba(255,255,255,0.02)',
+            background: 'var(--bg-card)',
             borderRadius: '24px',
-            border: '1px solid rgba(255,255,255,0.05)'
+            border: '1px solid var(--border-main)'
           }}>
             {tripStructure.map((item, idx) => (
               <React.Fragment key={idx}>
@@ -292,8 +292,8 @@ const MultiCityOverview = () => {
               transition={{ delay: idx * 0.1 }}
               className="pf-glass-card" 
               style={{ 
-                background: 'rgba(255,255,255,0.02)', 
-                border: '1px solid rgba(255,255,255,0.06)',
+                background: 'var(--bg-card)', 
+                border: '1px solid var(--border-main)',
                 borderRadius: '32px',
                 padding: '35px',
                 display: 'flex',

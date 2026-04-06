@@ -138,14 +138,18 @@
 }
 
 /* Dark Mode Map Filter - Apply to tiles only */
-.leaflet-tile-container {
+.dark-theme .leaflet-tile-container {
   filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(85%);
+}
+
+.light-theme .leaflet-tile-container {
+  filter: none;
 }
 
 .leaflet-container {
   height: 100% !important;
   width: 100% !important;
-  background: #020617; /* Matches dark theme background */
+  background: var(--bg-main);
   overflow: hidden;
 }
 

@@ -260,11 +260,13 @@ export const SettingsProvider = ({ children }) => {
     if (theme === 'dark') {
       root.classList.add('dark-theme');
       root.classList.remove('light-theme');
-      document.body.className = 'dark-theme';
+      document.body.classList.add('dark-theme');
+      document.body.classList.remove('light-theme');
     } else {
       root.classList.add('light-theme');
       root.classList.remove('dark-theme');
-      document.body.className = 'light-theme';
+      document.body.classList.add('light-theme');
+      document.body.classList.remove('dark-theme');
     }
   }, [theme]);
 

@@ -29,8 +29,8 @@
 
 body {
   font-family: var(--font-main);
-  background-color: #020202;
-  color: #ffffff;
+  background-color: var(--bg-main);
+  color: var(--text-main);
   line-height: var(--lh-base);
   letter-spacing: var(--tracking-normal);
 }
@@ -41,7 +41,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 800;
   letter-spacing: var(--tracking-tight);
   line-height: var(--lh-tight);
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 /* ── INTERACTIVE & UI ELEMENTS ── */

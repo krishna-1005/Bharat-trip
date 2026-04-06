@@ -94,8 +94,8 @@ const MultiCityPlanner = () => {
   return (
     <div className="tt-premium-root" style={{ alignItems: 'flex-start', paddingTop: '120px', overflowY: 'auto' }}>
       <div className="tt-bg-ambient">
-        <div className="tt-blob tt-blob-1" style={{ background: '#8b5cf6', top: '10%', right: '10%', left: 'auto' }}></div>
-        <div className="tt-blob tt-blob-2" style={{ background: '#3b82f6', bottom: '10%', left: '10%' }}></div>
+        <div className="tt-blob tt-blob-1" style={{ background: 'var(--accent-purple)', top: '10%', right: '10%', left: 'auto' }}></div>
+        <div className="tt-blob tt-blob-2" style={{ background: 'var(--accent-blue)', bottom: '10%', left: '10%' }}></div>
         <div className="tt-grid-overlay"></div>
       </div>
 
@@ -106,7 +106,7 @@ const MultiCityPlanner = () => {
           <p className="tt-subtitle">Define individual stops for your multi-city odyssey. Each stop will feature real-time search suggestions.</p>
         </motion.div>
 
-        <motion.div className="planner-glass-card" style={{ padding: '40px', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <motion.div className="planner-glass-card" style={{ padding: '40px', background: 'var(--bg-card)', border: '1px solid var(--border-main)' }}>
           <form onSubmit={handleSubmit} className="pf-wrap">
             
             <div className="stops-config-area" style={{ marginBottom: '40px' }}>

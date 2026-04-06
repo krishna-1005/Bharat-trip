@@ -3,14 +3,15 @@
 .tt-premium-root {
     min-height: 100vh;
     width: 100%;
-    background: #020202;
-    color: #fff;
+    background: var(--bg-main);
+    color: var(--text-main);
     overflow-x: hidden;
     overflow-y: auto;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: background 0.4s ease, color 0.4s ease;
 }
 
 /* Background Ambient */
@@ -31,7 +32,7 @@
 .tt-blob-1 {
     width: 600px;
     height: 600px;
-    background: #3b82f6;
+    background: var(--accent-blue);
     top: -100px;
     left: -100px;
 }
@@ -39,7 +40,7 @@
 .tt-blob-2 {
     width: 500px;
     height: 500px;
-    background: #8b5cf6;
+    background: var(--accent-purple);
     bottom: -100px;
     right: -100px;
     animation-delay: -5s;
@@ -48,7 +49,8 @@
 .tt-grid-overlay {
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-image: radial-gradient(var(--text-main) 1px, transparent 1px);
+    opacity: 0.03;
     background-size: 40px 40px;
     mask-image: radial-gradient(circle at center, black, transparent 80%);
 }
@@ -85,7 +87,7 @@
     font-size: 10px;
     font-weight: 900;
     letter-spacing: 2px;
-    color: #3b82f6;
+    color: var(--accent-blue);
     margin-bottom: 24px;
 }
 
@@ -98,7 +100,7 @@
 }
 
 .tt-main-title span {
-    background: linear-gradient(to right, #3b82f6, #8b5cf6);
+    background: linear-gradient(to right, var(--accent-blue), var(--accent-purple));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-style: italic;
@@ -106,7 +108,7 @@
 
 .tt-subtitle {
     font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-dim);
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.6;
@@ -132,9 +134,9 @@
 .tt-card-glass {
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--glass);
     backdrop-filter: blur(30px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-main);
     border-radius: 40px;
     z-index: 1;
     transition: all 0.5s ease;
@@ -176,13 +178,13 @@
     position: absolute;
     width: 80%;
     height: 80%;
-    background: #3b82f6;
+    background: var(--accent-blue);
     filter: blur(30px);
     opacity: 0.3;
     border-radius: 50%;
 }
 
-.color-purple { background: #8b5cf6; }
+.color-purple { background: var(--accent-purple); }
 
 .tt-card-title {
     font-size: 28px;
@@ -200,7 +202,7 @@
 
 .tt-card-desc {
     font-size: 15px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--text-dim);
     line-height: 1.7;
     margin-bottom: 32px;
     flex: 1;
@@ -215,7 +217,8 @@
 .tt-card-features span {
     font-size: 10px;
     font-weight: 800;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--text-dim);
+    opacity: 0.6;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -224,7 +227,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #3b82f6;
+    color: var(--accent-blue);
     font-weight: 700;
     font-size: 14px;
 }
@@ -251,7 +254,7 @@
 .tt-footer-line {
     width: 100px;
     height: 1px;
-    background: #fff;
+    background: var(--text-main);
 }
 
 .tt-footer-text {

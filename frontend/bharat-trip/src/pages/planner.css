@@ -5,12 +5,13 @@
 .planner-onboarding-page {
   min-height: 100vh;
   width: 100%;
-  background-color: #020202;
-  color: #ffffff;
+  background-color: var(--bg-main);
+  color: var(--text-main);
   overflow-x: hidden;
   display: flex;
   justify-content: center;
   padding: 60px 40px;
+  transition: background 0.4s ease, color 0.4s ease;
 }
 
 /* --- THE BACKGROUND --- */
@@ -31,7 +32,7 @@
 .planner-bg-overlay {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 70% 30%, rgba(59, 130, 246, 0.03) 0%, #020202 100%);
+    background: radial-gradient(circle at 70% 30%, rgba(59, 130, 246, 0.03) 0%, var(--bg-main) 100%);
     z-index: 1;
 }
 
@@ -101,8 +102,8 @@
 }
 
 .persona-tab.active {
-    color: #fff;
-    border-bottom-color: #3b82f6;
+    color: var(--text-main);
+    border-bottom-color: var(--accent-blue);
 }
 
 .persona-tip {
@@ -141,7 +142,7 @@
     display: block;
     font-weight: 700;
     font-size: 14px;
-    color: #fff;
+    color: var(--text-main);
 }
 
 .mini-spot-type {

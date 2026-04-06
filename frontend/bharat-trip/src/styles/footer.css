@@ -1,8 +1,8 @@
 /* ── FOOTER ── */
 .premium-footer {
   padding: 120px 8% 40px;
-  background: #0a1120 !important; /* Force a dark blue background */
-  border-top: 4px solid #3b82f6; 
+  background: var(--bg-panel) !important; 
+  border-top: 4px solid var(--accent-blue); 
   position: relative;
   z-index: 1;
   overflow: hidden;

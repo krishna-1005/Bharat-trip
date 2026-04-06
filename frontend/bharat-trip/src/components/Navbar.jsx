@@ -91,8 +91,14 @@ function Navbar() {
       </ul>
 
       <div className="nb-right">
-        <button className="nb-theme-toggle" onClick={toggleTheme}>
-          <motion.span animate={{ rotate: theme === 'dark' ? 0 : 180 }}>{theme === 'dark' ? '🌙' : '☀️'}</motion.span>
+        <button className="nb-theme-toggle" onClick={toggleTheme} aria-label="Toggle Theme">
+          <motion.div 
+            className="nb-toggle-thumb"
+            animate={{ x: theme === 'dark' ? 0 : 26 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
+            {theme === 'dark' ? '🌙' : '☀️'}
+          </motion.div>
         </button>
 
         {user ? (
