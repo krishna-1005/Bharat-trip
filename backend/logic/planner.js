@@ -268,18 +268,18 @@ function calculateDeterministicTripCost(itinerary, days, budgetTier, travelerTyp
 async function generatePlan({
   city,
   days,
-  budget, 
+  budget,
   interests,
   travelerType,
   pace,
-  userPreferences = {}
+  userPreferences = {},
+  language = "English"
 }) {
   const coords = await getCityCoords(city);
   const cleanCity = city.trim().toLowerCase();
   const totalBudget = Number(budget) || 5000;
   const perDayBudget = totalBudget / days;
   const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
-
   /* STEP 1: CURATED POOL */
   let curatedPool = allPlacesPool.filter(p => {
     if (p.area && p.area.toLowerCase() === cleanCity) return true;
@@ -390,7 +390,8 @@ async function generatePlan({
       travelerType,
       pace,
       candidates,
-      userPreferences
+      userPreferences,
+      language
     });
   } catch (err) {
     console.warn("AI Refinement skipped or failed:", err.message);

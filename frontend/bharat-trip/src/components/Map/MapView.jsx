@@ -14,6 +14,7 @@ import { createLocationIcon } from "./markerIcons";
 import ResizeMap from "./ResizeMap";
 import L from "leaflet";
 import { LocateControl } from "./LocateControl";
+import { useSettings } from "../../context/SettingsContext";
 
 import { DAY_COLORS } from "../../constants/dayColors";
 
@@ -62,6 +63,31 @@ function MapActions({ setUserLocation }) {
       </div>
     </div>
   );
+}
+
+/**
+ * Handles smooth 'Fly-To' transitions when a place is selected.
+ */
+function FlyToHandler({ activePlace }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!activePlace || !activePlace.lat || !activePlace.lng) return;
+
+    const latLng = [parseFloat(activePlace.lat), parseFloat(activePlace.lng)];
+    const zoomLevel = map.getZoom() < 14 ? 16 : map.getZoom();
+
+    // Leaflet flyTo with premium animation settings
+    map.flyTo(latLng, zoomLevel, {
+      duration: 1.8, // Smooth 1.8s flight
+      easeLinearity: 0.25,
+      noMoveStart: true
+    });
+
+    // If user interacts during flight, Leaflet automatically cancels the animation.
+  }, [activePlace, map]);
+
+  return null;
 }
 
 /**
@@ -129,10 +155,57 @@ function SafePolyline({ places }) {
   );
 }
 
+/**
+ * Handles smooth tile transition when theme changes.
+ * Uses a cross-fade approach by toggling opacity on layer change.
+ */
+function TileThemeController({ theme, tileUrls }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+    
+    // Add a transition class to the map container for smooth fading
+    const container = map.getContainer();
+    container.style.transition = 'filter 0.5s ease-in-out';
+    
+    // Slight brightness dip during swap to hide tile reloading if any
+    container.style.filter = 'brightness(0.8)';
+    setTimeout(() => {
+      container.style.filter = 'brightness(1)';
+    }, 500);
+  }, [theme, map]);
+
+  return (
+    <TileLayer
+      key={theme} // Key ensures React-Leaflet remounts the layer on theme change
+      url={tileUrls[theme]}
+      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      opacity={1}
+    />
+  );
+}
+
 // ── MAIN COMPONENT ──
 
 function MapView({ plan, currentIndex, userLocation, setUserLocation, activePlace, onHover }) {
-  // 1. Process places with strict validation and day context
+  const { theme, setTheme } = useSettings();
+
+  // 1. Auto-dark mode logic (Bonus: past 7:00 PM)
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 19 || hour < 6) {
+      if (theme !== 'dark') setTheme('dark');
+    }
+  }, []); // Only check on mount to avoid fighting user manual toggle
+
+  // 2. Tile URLs
+  const TILE_URLS = {
+    dark: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    light: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+  };
+
+  // 3. Process places with strict validation and day context
   const allPlacesWithDay = useMemo(() => {
     if (!plan?.itinerary) return [];
     const days = Array.isArray(plan.itinerary) ? plan.itinerary : Object.values(plan.itinerary);
@@ -172,12 +245,10 @@ function MapView({ plan, currentIndex, userLocation, setUserLocation, activePlac
         zoomControl={false}
         style={{ height: '100%', width: '100%' }}
       >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        />
+        <TileThemeController theme={theme} tileUrls={TILE_URLS} />
 
         <MapController center={safeInitialCenter} places={allPlacesWithDay} userLocation={userLocation} />
+        <FlyToHandler activePlace={activePlace} />
         <ResizeMap trigger={activePlace} />
         <MapActions setUserLocation={setUserLocation} />
         <SafePolyline places={allPlacesWithDay} />
@@ -189,13 +260,15 @@ function MapView({ plan, currentIndex, userLocation, setUserLocation, activePlac
 
           const isVisited = i < currentIndex;
           const isCurrent = i === currentIndex;
+          const isActive = activePlace && activePlace.name === p.name;
+          const isHighlighted = isActive || isCurrent;
           const dayColor = DAY_COLORS[p.dayIdx % DAY_COLORS.length];
           
           return (
             <Marker
               key={`${p.name}-${i}`}
               position={pos}
-              icon={createLocationIcon(isCurrent ? "#fff" : dayColor, isCurrent, isVisited)}
+              icon={createLocationIcon(isHighlighted ? "#fff" : dayColor, isHighlighted, isVisited, theme)}
               eventHandlers={{
                 mouseover: () => onHover?.(p),
                 mouseout: () => onHover?.(null)

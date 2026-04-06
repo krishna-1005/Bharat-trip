@@ -5,6 +5,7 @@ import Footer from "./Footer";
 import BottomNav from "./BottomNav";
 import CustomCursor from "./CustomCursor";
 import ScrollToTop from "./ScrollToTop";
+import OfflineBadge from "./OfflineBadge";
 
 export default function Layout() {
   const location = useLocation();
@@ -13,6 +14,7 @@ export default function Layout() {
 
   return (
     <div className={`app ${isFixedLayout ? "fixed-layout" : ""}`}>
+      <OfflineBadge />
       <CustomCursor />
       <ScrollToTop />
       <Navbar />

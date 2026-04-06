@@ -82,7 +82,8 @@ router.post("/generate", async (req, res) => {
       interests: interests || [],
       travelerType: req.body.travelerType || "solo",
       pace: req.body.pace || "moderate",
-      userPreferences // Pass preferences to the generator
+      userPreferences, // Pass preferences to the generator
+      language: req.body.language || "English"
     });
 
     res.json({ plan });

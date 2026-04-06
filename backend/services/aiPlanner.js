@@ -10,7 +10,8 @@ async function analyzeAndRefinePlan({
   travelerType,
   pace,
   candidates,
-  userPreferences = {}
+  userPreferences = {},
+  language = "English"
 }) {
   if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
     console.warn("⚠️ GEMINI_API_KEY missing or invalid");
@@ -25,14 +26,20 @@ async function analyzeAndRefinePlan({
   if (experience) personalizationNote += `\n- User values ${experience} as their must-have travel experience.`;
   if (packing) personalizationNote += `\n- User's packing style is ${packing}.`;
 
+  const languageInstruction = language === "Hindi" 
+    ? "IMPORTANT: You MUST return all text content (name, timeReason, reason) in Hindi (Hindi script/Devanagari). The JSON keys must remain in English." 
+    : "Return all text content in English.";
+
   const prompt = `
-Create a comprehensive ${days}-day travel itinerary for ${city}.
+Create a comprehensive ${days}-day travel itinerary for ${city} in ${language}.
 
 ### TRIP CONSTRAINTS:
 - Interests: ${interests.join(", ")}
 - Total Budget: ${budget} INR (Covers activities for ALL ${travelerType} travelers).
 - Traveler Type: ${travelerType}
 - Trip Pace: ${pace} (Ensure the number of activities matches this pace).
+
+${languageInstruction}
 
 ${personalizationNote ? "### USER STYLE PREFERENCES:" + personalizationNote : ""}
 

@@ -23,6 +23,19 @@ export default function MyTrips() {
     }
   }, [user, navigate]);
 
+  useEffect(() => {
+    const cachedTrips = localStorage.getItem("myTrips");
+    if (cachedTrips) {
+      try {
+        setDbTrips(JSON.parse(cachedTrips));
+        setLoading(false);
+      } catch (e) {
+        console.warn("Could not parse cached trips", e);
+      }
+    }
+    if (user) fetchTrips();
+  }, [user]);
+
   const fetchTrips = async () => {
     if (!user) return;
     try {
@@ -50,16 +63,13 @@ export default function MyTrips() {
         image: t.image,
       }));
       setDbTrips(formatted);
+      localStorage.setItem("myTrips", JSON.stringify(formatted));
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (user) fetchTrips();
-  }, [user]);
 
   const handleViewOnMap = (trip) => {
     const itineryObj = {};
@@ -126,6 +136,30 @@ export default function MyTrips() {
     }
   };
 
+  const handleQuickStart = (destination) => {
+    // Navigate to planner with the destination as a query param
+    // PlannerForm.jsx already has logic to read 'destination' from URL
+    navigate(`/planner?destination=${encodeURIComponent(destination)}&days=5&budget=30000&interests=Nature,Culture,Adventure`);
+  };
+
+  const trendingSpots = [
+    { 
+      name: "Goa", 
+      desc: "Sun, sand, and soulful sunsets.", 
+      img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80" 
+    },
+    { 
+      name: "Leh-Ladakh", 
+      desc: "The land of high passes and lakes.", 
+      img: "https://images.unsplash.com/photo-1581793745862-99f57ae50a2a?auto=format&fit=crop&w=800&q=80" 
+    },
+    { 
+      name: "Jaipur", 
+      desc: "Experience the royal pink city.", 
+      img: "https://images.unsplash.com/photo-1599661046289-e318978b3951?auto=format&fit=crop&w=800&q=80" 
+    }
+  ];
+
   return (
     <div className="pro-page">
       <div className="pro-body">
@@ -143,7 +177,7 @@ export default function MyTrips() {
 
         <section className="pro-section">
           <div className="section-header">
-            <h2>Saved Itineraries ({dbTrips.length})</h2>
+            <h2>{dbTrips.length === 0 ? "Start Your Journey" : `Saved Itineraries (${dbTrips.length})`}</h2>
           </div>
 
           {loading ? (
@@ -151,13 +185,34 @@ export default function MyTrips() {
               <p>Fetching your travel archives...</p>
             </div>
           ) : dbTrips.length === 0 ? (
-            <div className="pro-empty">
-              <div className="pro-empty-icon">🗺️</div>
-              <h3>No journeys found</h3>
-              <p>You haven't saved any travel plans yet. Ready to design your first adventure?</p>
-              <button className="btn-premium primary" style={{ marginTop: '12px' }} onClick={() => navigate("/planner")}>
-                Start Planning
-              </button>
+            <div className="pro-empty-v2">
+              <div className="pro-empty-welcome">
+                <h2>Where to next, {user?.displayName?.split(' ')[0] || 'Traveler'}?</h2>
+                <p>Start your journey with one of these trending spots.</p>
+              </div>
+              
+              <div className="quick-start-grid">
+                {trendingSpots.map((spot, i) => (
+                  <div key={i} className="featured-spot-card" style={{ backgroundImage: `url(${spot.img})` }}>
+                    <div className="featured-spot-overlay">
+                      <div className="featured-spot-content">
+                        <h3>{spot.name}</h3>
+                        <p>{spot.desc}</p>
+                        <button className="plan-now-btn" onClick={() => handleQuickStart(spot.name)}>
+                          Plan Now
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="custom-start-prompt">
+                <p>Or create a bespoke plan from scratch</p>
+                <button className="btn-premium secondary" onClick={() => navigate("/planner")}>
+                  Design Custom Odyssey
+                </button>
+              </div>
             </div>
           ) : (
             <div className="pro-trips-grid">

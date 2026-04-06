@@ -3,13 +3,14 @@ import { useState, useEffect, useRef, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 import "../styles/navbar.css";
 
 function Navbar() {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { user, logout } = useContext(AuthContext);
-  const { t, theme, toggleTheme } = useSettings();
+  const { t, theme, toggleTheme, language } = useSettings();
   const [open, setOpen]           = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled]   = useState(false);
@@ -91,6 +92,7 @@ function Navbar() {
       </ul>
 
       <div className="nb-right">
+        <LanguageSwitcher />
         <button className="nb-theme-toggle" onClick={toggleTheme} aria-label="Toggle Theme">
           <motion.div 
             className="nb-toggle-thumb"

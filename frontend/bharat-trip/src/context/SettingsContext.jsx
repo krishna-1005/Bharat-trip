@@ -252,6 +252,11 @@ export const SettingsProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem("settings_language", language);
+    if (language === "Hindi") {
+      document.body.style.fontFamily = "'Hind', sans-serif";
+    } else {
+      document.body.style.fontFamily = ""; // Reset to default
+    }
   }, [language]);
 
   useEffect(() => {

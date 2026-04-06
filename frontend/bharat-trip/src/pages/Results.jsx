@@ -1,15 +1,20 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import MapView from "../components/Map/MapView";
 import PlaceImage from "../components/PlaceImage";
+import BookingLeadGen from "../components/BookingLeadGen";
+import WeatherStrip from "../components/WeatherStrip";
+import SkeletonLoader from "../components/SkeletonLoader";
 import CategoryCostBreakdown from "../components/CategoryCostBreakdown";
 import BudgetPanel from "../components/BudgetPanel";
 import { calculateDistance, calculateTravelCost, filterAndSortPlaces } from "../utils/travelUtils";
+import { fetchWeatherForecast } from "../services/weatherService";
 import "./results.css";
 import { useState, useEffect, useMemo, useContext, useCallback } from "react";
 import { useSettings } from "../context/SettingsContext";
 import { AuthContext } from "../context/AuthContext";
 import { auth } from "../firebase";
 import { AnimatePresence, motion } from "framer-motion";
+import FloatingToggle from "../components/FloatingToggle";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
@@ -53,7 +58,7 @@ function Results() {
   const navigate = useNavigate();
   const loc = useLocation();
   const { id: routeTripId } = useParams();
-  const { formatPrice } = useSettings();
+  const { formatPrice, language } = useSettings();
   const { user, setShowAuthModal } = useContext(AuthContext);
 
   const isMapViewRoute = loc.pathname === "/map";
@@ -107,6 +112,18 @@ function Results() {
   const [userLocation, setUserLocation] = useState(null);
 
   const [aiLogs, setAiLogs] = useState([]);
+  const [weatherData, setWeatherData] = useState(null);
+
+  useEffect(() => {
+    if (!plan || !plan.coordinates) return;
+    const loadWeather = async () => {
+      const data = await fetchWeatherForecast(plan.coordinates.lat, plan.coordinates.lng);
+      if (data && data.list && data.list.length > 0) {
+        setWeatherData(data.list[0]); // Current or near-future forecast
+      }
+    };
+    loadWeather();
+  }, [plan]);
 
   useEffect(() => {
     if (!isGenerating) return;
@@ -134,32 +151,14 @@ function Results() {
   const normalizedItinerary = useMemo(() => {
     if (!plan || !plan.itinerary) return [];
     try {
-      const rawItin = Array.isArray(plan.itinerary) 
+      return Array.isArray(plan.itinerary) 
         ? plan.itinerary 
         : Object.entries(plan.itinerary).map(([day, data]) => ({ day, ...data }));
-
-      // Determine if we should apply distance filtering
-      // Only filter if user is within 100km of the destination city center
-      let shouldFilter = false;
-      if (userLocation && plan.coordinates) {
-        const distToCity = calculateDistance(
-          userLocation.lat, userLocation.lng, 
-          plan.coordinates.lat, plan.coordinates.lng
-        );
-        if (distToCity !== null && distToCity < 100) {
-          shouldFilter = true;
-        }
-      }
-
-      return rawItin.map(day => ({
-        ...day,
-        places: shouldFilter ? filterAndSortPlaces(day.places, userLocation) : day.places
-      }));
     } catch (e) {
       console.error("Failed to normalize itinerary:", e);
       return [];
     }
-  }, [plan, userLocation]);
+  }, [plan]);
 
   const allPlaces = useMemo(() => {
     try {
@@ -268,7 +267,8 @@ function Results() {
         headers,
         body: JSON.stringify({ 
           ...loc.state.planParams,
-          userPreferences: prefs // Send the collected preferences
+          userPreferences: prefs, // Send the collected preferences
+          language: language || "English"
         })
       });
 
@@ -432,6 +432,44 @@ function Results() {
       setShareStatus(true);
       setTimeout(() => setShareStatus(false), 2000);
     } catch (err) { alert(url); }
+  };
+
+  // ── WHATSAPP SHARE ──
+  const handleWhatsAppShare = () => {
+    if (!plan) return;
+    
+    let text = `*🗺️ My ${plan.city} Odyssey Blueprint*\n\n`;
+    text += `Duration: ${plan.days} Days\n`;
+    text += `Budget: ${formatPrice(budgetData.total)}\n\n`;
+    
+    normalizedItinerary.forEach((day, i) => {
+      text += `*Day ${i + 1}*\n`;
+      day.places?.forEach(p => {
+        text += `• ${p.name} (${p.category})\n`;
+      });
+      text += `\n`;
+    });
+    
+    text += `Plan your own trip at: ${window.location.origin}`;
+    
+    const encoded = encodeURIComponent(text);
+    window.open(`https://wa.me/?text=${encoded}`, '_blank');
+  };
+
+  // ── PDF EXPORT ──
+  const handleExportPDF = async () => {
+    const html2pdf = (await import('html2pdf.js')).default;
+    const element = document.querySelector('.premium-itinerary-sidebar');
+    
+    const opt = {
+      margin: 10,
+      filename: `${plan.city}_Odyssey_BharatTrip.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#05070a' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(element).set(opt).save();
   };
 
   // ── RENDERS ──
@@ -625,173 +663,188 @@ function Results() {
         </div>
 
         <div className="sidebar-scroll-content">
-          <motion.div 
-            className="trip-overview-premium"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="stat-label-small">Experience Overview</div>
-            <div className="overview-stats">
-              <div className="stat-box">
-                <span className="stat-label-small">Duration</span>
-                <span className="stat-value-mid">{plan.days} Days</span>
-              </div>
-              <div className="stat-box">
-                <span className="stat-label-small">Stops</span>
-                <span className="stat-value-mid">{allPlaces.length} Places</span>
-              </div>
-              <div className="stat-box">
-                <span className="stat-label-small">Budget</span>
-                <span className="stat-value-mid">{formatPrice(budgetData.total)}</span>
-              </div>
-            </div>
-          </motion.div>
-
-          <BudgetPanel budgetData={budgetData} formatPrice={formatPrice} variant="inline" />
-
-          <div className="guide-mode-toggle-wrap">
-            <button 
-              className={`guide-mode-btn ${guideMode ? "active" : ""}`}
-              onClick={() => setGuideMode(!guideMode)}
-            >
-              {guideMode ? "✨ Guide Me: ON" : "🧭 Enable Guide Mode"}
-            </button>
-          </div>
-          
-          <div className="itinerary-days-container">
-            {(() => {
-              let globalStopIdx = 0;
-              return normalizedItinerary.map((day, dIdx) => {
-                const isLocked = !user && dIdx > 0;
-                
-                return (
-                  <motion.div 
-                    key={dIdx} 
-                    className={`premium-day-section ${isLocked ? "guest-locked" : ""}`}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + dIdx * 0.1 }}
-                  >
-                    <div className="day-title-row">
-                      <div className="day-badge">{dIdx + 1}</div>
-                      <h3>
-                        Day {dIdx + 1}: {
-                          (day.title && day.title.length > 2 && day.title !== (dIdx + 1).toString()) 
-                            ? day.title 
-                            : (day.label && day.label !== `Day ${dIdx + 1}`)
-                              ? day.label
-                              : `Exploration`
-                        }
-                      </h3>
-                    </div>
-
-                    {isLocked && (
-                      <div className="glass-lock-overlay">
-                        <div className="lock-content">
-                          <span className="lock-icon">🔒</span>
-                          <h4>Full Odyssey Locked</h4>
-                          <p>Sign in to unlock the remaining {normalizedItinerary.length - 1} days and save this trip to your profile.</p>
-                          <button className="unlock-btn" onClick={() => handleSaveTrip()}>
-                            Unlock Full Itinerary
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="day-stops-list">
-                    {day.places?.map((place, pIdx) => {
-                      const currentIdx = globalStopIdx++;
-                      const isActive = currentIdx === currentIndex;
-                      const isVisited = currentIdx < currentIndex;
-                      return (
-                        <motion.div 
-                          key={pIdx} 
-                          className={`premium-stop-card-v3 ${isActive ? "active" : ""} ${isVisited ? "visited" : ""}`}
-                          whileHover={{ x: 8 }}
-                          onMouseEnter={() => setActivePlace(place)}
-                          onMouseLeave={() => setActivePlace(null)}
-                          onClick={() => {
-                            setActivePlace(place);
-                            if (isMobile) navigate("/map");
-                          }}
-                        >
-                          <div className="stop-image-wrap-v3">
-                            <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v3" />
-                            {isVisited && <div className="visited-check-v3">✓</div>}
-                            {isActive && <div className="active-glow-v3"></div>}
-                          </div>
-                          <div className="stop-info-v3">
-                            <div className="stop-meta-v3">
-                              <span className="stop-tag-v3">{place.category}</span>
-                              <div className="stop-trust-v3">
-                                <span className="star-v3">⭐</span>
-                                <span className="rating-v3">{place.rating || "4.5"}</span>
-                                <span className="reviews-v3">({place.reviews || "1.2k"})</span>
-                              </div>
-                            </div>
-                            <h4>{place.name}</h4>
-                            
-                            <div className="stop-details-v3">
-                              <span className="detail-item-v3">🕒 {place.timeHours || 2}h visit</span>
-                              <span className="detail-item-v3">💰 {formatPrice(place.estimatedCost || 0)}</span>
-                            </div>
-
-                            <p className="stop-reason-v3">
-                              {guideMode && isActive ? (
-                                <span className="guide-insight">✨ {place.reason}</span>
-                              ) : place.reason}
-                            </p>
-
-                            {place.tags && place.tags.length > 0 && (
-                              <div className="stop-tags-list-v3">
-                                {place.tags.slice(0, 2).map((t, ti) => (
-                                  <span key={ti} className="mini-tag-v3">#{t}</span>
-                                ))}
-                              </div>
-                            )}
-
-                            {isActive && (
-                              <div className="stop-actions-v3">
-                                <button 
-                                  className="live-track-btn-v3" 
-                                  onClick={(e) => { 
-                                    e.stopPropagation(); 
-                                    window.open(`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`, '_blank');
-                                  }}
-                                >
-                                  🛰️ Live Track
-                                </button>
-                                <button className="mark-done-btn-v3" onClick={(e) => { e.stopPropagation(); handleVisited(currentIdx); }}>
-                                  Mark as Visited
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      );
-                    })}
+          {(!plan && loading) ? (
+            <SkeletonLoader />
+          ) : (
+            <>
+              <motion.div 
+                className="trip-overview-premium"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <div className="stat-label-small">Experience Overview</div>
+                <div className="overview-stats">
+                  <div className="stat-box">
+                    <span className="stat-label-small">Duration</span>
+                    <span className="stat-value-mid">{plan?.days} Days</span>
                   </div>
-                </motion.div>
-              );
-            });
-          })()}
-        </div>
+                  <div className="stat-box">
+                    <span className="stat-label-small">Stops</span>
+                    <span className="stat-value-mid">{allPlaces.length} Places</span>
+                  </div>
+                  <div className="stat-box">
+                    <span className="stat-label-small">Budget</span>
+                    <span className="stat-value-mid">{formatPrice(budgetData.total)}</span>
+                  </div>
+                </div>
+              </motion.div>
+
+              <BudgetPanel budgetData={budgetData} formatPrice={formatPrice} variant="inline" />
+
+              <div className="guide-mode-toggle-wrap">
+                <button 
+                  className={`guide-mode-btn ${guideMode ? "active" : ""}`}
+                  onClick={() => setGuideMode(!guideMode)}
+                >
+                  {guideMode ? "✨ Guide Me: ON" : "🧭 Enable Guide Mode"}
+                </button>
+              </div>
+              
+              <div className="itinerary-days-container">
+                {(() => {
+                  let globalStopIdx = 0;
+                  return normalizedItinerary.map((day, dIdx) => {
+                    const isLocked = !user && dIdx > 0;
+                    
+                    return (
+                      <motion.div 
+                        key={dIdx} 
+                        className={`premium-day-section ${isLocked ? "guest-locked" : ""}`}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + dIdx * 0.1 }}
+                      >
+                        <div className="day-title-row">
+                          <div className="day-badge">{dIdx + 1}</div>
+                          <h3>
+                            Day {dIdx + 1}: {
+                              (day.title && day.title.length > 2 && day.title !== (dIdx + 1).toString()) 
+                                ? day.title 
+                                : (day.label && day.label !== `Day ${dIdx + 1}`)
+                                  ? day.label
+                                  : `Exploration`
+                            }
+                          </h3>
+                        </div>
+
+                        {dIdx === 0 && weatherData && <WeatherStrip weatherData={weatherData} />}
+
+                        {isLocked && (
+                          <div className="glass-lock-overlay">
+                            <div className="lock-content">
+                              <span className="lock-icon">🔒</span>
+                              <h4>Full Odyssey Locked</h4>
+                              <p>Sign in to unlock the remaining {normalizedItinerary.length - 1} days and save this trip to your profile.</p>
+                              <button className="unlock-btn" onClick={() => handleSaveTrip()}>
+                                Unlock Full Itinerary
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="day-stops-list">
+                        {day.places?.map((place, pIdx) => {
+                          const currentIdx = globalStopIdx++;
+                          const isActive = currentIdx === currentIndex;
+                          const isVisited = currentIdx < currentIndex;
+                          return (
+                            <motion.div 
+                              key={pIdx} 
+                              className={`premium-stop-card-v3 ${isActive ? "active" : ""} ${isVisited ? "visited" : ""}`}
+                              whileHover={{ x: 8 }}
+                              onMouseEnter={() => setActivePlace(place)}
+                              onMouseLeave={() => setActivePlace(null)}
+                              onClick={() => {
+                                setActivePlace(place);
+                                if (isMobile) navigate("/map");
+                              }}
+                            >
+                              <div className="stop-image-wrap-v3">
+                                <PlaceImage placeName={place.name} city={plan.city} className="stop-image-v3" />
+                                {isVisited && <div className="visited-check-v3">✓</div>}
+                                {isActive && <div className="active-glow-v3"></div>}
+                              </div>
+                              <div className="stop-info-v3">
+                                <div className="stop-meta-v3">
+                                  <span className="stop-tag-v3">{place.category}</span>
+                                  <div className="stop-trust-v3">
+                                    <span className="star-v3">⭐</span>
+                                    <span className="rating-v3">{place.rating || "4.5"}</span>
+                                    <span className="reviews-v3">({place.reviews || "1.2k"})</span>
+                                  </div>
+                                </div>
+                                <h4>{place.name}</h4>
+                                
+                                <div className="stop-details-v3">
+                                  <span className="detail-item-v3">🕒 {place.timeHours || 2}h visit</span>
+                                  <span className="detail-item-v3">💰 {formatPrice(place.estimatedCost || 0)}</span>
+                                </div>
+
+                                <p className="stop-reason-v3">
+                                  {guideMode && isActive ? (
+                                    <span className="guide-insight">✨ {place.reason}</span>
+                                  ) : place.reason}
+                                </p>
+
+                                {place.tags && place.tags.length > 0 && (
+                                  <div className="stop-tags-list-v3">
+                                    {place.tags.slice(0, 2).map((t, ti) => (
+                                      <span key={ti} className="mini-tag-v3">#{t}</span>
+                                    ))}
+                                  </div>
+                                )}
+
+                                <div className="stop-actions-v3">
+                                  <button 
+                                    className="live-track-btn-v3" 
+                                    style={{ gridColumn: isActive ? "span 1" : "span 2" }}
+                                    onClick={(e) => { 
+                                      e.stopPropagation(); 
+                                      window.open(`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`, '_blank');
+                                    }}
+                                  >
+                                    🛰️ Live Track
+                                  </button>
+                                  {isActive && (
+                                    <button className="mark-done-btn-v3" onClick={(e) => { e.stopPropagation(); handleVisited(currentIdx); }}>
+                                      Mark as Visited
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  );
+                });
+              })()}
+            </div>
+          </>
+        )}
         </div>
 
         <div className="sidebar-footer-premium">
           {!isMobile ? (
-            <div className="action-btn-group">
+            <div className="action-btn-group-v2">
               <button className="primary-action-btn" onClick={handleSaveTrip} disabled={saved || saving}>
                 {saving ? "Saving..." : saved ? "Journey Saved ✓" : "Save to Profile"}
               </button>
               <button className="secondary-action-btn" onClick={handleShare}>
-                {shareStatus ? "Link Copied!" : "Share Journey"}
+                {shareStatus ? "Link Copied!" : "Share Link"}
+              </button>
+              <button className="export-btn-pdf" onClick={handleExportPDF}>
+                📄 Export PDF
+              </button>
+              <button className="export-btn-wa" onClick={handleWhatsAppShare}>
+                💬 WhatsApp
               </button>
             </div>
           ) : (
-            <button className="mobile-view-switcher" onClick={() => navigate("/map")}>
-              🗺️ Open Interactive Map
+            <button className="primary-action-btn" style={{ width: '100%' }} onClick={handleSaveTrip} disabled={saved || saving}>
+              {saving ? "Saving..." : saved ? "Journey Saved ✓" : "Save to Profile"}
             </button>
           )}
         </div>
@@ -810,18 +863,8 @@ function Results() {
         </main>
       )}
 
-      {isMobile && !isMapViewRoute && (
-        <motion.button 
-          className="mobile-floating-map-btn"
-          onClick={() => navigate("/map")}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <span className="map-btn-icon">🗺️</span>
-          <span className="map-btn-text">View Map</span>
-        </motion.button>
-      )}
+      <BookingLeadGen plan={plan} />
+      {isMobile && <FloatingToggle />}
     </div>
   );
 }

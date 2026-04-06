@@ -451,10 +451,37 @@
   border-top: 1px solid var(--border-glass);
 }
 
-.action-btn-group {
+.action-btn-group, .action-btn-group-v2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+.export-btn-pdf, .export-btn-wa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.export-btn-wa {
+  background: rgba(37, 211, 102, 0.1);
+  color: #25d366;
+  border-color: rgba(37, 211, 102, 0.2);
+}
+
+.export-btn-pdf:hover, .export-btn-wa:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.2);
 }
 
 .primary-action-btn {
@@ -1028,32 +1055,64 @@
   filter: brightness(1.1);
 }
 
-/* ── MOBILE FLOATING MAP BUTTON ── */
-.mobile-floating-map-btn {
+/* ── MOBILE FLOATING TOGGLE FAB (PREMIUM GLASS) ── */
+.mobile-floating-toggle-fab {
   position: fixed;
-  bottom: 100px; /* Above bottom nav */
-  right: 20px;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: white;
-  border: none;
-  padding: 12px 20px;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 14px 24px;
   border-radius: 50px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  z-index: 10000; /* Stays above Leaflet (usually 400-1000) */
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 800;
-  font-size: 14px;
-  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
-  z-index: 1000;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  justify-content: center;
+  overflow: hidden;
 }
 
-.map-btn-icon {
+.mobile-floating-toggle-fab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.mobile-floating-toggle-fab:hover::before {
+  opacity: 1;
+}
+
+.fab-content-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fab-icon {
   font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab-text {
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 @media (min-width: 901px) {
-  .mobile-floating-map-btn {
+  .mobile-floating-toggle-fab {
     display: none;
   }
 }
