@@ -15,6 +15,9 @@ import { AuthContext } from "../context/AuthContext";
 import { auth } from "../firebase";
 import { AnimatePresence, motion } from "framer-motion";
 import FloatingToggle from "../components/FloatingToggle";
+import ItinerarySlider from "../components/ItinerarySlider";
+import SafetyModal from "../components/SafetyModal";
+import Haptics from "../utils/haptics";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
@@ -83,6 +86,7 @@ function Results() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [shareStatus, setShareStatus] = useState(false);
+  const [showSafetyModal, setShowSafetyModal] = useState(false);
 
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [userPreferences, setUserPreferences] = useState({
@@ -108,6 +112,7 @@ function Results() {
   });
 
   const [activePlace, setActivePlace] = useState(null);
+  const [selectedDayIdx, setSelectedDayIdx] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 900);
   const [userLocation, setUserLocation] = useState(null);
 
@@ -336,6 +341,7 @@ function Results() {
   };
 
   const handleVisited = (idx) => {
+    Haptics.light();
     const nextIdx = idx + 1;
     setCurrentIndex(nextIdx);
     localStorage.setItem("tripCurrentIndex", nextIdx);
@@ -401,15 +407,18 @@ function Results() {
 
       if (res.ok) {
         console.log("Trip saved successfully:", data);
+        Haptics.success();
         setSaved(true);
         setSaving(false); // Immediate reset
         localStorage.removeItem("pendingGuestTrip"); // Clear if saved
       } else {
         console.error("Backend save error:", data.error || "Unknown error");
+        Haptics.warning();
         setSaving(false);
       }
     } catch (err) { 
       console.error("Save fetch error:", err); 
+      Haptics.error();
       setSaving(false);
     }
   }, [saving, saved, plan, user, tripTitle, setShowAuthModal]);
@@ -603,7 +612,15 @@ function Results() {
     return (
       <div className="anchored-planner-root mobile-map-mode">
         <div className="map-half">
-          <MapView plan={plan} currentIndex={currentIndex} activePlace={activePlace} onHover={setActivePlace} userLocation={userLocation} setUserLocation={setUserLocation} />
+          <MapView 
+            plan={plan} 
+            currentIndex={currentIndex} 
+            activePlace={activePlace} 
+            onHover={setActivePlace} 
+            userLocation={userLocation} 
+            setUserLocation={setUserLocation} 
+            selectedDayIdx={selectedDayIdx}
+          />
           <button className="back-to-itin-btn" onClick={() => navigate("/results")}>✕ CLOSE MAP</button>
         </div>
 
@@ -652,7 +669,12 @@ function Results() {
               <div className="brand-glow-dot"></div>
               <span className="brand-text">Bharat Trip</span>
             </div>
-            <button className="back-control" onClick={() => navigate("/planner")}>← Edit Plan</button>
+            <div className="header-actions-row">
+              <button className="safety-trigger-btn" onClick={() => setShowSafetyModal(true)}>
+                🚨 <span className="safety-label">Safety</span>
+              </button>
+              <button className="back-control" onClick={() => navigate("/planner")}>← Edit</button>
+            </div>
           </div>
           <motion.h1 
             initial={{ opacity: 0, y: 10 }}
@@ -702,9 +724,20 @@ function Results() {
               </div>
               
               <div className="itinerary-days-container">
-                {(() => {
-                  let globalStopIdx = 0;
-                  return normalizedItinerary.map((day, dIdx) => {
+                {isMobile ? (
+                  <ItinerarySlider 
+                    itinerary={normalizedItinerary}
+                    onDayChange={setSelectedDayIdx}
+                    planCity={plan.city}
+                    formatPrice={formatPrice}
+                    currentIndex={currentIndex}
+                    handleVisited={handleVisited}
+                    guideMode={guideMode}
+                  />
+                ) : (
+                  (() => {
+                    let globalStopIdx = 0;
+                    return normalizedItinerary.map((day, dIdx) => {
                     const isLocked = !user && dIdx > 0;
                     
                     return (
@@ -820,13 +853,14 @@ function Results() {
                     </motion.div>
                   );
                 });
-              })()}
-            </div>
-          </>
-        )}
-        </div>
+              })()
+            )}
+          </div>
+        </>
+      )}
+      </div>
 
-        <div className="sidebar-footer-premium">
+      <div className="sidebar-footer-premium">
           {!isMobile ? (
             <div className="action-btn-group-v2">
               <button className="primary-action-btn" onClick={handleSaveTrip} disabled={saved || saving}>
@@ -859,12 +893,20 @@ function Results() {
             onHover={setActivePlace} 
             userLocation={userLocation} 
             setUserLocation={setUserLocation} 
+            selectedDayIdx={selectedDayIdx}
           />
         </main>
       )}
 
       <BookingLeadGen plan={plan} />
       {isMobile && <FloatingToggle />}
+
+      <SafetyModal 
+        isOpen={showSafetyModal} 
+        onClose={() => setShowSafetyModal(false)} 
+        city={plan?.city}
+        userLocation={userLocation}
+      />
     </div>
   );
 }

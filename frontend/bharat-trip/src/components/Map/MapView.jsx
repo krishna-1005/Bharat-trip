@@ -15,6 +15,7 @@ import ResizeMap from "./ResizeMap";
 import L from "leaflet";
 import { LocateControl } from "./LocateControl";
 import { useSettings } from "../../context/SettingsContext";
+import Haptics from "../../utils/haptics";
 
 import { DAY_COLORS } from "../../constants/dayColors";
 
@@ -84,6 +85,11 @@ function FlyToHandler({ activePlace }) {
       noMoveStart: true
     });
 
+    // Trigger haptic feedback once animation finishes
+    map.once("moveend", () => {
+      Haptics.light();
+    });
+
     // If user interacts during flight, Leaflet automatically cancels the animation.
   }, [activePlace, map]);
 
@@ -94,7 +100,7 @@ function FlyToHandler({ activePlace }) {
  * Manages map view changes and bounds fitting.
  * Combined into one component to ensure sequential updates and shared safety logic.
  */
-function MapController({ center, places, userLocation }) {
+function MapController({ center, places, userLocation, selectedDayIdx }) {
   const map = useMap();
 
   useEffect(() => {
@@ -114,13 +120,25 @@ function MapController({ center, places, userLocation }) {
     }
 
     // 2. Handle Bounds Fitting
-    const bounds = [];
-    places.forEach(p => {
-      const pos = getSafeLatLng(p.lat, p.lng);
-      if (pos) bounds.push(pos);
-    });
+    let bounds = [];
+    
+    // If a specific day is selected, only fit to those places
+    if (selectedDayIdx !== null && selectedDayIdx !== undefined) {
+      const dayPlaces = places.filter(p => p.dayIdx === selectedDayIdx);
+      if (dayPlaces.length > 0) {
+        bounds = dayPlaces.map(p => getSafeLatLng(p.lat, p.lng)).filter(pos => pos !== null);
+      }
+    }
 
-    if (userLocation) {
+    // Fallback to all places if no day selected or day has no places
+    if (bounds.length === 0) {
+      places.forEach(p => {
+        const pos = getSafeLatLng(p.lat, p.lng);
+        if (pos) bounds.push(pos);
+      });
+    }
+
+    if (userLocation && (selectedDayIdx === null || selectedDayIdx === undefined)) {
       const uPos = getSafeLatLng(userLocation.lat, userLocation.lng);
       if (uPos) bounds.push(uPos);
     }
@@ -132,7 +150,7 @@ function MapController({ center, places, userLocation }) {
         console.warn("MapController: fitBounds failed", err);
       }
     }
-  }, [map, center, places, userLocation]);
+  }, [map, center, places, userLocation, selectedDayIdx]);
 
   return null;
 }
@@ -188,7 +206,7 @@ function TileThemeController({ theme, tileUrls }) {
 
 // ── MAIN COMPONENT ──
 
-function MapView({ plan, currentIndex, userLocation, setUserLocation, activePlace, onHover }) {
+function MapView({ plan, currentIndex, userLocation, setUserLocation, activePlace, onHover, selectedDayIdx }) {
   const { theme, setTheme } = useSettings();
 
   // 1. Auto-dark mode logic (Bonus: past 7:00 PM)
@@ -247,7 +265,7 @@ function MapView({ plan, currentIndex, userLocation, setUserLocation, activePlac
       >
         <TileThemeController theme={theme} tileUrls={TILE_URLS} />
 
-        <MapController center={safeInitialCenter} places={allPlacesWithDay} userLocation={userLocation} />
+        <MapController center={safeInitialCenter} places={allPlacesWithDay} userLocation={userLocation} selectedDayIdx={selectedDayIdx} />
         <FlyToHandler activePlace={activePlace} />
         <ResizeMap trigger={activePlace} />
         <MapActions setUserLocation={setUserLocation} />
