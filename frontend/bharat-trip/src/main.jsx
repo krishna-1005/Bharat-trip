@@ -24,10 +24,11 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
       .then(registration => {
-        console.log('SW registered: ', registration);
+        console.log('PWA Active: Service Worker registered successfully');
+        console.log('Offline Resilience Ready: Strategy Stale-While-Revalidate');
       })
       .catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
+        console.error('PWA Registration failed: ', registrationError);
       });
   });
 }
