@@ -41,6 +41,8 @@ function Navbar() {
   };
 
   const isHomePage = location.pathname === "/";
+  const ADMIN_EMAILS = ["bharattrip@gmail.com", "krishkulkarni1005@gmail.com"];
+  const isAdmin = user && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email?.toLowerCase());
 
   const navLinks = [
     { label: "Explore", id: "destinations", path: "/explore" },
@@ -133,6 +135,11 @@ function Navbar() {
                       <button onClick={() => { navigate("/settings"); setProfileOpen(false); }} className="nb-dd-item">
                         ⚙️ Settings
                       </button>
+                      {isAdmin && (
+                        <button onClick={() => { navigate("/admin"); setProfileOpen(false); }} className="nb-dd-item">
+                          🛡️ Admin Panel
+                        </button>
+                      )}
                       <button onClick={handleLogout} className="nb-dd-item nb-dd-logout">
                         🚪 Logout
                       </button>
