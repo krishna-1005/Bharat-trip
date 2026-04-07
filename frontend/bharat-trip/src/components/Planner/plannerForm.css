@@ -76,7 +76,7 @@
 /* --- CHOICE CARDS TYPOGRAPHY & SPACING --- */
 .pf-selection-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-top: 12px;
 }
@@ -113,7 +113,7 @@
 /* --- INTEREST CARDS (STEP 3) --- */
 .pf-interest-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     margin-top: 12px;
 }
@@ -340,70 +340,35 @@
   box-shadow: 0 10px 20px rgba(255,255,255,0.1);
 }
 
-/* PACE CARDS REDESIGN */
-.pf-choice-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 24px;
-  border-radius: 24px;
+/* PROGRESS DOTS */
+.pf-progress-container {
   display: flex;
-  align-items: center;
-  gap: 20px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.pf-choice-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), transparent);
-  opacity: 0;
+.pf-step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
   transition: 0.3s;
 }
 
-.pf-choice-card.active {
-  border-color: #3b82f6;
-  background: rgba(59, 130, 246, 0.05);
-  transform: scale(1.02);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+.pf-step-dot.active {
+  background: var(--accent-blue);
+  box-shadow: 0 0 10px var(--accent-blue);
+  width: 24px;
+  border-radius: 10px;
 }
 
-.pf-choice-card.active::before { opacity: 1; }
-
-.pf-choice-icon {
-  font-size: 28px;
-  z-index: 1;
-  background: rgba(255,255,255,0.03);
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 18px;
+.pf-step-dot.completed {
+  background: var(--accent-blue);
+  opacity: 0.5;
 }
 
-.pf-choice-card.active .pf-choice-icon {
-  background: rgba(59, 130, 246, 0.2);
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
-}
-
-.pf-choice-label {
-  font-size: 16px;
-  font-weight: 800;
-  margin-bottom: 2px;
-  z-index: 1;
-}
-
-.pf-choice-desc {
-  font-size: 12px;
-  color: rgba(255,255,255,0.4);
-  z-index: 1;
-}
-
-/* --- FOOTER LAYOUT & TYPOGRAPHY --- */
+/* FOOTER SLEEK */
 .pf-footer-sleek {
     margin-top: 16px;
     padding: 20px 24px;
@@ -444,23 +409,6 @@
     border: none;
     cursor: pointer;
     transition: 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.pf-spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: pf-spin 0.6s linear infinite;
-}
-
-@keyframes pf-spin {
-  to { transform: rotate(360deg); }
 }
 
 .pf-secondary-btn {
@@ -471,128 +419,148 @@
     cursor: pointer;
 }
 
-/* Responsive Adjustments */
+/* Responsive Adjustments — PREMIUM MOBILE OVERHAUL */
 @media (max-width: 600px) {
     .pf-wrap {
-        gap: 24px;
-        padding-bottom: 160px; /* Increased space for BottomNav and FABs */
+        gap: 32px;
+        padding-bottom: 250px; /* Max clearance for BottomNav & FABs */
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .pf-step-header {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .pf-step-header p {
+        font-size: 10px;
+        letter-spacing: 3px;
     }
 
     .pf-step-header h2 {
-        font-size: 20px;
-    }
-
-    .pf-label {
-        font-size: 11px;
-    }
-
-    .pf-selection-grid, .pf-interest-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .pf-choice-card {
-        flex-direction: row;
-        align-items: center;
-        gap: 15px;
-        padding: 15px;
-    }
-
-    .pf-choice-icon {
         font-size: 24px;
+        margin-top: 4px;
     }
 
-    /* Currency Rail - make it more obvious it's a rail */
+    /* PREMIUM BUDGET CARD MOBILE */
+    .pf-premium-budget-card {
+        padding: 24px 20px;
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .pf-budget-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .pf-per-day-badge {
+        font-size: 10px;
+        padding: 4px 12px;
+    }
+
+    /* Sleek Currency Rail */
     .pf-currency-rail {
-        padding: 0 4px 15px 4px;
-        margin-bottom: 15px;
-        mask-image: linear-gradient(to right, black 85%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+        padding: 6px;
+        background: rgba(0,0,0,0.4);
+        border-radius: 14px;
+        margin-bottom: 24px;
+        gap: 6px;
     }
 
     .pf-currency-chip {
-        padding: 10px 16px;
-        background: rgba(255, 255, 255, 0.05);
+        padding: 8px 12px;
+        min-width: 65px;
+        border-radius: 100px;
     }
 
-    .pf-premium-budget-card {
-        padding: 20px;
-        border-radius: 20px;
-    }
-
+    /* Centered Huge Budget Input */
     .pf-budget-display {
-        margin: 10px 0 20px 0;
-        justify-content: center;
+        margin: 10px 0 28px 0;
         text-align: center;
     }
 
     .pf-budget-numeric-input {
-        font-size: 42px;
+        font-size: 56px;
+        font-weight: 900;
+        color: #ffffff;
+        text-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+        letter-spacing: -3px;
         width: 100%;
-        text-align: center !important;
-        max-width: none;
-        color: #3b82f6;
-        margin: 0 auto;
+        max-width: 100%;
     }
 
+    /* PACE CARDS REFINED */
+    .pf-selection-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .pf-choice-card {
+        padding: 20px;
+        border-radius: 20px;
+        flex-direction: row;
+        gap: 18px;
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .pf-choice-icon {
+        width: 54px;
+        height: 54px;
+        min-width: 54px;
+        font-size: 22px;
+        border-radius: 16px;
+    }
+
+    /* SLEEK FOOTER MOBILE */
     .pf-footer-sleek {
         flex-direction: column;
-        gap: 16px;
-        text-align: center;
-        padding: 18px;
-        margin-top: 24px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        justify-content: center !important;
-        align-items: center !important;
-        display: flex !important;
+        gap: 20px;
+        padding: 24px;
+        background: #0a0a0a;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 32px;
+        position: relative;
+        z-index: 5;
+    }
+
+    .pf-estimate-box {
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        padding-bottom: 16px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        align-items: center;
     }
 
     .pf-btn-group {
         width: 100%;
-        flex-direction: row;
         gap: 12px;
-        justify-content: center !important;
-        display: flex !important;
+        display: flex;
+        justify-content: center;
     }
 
     .pf-primary-btn {
         flex: 1;
-        padding: 14px 20px;
-        font-size: 13px;
-        max-width: 180px;
+        padding: 16px;
+        border-radius: 16px;
+        font-size: 15px;
     }
 
     .pf-secondary-btn {
         flex: 1;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 14px 10px;
-        font-size: 13px;
-        color: #fff;
-        max-width: 120px;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-
-    .pf-estimate-box {
-        display: flex !important;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center !important;
-        gap: 10px;
-        width: 100%;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        padding-bottom: 12px;
-    }
-
-    .pf-est-label {
-        margin-bottom: 0;
-    }
-
-    .pf-est-val {
-        font-size: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 16px;
+        color: #94a3b8;
+        font-weight: 700;
+        text-align: center;
     }
 }

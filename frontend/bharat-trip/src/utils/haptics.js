@@ -29,6 +29,13 @@ const Haptics = {
   },
 
   /**
+   * 30ms Medium Tap: Significant button clicks or selection feedback.
+   */
+  medium() {
+    this._vibrate(30);
+  },
+
+  /**
    * 50-30-50 Success: Professional double-tap for completions or saves.
    */
   success() {

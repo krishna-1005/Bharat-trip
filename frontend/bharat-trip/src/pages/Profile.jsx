@@ -119,39 +119,42 @@ export default function Profile() {
       <div className="pro-body">
         <header className="pro-hero">
           <div className="pro-hero-inner">
-            <div className="pro-avatar">{initial}</div>
+            <div className="pro-avatar-wrap">
+              <div className="pro-avatar">{initial}</div>
+              <div className="pro-avatar-glow"></div>
+            </div>
+            
             <div className="pro-user-info">
+              <div className="pro-badge-row desktop-only">
+                <span className="pro-status-badge premium">Premium Member</span>
+                <span className="pro-status-badge verified">Verified Traveler</span>
+              </div>
+              
               <h1 className="pro-name">{name}</h1>
               <p className="pro-bio">Adventurer • Explorer • Storyteller</p>
               
+              <div className="pro-badge-row mobile-only">
+                <span className="pro-status-badge premium">Premium</span>
+                <span className="pro-status-badge verified">Verified</span>
+              </div>
+
               {travelTags.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+                <div className="pro-tags-row">
                   {travelTags.map(tag => (
-                    <span key={tag} style={{ 
-                      fontSize: '10px', 
-                      background: 'rgba(59, 130, 246, 0.1)', 
-                      color: '#60a5fa', 
-                      padding: '4px 10px', 
-                      borderRadius: '100px',
-                      fontWeight: '800',
-                      border: '1px solid rgba(59, 130, 246, 0.2)'
-                    }}>
+                    <span key={tag} className="pro-tag">
                       ✦ {tag.toUpperCase()}
                     </span>
                   ))}
                 </div>
               )}
-
-              <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                <span className="pro-trip-badge" style={{ position: 'static', background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa' }}>Premium Member</span>
-                <span className="pro-trip-badge" style={{ position: 'static', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}>Verified Traveler</span>
-              </div>
             </div>
+
             <div className="pro-actions">
               <button className="btn-premium primary" onClick={() => navigate("/planner")}>
-                + New Journey
+                <span className="btn-icon">✨</span>
+                <span className="btn-text">New Journey</span>
               </button>
-              <button className="btn-premium outline" style={{ width: '56px', height: '56px', padding: 0 }} onClick={() => navigate("/settings")}>
+              <button className="btn-premium outline icon-only" onClick={() => navigate("/settings")}>
                 ⚙️
               </button>
             </div>
@@ -161,11 +164,13 @@ export default function Profile() {
         <div className="pro-stats">
           {stats.map((s, i) => (
             <div key={i} className="pro-stat-card">
-              <div className="pro-stat-header">
-                <span className="pro-stat-icon" style={{ background: `${s.color}15`, color: s.color }}>{s.icon}</span>
+              <div className="pro-stat-icon-wrap" style={{ background: `${s.color}15`, color: s.color }}>
+                {s.icon}
+              </div>
+              <div className="pro-stat-info">
+                <span className="pro-stat-value">{s.value}</span>
                 <span className="pro-stat-label">{s.label}</span>
               </div>
-              <span className="pro-stat-value">{s.value}</span>
             </div>
           ))}
         </div>

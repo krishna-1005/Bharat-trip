@@ -19,6 +19,87 @@ import ItinerarySlider from "../components/ItinerarySlider";
 import SafetyModal from "../components/SafetyModal";
 import Haptics from "../utils/haptics";
 
+/** ── RIDE MODAL COMPONENT ── **/
+const RideModal = ({ isOpen, onClose, destination }) => {
+  const { lat, lng, name } = destination || {};
+
+  const handleRide = (e, provider) => {
+    e.stopPropagation();
+    if (Haptics.medium) Haptics.medium();
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
+    if (provider === 'uber') {
+      const uberUrl = `uber://?action=setPickup&pickup=my_location&dropoff[latitude]=${lat}&dropoff[longitude]=${lng}&dropoff[nickname]=${encodeURIComponent(name)}`;
+      window.location.href = uberUrl;
+      setTimeout(() => {
+        if (document.hasFocus()) {
+          window.open(`https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=${lat}&dropoff[longitude]=${lng}`, '_blank');
+        }
+      }, 1500);
+    } else {
+      if (isIOS) {
+        window.open(`maps://?daddr=${lat},${lng}&dirflg=d`, '_blank');
+      } else {
+        window.open(`google.navigation:q=${lat},${lng}`, '_blank');
+      }
+      setTimeout(() => {
+        if (document.hasFocus()) {
+          window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+        }
+      }, 1500);
+    }
+    onClose();
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && destination && (
+        <motion.div 
+          className="ride-modal-overlay" 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          style={{ zIndex: 100000 }}
+        >
+          <motion.div 
+            className="ride-modal-card"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="sheet-pull-handle"></div>
+            <div className="ride-modal-header">
+              <h3>Ride to {name}</h3>
+              <p>Choose your preferred way to travel</p>
+            </div>
+            <div className="ride-options-grid">
+              <button type="button" className="ride-opt-btn uber" onClick={(e) => handleRide(e, 'uber')}>
+                <span className="ride-icon">🚗</span>
+                <div className="ride-info">
+                  <strong>Uber</strong>
+                  <span>Direct deep-link</span>
+                </div>
+              </button>
+              <button type="button" className="ride-opt-btn maps" onClick={(e) => handleRide(e, 'maps')}>
+                <span className="ride-icon">🗺️</span>
+                <div className="ride-info">
+                  <strong>Maps</strong>
+                  <span>Navigation & Rickshaws</span>
+                </div>
+              </button>
+            </div>
+            <button type="button" className="ride-cancel-btn" onClick={(e) => { e.stopPropagation(); onClose(); }}>Cancel</button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 
 const THINKING_MESSAGES = [
@@ -87,6 +168,7 @@ function Results() {
   const [saved, setSaved] = useState(false);
   const [shareStatus, setShareStatus] = useState(false);
   const [showSafetyModal, setShowSafetyModal] = useState(false);
+  const [rideModalConfig, setRideModalConfig] = useState({ isOpen: false, destination: null });
 
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [userPreferences, setUserPreferences] = useState({
@@ -625,6 +707,7 @@ function Results() {
         </div>
 
         <div className="live-guide-half">
+          <div className="sheet-pull-handle"></div>
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -733,6 +816,7 @@ function Results() {
                     currentIndex={currentIndex}
                     handleVisited={handleVisited}
                     guideMode={guideMode}
+                    setRideModalConfig={setRideModalConfig}
                   />
                 ) : (
                   (() => {
@@ -839,6 +923,15 @@ function Results() {
                                   >
                                     🛰️ Live Track
                                   </button>
+                                  <button 
+                                    className="ride-there-btn-v3"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setRideModalConfig({ isOpen: true, destination: place });
+                                    }}
+                                  >
+                                    🚗 Ride
+                                  </button>
                                   {isActive && (
                                     <button className="mark-done-btn-v3" onClick={(e) => { e.stopPropagation(); handleVisited(currentIdx); }}>
                                       Mark as Visited
@@ -855,6 +948,28 @@ function Results() {
                 });
               })()
             )}
+            {/* Premium Map Entry Card for Mobile */}
+            {isMobile && (
+              <motion.div 
+                className="mobile-map-entry-card"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={() => navigate("/map")}
+              >
+                <div className="map-card-glow"></div>
+                <div className="map-card-content">
+                  <div className="map-card-info">
+                    <span className="map-badge">SPATIAL VIEW</span>
+                    <h3>Explore on Interactive Map</h3>
+                    <p>Visualize your odyssey with real-time tracking and routes.</p>
+                  </div>
+                  <div className="map-card-icon">🗺️</div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* BookingLeadGen is now always inside the sidebar at the end of content */}
+            <BookingLeadGen plan={plan} />
           </div>
         </>
       )}
@@ -898,14 +1013,20 @@ function Results() {
         </main>
       )}
 
-      <BookingLeadGen plan={plan} />
-      {isMobile && <FloatingToggle />}
+      {/* Removed separate BookingLeadGen from outside sidebar */}
+      {/* Removed FloatingToggle as map entry is now inline */}
 
       <SafetyModal 
         isOpen={showSafetyModal} 
         onClose={() => setShowSafetyModal(false)} 
         city={plan?.city}
         userLocation={userLocation}
+      />
+
+      <RideModal 
+        isOpen={rideModalConfig.isOpen}
+        onClose={() => setRideModalConfig({ isOpen: false, destination: null })}
+        destination={rideModalConfig.destination}
       />
     </div>
   );

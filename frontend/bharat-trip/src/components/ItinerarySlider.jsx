@@ -4,7 +4,7 @@ import PlaceImage from './PlaceImage';
 import Haptics from '../utils/haptics';
 import './itinerarySlider.css';
 
-const ItinerarySlider = ({ itinerary, onDayChange, planCity, formatPrice, currentIndex, handleVisited, guideMode }) => {
+const ItinerarySlider = ({ itinerary, onDayChange, planCity, formatPrice, currentIndex, handleVisited, guideMode, setRideModalConfig }) => {
   const scrollRef = useRef(null);
   const [activeDayIdx, setActiveDayIdx] = useState(0);
 
@@ -98,6 +98,15 @@ const ItinerarySlider = ({ itinerary, onDayChange, planCity, formatPrice, curren
                           }}
                         >
                           🛰️ Track
+                        </button>
+                        <button 
+                          className="slider-action-btn ride-btn"
+                          onClick={() => {
+                            Haptics.light();
+                            setRideModalConfig({ isOpen: true, destination: place });
+                          }}
+                        >
+                          🚗 Ride
                         </button>
                         {isActive && (
                           <button 

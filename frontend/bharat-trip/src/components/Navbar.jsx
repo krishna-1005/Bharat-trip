@@ -7,16 +7,16 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import "../styles/navbar.css";
 
 function Navbar() {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useContext(AuthContext);
-  const { t, theme, toggleTheme, language } = useSettings();
-  const [open, setOpen]           = useState(false);
+  const { theme, toggleTheme } = useSettings();
+  const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled]   = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const username = user?.name || user?.email || "";
+  const username = user?.displayName || user?.email || "";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -27,7 +27,7 @@ function Navbar() {
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setOpen(false);
+        setProfileOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -36,151 +36,156 @@ function Navbar() {
 
   const handleLogout = () => {
     logout();
-    setOpen(false);
-    setMobileMenuOpen(false);
+    setProfileOpen(false);
     navigate("/");
   };
 
-  const ADMIN_EMAILS = ["bharattrip@gmail.com", "krishkulkarni1005@gmail.com"];
   const isHomePage = location.pathname === "/";
-  const isAdmin = user && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email?.toLowerCase());
 
-  const homeLinks = [
-    { label: "Features",     id: "features"     },
-    { label: "How it Works", id: "how-it-works" },
-    { label: "Destinations", id: "destinations" },
+  const navLinks = [
+    { label: "Explore", id: "destinations", path: "/explore" },
+    { label: "Trips", id: "how-it-works", path: "/trips" },
+    { label: "Saved", id: "features", path: "/trips" },
+    { label: "Profile", id: "profile", path: "/profile" },
   ];
-
-  const defaultLinks = [
-    { label: "Home",    id: "home",    path: "/"            },
-    { label: "Explore", id: "explore", path: "/explore"     },
-    { label: "Poll",    id: "poll",    path: "/create-poll" },
-    { label: "Planner", id: "planner", path: "/trip-type"   },
-  ];
-
-  const navLinks = isHomePage ? homeLinks : defaultLinks;
 
   const handleNavClick = (link) => {
-    if (isHomePage && link.id !== "home" && link.id !== "admin") {
+    setMobileMenuOpen(false);
+    if (isHomePage && link.id !== "home") {
       const element = document.getElementById(link.id);
       if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
+        const offset = 80;
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = element.getBoundingClientRect().top;
+        window.scrollTo({
+          top: elementRect - bodyRect - offset,
+          behavior: "smooth"
+        });
+        return;
       }
-    } else {
-      navigate(link.path);
     }
-    setMobileMenuOpen(false);
+    navigate(link.path);
   };
 
   return (
-    <nav className={`nb-nav ${scrolled ? "nb-scrolled" : ""} ${mobileMenuOpen ? "nb-mobile-active" : ""}`}>
-      <div className="nb-logo" onClick={() => { navigate("/"); setMobileMenuOpen(false); window.scrollTo({top:0, behavior:'smooth'}); }}>
-        <span className="nb-logo-flag">🇮🇳</span>
-        <span className="nb-logo-text">Bharat Trip</span>
-      </div>
+    <nav className={`nb-nav-base ${scrolled ? "nb-nav-scrolled" : "nb-nav-initial"}`}>
+      <div className="nb-container-base">
+        
+        {/* LEFT: LOGO */}
+        <div className="nb-logo-wrap" onClick={() => navigate("/")}>
+          <span className="nb-logo-flag">🇮🇳</span>
+          <span className="nb-logo-text">Bharat <span>Trip</span></span>
+        </div>
 
-      <ul className="nb-links">
-        {navLinks.map(link => (
-          <li
-            key={link.id}
-            className={`nb-link-item ${!isHomePage && location.pathname === link.path ? "nb-active" : ""}`}
-            onClick={() => handleNavClick(link)}
-          >
-            {link.label}
-          </li>
-        ))}
-      </ul>
-
-      <div className="nb-right">
-        <LanguageSwitcher />
-        <button className="nb-theme-toggle" onClick={toggleTheme} aria-label="Toggle Theme">
-          <motion.div 
-            className="nb-toggle-thumb"
-            animate={{ x: theme === 'dark' ? 0 : 26 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            {theme === 'dark' ? '🌙' : '☀️'}
-          </motion.div>
-        </button>
-
-        {user ? (
-          <div className="nb-profile-wrap" ref={dropdownRef}>
-            <button className="nb-avatar" onClick={() => setOpen(!open)}>
-              <span className="nb-avatar-letter">{username.charAt(0).toUpperCase()}</span>
+        {/* CENTER: NAV LINKS (DESKTOP) */}
+        <div className="nb-links-pill">
+          {navLinks.map((link) => (
+            <button
+              key={link.label}
+              onClick={() => handleNavClick(link)}
+              className="nb-link-btn"
+            >
+              {link.label}
             </button>
-            <AnimatePresence>
-              {open && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="nb-dropdown"
-                >
-                  <div className="nb-dd-header">
-                    <div className="nb-dd-avatar-lg">{username.charAt(0).toUpperCase()}</div>
-                    <div className="nb-dd-user-info">
-                      <span className="nb-dd-name">{username}</span>
-                      <span className="nb-dd-tag">{user.email}</span>
-                    </div>
-                  </div>
-                  <div className="nb-dd-menu">
-                    <button className="nb-dd-item" onClick={() => { navigate("/profile"); setOpen(false); }}>👤 Profile</button>
-                    <button className="nb-dd-item" onClick={() => { navigate("/trips"); setOpen(false); }}>🗺️ My Trips</button>
-                    <button className="nb-dd-item" onClick={() => { navigate("/settings"); setOpen(false); }}>⚙️ Settings</button>
-                    {isAdmin && (
-                      <button className="nb-dd-item" onClick={() => { navigate("/admin"); setOpen(false); }}>🛡️ Admin Panel</button>
-                    )}
-                    <div className="nb-dd-divider"></div>
-                    <button className="nb-dd-logout" onClick={handleLogout}>Logout</button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        ) : (
-          <div className="nb-auth-btns desktop-only">
-            <button className="nb-btn-primary" onClick={() => navigate("/login")}>Login</button>
-          </div>
-        )}
+          ))}
+        </div>
 
-        <button 
-          className={`nb-hamburger ${mobileMenuOpen ? "active" : ""}`}
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          <span></span><span></span><span></span>
-        </button>
+        {/* RIGHT: CONTROLS */}
+        <div className="nb-right-stack">
+          <div className="desktop-only">
+            <LanguageSwitcher />
+          </div>
+
+          <button className="nb-icon-btn" onClick={toggleTheme}>
+            {theme === 'dark' ? '🌙' : '☀️'}
+          </button>
+
+          {user ? (
+            <div style={{ position: 'relative' }} ref={dropdownRef}>
+              <button 
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="nb-avatar-btn"
+              >
+                {username.charAt(0).toUpperCase()}
+              </button>
+              
+              <AnimatePresence>
+                {profileOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="nb-profile-dropdown"
+                  >
+                    <div className="nb-dd-user-box">
+                      <div className="nb-dd-avatar-sm">
+                        {username.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="nb-dd-info">
+                        <span className="nb-dd-name">{username}</span>
+                        <span className="nb-dd-email">{user.email}</span>
+                      </div>
+                    </div>
+                    <div className="nb-dd-menu">
+                      <button onClick={() => { navigate("/profile"); setProfileOpen(false); }} className="nb-dd-item">
+                        👤 Profile
+                      </button>
+                      <button onClick={() => { navigate("/settings"); setProfileOpen(false); }} className="nb-dd-item">
+                        ⚙️ Settings
+                      </button>
+                      <button onClick={handleLogout} className="nb-dd-item nb-dd-logout">
+                        🚪 Logout
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <button 
+              onClick={() => navigate("/login")}
+              className="nb-login-btn"
+            >
+              Login
+            </button>
+          )}
+
+          {/* HAMBURGER (MOBILE ONLY) */}
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className={`nb-hamburger mobile-only ${mobileMenuOpen ? 'active' : ''}`}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
       </div>
 
+      {/* MOBILE DRAWER */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div 
-            initial={{ x: '100%' }}
+          <motion.div
+            initial={{ x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="nb-mobile-menu"
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="nb-mobile-drawer"
           >
-            <ul className="nb-mobile-links">
-              {navLinks.map(link => (
-                <li key={link.id} className="nb-mobile-item" onClick={() => handleNavClick(link)}>
-                  {link.label}
-                </li>
-              ))}
-              {!user ? (
-                <li className="nb-mobile-item nb-mobile-login" onClick={() => navigate("/login")}>Login</li>
-              ) : (
-                <>
-                  <li className="nb-mobile-divider"></li>
-                  <li className="nb-mobile-item" onClick={() => { navigate("/profile"); setMobileMenuOpen(false); }}>👤 Profile</li>
-                  <li className="nb-mobile-item" onClick={() => { navigate("/trips"); setMobileMenuOpen(false); }}>🗺️ My Trips</li>
-                  <li className="nb-mobile-item" onClick={() => { navigate("/settings"); setMobileMenuOpen(false); }}>⚙️ Settings</li>
-                  {isAdmin && (
-                    <li className="nb-mobile-item" onClick={() => { navigate("/admin"); setMobileMenuOpen(false); }}>🛡️ Admin Panel</li>
-                  )}
-                  <li className="nb-mobile-item nb-mobile-logout" onClick={handleLogout}>Logout</li>
-                </>
-              )}
-            </ul>
+            <p className="nb-mobile-nav-title">Navigation</p>
+            {navLinks.map((link, i) => (
+              <motion.button
+                key={link.label}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 }}
+                onClick={() => handleNavClick(link)}
+                className="nb-mobile-link"
+              >
+                {link.label}
+                <span>→</span>
+              </motion.button>
+            ))}
           </motion.div>
         )}
       </AnimatePresence>

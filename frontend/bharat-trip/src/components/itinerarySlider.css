@@ -204,16 +204,20 @@
 .track-btn {
     background: rgba(255, 255, 255, 0.1);
     color: white;
-    grid-column: span 2;
+    grid-column: span 1;
 }
 
-.slider-stop-card-v4.active .track-btn {
+.ride-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
     grid-column: span 1;
 }
 
 .done-btn {
     background: #3b82f6;
     color: white;
+    grid-column: span 2;
 }
 
 .slider-nav-dots {

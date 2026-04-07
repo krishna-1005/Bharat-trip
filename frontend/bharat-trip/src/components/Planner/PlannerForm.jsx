@@ -97,9 +97,7 @@ function PlannerForm({ onPlanGenerated }) {
     };
 
     // Navigate to results with isNew: true and the form data
-    // Results.jsx will now handle the "Quiz + API Call" flow
     if (onPlanGenerated) {
-      // We pass the parameters as state so Results.jsx can trigger the real generation
       onPlanGenerated(null, queryParams); 
     }
   };

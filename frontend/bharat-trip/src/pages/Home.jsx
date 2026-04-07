@@ -113,7 +113,6 @@ const TripPulse = () => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/public/recent-activity`);
       const data = await res.json();
       if (data.activity && data.activity.length > 0) {
-        // Format time to relative string
         const formatted = data.activity.map(a => {
           const diff = Math.floor((new Date() - new Date(a.time)) / 60000);
           let timeStr = "Just now";
@@ -134,7 +133,7 @@ const TripPulse = () => {
 
   useEffect(() => {
     fetchActivity();
-    const interval = setInterval(fetchActivity, 15000); // Refresh every 15s
+    const interval = setInterval(fetchActivity, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -374,10 +373,8 @@ const TravelFeed = () => {
   );
 };
 
-/* Added inline styles for mobile responsiveness where classes aren't enough */
 const Home = () => {
   const navigate = useNavigate();
-  const isMobile = window.innerWidth <= 768;
   const destRef = useRef(null);
 
   const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024);
@@ -388,7 +385,6 @@ const Home = () => {
     const handleResize = () => setIsDesktop(window.innerWidth > 1024);
     window.addEventListener('resize', handleResize);
     
-    // Onboarding check
     const hasSeenGuide = localStorage.getItem("hasSeenGuide");
     if (!hasSeenGuide) {
       setTimeout(() => setShowTooltip(true), 2000);
@@ -423,7 +419,6 @@ const Home = () => {
   };
 
   const handleViewSample = () => {
-    // Navigate to a known popular destination details or results
     navigate('/explore/Goa');
   };
 
@@ -449,7 +444,6 @@ const Home = () => {
   ];
 
   const [selectedMood, setSelectedMood] = useState('🏖️ Relaxed');
-  const [selectedBudget, setSelectedBudget] = useState('Comfort');
 
   const matchData = {
     '🏔️ Adventure': { name: 'Manali', desc: 'Snow-capped peaks and thrilling paragliding.', img: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80' },
@@ -458,14 +452,6 @@ const Home = () => {
     '🎭 Culture': { name: 'Varanasi', desc: 'The spiritual heart of timeless India.', img: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80' },
     '💖 Romantic': { name: 'Udaipur', desc: 'Palaces, lakes, and royal romance.', img: 'https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=800&q=80' },
   };
-
-  const galleryImages = [
-    "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1593179241557-bce1eb92e47e?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1581791534721-e599df4417f7?auto=format&fit=crop&w=800&q=80"
-  ];
 
   useEffect(() => {
     const randomIdx = Math.floor(Math.random() * heroOptions.length);
@@ -569,7 +555,8 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="onboarding-decision-section container">
+      {/* Added ID for scrolling */}
+      <section id="features" className="container onboarding-decision-section">
         <div className="section-header">
           <h2>What do you want to do?</h2>
           <p className="dashboard-subtitle">Quickly jump into your next travel phase</p>
@@ -605,29 +592,12 @@ const Home = () => {
         </div>
       </section>
 
-      <div className="container">
-        <div className="actions-grid">
-          {[
-            { label: "AI Planner", icon: "🤖", path: "/trip-type", desc: "Craft custom itinerary." },
-            { label: "Polls", icon: "🗳️", path: "/create-poll", desc: "Vote with friends." },
-            { label: "Map", icon: "🗺️", path: "/map", desc: "Visual exploration." },
-            { label: "Explore", icon: "✨", action: scrollToDestinations, desc: "Top destinations." },
-          ].map((action, i) => (
-            <motion.div 
-              key={i}
-              whileTap={{ scale: 0.97 }}
-              className="action-card" 
-              onClick={() => action.path ? navigate(action.path) : action.action()}
-            >
-              <div className="action-icon">{action.icon}</div>
-              <div className="action-info">
-                <h3>{action.label}</h3>
-                <p className="desktop-only">{action.desc}</p>
-              </div>
-            </motion.div>
-          ))}
+      {/* Added ID for scrolling */}
+      <section id="how-it-works" className="container travel-feed-section">
+        <div className="feed-container">
+          <TravelFeed />
         </div>
-      </div>
+      </section>
 
       <section className="matchmaker-section container">
         <div className="matchmaker-card">
@@ -667,8 +637,6 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
-
-      <TravelFeed />
 
       <TripPulse />
 
