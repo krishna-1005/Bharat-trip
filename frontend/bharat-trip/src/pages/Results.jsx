@@ -999,13 +999,25 @@ function Results() {
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-              <button className="primary-action-btn" style={{ flex: 1 }} onClick={handleSaveTrip} disabled={saved || saving}>
+            <div className="mobile-action-footer-v2">
+              <button className="primary-action-btn mobile-save-btn" onClick={handleSaveTrip} disabled={saved || saving}>
                 {saving ? "Saving..." : saved ? "Journey Saved ✓" : "Save to Profile"}
               </button>
-              <button className="qr-share-btn-mobile" onClick={() => setShowQRModal(true)} style={{ padding: '0 15px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                📱
-              </button>
+              
+              <div className="mobile-secondary-grid">
+                <button className="secondary-action-btn" onClick={handleShare}>
+                  {shareStatus ? "Copied!" : "Share Link"}
+                </button>
+                <button className="export-btn-pdf" onClick={handleExportPDF}>
+                  📄 Export PDF
+                </button>
+                <button className="export-btn-wa" onClick={handleWhatsAppShare}>
+                  💬 WhatsApp
+                </button>
+                <button className="qr-share-btn-v2" onClick={() => setShowQRModal(true)}>
+                  📱 QR Code
+                </button>
+              </div>
             </div>
           )}
         </div>

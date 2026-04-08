@@ -1426,3 +1426,51 @@
   .ride-modal-overlay { align-items: center; justify-content: center; }
   .ride-modal-card { max-width: 400px; border-radius: 32px; padding: 40px; }
 }
+
+/* MOBILE ACTION FOOTER ENHANCEMENTS */
+.mobile-action-footer-v2 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.mobile-save-btn {
+  width: 100% !important;
+  padding: 14px !important;
+  font-size: 16px !important;
+}
+
+.mobile-secondary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.mobile-secondary-grid button {
+  padding: 10px !important;
+  font-size: 13px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  transition: all 0.2s;
+}
+
+.mobile-secondary-grid .export-btn-wa {
+  border-color: rgba(37, 211, 102, 0.2);
+}
+
+.qr-share-btn-v2 {
+  grid-column: span 2;
+  margin-top: 4px;
+  padding: 8px !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+

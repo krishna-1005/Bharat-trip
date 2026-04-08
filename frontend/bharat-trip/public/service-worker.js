@@ -57,7 +57,16 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match(request))
+        .catch(async () => {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          
+          // Fallback for API calls when offline and not cached
+          return new Response(JSON.stringify({ error: "Offline", message: "You are offline and this data is not cached." }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        })
     );
     return;
   }
