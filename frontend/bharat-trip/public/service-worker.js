@@ -62,9 +62,14 @@ self.addEventListener('fetch', (event) => {
           if (cached) return cached;
           
           // Fallback for API calls when offline and not cached
+          // Added CORS headers so Vercel can read this response from the Render API
           return new Response(JSON.stringify({ error: "Offline", message: "You are offline and this data is not cached." }), {
             status: 503,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*', // Critical for cross-origin offline messages
+              'Access-Control-Allow-Credentials': 'true'
+            }
           });
         })
     );

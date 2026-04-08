@@ -24,21 +24,12 @@ const maintenanceMode = require("./middleware/maintenance");
 // More permissive CORS for troubleshooting
 app.use(
   cors({
-    origin: true, // Reflect request origin back to allow any origin
+    origin: true, // Reflect request origin back
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
   })
 );
-
-// Explicitly handle preflight for all routes using regex for maximum compatibility
-app.options(/.*/, (req, res) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.sendStatus(204);
-});
 
 app.use(express.json());
 app.use(maintenanceMode);
@@ -69,9 +60,14 @@ app.get("/", (req, res) => {
   });
 });
 
-/* ── ping route (keeps server awake) ── */
+/* ── ping route ── */
 app.get("/ping", (req, res) => {
   res.status(200).send("BharatTrip server alive 🚀");
+});
+
+// 404 Handler with CORS support
+app.use((req, res) => {
+  res.status(404).json({ error: "Not Found", message: "The requested API route does not exist." });
 });
 
 module.exports = app;
