@@ -1,21 +1,21 @@
-const STATIC_CACHE = 'static-assets-v4';
-const MAP_CACHE = 'map-tiles-v4';
-const ITINERARY_CACHE = 'itinerary-cache-v4';
+const VERSION = 'v8';
+const CACHE_NAME = `bt-cache-${VERSION}`;
 
-const STATIC_ASSETS = [
+// Assets that MUST be cached for the app to work offline
+const CORE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/vite.svg',
-  '/og-image.png'
+  '/vite.svg'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
-      console.log('[SW] Pre-caching Core Files');
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('[SW] Pre-caching core assets');
+      // Using allSettled to prevent one missing file from breaking the SW
       return Promise.allSettled(
-        STATIC_ASSETS.map(url => cache.add(url))
+        CORE_ASSETS.map(asset => cache.add(asset).catch(err => console.warn(`Failed to cache ${asset}:`, err)))
       );
     })
   );
@@ -24,15 +24,9 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (![STATIC_CACHE, MAP_CACHE, ITINERARY_CACHE].includes(key)) {
-            return caches.delete(key);
-          }
-        })
-      );
-    })
+    caches.keys().then((keys) => 
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
   );
   self.clients.claim();
 });
@@ -41,9 +35,8 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  if (request.method !== 'GET') return;
-
-  // 1. Navigation Fallback (CRITICAL FOR OFFLINE)
+  // 1. Navigation Fallback (SPA Support)
+  // When user refreshes on /results or /map, serve index.html from cache
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(() => {
@@ -53,55 +46,39 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. Map Tiles
-  if (url.hostname.includes('tile.openstreetmap.org') || url.hostname.includes('basemaps.cartocdn.com')) {
-    event.respondWith(staleWhileRevalidate(MAP_CACHE, request));
+  // 2. API Strategy: Network First
+  if (url.pathname.startsWith('/api')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok && request.method === 'GET') {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
     return;
   }
 
-  // 3. API Data
-  if (url.pathname.includes('/api/trip') || url.pathname.includes('/api/plan')) {
-    event.respondWith(staleWhileRevalidate(ITINERARY_CACHE, request));
-    return;
-  }
+  // 3. Asset Strategy: Cache First, then Network
+  // This handles Vite JS/CSS bundles and prevents the blank white screen
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
 
-  // 4. Static Assets (Bundles, Images, Fonts)
-  if (
-    url.origin === self.location.origin ||
-    url.hostname.includes('fonts.googleapis.com') ||
-    url.hostname.includes('fonts.gstatic.com')
-  ) {
-    event.respondWith(staleWhileRevalidate(STATIC_CACHE, request));
-    return;
-  }
+      return fetch(request).then((response) => {
+        // Cache successful responses from our own origin or images
+        if (response.ok && (url.origin === self.location.origin || request.destination === 'image')) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+        }
+        return response;
+      }).catch(() => {
+        // If offline and image fails, show placeholder
+        if (request.destination === 'image') return caches.match('/vite.svg');
+      });
+    })
+  );
 });
-
-async function staleWhileRevalidate(cacheName, request) {
-  const cache = await caches.open(cacheName);
-  const cachedResponse = await cache.match(request);
-
-  // If we have it in cache, return it immediately, but update in background
-  if (cachedResponse) {
-    // Background update
-    fetch(request).then((networkResponse) => {
-      if (networkResponse && networkResponse.status === 200) {
-        cache.put(request, networkResponse.clone());
-      }
-    }).catch(() => {/* Silent fail for background fetch */});
-    
-    return cachedResponse;
-  }
-
-  // If not in cache, fetch and put in cache
-  return fetch(request).then((networkResponse) => {
-    if (networkResponse && networkResponse.status === 200) {
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  }).catch(() => {
-    // If network fails and NO cache, last resort is index.html for UI shell
-    if (request.destination === 'document') {
-      return caches.match('/index.html');
-    }
-  });
-}

@@ -7,9 +7,10 @@ export default function PlaceImage({ placeName, city, className, style }) {
 
   useEffect(() => {
     let mounted = true;
+    setImage(null); // Reset image on prop change
+    setLoading(true);
 
     const fetchImg = async () => {
-      setLoading(true);
       const img = await getPlaceImage(placeName, city);
       if (mounted) {
         setImage(img);

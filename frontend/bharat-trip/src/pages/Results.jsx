@@ -167,8 +167,12 @@ function Results() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [shareStatus, setShareStatus] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
   const [showSafetyModal, setShowSafetyModal] = useState(false);
   const [rideModalConfig, setRideModalConfig] = useState({ isOpen: false, destination: null });
+
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${window.location.origin}/trip/${plan?.id || routeTripId || ''}`)}`;
+
 
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [userPreferences, setUserPreferences] = useState({
@@ -990,11 +994,19 @@ function Results() {
               <button className="export-btn-wa" onClick={handleWhatsAppShare}>
                 💬 WhatsApp
               </button>
+              <button className="qr-share-btn" onClick={() => setShowQRModal(true)}>
+                📱 QR Code
+              </button>
             </div>
           ) : (
-            <button className="primary-action-btn" style={{ width: '100%' }} onClick={handleSaveTrip} disabled={saved || saving}>
-              {saving ? "Saving..." : saved ? "Journey Saved ✓" : "Save to Profile"}
-            </button>
+            <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+              <button className="primary-action-btn" style={{ flex: 1 }} onClick={handleSaveTrip} disabled={saved || saving}>
+                {saving ? "Saving..." : saved ? "Journey Saved ✓" : "Save to Profile"}
+              </button>
+              <button className="qr-share-btn-mobile" onClick={() => setShowQRModal(true)} style={{ padding: '0 15px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                📱
+              </button>
+            </div>
           )}
         </div>
       </aside>
@@ -1028,6 +1040,61 @@ function Results() {
         onClose={() => setRideModalConfig({ isOpen: false, destination: null })}
         destination={rideModalConfig.destination}
       />
+
+      {/* QR CODE MODAL */}
+      <AnimatePresence>
+        {showQRModal && (
+          <motion.div 
+            className="qr-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowQRModal(false)}
+            style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              zIndex: 1000000, padding: '20px'
+            }}
+          >
+            <motion.div 
+              className="qr-modal-card"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)',
+                padding: '32px', borderRadius: '24px', textAlign: 'center',
+                maxWidth: '350px', width: '100%'
+              }}
+            >
+              <h3 style={{ marginBottom: '8px', color: '#fff' }}>Share Odyssey</h3>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginBottom: '24px' }}>
+                Scan this code to instantly open this itinerary on another device.
+              </p>
+              
+              <div style={{ 
+                background: '#fff', padding: '12px', borderRadius: '16px', 
+                display: 'inline-block', marginBottom: '24px' 
+              }}>
+                <img src={qrCodeUrl} alt="Trip QR Code" style={{ display: 'block' }} />
+              </div>
+
+              <button 
+                onClick={() => setShowQRModal(false)}
+                style={{
+                  width: '100%', padding: '12px', borderRadius: '12px',
+                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#fff', cursor: 'pointer', fontWeight: '600'
+                }}
+              >
+                Close
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

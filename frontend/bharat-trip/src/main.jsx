@@ -25,7 +25,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js')
       .then(registration => {
         console.log('PWA Active: Service Worker registered successfully');
-        console.log('Offline Resilience Ready: Strategy Stale-While-Revalidate');
+        console.log('Offline Resilience Ready: Strategy Network-First');
       })
       .catch(registrationError => {
         console.error('PWA Registration failed: ', registrationError);

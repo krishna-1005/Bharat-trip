@@ -33,6 +33,7 @@ import Maintenance from "./pages/Maintenance";
 import TripRoom from "./pages/TripRoom";
 
 import TravelBot from "./components/TravelBot";
+import InstallPrompt from "./components/InstallPrompt";
 
 import "./styles/layout.css";
 import "./styles/global.css";
@@ -185,6 +186,7 @@ function App() {
       </ErrorBoundary>
 
       <AuthModal />
+      <InstallPrompt />
 
       {/* AI Chatbot */}
       <TravelBot />
