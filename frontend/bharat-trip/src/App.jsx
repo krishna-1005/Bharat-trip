@@ -47,7 +47,7 @@ import AuthModal from "./components/AuthModal";
 import { AuthContext } from "./context/AuthContext";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
-const ADMIN_EMAILS = ["bharattrip@gmail.com", "krishkulkarni1005@gmail.com"];
+const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
 
 class ErrorBoundary extends Component {
   constructor(props) {

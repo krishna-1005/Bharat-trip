@@ -6,10 +6,10 @@ import axios from "axios";
 
 // Helper to get or create guestId
 const getGuestId = () => {
-  let gid = localStorage.getItem("bharat_trip_guest_id");
+  let gid = localStorage.getItem("gotripo_guest_id");
   if (!gid) {
     gid = `guest_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
-    localStorage.setItem("bharat_trip_guest_id", gid);
+    localStorage.setItem("gotripo_guest_id", gid);
   }
   return gid;
 };
@@ -22,7 +22,7 @@ export default function AuthProvider({ children }) {
 
   const trackActivity = useCallback(async (u, action = "page_view") => {
     try {
-      const gid = localStorage.getItem("bharat_trip_guest_id");
+      const gid = localStorage.getItem("gotripo_guest_id");
       if (!gid) return; // Don't track if no guest ID yet
 
       const payload = {

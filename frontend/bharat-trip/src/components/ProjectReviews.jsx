@@ -74,7 +74,7 @@ export default function ProjectReviews() {
       <div className="reviews-container">
         <div className="reviews-header">
           <h2>Explorer Feedback</h2>
-          <p>What fellow travelers are saying about Bharat Trip</p>
+          <p>What fellow travelers are saying about GoTripo</p>
         </div>
 
         <div className="reviews-list">

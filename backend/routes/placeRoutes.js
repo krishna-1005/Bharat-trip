@@ -35,7 +35,7 @@ router.get("/search", async (req, res) => {
   try {
     const response = await axios.get(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=5`,
-      { headers: { "User-Agent": "BharatTrip/1.0" } }
+      { headers: { "User-Agent": "GoTripo/1.0" } }
     );
 
     const places = response.data.map(p => ({

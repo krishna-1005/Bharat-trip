@@ -26,7 +26,7 @@ export default function About() {
       a: "Our AI analyzes millions of data points including local attractions, opening hours, traffic patterns, and user preferences to curate a logical, time-efficient itinerary just for you."
     },
     {
-      q: "Is Bharat Trip free to use?",
+      q: "Is GoTripo free to use?",
       a: "Yes! The core trip planning and discovery features are completely free for all explorers."
     },
     {
@@ -45,7 +45,7 @@ export default function About() {
             <span className="section-label">Our Story</span>
             <h1>Redefining Travel through Intelligence</h1>
             <p>
-              Bharat Trip was born from a simple idea: that planning a journey should be as 
+              GoTripo was born from a simple idea: that planning a journey should be as 
               exciting as the journey itself. We combine deep local insights with 
               cutting-edge AI.
             </p>

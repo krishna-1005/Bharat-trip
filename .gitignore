@@ -30,7 +30,7 @@ Thumbs.db
 coverage/
 
 # frontend build
-frontend/bharat-trip/dist/
+frontend/gotripo/dist/
 
 # backend logs
 backend/logs/

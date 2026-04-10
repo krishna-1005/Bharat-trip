@@ -160,7 +160,7 @@ export default function MinimalReviewSection() {
 
         <div style={formBoxStyle}>
           <h3 style={{marginBottom: "16px", fontSize: "2rem", fontWeight: "800", fontFamily: "'Syne', sans-serif"}}>Share Your Journey</h3>
-          <p style={{color: "var(--text-dim)", marginBottom: "40px"}}>How did BharatTrip AI transform your exploration?</p>
+          <p style={{color: "var(--text-dim)", marginBottom: "40px"}}>How did GoTripo AI transform your exploration?</p>
           
           {user ? (
             <form onSubmit={handleReviewSubmit}>

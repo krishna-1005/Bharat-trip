@@ -27,7 +27,7 @@ const Maintenance = () => {
         
         <p className="large-text" style={{ marginBottom: '40px' }}>
           We're currently performing some scheduled updates to improve your experience. 
-          BharatTrip will be back online shortly. Thank you for your patience!
+          GoTripo will be back online shortly. Thank you for your patience!
         </p>
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>

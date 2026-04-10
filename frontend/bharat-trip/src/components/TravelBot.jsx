@@ -9,7 +9,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text: "Hi! I'm BharatTrip AI, your personal travel assistant for India. 🇮🇳\n\nI can help you plan trips to **Bengaluru**, **Mumbai**, **Delhi**, **Jaipur**, **Goa**, and more! Just tell me where you want to go, for how long, and what you enjoy.\n\nWhere shall we plan your next adventure?"
+      text: "Hi! I'm GoTripo AI, your personal travel assistant for India. 🇮🇳\n\nI can help you plan trips to **Bengaluru**, **Mumbai**, **Delhi**, **Jaipur**, **Goa**, and more! Just tell me where you want to go, for how long, and what you enjoy.\n\nWhere shall we plan your next adventure?"
     }
   ]);
 
@@ -122,7 +122,7 @@ export default function TravelBot({ isOpen, setIsOpen }) {
         <div className="cb-window">
           <div className="cb-header">
             <div className="cb-header-info">
-              <h3>BharatTrip AI</h3>
+              <h3>GoTripo AI</h3>
               <div className="cb-status">
                 <span className="pulse-dot"></span>
                 Online & Ready

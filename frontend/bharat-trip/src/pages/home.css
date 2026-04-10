@@ -67,7 +67,8 @@ h1, h2, h3 {
   min-height: 80vh;
   display: flex;
   align-items: center;
-  padding-top: 120px;
+  padding-top: 60px;
+  position: relative;
 }
 
 .hero-grid {
@@ -79,6 +80,7 @@ h1, h2, h3 {
 
 .hero-content {
   text-align: left;
+  margin-bottom: 54px;
 }
 
 .hero-content h1 {
@@ -230,6 +232,44 @@ h1, h2, h3 {
 .card-1 { top: 5%; right: 10%; z-index: 5; }
 .card-2 { bottom: 10%; left: 15%; z-index: 8; }
 .card-3 { bottom: 5%; right: 15%; z-index: 12; }
+
+/* SCROLL INDICATOR */
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  z-index: 20;
+  transition: opacity 0.3s ease;
+}
+
+.hero-scroll-indicator:hover {
+  opacity: 0.7;
+}
+
+.scroll-text {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+}
+
+.scroll-arrow {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 768px) {
+  .hero-scroll-indicator {
+    bottom: 10px;
+  }
+}
 
 /* ── QUICK ACTION PANEL (MENU) ── */
 .quick-actions {

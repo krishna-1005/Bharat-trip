@@ -1,5 +1,5 @@
 /**
- * Haptic Engine Utility for Bharat Trip
+ * Haptic Engine Utility for GoTripo
  * Wraps the navigator.vibrate API with professional patterns and safety checks.
  */
 

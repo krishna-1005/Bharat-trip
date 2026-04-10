@@ -27,12 +27,12 @@ async function sendUpdateEmail(emails, subject, content) {
   }
 
   const mailOptions = {
-    from: `"BharatTrip Updates" <${process.env.EMAIL_USER}>`,
+    from: `"GoTripo Updates" <${process.env.EMAIL_USER}>`,
     bcc: emails.join(", "), // Use BCC for privacy
     subject: subject,
     html: `
       <div style="font-family: sans-serif; padding: 20px; color: #333;">
-        <h2 style="color: #3b82f6;">🌍 BharatTrip Update</h2>
+        <h2 style="color: #3b82f6;">🌍 GoTripo Update</h2>
         <div style="font-size: 16px; line-height: 1.6;">
           ${content}
         </div>

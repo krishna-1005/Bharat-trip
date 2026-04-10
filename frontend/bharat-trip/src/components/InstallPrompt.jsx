@@ -47,7 +47,7 @@ const InstallPrompt = () => {
       <div className="install-content">
         <div className="install-icon">📲</div>
         <div className="install-text">
-          <strong>Install Bharat Trip</strong>
+          <strong>Install GoTripo</strong>
           <span>Add to home screen for faster access & offline use</span>
         </div>
       </div>

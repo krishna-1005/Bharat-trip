@@ -1,5 +1,5 @@
 /* =============================================
-   PREMIUM SaaS-STYLE NAVBAR (Bharat Trip)
+   PREMIUM SaaS-STYLE NAVBAR (GoTripo)
 ============================================= */
 
 .nb-nav-base {
@@ -51,20 +51,18 @@
   transition: transform 0.3s ease;
 }
 
-.nb-logo-wrap:hover { transform: scale(1.02); }
-
-.nb-logo-flag { font-size: 24px; }
-
-.nb-logo-text {
-  font-size: 1.25rem;
-  font-weight: 900;
-  color: #fff;
-  letter-spacing: -1px;
-  text-transform: uppercase;
-  font-style: italic;
+.nb-brand-logo {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.2));
 }
 
-.nb-logo-text span { color: #3b82f6; }
+@media (max-width: 768px) {
+  .nb-brand-logo {
+    height: 35px;
+  }
+}
 
 /* ── CENTER: NAVIGATION ── */
 .nb-links-pill {
@@ -282,7 +280,6 @@
 @media (max-width: 900px) {
   .nb-container-base { padding: 0 20px; }
   .nb-links-pill { display: none; }
-  .nb-logo-text { font-size: 1.1rem; }
   .nb-scrolled { height: 60px; }
 }
 

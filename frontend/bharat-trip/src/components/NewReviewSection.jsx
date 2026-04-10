@@ -102,7 +102,7 @@ export default function NewReviewSection() {
               
               <textarea
                 className="bt-review-textarea"
-                placeholder="What do you think about Bharat Trip?"
+                placeholder="What do you think about GoTripo?"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 required

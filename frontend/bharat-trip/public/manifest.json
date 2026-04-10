@@ -1,6 +1,6 @@
 {
-  "name": "Bharat Trip",
-  "short_name": "Bharat Trip",
+  "name": "GoTripo",
+  "short_name": "GoTripo",
   "description": "AI-Powered Collaborative Travel Planner for India",
   "start_url": "/",
   "display": "standalone",

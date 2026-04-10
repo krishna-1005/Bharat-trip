@@ -17,9 +17,9 @@ export default function Help() {
 
   const faqs = [
     { cat: "planner", q: "How accurate are the AI itineraries?", a: "Our AI uses real-time data from OpenStreetMap and Google. While highly accurate, we always recommend checking local conditions and official attraction websites for the most up-to-date hours." },
-    { cat: "planner", q: "Can I generate plans for cities outside Bangalore?", a: "Yes! Bharat Trip supports planning across major Indian cities including Goa, Jaipur, Mumbai, and Delhi, with more regions being added weekly." },
+    { cat: "planner", q: "Can I generate plans for cities outside Bangalore?", a: "Yes! GoTripo supports planning across major Indian cities including Goa, Jaipur, Mumbai, and Delhi, with more regions being added weekly." },
     { cat: "account", q: "Is my data secure?", a: "We use Firebase's industry-standard authentication. Your personal data and saved trips are encrypted and never shared without your explicit permission." },
-    { cat: "billing", q: "Are there any hidden costs?", a: "No. Bharat Trip is a free tool for travelers. We may show affiliate links for hotels or transport, but using our AI planner costs you nothing." },
+    { cat: "billing", q: "Are there any hidden costs?", a: "No. GoTripo is a free tool for travelers. We may show affiliate links for hotels or transport, but using our AI planner costs you nothing." },
     { cat: "safety", q: "What should I do in case of a travel emergency?", a: "While we provide travel info, we are not a 24/7 emergency service. Please keep local emergency numbers (112) handy and consult your embassy if traveling internationally." }
   ];
 
@@ -99,7 +99,7 @@ export default function Help() {
           <div style={{ textAlign: 'center', minWidth: '200px' }}>
             <div style={{ fontSize: '24px', marginBottom: '10px' }}>✉️</div>
             <h4 style={{ margin: '0 0 5px' }}>Email Us</h4>
-            <p style={{ fontSize: '14px', color: 'var(--text-dim)' }}>support@bharattrip.ai</p>
+            <p style={{ fontSize: '14px', color: 'var(--text-dim)' }}>support@gotripo.com</p>
           </div>
           <div style={{ textAlign: 'center', minWidth: '200px' }}>
             <div style={{ fontSize: '24px', marginBottom: '10px' }}>💬</div>
@@ -109,7 +109,7 @@ export default function Help() {
           <div style={{ textAlign: 'center', minWidth: '200px' }}>
             <div style={{ fontSize: '24px', marginBottom: '10px' }}>📱</div>
             <h4 style={{ margin: '0 0 5px' }}>Social Media</h4>
-            <p style={{ fontSize: '14px', color: 'var(--text-dim)' }}>@bharattrip_ai</p>
+            <p style={{ fontSize: '14px', color: 'var(--text-dim)' }}>@gotripo_ai</p>
           </div>
         </div>
         <button 

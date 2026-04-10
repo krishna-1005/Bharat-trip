@@ -558,7 +558,7 @@ function Results() {
     
     const opt = {
       margin: 10,
-      filename: `${plan.city}_Odyssey_BharatTrip.pdf`,
+      filename: `${plan.city}_Odyssey_GoTripo.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, backgroundColor: '#05070a' },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -754,7 +754,7 @@ function Results() {
           <div className="header-top-row">
             <div className="premium-brand">
               <div className="brand-glow-dot"></div>
-              <span className="brand-text">Bharat Trip</span>
+              <span className="brand-text">GoTripo</span>
             </div>
             <div className="header-actions-row">
               <button className="safety-trigger-btn" onClick={() => setShowSafetyModal(true)}>

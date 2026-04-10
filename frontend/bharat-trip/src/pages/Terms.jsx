@@ -15,7 +15,7 @@ export default function Terms() {
       <section className="premium-card" style={{ maxWidth: "800px", margin: "0 auto", padding: "40px", lineHeight: "1.8", color: "var(--text-dim)" }}>
         <h3 style={{ color: "var(--text-main)", marginBottom: "16px", fontSize: "1.5rem" }}>1. Acceptance of Terms</h3>
         <p style={{ marginBottom: "24px" }}>
-          By accessing and using Bharat Trip, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
+          By accessing and using GoTripo, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
         </p>
 
         <h3 style={{ color: "var(--text-main)", marginBottom: "16px", fontSize: "1.5rem" }}>2. Use of the Service</h3>
@@ -25,7 +25,7 @@ export default function Terms() {
 
         <h3 style={{ color: "var(--text-main)", marginBottom: "16px", fontSize: "1.5rem" }}>3. AI-Generated Itineraries</h3>
         <p style={{ marginBottom: "24px" }}>
-          Bharat Trip uses artificial intelligence to generate travel itineraries. While we strive for accuracy, we do not guarantee that the generated plans are perfectly accurate, safe, or optimal. You are responsible for verifying operating hours, travel times, and safety conditions before embarking on your trip.
+          GoTripo uses artificial intelligence to generate travel itineraries. While we strive for accuracy, we do not guarantee that the generated plans are perfectly accurate, safe, or optimal. You are responsible for verifying operating hours, travel times, and safety conditions before embarking on your trip.
         </p>
 
         <h3 style={{ color: "var(--text-main)", marginBottom: "16px", fontSize: "1.5rem" }}>4. Modifications to the Service</h3>

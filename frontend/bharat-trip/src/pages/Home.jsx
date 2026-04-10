@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useSettings } from "../context/SettingsContext";
 import MinimalReviewSection from "../components/MinimalReviewSection";
+import BrandPromotion from "../components/BrandPromotion";
 import PlaceImage from "../components/PlaceImage";
 import JoinByCode from "../components/JoinByCode";
 import "./home.css";
@@ -147,7 +148,7 @@ const TripPulse = () => {
           <span className="pulse-dot"></span>
           REAL-TIME ACTIVITY
         </div>
-        <h2>The Pulse of Bharat Trip</h2>
+        <h2>The Pulse of GoTripo</h2>
         <p>Actual destinations being explored by our community right now.</p>
       </div>
 
@@ -394,7 +395,7 @@ const Home = () => {
   }, []);
 
   const tooltips = [
-    { title: "Welcome to Bharat Trip!", text: "Your AI-powered travel companion. Let's show you around." },
+    { title: "Welcome to GoTripo!", text: "Your AI-powered travel companion. Let's show you around." },
     { title: "Smart Planning", text: "Click 'Start Planning' to get a bespoke itinerary in seconds." },
     { title: "Group Polls", text: "Planning with friends? Create a poll and let the group decide." }
   ];
@@ -553,7 +554,20 @@ const Home = () => {
             <InteractiveHeroImages />
           </div>
         </div>
+
+        <motion.div 
+          className="hero-scroll-indicator"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, y: [0, 10, 0] }}
+          transition={{ delay: 1.5, duration: 2, repeat: Infinity }}
+          onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}
+        >
+          <span className="scroll-text">Explore GoTripo</span>
+          <div className="scroll-arrow">↓</div>
+        </motion.div>
       </section>
+
+      <BrandPromotion />
 
       {/* Added ID for scrolling */}
       <section id="features" className="container onboarding-decision-section">
@@ -665,6 +679,7 @@ const Home = () => {
         </div>
       </section>
 
+      <BrandPromotion />
       <MinimalReviewSection />
     </div>
   );

@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
     let planData = null;
 
     // System Instruction for the AI Agent
-    const systemInstruction = `You are the BharatTrip AI Agent, a world-class travel concierge for India.
+    const systemInstruction = `You are the GoTripo AI Agent, a world-class travel concierge for India.
 
 CORE MISSION:
 1. **Never be boring**. Use emojis and a friendly, sophisticated tone.
@@ -165,7 +165,7 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
       if (/\b(hi|hello|hey|greetings|namaste)\b/.test(msg)) {
         return res.json({ 
           type: "chat", 
-          reply: "Hello! I'm your BharatTrip AI concierge. 🇮🇳 Which beautiful city in India are we planning to explore today? (Delhi, Mumbai, Jaipur, Goa, or Bengaluru?)" 
+          reply: "Hello! I'm your GoTripo AI concierge. 🇮🇳 Which beautiful city in India are we planning to explore today? (Delhi, Mumbai, Jaipur, Goa, or Bengaluru?)" 
         });
       }
       return res.json({ 

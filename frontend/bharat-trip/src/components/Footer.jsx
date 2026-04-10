@@ -25,10 +25,9 @@ export default function Footer() {
       <div className="footer-main">
         <div className="footer-brand">
           <div className="footer-logo">
-            <span className="logo-icon">🇮🇳</span>
-            <h3>Bharat Trip</h3>
+            <img src="/logo.png" alt="GoTripo" className="footer-brand-logo" />
           </div>
-          <p>Crafting memories across the Indian subcontinent with cutting-edge AI. Your personal Bengaluru travel assistant, redefined.</p>
+          <p>Crafting memories across the Indian subcontinent with cutting-edge AI. Your personal travel assistant, redefined.</p>
           <div className="footer-socials">
             <a href="#" className="social-icon">𝕏</a>
             <a href="#" className="social-icon">📸</a>
@@ -64,9 +63,8 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <div style={{ color: 'red', fontWeight: 'bold' }}>NEW FOOTER RENDERING</div>
         <div className="footer-copyright">
-          <span>© 2024 BharatTrip AI • Designed for the modern explorer</span>
+          <span>© 2024 GoTripo AI • Designed for the modern explorer</span>
         </div>
         <div className="footer-status">
           <span className="status-dot excellent"></span>

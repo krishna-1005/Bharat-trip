@@ -102,7 +102,7 @@ export default function MyTrips() {
       try {
         await navigator.share({
           title: `My Trip to ${trip.location}`,
-          text: `Check out my travel plan for ${trip.location} on Bharat Trip!`,
+          text: `Check out my travel plan for ${trip.location} on GoTripo!`,
           url: shareUrl,
         });
       } catch (err) {

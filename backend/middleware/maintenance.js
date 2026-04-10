@@ -1,7 +1,7 @@
 const SystemConfig = require("../models/SystemConfig");
 const { admin } = require("../firebaseAdmin");
 
-const ADMIN_EMAILS = ["bharattrip@gmail.com", "krishkulkarni1005@gmail.com"];
+const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
 
 const maintenanceMode = async (req, res, next) => {
   try {

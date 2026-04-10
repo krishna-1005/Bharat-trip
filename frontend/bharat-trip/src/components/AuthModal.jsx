@@ -78,7 +78,7 @@ const AuthModal = () => {
         <div className="auth-modal-header">
           <h2>{isLogin ? "Welcome Back" : "Create Account"}</h2>
           <p className="auth-modal-subtitle">
-            {isLogin ? "Sign in to unlock your full plan" : "Join BharatTrip to save your journey"}
+            {isLogin ? "Sign in to unlock your full plan" : "Join GoTripo to save your journey"}
           </p>
         </div>
 

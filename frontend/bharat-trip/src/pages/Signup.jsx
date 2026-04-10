@@ -58,7 +58,7 @@ function Signup() {
         
         <div className="auth-header">
           <h2>Create Account</h2>
-          <p className="auth-subtitle">Join BharatTrip and start exploring</p>
+          <p className="auth-subtitle">Join GoTripo and start exploring</p>
         </div>
 
         <form onSubmit={handleSignup}>

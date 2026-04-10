@@ -56,13 +56,13 @@ app.use("/api/public", publicRoutes);
 // health check
 app.get("/", (req, res) => {
   res.json({
-    status: "Bharat Trip API running 🚀"
+    status: "GoTripo API running 🚀"
   });
 });
 
 /* ── ping route ── */
 app.get("/ping", (req, res) => {
-  res.status(200).send("BharatTrip server alive 🚀");
+  res.status(200).send("GoTripo server alive 🚀");
 });
 
 // 404 Handler with CORS support

@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 /**
- * Maps OSM tags to standard Bharat Trip categories.
+ * Maps OSM tags to standard GoTripo categories.
  * Standard categories: Nature, Food, Culture, Shopping, Adventure, Nightlife
  */
 function mapCategory(tags = {}) {

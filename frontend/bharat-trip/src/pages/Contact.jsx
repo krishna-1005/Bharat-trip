@@ -13,7 +13,7 @@ export default function Contact() {
 
   const contactDetails = [
     { icon: "📍", label: "Our Office", val: "Indiranagar, Bengaluru, KA 560038" },
-    { icon: "✉️", label: "Support Email", val: "support@bharattrip.ai" },
+    { icon: "✉️", label: "Support Email", val: "support@gotripo.com" },
     { icon: "📞", label: "Phone", val: "+91 80 4567 8900" },
   ];
 

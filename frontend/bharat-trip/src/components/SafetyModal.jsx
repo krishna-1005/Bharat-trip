@@ -129,7 +129,7 @@ const SafetyModal = ({ isOpen, onClose, city, userLocation }) => {
             </div>
 
             <div className="safety-tips-footer">
-              <p>Bharat Trip: Traveling safe is traveling smart.</p>
+              <p>GoTripo: Traveling safe is traveling smart.</p>
             </div>
           </motion.div>
         </div>

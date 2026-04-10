@@ -41,7 +41,7 @@ function Navbar() {
   };
 
   const isHomePage = location.pathname === "/";
-  const ADMIN_EMAILS = ["bharattrip@gmail.com", "krishkulkarni1005@gmail.com"];
+  const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
   const isAdmin = user && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email?.toLowerCase());
 
   const navLinks = [
@@ -76,7 +76,7 @@ function Navbar() {
         {/* LEFT: LOGO */}
         <div className="nb-logo-wrap" onClick={() => navigate("/")}>
           <span className="nb-logo-flag">🇮🇳</span>
-          <span className="nb-logo-text">Bharat <span>Trip</span></span>
+          <span className="nb-logo-text">Go<span>Tripo</span></span>
         </div>
 
         {/* CENTER: NAV LINKS (DESKTOP) */}

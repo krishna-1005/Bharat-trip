@@ -129,7 +129,7 @@ export default function VotePoll() {
   };
 
   const handleWhatsAppShare = () => {
-    const text = `Hey! Vote for our next trip destination on Bharat Trip: ${window.location.href}`;
+    const text = `Hey! Vote for our next trip destination on GoTripo: ${window.location.href}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
