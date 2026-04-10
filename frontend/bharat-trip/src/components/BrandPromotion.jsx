@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import "./brandPromotion.css";
 
 const BrandPromotion = () => {
+  const navigate = useNavigate();
   const slogans = [
     "Plan Smarter.",
     "Travel Together.",
@@ -80,6 +82,7 @@ const BrandPromotion = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="promo-cta"
+          onClick={() => navigate('/future')}
         >
           Experience the Future of Travel
         </motion.button>

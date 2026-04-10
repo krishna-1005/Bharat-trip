@@ -236,7 +236,7 @@ h1, h2, h3 {
 /* SCROLL INDICATOR */
 .hero-scroll-indicator {
   position: absolute;
-  bottom: 10px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -245,7 +245,7 @@ h1, h2, h3 {
   gap: 8px;
   cursor: pointer;
   z-index: 20;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .hero-scroll-indicator:hover {

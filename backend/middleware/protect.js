@@ -39,7 +39,8 @@ const protect = async (req, res, next) => {
         user = await User.findById(decoded.id);
       } catch (jwtErr) {
         // Log both errors for debugging, but be concise
-        console.warn(`Auth failed. Firebase: ${firebaseErr.message.substring(0, 100)}... JWT: ${jwtErr.message}`);
+        console.warn(`Auth failed. Firebase: ${firebaseErr.message} | JWT: ${jwtErr.message}`);
+        console.debug("Token that failed:", token.substring(0, 10) + "...");
         return res.status(401).json({ error: "Invalid or expired token" });
       }
     }

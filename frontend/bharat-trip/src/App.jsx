@@ -31,6 +31,7 @@ import SearchResults from "./pages/SearchResults";
 import DestinationDetails from "./pages/DestinationDetails";
 import Maintenance from "./pages/Maintenance";
 import TripRoom from "./pages/TripRoom";
+import FutureExperience from "./pages/FutureExperience";
 
 import TravelBot from "./components/TravelBot";
 import InstallPrompt from "./components/InstallPrompt";
@@ -114,6 +115,7 @@ function App() {
         <Routes>
           <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/future" element={<FutureExperience />} />
           <Route path="/maintenance" element={<Maintenance />} />
           <Route path="/create-poll" element={<CreatePoll />} />
           <Route path="/vote/:pollId" element={<VotePoll />} />

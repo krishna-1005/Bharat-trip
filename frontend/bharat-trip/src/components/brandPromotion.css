@@ -88,13 +88,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  width: 100%;
 }
 
 .promo-slogan-active {
+  position: absolute;
   font-size: 26px;
   color: #888;
   font-weight: 300;
   letter-spacing: 1px;
+  white-space: nowrap;
+  text-align: center;
 }
 
 /* Stats */
