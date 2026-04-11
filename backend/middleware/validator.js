@@ -37,7 +37,13 @@ const reviewValidation = [
 const planValidation = [
   body("city").trim().notEmpty().withMessage("City is required").isLength({ max: 50 }).escape(),
   body("days").isInt({ min: 1, max: 10 }).withMessage("Days must be between 1 and 10"),
-  body("budget").isIn(["low", "medium", "high"]).withMessage("Budget must be low, medium, or high"),
+  body("budget")
+    .custom((value) => {
+      if (typeof value === 'string' && ["low", "medium", "high"].includes(value)) return true;
+      if (typeof value === 'number' && value >= 0) return true;
+      if (!isNaN(Number(value)) && Number(value) >= 0) return true;
+      throw new Error("Budget must be low, medium, high or a positive number");
+    }),
   body("interests").isArray().withMessage("Interests must be an array"),
   body("interests.*").trim().isString().isLength({ max: 30 }).escape(),
   validate

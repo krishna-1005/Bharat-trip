@@ -152,13 +152,7 @@ function Results() {
   const [loading, setLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(() => {
     // Only enter generation mode if it's a 'new' request AND we have params to generate from
-    const isNew = (loc.state?.isNew && loc.state?.planParams) || false;
-    
-    if (isNew) {
-      // Clear the state so refresh doesn't trigger "isNew" logic again
-      window.history.replaceState({ ...loc.state, isNew: false }, "");
-    }
-    return isNew;
+    return (loc.state?.isNew && loc.state?.planParams) || false;
   });
   const [genStep, setGenStep] = useState("thinking"); // "thinking" | "summary"
   const [apiStatus, setApiStatus] = useState("idle"); // "idle" | "requesting" | "success" | "error"
@@ -263,20 +257,23 @@ function Results() {
   const budgetData = useMemo(() => {
     if (!plan) return { total: 0, target: 0, percent: 0, isOver: false, targetPercent: 100 };
     const total = Number(plan.totalTripCost || plan.totalCost) || 0;
-    const target = Number(plan.totalBudget) || 0;
+    
+    // Prioritize budget from original params to avoid 0 if backend doesn't return it
+    const target = Number(plan.totalBudget) || Number(loc.state?.planParams?.budget) || 0;
+    
     const max = Math.max(total, target, 1);
-    const percent = (total / max) * 100;
+    const percent = target > 0 ? (total / target) * 100 : 100;
     const targetPercent = (target / max) * 100;
 
     return { 
       total, 
       target, 
       percent: isNaN(percent) ? 0 : percent, 
-      isOver: total > target,
+      isOver: target > 0 && total > target,
       targetPercent: isNaN(targetPercent) ? 100 : targetPercent,
       breakdown: plan.costBreakdown || null
     };
-  }, [plan]);
+  }, [plan, loc.state]);
 
   const [guideMode, setGuideMode] = useState(false);
 

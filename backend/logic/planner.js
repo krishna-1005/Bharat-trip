@@ -277,7 +277,26 @@ async function generatePlan({
 }) {
   const coords = await getCityCoords(city);
   const cleanCity = city.trim().toLowerCase();
-  const totalBudget = Number(budget) || 5000;
+  
+  // Normalize budget: can be a number (total) or a tier string
+  let totalBudget = 5000;
+  let budgetTier = "medium";
+
+  if (typeof budget === 'number' || !isNaN(Number(budget))) {
+    totalBudget = Number(budget);
+    const dailyBudget = totalBudget / days;
+    if (totalBudget <= 3500 || dailyBudget <= 1500) {
+      budgetTier = "low";
+    } else if (totalBudget <= 12000 || dailyBudget <= 4000) {
+      budgetTier = "medium";
+    } else {
+      budgetTier = "high";
+    }
+  } else if (typeof budget === 'string') {
+    budgetTier = budget.toLowerCase();
+    totalBudget = { low: 3000, medium: 7000, high: 20000 }[budgetTier] || 5000;
+  }
+
   const perDayBudget = totalBudget / days;
   const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
   /* STEP 1: CURATED POOL */
@@ -313,18 +332,6 @@ async function generatePlan({
   if (filteredPool.length === 0) filteredPool = cityPool;
 
   /* STEP 5: SCORING & ENRICHMENT */
-  const dailyBudget = totalBudget / days;
-  
-  // Refined Tier Selection: 
-  // < 3000 total or < 1500/day -> low
-  // < 10000 total or < 4000/day -> medium
-  // else -> high
-  let budgetTier = "high";
-  if (totalBudget <= 3500 || dailyBudget <= 1500) {
-    budgetTier = "low";
-  } else if (totalBudget <= 12000 || dailyBudget <= 4000) {
-    budgetTier = "medium";
-  }
   let prioritizedPool = filteredPool
     .map((p, idx) => {
       const enriched = enrichPlace(p, idx);
