@@ -41,10 +41,7 @@ function Navbar() {
   };
 
   const isHomePage = location.pathname === "/";
-  // Admin access controlled via environment variables
-  const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || "gotripo@gmail.com,krishkulkarni1005@gmail.com")
-    .split(",")
-    .map(e => e.trim().toLowerCase());
+  const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
   const isAdmin = user && ADMIN_EMAILS.map(e => e.toLowerCase()).includes(user.email?.toLowerCase());
 
   const navLinks = [
