@@ -2,6 +2,8 @@ const express = require("express");
 const jwt     = require("jsonwebtoken");
 const User    = require("../models/User");
 const { protect } = require("../middleware/protect");
+const { authLimiter } = require("../middleware/rateLimiter");
+const { signupValidation, loginValidation } = require("../middleware/validator");
 
 const router = express.Router();
 
@@ -9,10 +11,11 @@ const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
 /* ── SIGNUP ── */
-router.post("/signup", async (req, res) => {
+router.post("/signup", authLimiter, signupValidation, async (req, res) => {
   try {
 
     const { name, email, password } = req.body;
+
 
     if (!name || !email || !password)
       return res.status(400).json({ error: "Name, email and password are required." });
@@ -50,9 +53,10 @@ router.post("/signup", async (req, res) => {
 
 
 /* ── LOGIN ── */
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, loginValidation, async (req, res) => {
   try {
     const { email, password } = req.body;
+
 
     if (!email || !password)
       return res.status(400).json({ error: "Email and password are required." });
@@ -81,7 +85,7 @@ router.post("/login", async (req, res) => {
 
 
 /* ── CHANGE PASSWORD ── */
-router.put("/change-password", protect, async (req, res) => {
+router.put("/change-password", protect, authLimiter, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 

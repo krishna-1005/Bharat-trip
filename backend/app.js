@@ -1,5 +1,6 @@
 const express  = require("express");
 const cors     = require("cors");
+const helmet   = require("helmet");
 const mongoose = require("mongoose");
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
@@ -20,6 +21,10 @@ const publicRoutes = require("./routes/publicRoutes");
 // Per-environment CORS configuration
 const app = express();
 const maintenanceMode = require("./middleware/maintenance");
+const { globalLimiter } = require("./middleware/rateLimiter");
+
+// Security Headers
+app.use(helmet());
 
 // More permissive CORS for troubleshooting
 app.use(
@@ -31,8 +36,28 @@ app.use(
   })
 );
 
-app.use(express.json());
+// Payload size limit to prevent oversized requests
+app.use(express.json({ limit: "10kb" }));
+
+// Global input sanitization
+app.use((req, res, next) => {
+  if (req.body) {
+    const sanitize = (obj) => {
+      for (let key in obj) {
+        if (typeof obj[key] === "string") {
+          obj[key] = obj[key].trim();
+        } else if (typeof obj[key] === "object" && obj[key] !== null) {
+          sanitize(obj[key]);
+        }
+      }
+    };
+    sanitize(req.body);
+  }
+  next();
+});
+
 app.use(maintenanceMode);
+app.use(globalLimiter);
 
 /* ── MongoDB Connection ── */
 mongoose.connect(process.env.MONGO_URI)

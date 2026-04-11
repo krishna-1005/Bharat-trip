@@ -6,11 +6,13 @@ const UsageLog     = require("../models/UsageLog");
 const { admin } = require("../firebaseAdmin");
 const User         = require("../models/User");
 const jwt          = require("jsonwebtoken");
+const { planValidation } = require("../middleware/validator");
 
 const router = express.Router();
 
 /* ── Generate Trip Plan ── */
-router.post("/generate", async (req, res) => {
+router.post("/generate", planValidation, async (req, res) => {
+
 
   if (!req.body) {
     return res.status(400).json({ error: "Request body missing" });

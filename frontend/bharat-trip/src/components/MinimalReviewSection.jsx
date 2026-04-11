@@ -34,7 +34,11 @@ export default function MinimalReviewSection() {
 
     try {
       setIsSubmitting(true);
-      const result = await postReview({ rating, comment });
+      const result = await postReview({ 
+        rating, 
+        comment, 
+        name: user.displayName || user.email || "Explorer" 
+      });
       setReviews(prev => [result, ...prev]);
       setComment("");
       setRating(5);

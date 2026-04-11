@@ -3,12 +3,12 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDnq6rwoPL4s8GAPoZ5xqUc_jCCkS461Hs",
-  authDomain: "bharat-trip-620eb.firebaseapp.com",
-  projectId: "bharat-trip-620eb",
-  storageBucket: "bharat-trip-620eb.firebasestorage.app",
-  messagingSenderId: "933478377830",
-  appId: "1:933478377830:web:ee33ddcac0013a34c5c0a7"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);

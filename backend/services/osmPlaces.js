@@ -13,7 +13,7 @@ function mapCategory(tags = {}) {
 
   // CULTURE
   if (tags.tourism === "museum" || tags.tourism === "art_gallery" || tags.historic || tags.heritage) return "Culture";
-  if (tags.amenity === "theatre" || tags.amenity === "library") return "Culture";
+  if (tags.amenity === "theatre" || tags.amenity === "library" || tags.amenity === "arts_centre") return "Culture";
   
   // NATURE
   if (tags.leisure === "park" || tags.leisure === "garden" || tags.leisure === "nature_reserve") return "Nature";
@@ -27,13 +27,24 @@ function mapCategory(tags = {}) {
   if (tags.shop || tags.amenity === "market" || tags.tourism === "marketplace") return "Shopping";
 
   // ADVENTURE / ENTERTAINMENT
-  if (tags.leisure === "theme_park" || tags.leisure === "water_park" || tags.leisure === "stadium" || tags.leisure === "cinema" || tags.leisure === "adventure_park") return "Adventure";
+  if (tags.leisure === "theme_park" || tags.leisure === "water_park" || tags.leisure === "stadium" || tags.leisure === "cinema" || tags.leisure === "adventure_park" || tags.leisure === "playground") return "Adventure";
 
   // ATTRACTION FALLBACK
   if (tags.tourism === "attraction" || tags.tourism === "viewpoint") return "Culture";
 
   return "Other";
 }
+
+const NAME_MAPPINGS = {
+  "Bird and Rabbit park": "Jawahar Bal Bhavan",
+  "Bird And Rabbit Park": "Jawahar Bal Bhavan",
+  "Indira Gandhi Musical Fountain": "Indira Gandhi Musical Fountain Park",
+  "High Court of Karnataka": "Karnataka High Court",
+  "Cubbon Park": "Cubbon Park",
+  "Lalbagh Botanical Garden": "Lalbagh Botanical Garden",
+  "Government Museum": "Government Museum (Bengaluru)",
+  "Visvesvaraya Industrial and Technological Museum": "Visvesvaraya Museum"
+};
 
 const JUNK_PATTERNS = [
   /^tree\b/i, /\btree$/i,
@@ -43,7 +54,32 @@ const JUNK_PATTERNS = [
   /park\s+\d+/i,
   /\d{4,}/,
   /^[a-z]{1,3}$/i,
+  /gate\s+\d+/i,
+  /pillar\s+\d+/i
 ];
+
+function sanitizeName(name) {
+  if (!name) return "";
+  let trimmed = name.trim();
+  
+  // 1. Check exact mapping (case-insensitive check for robustness)
+  for (const [key, val] of Object.entries(NAME_MAPPINGS)) {
+    if (trimmed.toLowerCase() === key.toLowerCase()) return val;
+  }
+  
+  // 2. Remove leading "The "
+  trimmed = trimmed.replace(/^the\s+/i, '');
+
+  // 3. Fix double spaces
+  trimmed = trimmed.replace(/\s+/g, ' ');
+
+  // 4. Proper Case Conversion (if all caps)
+  if (trimmed === trimmed.toUpperCase() && trimmed.length > 4) {
+    trimmed = trimmed.charAt(0) + trimmed.slice(1).toLowerCase();
+  }
+
+  return trimmed;
+}
 
 function isJunk(name = "") {
   if (!name || name.trim().length < 4) return true;
@@ -67,11 +103,11 @@ async function fetchOSMPlaces(lat, lng, radiusKm = 10) {
     node["tourism"~"attraction|museum|viewpoint|art_gallery|zoo|aquarium"](${minLat},${minLng},${maxLat},${maxLng});
     way["tourism"~"attraction|museum|viewpoint|art_gallery|zoo|aquarium"](${minLat},${minLng},${maxLat},${maxLng});
     
-    node["leisure"~"park|garden|nature_reserve|theme_park|water_park|adventure_park|stadium"](${minLat},${minLng},${maxLat},${maxLng});
-    way["leisure"~"park|garden|nature_reserve|theme_park|water_park|adventure_park|stadium"](${minLat},${minLng},${maxLat},${maxLng});
+    node["leisure"~"park|garden|nature_reserve|theme_park|water_park|adventure_park|stadium|playground"](${minLat},${minLng},${maxLat},${maxLng});
+    way["leisure"~"park|garden|nature_reserve|theme_park|water_park|adventure_park|stadium|playground"](${minLat},${minLng},${maxLat},${maxLng});
 
-    node["amenity"~"restaurant|cafe|food_court|place_of_worship|theatre|market|pub|bar|nightclub"](${minLat},${minLng},${maxLat},${maxLng});
-    way["amenity"~"restaurant|cafe|food_court|place_of_worship|theatre|market|pub|bar|nightclub"](${minLat},${minLng},${maxLat},${maxLng});
+    node["amenity"~"restaurant|cafe|food_court|place_of_worship|theatre|market|pub|bar|nightclub|arts_centre"](${minLat},${minLng},${maxLat},${maxLng});
+    way["amenity"~"restaurant|cafe|food_court|place_of_worship|theatre|market|pub|bar|nightclub|arts_centre"](${minLat},${minLng},${maxLat},${maxLng});
 
     node["historic"](${minLat},${minLng},${maxLat},${maxLng});
     way["historic"](${minLat},${minLng},${maxLat},${maxLng});
@@ -96,13 +132,14 @@ async function fetchOSMPlaces(lat, lng, radiusKm = 10) {
       .map(p => {
         const pLat = p.lat || p.center?.lat;
         const pLng = p.lon || p.center?.lon;
+        const sName = sanitizeName(p.tags.name);
         
         // Generate realistic enrichment for OSM data
         const rating = (4.0 + Math.random() * 0.8).toFixed(1);
         const reviews = Math.floor(100 + Math.random() * 4900);
         
         return {
-          name: p.tags.name,
+          name: sName,
           lat: Number(pLat),
           lng: Number(pLng),
           category: mapCategory(p.tags),
@@ -114,10 +151,11 @@ async function fetchOSMPlaces(lat, lng, radiusKm = 10) {
           source: "osm"
         };
       })
-      .filter(p => p.lat && p.lng);
+      .filter(p => p.lat && p.lng && p.name);
 
     console.log(`✅ OSM: Fetched and normalized ${places.length} places for coordinates [${lat}, ${lng}]`);
     return places;
+
 
   } catch (err) {
     console.error("⚠️ OSM Fetch Error:", err.message);

@@ -1,7 +1,10 @@
 const SystemConfig = require("../models/SystemConfig");
 const { admin } = require("../firebaseAdmin");
 
-const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
+// Admin list from env
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "gotripo@gmail.com,krishkulkarni1005@gmail.com")
+  .split(",")
+  .map(e => e.trim().toLowerCase());
 
 const maintenanceMode = async (req, res, next) => {
   try {

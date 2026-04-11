@@ -3,6 +3,7 @@ const router = express.Router();
 const ProjectReview = require("../models/ProjectReview");
 const User = require("../models/User");
 const { admin } = require("../firebaseAdmin");
+const { reviewValidation } = require("../middleware/validator");
 
 // Public route to get all project reviews
 router.get("/", async (req, res) => {
@@ -16,9 +17,10 @@ router.get("/", async (req, res) => {
 });
 
 // Protected route to post a project review
-router.post("/", async (req, res) => {
+router.post("/", reviewValidation, async (req, res) => {
   try {
-    const { rating, comment } = req.body;
+    const { rating, comment, name } = req.body;
+
     
     // Check for authorization header
     const authHeader = req.headers.authorization;

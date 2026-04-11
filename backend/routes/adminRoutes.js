@@ -9,8 +9,10 @@ const { admin, db } = require("../firebaseAdmin");
 
 const router = express.Router();
 
-// Only you can access this - Hardcoded for maximum security
-const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
+// Only authorized admins can access - sourced from environment variables
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "gotripo@gmail.com,krishkulkarni1005@gmail.com")
+  .split(",")
+  .map(e => e.trim().toLowerCase());
 
 // Middleware to double check admin email
 const verifyAdminEmail = async (req, res, next) => {
