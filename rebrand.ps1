@@ -1,8 +1,8 @@
 
 $replaces = @(
-    @("support@bharattrip.ai", "support@gotripo.com"),
+    @("support@bharattrip.ai", "support@gotripo.tech"),
     @("bharattrip@gmail.com", "gotripo@gmail.com"),
-    @("bharat-trip-opal.vercel.app", "gotripo.vercel.app"),
+    @("bharat-trip-opal.vercel.app", "gotripo.tech"),
     @("Bharat <span>Trip</span>", "Go<span>Tripo</span>"),
     @("Bharat Trip", "GoTripo"),
     @("BharatTrip", "GoTripo"),

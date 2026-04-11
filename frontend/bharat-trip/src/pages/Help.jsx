@@ -99,7 +99,7 @@ export default function Help() {
           <div style={{ textAlign: 'center', minWidth: '200px' }}>
             <div style={{ fontSize: '24px', marginBottom: '10px' }}>✉️</div>
             <h4 style={{ margin: '0 0 5px' }}>Email Us</h4>
-            <p style={{ fontSize: '14px', color: 'var(--text-dim)' }}>support@gotripo.com</p>
+            <p style={{ fontSize: '14px', color: 'var(--text-dim)' }}>support@gotripo.tech</p>
           </div>
           <div style={{ textAlign: 'center', minWidth: '200px' }}>
             <div style={{ fontSize: '24px', marginBottom: '10px' }}>💬</div>
