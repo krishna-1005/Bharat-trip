@@ -1,6 +1,7 @@
 const { admin } = require("../firebaseAdmin");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const UsageLog = require("../models/UsageLog");
 
 const protect = async (req, res, next) => {
   try {
@@ -52,7 +53,6 @@ const protect = async (req, res, next) => {
     req.user = user;
 
     // Background logging (non-blocking)
-    const UsageLog = require("../models/UsageLog");
     setTimeout(() => {
       UsageLog.create({
         action: "site_access",

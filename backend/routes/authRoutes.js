@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt     = require("jsonwebtoken");
 const User    = require("../models/User");
+const UsageLog = require("../models/UsageLog");
 const { protect } = require("../middleware/protect");
 const { authLimiter } = require("../middleware/rateLimiter");
 const { signupValidation, loginValidation } = require("../middleware/validator");
@@ -71,8 +72,7 @@ router.post("/login", authLimiter, loginValidation, async (req, res) => {
 
     const token = signToken(user._id);
 
-    // Log the login
-    const UsageLog = require("../models/UsageLog");
+    // Log the login (background)
     UsageLog.create({
       action: "login",
       userId: user._id,

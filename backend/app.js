@@ -20,7 +20,6 @@ const publicRoutes = require("./routes/publicRoutes");
 
 // Per-environment CORS configuration
 const app = express();
-app.set('trust proxy', 1);
 const maintenanceMode = require("./middleware/maintenance");
 const { globalLimiter } = require("./middleware/rateLimiter");
 
