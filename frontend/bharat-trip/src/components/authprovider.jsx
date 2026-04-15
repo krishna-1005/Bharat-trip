@@ -47,8 +47,20 @@ export default function AuthProvider({ children }) {
     const gid = getGuestId();
     setGuestId(gid);
 
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        const token = await firebaseUser.getIdToken();
+        const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
+        
+        // Sync with backend MongoDB
+        try {
+          await axios.get(`${API_URL}/api/admin/whoami`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+        } catch (syncErr) {
+          console.warn("Backend sync warning:", syncErr.message);
+        }
+
         const userData = {
           uid: firebaseUser.uid,
           id: firebaseUser.uid,
