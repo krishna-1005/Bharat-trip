@@ -3,7 +3,7 @@ const rateLimit = require("express-rate-limit");
 // Global rate limiter for all endpoints
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per `window` (15 minutes)
+  max: 500, // Limit each IP to 500 requests per `window` (15 minutes)
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: {
@@ -12,10 +12,10 @@ const globalLimiter = rateLimit({
   }
 });
 
-// Stricter limiter for auth/login routes: max 5 attempts per 15 min
+// Stricter limiter for auth/login routes: max 20 attempts per 15 min
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per `window` (15 minutes)
+  max: 20, // Limit each IP to 20 requests per `window` (15 minutes)
   standardHeaders: true,
   legacyHeaders: false,
   message: {
