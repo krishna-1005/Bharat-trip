@@ -71,6 +71,16 @@ router.post("/login", authLimiter, loginValidation, async (req, res) => {
 
     const token = signToken(user._id);
 
+    // Log the login
+    const UsageLog = require("../models/UsageLog");
+    UsageLog.create({
+      action: "login",
+      userId: user._id,
+      isGuest: false,
+      ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+      userAgent: req.headers['user-agent']
+    }).catch(e => console.error("Login log error:", e.message));
+
     res.json({
       message: "Login successful.",
       token,

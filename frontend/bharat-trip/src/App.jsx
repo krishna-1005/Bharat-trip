@@ -75,11 +75,18 @@ class ErrorBoundary extends Component {
   }
 }
 
+import { trackActivity } from "./utils/tracker";
+
 function App() {
   const [isMaintenance, setIsMaintenance] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, loading } = useContext(AuthContext);
+
+  useEffect(() => {
+    // Track every page view
+    trackActivity("page_view", { path: location.pathname });
+  }, [location.pathname]);
 
   useEffect(() => {
     const checkMaintenance = async () => {

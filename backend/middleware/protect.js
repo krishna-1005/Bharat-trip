@@ -50,6 +50,20 @@ const protect = async (req, res, next) => {
     }
 
     req.user = user;
+
+    // Background logging (non-blocking)
+    const UsageLog = require("../models/UsageLog");
+    setTimeout(() => {
+      UsageLog.create({
+        action: "site_access",
+        userId: user._id,
+        isGuest: false,
+        details: { path: req.path, method: req.method },
+        ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+        userAgent: req.headers['user-agent']
+      }).catch(err => console.error("Auto-log error:", err.message));
+    }, 0);
+
     next();
 
   } catch (err) {

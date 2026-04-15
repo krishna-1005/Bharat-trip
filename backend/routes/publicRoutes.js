@@ -9,11 +9,21 @@ let firestoreEnabled = true;
 /* ── TRACKING ── */
 router.post("/track", async (req, res) => {
   try {
-    const { userId, userType, guestId, action } = req.body;
+    const { userId, userType, guestId, action, details } = req.body;
     
     // id can be userId (if logged in) or guestId (if guest)
     const id = userId || guestId;
     if (!id) return res.status(400).json({ error: "No ID provided" });
+
+    // 1. Log to UsageLog (MongoDB) for Live Feed
+    UsageLog.create({
+      action: action || "site_access",
+      userId: userId || null,
+      isGuest: !userId,
+      details: { ...details, guestId },
+      ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+      userAgent: req.headers['user-agent']
+    }).catch(e => console.error("UsageLog error:", e.message));
 
     if (!db || !firestoreEnabled) {
       console.warn("Tracking skipped: Firestore not available or disabled due to auth error.");
