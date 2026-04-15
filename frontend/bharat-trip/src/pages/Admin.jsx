@@ -243,12 +243,22 @@ export default function Admin() {
                     <h2>Live Activity Feed</h2>
                     <div className="admin-table-wrap">
                       <table className="admin-table">
-                        <thead><tr><th>User</th><th>Action</th><th>Time</th></tr></thead>
+                        <thead><tr><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr></thead>
                         <tbody>
                           {data.recentActivityLogs.map((log, i) => (
                             <tr key={i}>
                               <td className="bold">{log.userId?.name || "Guest"}</td>
-                              <td><span className="tag-blue">{log.details.days} Days Plan</span></td>
+                              <td>
+                                <span className={`tag-blue action-${log.action}`}>
+                                  {log.action?.replace('_', ' ')}
+                                </span>
+                              </td>
+                              <td className="dim-small">
+                                {log.action === 'generate_plan' ? `${log.details?.days} Days in ${log.details?.city}` : 
+                                 log.action === 'page_view' ? log.details?.path :
+                                 log.action === 'site_access' ? log.details?.path : 
+                                 '-'}
+                              </td>
                               <td className="dim">{new Date(log.createdAt).toLocaleTimeString()}</td>
                             </tr>
                           ))}

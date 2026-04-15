@@ -132,6 +132,9 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     const finalGuestCount = guestCount > 0 ? guestCount : guestLogsCount;
     const finalTrackedCount = trackedUserCount > 0 ? trackedUserCount : trackedUserCountFromLogs;
 
+    // The most accurate "registered" count is usually MongoDB, but some might be Firebase-only
+    const totalRegisteredCount = Math.max(totalUsers, trackedUserCount);
+
     const recentUsers = await User.find()
       .select("name email role createdAt")
       .sort({ createdAt: -1 })
@@ -140,7 +143,7 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     const recentUsage = await UsageLog.find()
       .populate("userId", "name email")
       .sort({ createdAt: -1 })
-      .limit(10);
+      .limit(15);
 
     const recentReviews = await ProjectReview.find()
       .sort({ createdAt: -1 })
@@ -148,13 +151,13 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
 
     res.json({
       summary: {
-        totalRegisteredUsers: totalUsers,
+        totalRegisteredUsers: totalRegisteredCount,
         totalPlansGenerated: totalUsageLogs,
         totalTripsSavedByUsers: totalSavedTrips,
         totalReviews,
         totalPolls,
         guestCount: finalGuestCount,
-        trackedUserCount,
+        trackedUserCount: finalTrackedCount,
         totalConversions
       },
       recentRegisteredUsers: recentUsers,
