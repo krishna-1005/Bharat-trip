@@ -8,8 +8,13 @@ const { signupValidation, loginValidation } = require("../middleware/validator")
 
 const router = express.Router();
 
-const signToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+const signToken = (id) => {
+  if (!process.env.JWT_SECRET) {
+    console.error("CRITICAL: JWT_SECRET is missing from environment variables!");
+    throw new Error("JWT_SECRET is not configured on the server.");
+  }
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+};
 
 /* ── SIGNUP ── */
 router.post("/signup", authLimiter, signupValidation, async (req, res) => {
