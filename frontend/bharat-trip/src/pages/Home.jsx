@@ -56,7 +56,7 @@ const InteractiveHeroImages = () => {
   const famousPlaces = [
     {
       name: "Taj Mahal",
-      img: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80",
+      img: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80",
       x: -20, y: -20, rotate: -5, scale: 1.1
     },
     {
@@ -70,8 +70,8 @@ const InteractiveHeroImages = () => {
       x: -30, y: 50, rotate: -10, scale: 1.0
     },
     {
-      name: "Jaipur",
-      img: "https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=800&q=80",
+      name: "Amber Fort",
+      img: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80",
       x: 50, y: 30, rotate: 5, scale: 1.05
     }
   ];
@@ -306,7 +306,7 @@ const TravelFeed = () => {
   const { formatPrice } = useSettings();
 
   const trending = [
-    { id: 1, title: "Golden Triangle Luxury", city: "Delhi, Agra, Jaipur", days: 6, cost: 45000, tags: ["History", "Luxury"], img: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80" },
+    { id: 1, title: "Golden Triangle Luxury", city: "Delhi, Agra, Jaipur", days: 6, cost: 45000, tags: ["History", "Luxury"], img: "https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=800&q=80" },
     { id: 2, title: "Kerala Backwater Bliss", city: "Alleppey", days: 4, cost: 22000, tags: ["Nature", "Relaxed"], img: "https://images.unsplash.com/photo-1593179241557-bce1eb92e47e?auto=format&fit=crop&w=800&q=80" },
     { id: 3, title: "Goa Beach Party", city: "North Goa", days: 3, cost: 15000, tags: ["Party", "Beach"], img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80" }
   ];

@@ -156,10 +156,9 @@ function Navbar() {
               Login
             </button>
           )}
-  
+
         </div>
       </div>
-
       {/* MOBILE DRAWER */}
       <AnimatePresence>
         {!isHomePage && mobileMenuOpen && (

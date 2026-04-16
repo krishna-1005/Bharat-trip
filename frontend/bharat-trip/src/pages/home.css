@@ -1346,6 +1346,7 @@ h1, h2, h3 {
 
 .feed-row {
   width: 100%;
+  overflow: visible; /* Ensure it doesn't clip children */
 }
 
 .feed-row-header {
@@ -1362,11 +1363,14 @@ h1, h2, h3 {
 
 .feed-scroll-container {
   display: flex;
+  flex-wrap: nowrap; /* CRITICAL: Prevent stacking */
   gap: 20px;
-  overflow-x: auto;
-  padding: 10px 4px 30px;
+  overflow-x: auto !important; /* Force scroll */
+  -webkit-overflow-scrolling: touch; /* Smooth touch scroll */
+  padding: 10px 0 30px;
   scroll-behavior: smooth;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none; /* Hide for Firefox */
+  width: 100%;
 }
 
 .feed-scroll-container::-webkit-scrollbar {
@@ -1481,6 +1485,21 @@ h1, h2, h3 {
 @media (max-width: 768px) {
   .feed-card {
     min-width: 280px;
+    flex-shrink: 0;
+  }
+  
+  .feed-scroll-container {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-left: -20px;
+    margin-right: -20px;
+    scroll-snap-type: x proximity;
+  }
+
+  .feed-card {
+    scroll-snap-align: start;
   }
 }
 
