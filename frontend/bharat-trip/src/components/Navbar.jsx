@@ -156,22 +156,13 @@ function Navbar() {
               Login
             </button>
           )}
-
-          {/* HAMBURGER (MOBILE ONLY) */}
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`nb-hamburger mobile-only ${mobileMenuOpen ? 'active' : ''}`}
-          >
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
+  
         </div>
       </div>
 
       {/* MOBILE DRAWER */}
       <AnimatePresence>
-        {mobileMenuOpen && (
+        {!isHomePage && mobileMenuOpen && (
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}

@@ -238,49 +238,74 @@
   text-align: left;
 }
 
-/* ── MOBILE DRAWER ── */
-.nb-mobile-drawer {
-  position: fixed;
-  inset: 0;
-  z-index: 4999;
-  background: #020617;
-  padding: 100px 32px 40px;
-  display: flex;
-  flex-direction: column;
-}
-
-.nb-mobile-nav-title {
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
-  letter-spacing: 3px;
-  margin-bottom: 24px;
-}
-
-.nb-mobile-link {
-  width: 100%;
-  background: transparent;
-  border: none;
-  color: #fff;
-  font-size: 2.5rem;
-  font-weight: 900;
-  text-align: left;
-  padding: 12px 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-}
-
-.nb-mobile-link span { color: rgba(255, 255, 255, 0.1); transition: 0.3s; }
-.nb-mobile-link:active span { color: #3b82f6; transform: translateX(10px); }
-
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .nb-container-base { padding: 0 20px; }
   .nb-links-pill { display: none; }
   .nb-scrolled { height: 60px; }
+}
+
+/* ── MOBILE DRAWER ── */
+.nb-mobile-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 4990;
+  background: rgba(2, 6, 23, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 120px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.nb-mobile-nav-title {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  letter-spacing: 4px;
+  margin-bottom: 30px;
+  opacity: 0.8;
+}
+
+.nb-mobile-link {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 800;
+  text-align: left;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  margin-bottom: 12px;
+}
+
+.nb-mobile-link span { 
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.2); 
+  transition: 0.3s; 
+}
+
+.nb-mobile-link:active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: scale(0.98);
+}
+
+.nb-mobile-link:active span { 
+  color: var(--accent-blue); 
+  transform: translateX(5px); 
 }
 
 /* ── HAMBURGER ── */
