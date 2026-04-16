@@ -39,7 +39,8 @@ export default function MyTrips() {
   const fetchTrips = async () => {
     if (!user) return;
     try {
-      const token = await auth.currentUser?.getIdToken(true);
+      let token = await auth.currentUser?.getIdToken(true);
+      if (!token && user?.token) token = user.token;
       if (!token) return;
 
       const res = await fetch(`${API}/api/profile/trips`, {
@@ -123,7 +124,9 @@ export default function MyTrips() {
     e.stopPropagation();
     if (!window.confirm("Are you sure you want to delete this journey?")) return;
     try {
-      const token = await auth.currentUser?.getIdToken(true);
+      let token = await auth.currentUser?.getIdToken(true);
+      if (!token && user?.token) token = user.token;
+
       const res = await fetch(`${API}/api/profile/trips/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },

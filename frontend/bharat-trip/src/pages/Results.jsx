@@ -460,10 +460,14 @@ function Results() {
 
     setSaving(true);
     try {
-      // Ensure we have a fresh token
-      const token = await auth.currentUser?.getIdToken(true);
+      // Ensure we have a fresh token (Try Firebase first, then fallback to our custom token from context)
+      let token = await auth.currentUser?.getIdToken(true);
+      if (!token && user?.token) {
+        token = user.token;
+      }
+
       if (!token) {
-        console.error("Save failed: No Firebase token available.");
+        console.error("Save failed: No authentication token available.");
         setSaving(false);
         return;
       }

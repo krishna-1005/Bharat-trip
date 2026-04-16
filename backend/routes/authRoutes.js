@@ -54,8 +54,8 @@ router.post("/signup", authLimiter, signupValidation, async (req, res) => {
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({
-      error: err.message,
-      stack: err.stack
+      error: "Registration failed. Please try again later.",
+      // stack: err.stack // Removed for security/cleanliness
     });
   }
 });

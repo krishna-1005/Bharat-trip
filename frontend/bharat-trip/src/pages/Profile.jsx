@@ -26,7 +26,8 @@ export default function Profile() {
 
   const fetchProfile = async () => {
     try {
-      const token = await auth.currentUser?.getIdToken(true);
+      let token = await auth.currentUser?.getIdToken(true);
+      if (!token && user?.token) token = user.token;
       if (!token) return;
       
       const res = await fetch(`${API}/api/profile`, {
@@ -42,7 +43,8 @@ export default function Profile() {
   const fetchTrips = async () => {
     if (!user) return;
     try {
-      const token = await auth.currentUser?.getIdToken(true);
+      let token = await auth.currentUser?.getIdToken(true);
+      if (!token && user?.token) token = user.token;
       if (!token) return;
 
       const res = await fetch(`${API}/api/profile/trips`, {

@@ -39,7 +39,9 @@ const MultiCityOverview = () => {
     if (saving || saved || !tripStructure.length) return;
     setSaving(true);
     try {
-      const token = await auth.currentUser?.getIdToken(true);
+      let token = await auth.currentUser?.getIdToken(true);
+      if (!token && user?.token) token = user.token;
+
       const res = await fetch(`${API}/api/profile/trips`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
