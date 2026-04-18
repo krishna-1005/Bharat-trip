@@ -138,6 +138,46 @@ const INTERACTIVE_QUESTIONS = [
   }
 ];
 
+const TrendingTrips = ({ formatPrice }) => {
+  const [trips, setTrips] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch(`${API}/api/public/featured-trips`)
+      .then(res => res.json())
+      .then(data => setTrips(data.trips?.slice(0, 4) || []))
+      .catch(() => {});
+  }, []);
+
+  if (trips.length === 0) return null;
+
+  return (
+    <div className="trending-sidebar-section">
+      <div className="section-header-mini">
+        <span className="sh-badge">DISCOVER</span>
+        <h3>Trending Discoveries</h3>
+      </div>
+      <div className="trending-scroll-row">
+        {trips.map(trip => (
+          <div key={trip.id} className="trending-mini-card" onClick={() => navigate(`/trip/${trip.id}`)}>
+            <div className="tm-img">
+              <PlaceImage placeName={trip.destination} city={trip.destination} />
+              <div className="tm-days">{trip.days}d</div>
+            </div>
+            <div className="tm-info">
+              <h4>{trip.title}</h4>
+              <div className="tm-meta">
+                <span>📍 {trip.destination}</span>
+                <span className="tm-price">{formatPrice(trip.cost)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 function Results() {
   const navigate = useNavigate();
   const loc = useLocation();
@@ -973,58 +1013,64 @@ function Results() {
               </motion.div>
             )}
 
+            {/* Mobile Action Buttons: Integrated into scroll flow above Trending/Partners */}
+            {isMobile && (
+              <div className="mobile-integrated-actions">
+                <button className="primary-action-btn mobile-save-btn" onClick={handleSaveTrip} disabled={saved || saving}>
+                  {saving ? "Saving..." : saved ? "Journey Saved ✓" : "Save to Profile"}
+                </button>
+                
+                <div className="mobile-secondary-grid">
+                  <button className="secondary-action-btn" onClick={handleShare}>
+                    {shareStatus ? "Copied!" : "Share Link"}
+                  </button>
+                  <button className="export-btn-pdf" onClick={handleExportPDF}>
+                    📄 Export PDF
+                  </button>
+                  <button className="export-btn-wa" onClick={handleWhatsAppShare}>
+                    💬 WhatsApp
+                  </button>
+                  <button className="qr-share-btn-v2" onClick={() => setShowQRModal(true)}>
+                    📱 QR Code
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Trending Discoveries Section: Fixed above Premium Partners */}
+            <TrendingTrips formatPrice={formatPrice} />
+
             {/* BookingLeadGen is now always inside the sidebar at the end of content */}
             <BookingLeadGen plan={plan} />
 
-            {/* Mobile Scroll Spacer: ensures last card is visible above fixed footer */}
-            {isMobile && <div className="mobile-sidebar-spacer" style={{ height: '120px', width: '100%' }}></div>}
+            {/* Mobile Scroll Spacer: ensures last card is visible above BottomNav */}
+            {isMobile && <div className="mobile-sidebar-spacer" style={{ height: '100px', width: '100%' }}></div>}
           </div>
         </>
       )}
       </div>
 
-      <div className="sidebar-footer-premium">
-          {!isMobile ? (
-            <div className="action-btn-group-v2">
-              <button className="primary-action-btn" onClick={handleSaveTrip} disabled={saved || saving}>
-                {saving ? "Saving..." : saved ? "Journey Saved ✓" : "Save to Profile"}
-              </button>
-              <button className="secondary-action-btn" onClick={handleShare}>
-                {shareStatus ? "Link Copied!" : "Share Link"}
-              </button>
-              <button className="export-btn-pdf" onClick={handleExportPDF}>
-                📄 Export PDF
-              </button>
-              <button className="export-btn-wa" onClick={handleWhatsAppShare}>
-                💬 WhatsApp
-              </button>
-              <button className="qr-share-btn" onClick={() => setShowQRModal(true)}>
-                📱 QR Code
-              </button>
-            </div>
-          ) : (
-            <div className="mobile-action-footer-v2">
-              <button className="primary-action-btn mobile-save-btn" onClick={handleSaveTrip} disabled={saved || saving}>
-                {saving ? "Saving..." : saved ? "Journey Saved ✓" : "Save to Profile"}
-              </button>
-              
-              <div className="mobile-secondary-grid">
-                <button className="secondary-action-btn" onClick={handleShare}>
-                  {shareStatus ? "Copied!" : "Share Link"}
-                </button>
-                <button className="export-btn-pdf" onClick={handleExportPDF}>
-                  📄 Export PDF
-                </button>
-                <button className="export-btn-wa" onClick={handleWhatsAppShare}>
-                  💬 WhatsApp
-                </button>
-                <button className="qr-share-btn-v2" onClick={() => setShowQRModal(true)}>
-                  📱 QR Code
-                </button>
-              </div>
-            </div>
-          )}
+      {!isMobile && (
+        <div className="sidebar-footer-premium">
+          <div className="action-btn-group-v2">
+            <button className="primary-action-btn" onClick={handleSaveTrip} disabled={saved || saving}>
+              {saving ? "Saving..." : saved ? "Journey Saved ✓" : "Save to Profile"}
+            </button>
+            <button className="secondary-action-btn" onClick={handleShare}>
+              {shareStatus ? "Link Copied!" : "Share Link"}
+            </button>
+            <button className="export-btn-pdf" onClick={handleExportPDF}>
+              📄 Export PDF
+            </button>
+            <button className="export-btn-wa" onClick={handleWhatsAppShare}>
+              💬 WhatsApp
+            </button>
+            <button className="qr-share-btn" onClick={() => setShowQRModal(true)}>
+              📱 QR Code
+            </button>
+          </div>
         </div>
+      )}
       </aside>
 
       {!isMobile && (
