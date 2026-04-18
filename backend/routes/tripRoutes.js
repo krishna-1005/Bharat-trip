@@ -1,6 +1,7 @@
 const express = require("express");
 const Trip = require("../models/Trip");
 const { protect } = require("../middleware/protect");
+const supplierOrchestrator = require("../services/supplierOrchestrator");
 
 const router = express.Router();
 
@@ -74,6 +75,35 @@ router.get("/:id", async (req, res) => {
     res.json(trip);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* EXECUTE REBOOKING REVISION */
+router.post("/:id/execute-revision", async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+    if (!trip || !trip.pendingRevision) {
+      return res.status(404).json({ error: "Trip or pending revision not found" });
+    }
+
+    console.log(`⚡ Executing rebooking for Trip ${trip._id}`);
+
+    // 1. Commit the revision
+    trip.itinerary = trip.pendingRevision.itinerary;
+    
+    // 2. Clear revision data
+    trip.pendingRevision = undefined;
+
+    // 3. Fire the Orchestrator (dispatch emails/API calls)
+    await supplierOrchestrator.executeNotifications(trip);
+
+    await trip.save();
+
+    res.json({ success: true, message: "Rebooking blueprint executed successfully" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error executing rebooking" });
   }
 });
 

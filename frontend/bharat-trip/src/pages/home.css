@@ -1405,173 +1405,74 @@ h1, h2, h3 {
   }
 }
 
-/* ── TRAVEL FEED SECTION ── */
-.travel-feed-section {
+/* ── NEW ROBUST TRAVEL FEED (tf-) ── */
+.tf-section {
   padding: 80px 0;
+  background: var(--bg-main);
 }
 
-.feed-container {
-  display: flex;
-  flex-direction: column;
-  gap: 60px;
+.tf-row {
+  margin-bottom: 60px;
 }
 
-.feed-row {
-  width: 100%;
-  overflow: visible; /* Ensure it doesn't clip children */
-}
-
-.feed-row-header {
+.tf-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   margin-bottom: 24px;
 }
 
-.feed-row-header h2 {
-  font-size: 2rem;
-  margin: 0;
+.tf-header h2 {
+  font-size: 1.8rem;
+  color: #fff !important;
 }
 
-.feed-scroll-container {
+.tf-scroll {
   display: flex;
-  flex-wrap: nowrap; /* CRITICAL: Prevent stacking */
-  gap: 20px;
-  overflow-x: auto !important; /* Force scroll */
-  -webkit-overflow-scrolling: touch; /* Smooth touch scroll */
-  padding: 10px 0 30px;
-  scroll-behavior: smooth;
-  scrollbar-width: none; /* Hide for Firefox */
-  width: 100%;
+  gap: 24px;
+  overflow-x: auto;
+  padding: 10px 20px 40px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-.feed-scroll-container::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+.tf-scroll::-webkit-scrollbar {
+  display: none;
 }
 
-.feed-card {
-  min-width: 320px;
-  max-width: 320px;
-  background: var(--bg-panel);
-  border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
+/* ── FEATURED MASTERPIECES (FIXED) ── */
+.featured-section {
+  padding: 80px 0 !important;
+  background: var(--bg-main) !important;
 }
 
-.feed-card:hover {
-  transform: translateY(-8px);
-  border-color: var(--accent-blue);
-  box-shadow: 0 20px 40px var(--shadow-main);
+.featured-card {
+  background: #16161a !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 32px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  opacity: 1 !important;
 }
 
-.feed-card-img {
-  height: 180px;
-  position: relative;
+.f-card-content {
+  padding: 24px !important;
+  background: #16161a !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
 }
 
-.feed-card-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.feed-badge {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  padding: 4px 12px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: white;
-}
-
-.feed-card-content {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex: 1;
-}
-
-.feed-card-title {
-  font-size: 1.25rem;
-  font-weight: 800;
-  margin: 0;
-  line-height: 1.3;
-}
-
-.feed-card-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  color: var(--text-dim);
-  font-weight: 600;
-}
-
-.feed-card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.feed-tag {
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--accent-blue);
-  padding: 2px 10px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.feed-plan-btn {
-  margin-top: auto;
-  width: 100%;
-  padding: 12px;
-  border-radius: 12px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  color: var(--text-main);
-  font-weight: 700;
-  font-size: 0.9rem;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.feed-card:hover .feed-plan-btn {
-  background: var(--accent-blue);
-  color: white;
-  border-color: var(--accent-blue);
+.f-card-content h3 {
+  color: #ffffff !important;
+  margin: 0 !important;
+  opacity: 1 !important;
 }
 
 @media (max-width: 768px) {
-  .feed-card {
-    min-width: 280px;
-    flex-shrink: 0;
-  }
-  
-  .feed-scroll-container {
-    -webkit-overflow-scrolling: touch;
-    overflow-x: auto;
-    padding-left: 20px;
-    padding-right: 20px;
-    margin-left: -20px;
-    margin-right: -20px;
-    scroll-snap-type: x proximity;
-  }
-
-  .feed-card {
-    scroll-snap-align: start;
+  .featured-card {
+    min-width: 280px !important;
   }
 }
 

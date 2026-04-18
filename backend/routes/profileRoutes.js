@@ -76,7 +76,8 @@ router.delete("/", async (req, res) => {
 /* GET /api/profile/trips?status=upcoming  — list all trips */
 router.get("/trips", async (req, res) => {
   try {
-
+    console.log(`[MY TRIPS] Fetching trips for user: ${req.user._id} (${req.user.email})`);
+    
     const filter = { userId: req.user._id };
 
     if (req.query.status) {
@@ -84,11 +85,12 @@ router.get("/trips", async (req, res) => {
     }
 
     const trips = await Trip.find(filter).sort({ createdAt: -1 });
+    console.log(`[MY TRIPS] Found ${trips.length} trips for user: ${req.user._id}`);
 
     res.json({ trips });
 
   } catch (err) {
-    console.error(err);
+    console.error("[MY TRIPS] Error fetching trips:", err);
     res.status(500).json({ error: "Server error." });
   }
 });
@@ -133,23 +135,30 @@ router.post("/trips", async (req, res) => {
       }));
     } else if (typeof itinerary === 'object' && itinerary !== null) {
       console.log(`[SAVE TRIP] Itinerary is object with keys: ${Object.keys(itinerary)}`);
-      formattedItinerary = Object.entries(itinerary).map(([dayLabel, dayData]) => ({
-        day: dayLabel,
-        estimatedHours: dayData.estimatedHours || 0,
-        estimatedCost: dayData.estimatedCost || 0,
-        places: (dayData.places || []).map(p => ({
-          name: p.name,
-          lat: p.lat,
-          lng: p.lng,
-          estimatedCost: p.estimatedCost || p.avgCost || 0,
-          estimatedHours: p.estimatedHours || p.timeHours || 0,
-          category: p.category,
-          rating: p.rating,
-          reviews: p.reviews,
-          tag: p.tag,
-          userReviews: p.userReviews || []
-        }))
-      }));
+      formattedItinerary = Object.entries(itinerary).map(([dayLabel, dayValue]) => {
+        // Handle both: {"1": [places]} AND {"1": {places: [places]}}
+        const places = Array.isArray(dayValue) ? dayValue : (dayValue.places || []);
+        const estimatedHours = dayValue.estimatedHours || 0;
+        const estimatedCost = dayValue.estimatedCost || 0;
+
+        return {
+          day: dayLabel,
+          estimatedHours,
+          estimatedCost,
+          places: places.map(p => ({
+            name: p.name,
+            lat: p.lat,
+            lng: p.lng,
+            estimatedCost: p.estimatedCost || p.avgCost || 0,
+            estimatedHours: p.estimatedHours || p.timeHours || 0,
+            category: p.category,
+            rating: p.rating,
+            reviews: p.reviews,
+            tag: p.tag,
+            userReviews: p.userReviews || []
+          }))
+        };
+      });
     }
 
     const trip = await Trip.create({

@@ -1,4 +1,4 @@
-const API_KEY = import.meta.env.VITE_WEATHER_API_KEY || "YOUR_FREE_OPENWEATHER_KEY"; // Placeholder
+const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const BASE_URL = "https://api.openweathermap.org/data/2.5";
 
 /**
@@ -6,6 +6,10 @@ const BASE_URL = "https://api.openweathermap.org/data/2.5";
  * For this demo, we use the 5-day forecast.
  */
 export const fetchWeatherForecast = async (lat, lng) => {
+  if (!API_KEY || API_KEY === "YOUR_FREE_OPENWEATHER_KEY") {
+    console.warn("Weather API Key missing. Skipping fetch.");
+    return null;
+  }
   try {
     const response = await fetch(
       `${BASE_URL}/forecast?lat=${lat}&lon=${lng}&appid=${API_KEY}&units=metric`

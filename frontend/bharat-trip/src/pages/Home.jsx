@@ -8,8 +8,6 @@ import PlaceImage from "../components/PlaceImage";
 import JoinByCode from "../components/JoinByCode";
 import "./home.css";
 
-import ThreeScene from "../components/ThreeScene";
-
 const FloatingImageCard = ({ place, index, sx, sy }) => {
   const x = useTransform(sx, (val) => val * (index + 1) * 0.5);
   const y = useTransform(sy, (val) => val * (index + 1) * 0.5);
@@ -23,9 +21,8 @@ const FloatingImageCard = ({ place, index, sx, sy }) => {
         rotate: place.rotate,
       }}
       whileHover={{ scale: place.scale * 1.1, zIndex: 50, rotate: 0 }}
-      initial={{ opacity: 0, scale: 0.5 }}
+      initial={{ opacity: 1, scale: place.scale }}
       animate={{ opacity: 1, scale: place.scale }}
-      transition={{ duration: 0.8, delay: index * 0.1 }}
     >
       <img src={place.img} alt={place.name} />
       <div className="image-caption">{place.name}</div>
@@ -91,103 +88,62 @@ const InteractiveHeroImages = () => {
   );
 };
 
-const FeatureCard = ({ icon, title, desc }) => (
-  <motion.div 
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    whileHover={{ y: -10, backgroundColor: 'rgba(255,255,255,0.08)' }}
-    className="feature-card"
-  >
-    <div className="action-icon" style={{ marginBottom: '20px' }}>{icon}</div>
-    <h3>{title}</h3>
-    <p>{desc}</p>
-  </motion.div>
-);
+const TravelFeed = () => {
+  const navigate = useNavigate();
+  const { formatPrice } = useSettings();
 
-const TripPulse = () => {
-  const [activeTrips, setActiveTrips] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const trending = [
+    { id: 3001, title: "Golden Triangle Luxury", city: "Delhi, Jaipur", days: 5, cost: 42000, tags: ["History", "Royal"], img: "https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=800" },
+    { id: 3002, title: "Kerala Backwater Bliss", city: "Alleppey", days: 4, cost: 22000, tags: ["Nature", "Relaxed"], img: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=800" },
+    { id: 3003, title: "Goa Beach Party", city: "North Goa", days: 3, cost: 15000, tags: ["Party", "Beach"], img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800" }
+  ];
 
-  const fetchActivity = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/public/recent-activity`);
-      const data = await res.json();
-      if (data.activity && data.activity.length > 0) {
-        const formatted = data.activity.map(a => {
-          const diff = Math.floor((new Date() - new Date(a.time)) / 60000);
-          let timeStr = "Just now";
-          if (diff > 0 && diff < 60) timeStr = `${diff}m ago`;
-          else if (diff >= 60 && diff < 1440) timeStr = `${Math.floor(diff / 60)}h ago`;
-          else if (diff >= 1440) timeStr = `${Math.floor(diff / 1440)}d ago`;
-          
-          return { ...a, timeStr };
-        });
-        setActiveTrips(formatted.slice(0, 3));
-      }
-    } catch (err) {
-      console.error("Error fetching live pulse:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const ideas = [
+    { id: 3004, title: "Spirituality in Kashi", city: "Varanasi", days: 3, cost: 12000, tags: ["Culture", "Spiritual"], img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?q=80&w=800" },
+    { id: 3005, title: "Yoga Retreat", city: "Rishikesh", days: 5, cost: 18000, tags: ["Wellness", "Adventure"], img: "https://images.unsplash.com/photo-1545105511-923f63f29e07?q=80&w=800" }
+  ];
 
-  useEffect(() => {
-    fetchActivity();
-    const interval = setInterval(fetchActivity, 15000);
-    return () => clearInterval(interval);
-  }, []);
-
-  if (loading && activeTrips.length === 0) return null;
-  if (!loading && activeTrips.length === 0) return null;
+  const FeedRow = ({ title, items, badge }) => (
+    <div style={{ marginBottom: '60px', display: 'block', width: '100%' }}>
+      <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#ffffff', opacity: 1, margin: 0 }}>{title}</h2>
+        {badge && <span style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '4px 14px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: '800', opacity: 1 }}>{badge}</span>}
+      </div>
+      <div style={{ display: 'flex', gap: '24px', overflowX: 'auto', padding: '10px 20px 40px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', alignItems: 'flex-start' }}>
+        {items.map(item => (
+          <div 
+            key={item.id} 
+            style={{ minWidth: '280px', width: '280px', background: '#16161a', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', flexShrink: 0, cursor: 'pointer', transition: 'all 0.3s ease', boxShadow: '0 10px 40px rgba(0,0,0,0.5)', opacity: 1 }}
+            onClick={() => navigate('/planner', { state: { prefilledCity: item.city.split(',')[0].trim() } })}
+          >
+            <div style={{ width: '100%', height: '180px', background: '#000', position: 'relative', display: 'block' }}>
+              <img src={item.img} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 1 }} />
+              <span style={{ position: 'absolute', top: '16px', left: '16px', background: '#3b82f6', color: '#ffffff', padding: '5px 12px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: '900', opacity: 1, zIndex: 10 }}>{badge || 'HOT'}</span>
+            </div>
+            <div style={{ padding: '24px', background: '#16161a', display: 'flex', flexDirection: 'column', gap: '12px', opacity: 1, visibility: 'visible' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#94a3b8', fontWeight: '700', opacity: 1 }}>
+                <span>📍 {item.city}</span>
+                <span>{item.days}d</span>
+              </div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#ffffff', margin: '0', display: 'block', opacity: 1 }}>{item.title}</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', opacity: 1 }}>
+                {item.tags.map(t => <span key={t} style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', padding: '4px 10px', borderRadius: '8px', fontSize: '10px', fontWeight: '800', opacity: 1 }}>{t}</span>)}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '16px', marginTop: '4px', opacity: 1 }}>
+                <span style={{ fontWeight: '900', color: '#ffffff', fontSize: '1.2rem', opacity: 1 }}>{formatPrice(item.cost)}</span>
+                <button style={{ padding: '10px 20px', background: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: '800', fontSize: '0.85rem', opacity: 1 }}>Plan ⚡</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
-    <section className="pulse-section container">
-      <div className="pulse-header">
-        <div className="pulse-live-tag">
-          <span className="pulse-dot"></span>
-          REAL-TIME ACTIVITY
-        </div>
-        <h2>The Pulse of GoTripo</h2>
-        <p>Actual destinations being explored by our community right now.</p>
-      </div>
-
-      <div className="pulse-grid">
-        <AnimatePresence mode="popLayout">
-          {activeTrips.map((trip) => (
-            <motion.div
-              key={trip.id}
-              layout
-              initial={{ opacity: 0, x: -20, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="pulse-card"
-            >
-              <div className="pulse-card-icon">✨</div>
-              <div className="pulse-card-content">
-                <div className="pulse-user-info">
-                  <strong>{trip.user}</strong> is exploring <span>{trip.type}</span> spots
-                </div>
-                <div className="pulse-location-info">
-                  <h3>{trip.city}</h3>
-                  <span className="pulse-time">{trip.timeStr}</span>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-        
-        <div className="pulse-stats-mini">
-          <div className="mini-stat">
-            <span className="stat-num">Live</span>
-            <span className="stat-lab">Database Feed</span>
-          </div>
-          <div className="mini-stat">
-            <span className="stat-num">Verified</span>
-            <span className="stat-lab">User Interest</span>
-          </div>
-        </div>
-      </div>
+    <section style={{ padding: '80px 0', background: '#050505', position: 'relative', zIndex: 10 }}>
+      <FeedRow title="Trending Destinations" items={trending} badge="TRENDING" />
+      <FeedRow title="Travel Ideas" items={ideas} />
     </section>
   );
 };
@@ -198,16 +154,10 @@ const FeaturedTrips = () => {
   const { formatPrice } = useSettings();
 
   useEffect(() => {
-    const fetchFeatured = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/public/featured-trips`);
-        const data = await res.json();
-        if (data.trips) setTrips(data.trips);
-      } catch (err) {
-        console.error("Featured trips error:", err);
-      }
-    };
-    fetchFeatured();
+    fetch(`${import.meta.env.VITE_API_URL}/api/public/featured-trips`)
+      .then(res => res.json())
+      .then(data => { if (data.trips) setTrips(data.trips); })
+      .catch(err => console.error("Featured trips error:", err));
   }, []);
 
   const handleClone = (trip) => {
@@ -237,30 +187,21 @@ const FeaturedTrips = () => {
   if (trips.length === 0) return null;
 
   return (
-    <section className="featured-section container">
-      <div className="section-header-v2">
+    <section className="featured-section">
+      <div className="section-header-v2 container">
         <div className="sh-left">
           <span className="premium-badge-v2">COMMUNITY MASTERPIECES</span>
           <h2>Top Rated Itineraries</h2>
-          <p>Hand-crafted journeys by our elite travelers. Clone and customize your own.</p>
         </div>
         <button className="sh-btn" onClick={() => navigate('/destinations')}>Explore More →</button>
       </div>
 
       <div className="featured-grid">
-        {trips.map((trip, i) => (
-          <motion.div 
-            key={trip.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1, duration: 0.6 }}
-            className="featured-card"
-          >
+        {trips.map((trip) => (
+          <div key={trip.id} className="featured-card">
             <div className="f-card-img">
               <PlaceImage placeName={trip.destination} city={trip.destination} />
               <div className="f-card-badge">{trip.days} Days</div>
-              <div className="f-card-saves">🔖 {trip.saves} saves</div>
             </div>
             <div className="f-card-content">
               <div className="f-card-meta">
@@ -268,107 +209,12 @@ const FeaturedTrips = () => {
                 <span className="f-price">{formatPrice(trip.cost)}</span>
               </div>
               <h3>{trip.title}</h3>
-              
-              <div className="f-card-itinerary-preview" style={{ marginTop: '15px', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {(Array.isArray(trip.itinerary) ? trip.itinerary : Object.entries(trip.itinerary || {})).slice(0, 2).map((item, i) => {
-                  const dayLabel = Array.isArray(trip.itinerary) ? (item.day || `Day ${i+1}`) : item[0];
-                  const places = Array.isArray(trip.itinerary) ? item.places : item[1].places;
-                  return (
-                    <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--accent-blue)', opacity: 0.8, minWidth: '35px' }}>{dayLabel.toUpperCase()}</span>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                        {(places || []).slice(0, 2).map((p, pi) => (
-                          <span key={pi} style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.05)', padding: '1px 6px', borderRadius: '4px' }}>
-                            {p.name}
-                          </span>
-                        ))}
-                        {(places || []).length > 2 && <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>+{places.length - 2}</span>}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
               <button className="f-clone-btn" onClick={() => handleClone(trip)}>
-                <span className="btn-text">Clone this Journey</span>
-                <span className="btn-icon">⚡</span>
+                Clone Journey ⚡
               </button>
             </div>
-          </motion.div>
+          </div>
         ))}
-      </div>
-    </section>
-  );
-};
-
-const TravelFeed = () => {
-  const navigate = useNavigate();
-  const { formatPrice } = useSettings();
-
-  const trending = [
-    { id: 1, title: "Golden Triangle Luxury", city: "Delhi, Agra, Jaipur", days: 6, cost: 45000, tags: ["History", "Luxury"], img: "https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&w=800&q=80" },
-    { id: 2, title: "Kerala Backwater Bliss", city: "Alleppey", days: 4, cost: 22000, tags: ["Nature", "Relaxed"], img: "https://images.unsplash.com/photo-1593179241557-bce1eb92e47e?auto=format&fit=crop&w=800&q=80" },
-    { id: 3, title: "Goa Beach Party", city: "North Goa", days: 3, cost: 15000, tags: ["Party", "Beach"], img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80" }
-  ];
-
-  const ideas = [
-    { id: 4, title: "Spirituality in Kashi", city: "Varanasi", days: 3, cost: 12000, tags: ["Culture", "Spiritual"], img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80" },
-    { id: 5, title: "Yoga Retreat", city: "Rishikesh", days: 5, cost: 18000, tags: ["Wellness", "Adventure"], img: "https://images.unsplash.com/photo-1545105511-923f63f29e07?auto=format&fit=crop&w=800&q=80" },
-    { id: 6, title: "Tea Gardens Escape", city: "Munnar", days: 4, cost: 20000, tags: ["Nature", "Hills"], img: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80" }
-  ];
-
-  const gems = [
-    { id: 7, title: "The Ruins of Hampi", city: "Hampi", days: 3, cost: 10000, tags: ["Heritage", "Ancient"], img: "https://images.unsplash.com/photo-1600100397608-f010e4aa0984?auto=format&fit=crop&w=800&q=80" },
-    { id: 8, title: "French Quarter Stroll", city: "Pondicherry", days: 3, cost: 14000, tags: ["Culture", "Coastal"], img: "https://images.unsplash.com/photo-1589793907316-f94025b46850?auto=format&fit=crop&w=800&q=80" },
-    { id: 9, title: "Boulders & Bicycles", city: "Badami", days: 2, cost: 8000, tags: ["Adventure", "History"], img: "https://images.unsplash.com/photo-1623150502742-6a849aa94be4?auto=format&fit=crop&w=800&q=80" }
-  ];
-
-  const FeedRow = ({ title, items, badge }) => (
-    <div className="feed-row">
-      <div className="feed-row-header">
-        <h2>{title}</h2>
-        <span className="btn-tertiary">View All →</span>
-      </div>
-      <div className="feed-scroll-container">
-        {items.map(item => (
-          <motion.div 
-            key={item.id} 
-            className="feed-card"
-            whileHover={{ y: -5 }}
-            onClick={() => navigate('/planner', { state: { prefilledCity: item.city.split(',')[0].trim() } })}
-          >
-            <div className="feed-card-img">
-              <img src={item.img} alt={item.title} />
-              {badge && <span className="feed-badge">{badge}</span>}
-            </div>
-            <div className="feed-card-content">
-              <div className="feed-card-meta">
-                <span>📍 {item.city}</span>
-                <span>{item.days} Days</span>
-              </div>
-              <h3 className="feed-card-title">{item.title}</h3>
-              <div className="feed-card-tags">
-                {item.tags.map(t => <span key={t} className="feed-tag">{t}</span>)}
-              </div>
-              <div style={{ marginTop: '10px', fontWeight: '800', color: 'var(--text-main)' }}>
-                {formatPrice(item.cost)}
-              </div>
-              <button className="feed-plan-btn">
-                Plan this trip ⚡
-              </button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-
-  return (
-    <section className="travel-feed-section container">
-      <div className="feed-container">
-        <FeedRow title="Trending Destinations" items={trending} badge="TRENDING" />
-        <FeedRow title="Travel Ideas" items={ideas} />
-        <FeedRow title="Hidden Gems" items={gems} badge="RARE" />
       </div>
     </section>
   );
@@ -376,59 +222,8 @@ const TravelFeed = () => {
 
 const Home = () => {
   const navigate = useNavigate();
-  const destRef = useRef(null);
-
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 1024);
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [tooltipStep, setTooltipStep] = useState(0);
-
-  useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth > 1024);
-    window.addEventListener('resize', handleResize);
-    
-    const hasSeenGuide = localStorage.getItem("hasSeenGuide");
-    if (!hasSeenGuide) {
-      setTimeout(() => setShowTooltip(true), 2000);
-    }
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const tooltips = [
-    { title: "Welcome to GoTripo!", text: "Your AI-powered travel companion. Let's show you around." },
-    { title: "Smart Planning", text: "Click 'Start Planning' to get a bespoke itinerary in seconds." },
-    { title: "Group Polls", text: "Planning with friends? Create a poll and let the group decide." }
-  ];
-
-  const handleNextTooltip = () => {
-    if (tooltipStep < tooltips.length - 1) {
-      setTooltipStep(tooltipStep + 1);
-    } else {
-      setShowTooltip(false);
-      localStorage.setItem("hasSeenGuide", "true");
-    }
-  };
-
-  const handleQuickStart = () => {
-    navigate('/planner', { 
-      state: { 
-        prefilledCity: "Goa",
-        prefilledDays: 3,
-        prefilledBudget: "Comfort"
-      } 
-    });
-  };
-
-  const handleViewSample = () => {
-    navigate('/explore/Goa');
-  };
-
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [heroText, setHeroText] = useState({
-    h: "Your Indian Odyssey, <br /> Perfected by AI.",
-    p: "From hidden Himalayan trails to the vibrant heart of the Pink City—get a bespoke, high-precision itinerary."
-  });
-
+  
   const heroOptions = [
     {
       h: "Your Indian Odyssey, <br /> Perfected by AI.",
@@ -444,242 +239,99 @@ const Home = () => {
     }
   ];
 
-  const [selectedMood, setSelectedMood] = useState('🏖️ Relaxed');
-
-  const matchData = {
-    '🏔️ Adventure': { name: 'Manali', desc: 'Snow-capped peaks and thrilling paragliding.', img: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80' },
-    '🏖️ Relaxed': { name: 'Goa', desc: 'Golden sands and soulful sunsets.', img: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80' },
-    '🛕 Heritage': { name: 'Hampi', desc: 'Ancient ruins and architectural marvels.', img: 'https://images.unsplash.com/photo-1600100397608-f010e4aa0984?auto=format&fit=crop&w=800&q=80' },
-    '🎭 Culture': { name: 'Varanasi', desc: 'The spiritual heart of timeless India.', img: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80' },
-    '💖 Romantic': { name: 'Udaipur', desc: 'Palaces, lakes, and royal romance.', img: 'https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=800&q=80' },
-  };
+  const [heroText, setHeroText] = useState(heroOptions[0]);
 
   useEffect(() => {
-    const randomIdx = Math.floor(Math.random() * heroOptions.length);
-    setHeroText(heroOptions[randomIdx]);
+    const idx = Math.floor(Math.random() * heroOptions.length);
+    setHeroText(heroOptions[idx]);
   }, []);
 
   useEffect(() => {
-    const handleGlobalMouse = (e) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
+    const handleGlobalMouse = (e) => setMousePos({ x: e.clientX, y: e.clientY });
     window.addEventListener('mousemove', handleGlobalMouse);
     return () => window.removeEventListener('mousemove', handleGlobalMouse);
   }, []);
 
   const destinations = [
-    { name: "Goa", tagline: "Sun, Sand & Charms", img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80" },
+    { name: "Goa", tagline: "Sun, Sand & Charms", img: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800" },
     { name: "Manali", tagline: "Himalayan Snow Peaks", img: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80" },
     { name: "Kerala", tagline: "Backwaters & Tea", img: "https://images.unsplash.com/photo-1593179241557-bce1eb92e47e?auto=format&fit=crop&w=800&q=80" },
     { name: "Jaipur", tagline: "Royal Pink City", img: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80" },
   ];
-
-  const scrollToDestinations = () => {
-    destRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   return (
     <div className="home-redesign">
       <div className="interactive-bg">
         <motion.div 
           className="bg-blob"
-          animate={{
-            x: mousePos.x - 150,
-            y: mousePos.y - 150,
-          }}
+          animate={{ x: mousePos.x - 150, y: mousePos.y - 150 }}
           transition={{ type: 'spring', damping: 30, stiffness: 50 }}
         />
       </div>
 
-      <AnimatePresence>
-        {showTooltip && (
-          <motion.div 
-            className="tooltip-guide-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div 
-              className="tooltip-card"
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-            >
-              <div className="tooltip-dot" />
-              <h3>{tooltips[tooltipStep].title}</h3>
-              <p>{tooltips[tooltipStep].text}</p>
-              <div className="tooltip-actions">
-                <button className="btn-tertiary" onClick={() => { setShowTooltip(false); localStorage.setItem("hasSeenGuide", "true"); }}>Skip</button>
-                <button className="btn-primary" style={{ padding: '10px 24px', borderRadius: '10px' }} onClick={handleNextTooltip}>
-                  {tooltipStep === tooltips.length - 1 ? "Finish" : "Next →"}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
       <section className="hero-section container">
         <div className="hero-grid">
-          <motion.div 
-            className="hero-content"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
+          <div className="hero-content">
             <h1 dangerouslySetInnerHTML={{ __html: heroText.h }}></h1>
             <p>{heroText.p}</p>
             <div className="hero-actions">
-              <motion.button 
-                whileTap={{ scale: 0.95 }}
-                className="btn-large btn-primary" 
-                onClick={() => navigate('/trip-type')}
-              >
+              <button className="btn-large btn-primary" onClick={() => navigate('/trip-type')}>
                 Start Planning
-              </motion.button>
-              <motion.button 
-                whileTap={{ scale: 0.95 }}
-                className="btn-large btn-secondary" 
-                onClick={() => navigate('/create-poll')}
-              >
-                Group Vote
-              </motion.button>
-              
-              <button className="btn-sample" onClick={handleViewSample}>
-                <div className="icon-circle">▶</div>
-                View Sample Trip
+              </button>
+              <button className="btn-large btn-secondary" onClick={() => navigate('/destinations')}>
+                Explore Trips
               </button>
             </div>
-          </motion.div>
+          </div>
           <div className="hero-preview-container desktop-only">
             <InteractiveHeroImages />
           </div>
         </div>
-
-        <motion.div 
-          className="hero-scroll-indicator"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, y: [0, 10, 0] }}
-          transition={{ delay: 1.5, duration: 2, repeat: Infinity }}
-          onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}
-        >
-          <span className="scroll-text">Explore GoTripo</span>
-          <div className="scroll-arrow">↓</div>
-        </motion.div>
       </section>
 
       <BrandPromotion />
 
-      {/* Added ID for scrolling */}
-      <section id="features" className="container onboarding-decision-section">
+      <section className="container onboarding-decision-section">
         <div className="section-header">
-          <h2>What do you want to do?</h2>
-          <p className="dashboard-subtitle">Quickly jump into your next travel phase</p>
+          <h2>Quick Actions</h2>
         </div>
         <div className="decision-grid">
-          <motion.div whileHover={{ y: -5 }} className="decision-card" onClick={() => navigate('/trip-type')}>
+          <div className="decision-card" onClick={() => navigate('/trip-type')}>
             <div className="decision-icon">🤖</div>
-            <h3>Plan a Trip</h3>
-            <p>Get an AI-crafted itinerary for any destination.</p>
-          </motion.div>
-          <motion.div whileHover={{ y: -5 }} className="decision-card" onClick={() => navigate('/destinations')}>
+            <h3>Plan New</h3>
+          </div>
+          <div className="decision-card" onClick={() => navigate('/destinations')}>
             <div className="decision-icon">✨</div>
-            <h3>Explore Trips</h3>
-            <p>Discover hand-picked journeys from the community.</p>
-          </motion.div>
-          <motion.div whileHover={{ y: -5 }} className="decision-card" onClick={() => navigate('/create-poll')}>
+            <h3>Top Rated</h3>
+          </div>
+          <div className="decision-card" onClick={() => navigate('/create-poll')}>
             <div className="decision-icon">🗳️</div>
-            <h3>Use Polls</h3>
-            <p>Can't decide? Let your group vote on the best spot.</p>
-          </motion.div>
-        </div>
-
-        <JoinByCode />
-
-        <div className="quick-start-bar">
-          <div className="quick-start-info">
-            <h4>Plan a trip in 30 seconds</h4>
-            <p>Let us pre-fill a popular 3-day Goa itinerary for you.</p>
+            <h3>Group Poll</h3>
           </div>
-          <button className="btn-primary" style={{ padding: '14px 28px', borderRadius: '12px' }} onClick={handleQuickStart}>
-            Quick Start ✨
-          </button>
         </div>
       </section>
 
-      {/* Added ID for scrolling */}
-      <section id="how-it-works" className="container travel-feed-section">
-        <div className="feed-container">
-          <TravelFeed />
-        </div>
-      </section>
-
-      <section className="matchmaker-section container">
-        <div className="matchmaker-card">
-          <div className="mm-content">
-            <div className="mm-badge">AI Matchmaker</div>
-            <h2>Find Your Soul Destination</h2>
-            <div className="mm-controls">
-              <div className="mm-group">
-                <label>Vibe</label>
-                <div className="mm-options">
-                  {['🏔️ Adventure', '🏖️ Relaxed', '🛕 Heritage'].map(m => (
-                    <button 
-                      key={m} 
-                      className={`mm-opt ${selectedMood === m ? 'active' : ''}`}
-                      onClick={() => setSelectedMood(m)}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-          <motion.div 
-            className="mm-result"
-            key={selectedMood}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <div className="mm-result-card" onClick={() => navigate('/planner', { state: { prefilledCity: matchData[selectedMood]?.name } })}>
-              <img src={matchData[selectedMood]?.img} alt="Match" />
-              <div className="mm-result-info">
-                <h3>{matchData[selectedMood]?.name}</h3>
-                <p>{matchData[selectedMood]?.desc}</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      <TripPulse />
+      <TravelFeed />
 
       <FeaturedTrips />
 
-      <section id="destinations" className="container" ref={destRef}>
+      <section className="container">
         <div className="section-header">
           <h2>Trending Now</h2>
-          <button className="btn-tertiary" onClick={() => navigate('/destinations')}>View All →</button>
         </div>
         <div className="dest-grid">
           {destinations.map((d, i) => (
-            <motion.div 
-              key={i} 
-              className="dest-card"
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate(`/explore/${d.name}`)}
-            >
+            <div key={i} className="dest-card" onClick={() => navigate(`/explore/${d.name}`)}>
               <img src={d.img} alt={d.name} />
               <div className="dest-overlay">
                 <h3>{d.name}</h3>
                 <span className="dest-tagline">{d.tagline}</span>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </section>
 
-      <BrandPromotion />
       <MinimalReviewSection />
     </div>
   );

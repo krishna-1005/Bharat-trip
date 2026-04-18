@@ -96,7 +96,31 @@ const tripSchema = new mongoose.Schema({
   image: {
     type: String,
     default: ""
-  }
+  },
+
+  /* ── REBOOKING ENGINE DATA ── */
+  disruptionAlerts: [{
+    type: { type: String }, // e.g., "flight_delay", "weather"
+    message: String,
+    severity: { type: String, enum: ["low", "medium", "high"], default: "medium" },
+    timestamp: { type: Date, default: Date.now }
+  }],
+
+  pendingRevision: {
+    itinerary: [daySchema],
+    impactSummary: String,
+    recalculationReason: String,
+    createdAt: Date
+  },
+
+  queuedSupplierNotifications: [{
+    supplierName: String,
+    supplierType: { type: String, enum: ["hotel", "restaurant", "transport"] },
+    actionType: String, // e.g., "late_checkin", "reschedule"
+    status: { type: String, enum: ["pending", "sent", "failed"], default: "pending" },
+    messageDraft: String,
+    sentAt: Date
+  }]
 
 }, { timestamps: true });
 

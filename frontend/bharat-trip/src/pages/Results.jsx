@@ -500,19 +500,30 @@ function Results() {
 
     setSaving(true);
     try {
-      // Ensure we have a fresh token (Try Firebase first, then fallback to our custom token from context)
-      let token = await auth.currentUser?.getIdToken(true);
+      // FORCE get a fresh token from Firebase
+      let token = null;
+      if (auth.currentUser) {
+        token = await auth.currentUser.getIdToken(true);
+        console.log("[SAVE TRIP] Fresh Firebase token acquired");
+      }
+      
       if (!token && user?.token) {
         token = user.token;
+        console.log("[SAVE TRIP] Using legacy context token");
       }
 
       if (!token) {
-        console.error("Save failed: No authentication token available.");
-        setSaving(false);
-        return;
+        throw new Error("No authentication token available. Please log in again.");
       }
 
-      console.log("Saving trip to profile...");
+      console.log("Saving trip to profile with payload:", {
+        title: tripTitle || `${planToSave.city} Trip`,
+        city: planToSave.city,
+        days: planToSave.days || 1,
+        totalCost: planToSave.totalTripCost || planToSave.totalCost,
+        totalBudget: planToSave.totalBudget
+      });
+
       const res = await fetch(`${API}/api/profile/trips`, {
         method: "POST",
         headers: { 
@@ -531,6 +542,7 @@ function Results() {
       });
 
       const data = await res.json();
+      console.log("[SAVE TRIP] Backend response:", { status: res.status, data });
 
       if (res.ok) {
         console.log("Trip saved successfully:", data);
