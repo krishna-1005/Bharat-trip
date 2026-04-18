@@ -169,27 +169,45 @@
 
 /* --- RESPONSIVE --- */
 @media (max-width: 1100px) {
-    .planner-onboarding-page { padding: 40px 0 180px; } /* Increased bottom padding */
+    .planner-onboarding-page { 
+        padding: 40px 15px 180px; 
+        justify-content: center;
+        width: 100%;
+        overflow-x: hidden;
+    } 
     .planner-container { 
         grid-template-columns: 1fr; 
-        gap: 60px; 
-        padding: 20px;
-        max-width: 600px;
+        gap: 40px; 
+        padding: 0;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
     }
-    .planner-intro-section, .tt-main-title, .tt-subtitle { text-align: center; margin-left: auto; margin-right: auto; }
+    .planner-intro-section, .tt-main-title, .tt-subtitle { 
+        text-align: center; 
+        margin-left: auto; 
+        margin-right: auto; 
+    }
     .persona-tabs { 
         justify-content: center; 
         overflow-x: auto; 
         padding-bottom: 10px;
+        width: 100%;
     }
-    .featured-mini-list { justify-content: center; }
+    .featured-mini-list { 
+        justify-content: center; 
+        flex-wrap: wrap;
+        gap: 15px;
+    }
     .planner-glass-card { 
         width: 100%; 
-        padding: 24px 20px; 
+        padding: 24px 16px; 
         border-radius: 28px; 
         background: var(--bg-panel);
         border: 1px solid var(--border-main);
-        overflow: hidden; /* Prevent internal overflow from pushing card */
+        overflow: hidden; 
+        margin: 0 auto;
+        box-sizing: border-box;
     }
     .planner-form-header {
         text-align: center;
@@ -206,12 +224,44 @@
 }
 
 @media (max-width: 600px) {
-    .planner-container { padding: 15px; }
-    .planner-main-title { font-size: 2rem; }
-    .tt-main-title { font-size: 2.2rem; }
+    .planner-container { 
+        padding: 0; 
+        max-width: 100%;
+    }
+    .planner-onboarding-page {
+        padding: 20px 10px 150px;
+    }
+    .planner-main-title { font-size: 1.8rem; }
+    .tt-main-title { font-size: 2rem; }
     .persona-tabs { gap: 15px; }
-    .persona-tab { font-size: 16px; }
-    .mini-spot-card { max-width: 120px; }
-    .mini-spot-img-wrap { height: 150px; }
+    .persona-tab { font-size: 15px; }
+    .mini-spot-card { max-width: 110px; }
+    .mini-spot-img-wrap { height: 140px; }
 }
 
+@media (max-width:600px){
+
+  .planner-form-section,
+  .planner-glass-card,
+  .pf-wrap,
+  .pf-step-container,
+  .pf-step,
+  .pf-field{
+      width:100%;
+      max-width:100%;
+      margin:0 auto;
+      box-sizing:border-box;
+  }
+
+  .pf-wrap{
+      padding:0;
+  }
+
+}
+
+@media (max-width:600px){
+   .planner-glass-card{
+      padding-left:14px;
+      padding-right:14px;
+   }
+}

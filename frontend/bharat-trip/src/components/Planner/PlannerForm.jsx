@@ -278,7 +278,7 @@ function PlannerForm({ onPlanGenerated }) {
                     onClick={() => setPace(opt.value)}
                   >
                     <span className="pf-choice-icon">{opt.icon}</span>
-                    <div style={{ textAlign: 'left' }}>
+                    <div className="pf-choice-text-group">
                         <div className="pf-choice-label">{opt.label}</div>
                         <div className="pf-choice-desc">{opt.desc}</div>
                     </div>

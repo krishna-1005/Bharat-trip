@@ -78,7 +78,7 @@ function Planner() {
   };
 
   return (
-    <div className="tt-premium-root" style={{ alignItems: 'flex-start', paddingTop: '100px' }}>
+    <div className="planner-onboarding-page tt-premium-root" style={{ paddingTop: '100px' }}>
       {/* Dynamic Background */}
       <div className="tt-bg-ambient">
         <div className="tt-blob tt-blob-1" style={{ background: '#3b82f6', top: '10%', left: '10%' }}></div>

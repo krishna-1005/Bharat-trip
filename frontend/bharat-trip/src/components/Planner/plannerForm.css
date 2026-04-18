@@ -84,30 +84,60 @@
 .pf-choice-card {
     background: var(--bg-panel);
     border: 1px solid var(--border-main);
-    padding: 18px 20px;
-    border-radius: 20px;
+    padding: 24px;
+    border-radius: 24px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
     cursor: pointer;
     transition: 0.4s;
 }
 
+.pf-choice-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-main);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.pf-choice-text-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .pf-choice-label { 
-    font-weight: 700; 
+    font-weight: 800; 
     color: var(--text-main); 
-    font-size: 14px; 
+    font-size: 16px; 
 }
 
 .pf-choice-desc { 
-    font-size: 11px; 
+    font-size: 12px; 
     color: var(--text-dim); 
     line-height: 1.4; 
+    max-width: 200px;
 }
 
 .pf-choice-card.active {
     border-color: var(--accent-blue);
+    background: rgba(59, 130, 246, 0.05);
+    transform: translateY(-2px);
+}
+
+.pf-choice-card.active .pf-choice-icon {
     background: rgba(59, 130, 246, 0.1);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
 }
 
 /* --- INTEREST CARDS (STEP 3) --- */
@@ -420,10 +450,10 @@
 }
 
 /* Responsive Adjustments — PREMIUM MOBILE OVERHAUL */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .pf-wrap {
         gap: 32px;
-        padding-bottom: 250px; /* Max clearance for BottomNav & FABs */
+        padding-bottom: 250px;
         padding-left: 12px;
         padding-right: 12px;
     }
@@ -444,7 +474,7 @@
     }
 
     .pf-label {
-        text-align: center;
+        text-align: center !important;
         display: block;
         width: 100%;
         margin-bottom: 16px;
@@ -476,10 +506,11 @@
     }
 
     .pf-budget-header {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 12px;
         margin-bottom: 24px;
+        width: 100%;
     }
 
     .pf-per-day-badge {
@@ -487,6 +518,8 @@
         padding: 6px 14px;
         background: rgba(59, 130, 246, 0.15);
         border: 1px solid rgba(59, 130, 246, 0.3);
+        display: inline-block;
+        margin: 0 auto;
     }
 
     /* Sleek Currency Rail */
@@ -497,6 +530,8 @@
         margin-bottom: 28px;
         gap: 8px;
         justify-content: center;
+        flex-wrap: wrap; /* Wrap to ensure centering on very narrow screens */
+        overflow-x: visible;
     }
 
     .pf-currency-chip {
@@ -521,6 +556,9 @@
     .pf-budget-display {
         margin: 10px 0 32px 0;
         text-align: center;
+        width: 100%;
+        display: flex;
+        justify-content: center;
     }
 
     .pf-budget-numeric-input {
@@ -531,6 +569,7 @@
         letter-spacing: -3px;
         width: 100%;
         max-width: 100%;
+        text-align: center;
     }
 
     .pf-slider-labels {
@@ -541,6 +580,7 @@
     .pf-budget-presets {
         gap: 12px;
         flex-wrap: wrap;
+        justify-content: center !important;
     }
 
     .pf-preset-pill {
@@ -636,3 +676,4 @@
         text-align: center;
     }
 }
+

@@ -35,13 +35,14 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // 1. Exclude Vite & Local Development HMR stuff
+  // 1. Exclude Vite-specific development assets only
   // This prevents the SW from breaking Vite's HMR websocket and hot updates
+  // while still allowing navigation fallbacks to work on localhost
   if (
-    url.hostname === 'localhost' || 
     url.pathname.includes('@vite') || 
     url.pathname.includes('node_modules') ||
-    request.url.includes('token=') // Vite HMR tokens
+    request.url.includes('token=') || // Vite HMR tokens
+    url.pathname.includes('chrome-extension') // Browser extensions
   ) {
     return; // Let browser handle normally
   }
