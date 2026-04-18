@@ -35,8 +35,18 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // 1. Navigation Fallback (SPA Support)
-  // When user refreshes on /results or /map, serve index.html from cache
+  // 1. Exclude Vite & Local Development HMR stuff
+  // This prevents the SW from breaking Vite's HMR websocket and hot updates
+  if (
+    url.hostname === 'localhost' || 
+    url.pathname.includes('@vite') || 
+    url.pathname.includes('node_modules') ||
+    request.url.includes('token=') // Vite HMR tokens
+  ) {
+    return; // Let browser handle normally
+  }
+
+  // 2. Navigation Fallback (SPA Support)
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(() => {
@@ -46,7 +56,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. API Strategy: Network First
+  // 3. API Strategy: Network First
   if (url.pathname.startsWith('/api')) {
     event.respondWith(
       fetch(request)
@@ -61,14 +71,11 @@ self.addEventListener('fetch', (event) => {
           const cached = await caches.match(request);
           if (cached) return cached;
           
-          // Fallback for API calls when offline and not cached
-          // Added CORS headers so Vercel can read this response from the Render API
-          return new Response(JSON.stringify({ error: "Offline", message: "You are offline and this data is not cached." }), {
+          return new Response(JSON.stringify({ error: "Offline", message: "You are offline." }), {
             status: 503,
             headers: { 
               'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*', // Critical for cross-origin offline messages
-              'Access-Control-Allow-Credentials': 'true'
+              'Access-Control-Allow-Origin': '*'
             }
           });
         })
@@ -76,22 +83,21 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Asset Strategy: Cache First, then Network
-  // This handles Vite JS/CSS bundles and prevents the blank white screen
+  // 4. Asset Strategy: Cache First, then Network
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
 
       return fetch(request).then((response) => {
-        // Cache successful responses from our own origin or images
         if (response.ok && (url.origin === self.location.origin || request.destination === 'image')) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
         }
         return response;
       }).catch(() => {
-        // If offline and image fails, show placeholder
         if (request.destination === 'image') return caches.match('/vite.svg');
+        // Return a basic error response instead of undefined
+        return new Response('Network error occurred', { status: 408, statusText: 'Network error occurred' });
       });
     })
   );

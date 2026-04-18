@@ -443,50 +443,88 @@
         margin-top: 4px;
     }
 
+    .pf-label {
+        text-align: center;
+        display: block;
+        width: 100%;
+        margin-bottom: 16px;
+    }
+
+    .pf-days-row {
+        justify-content: center;
+        margin-bottom: 24px;
+    }
+
+    /* INTEREST CARDS MOBILE */
+    .pf-interest-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .pf-interest-card {
+        padding: 18px 20px;
+        justify-content: center;
+    }
+
     /* PREMIUM BUDGET CARD MOBILE */
     .pf-premium-budget-card {
-        padding: 24px 20px;
-        border-radius: 30px;
+        padding: 32px 20px;
+        border-radius: 32px;
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     }
 
     .pf-budget-header {
         flex-direction: column;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 20px;
+        gap: 10px;
+        margin-bottom: 24px;
     }
 
     .pf-per-day-badge {
-        font-size: 10px;
-        padding: 4px 12px;
+        font-size: 11px;
+        padding: 6px 14px;
+        background: rgba(59, 130, 246, 0.15);
+        border: 1px solid rgba(59, 130, 246, 0.3);
     }
 
     /* Sleek Currency Rail */
     .pf-currency-rail {
-        padding: 6px;
-        background: rgba(0,0,0,0.4);
-        border-radius: 14px;
-        margin-bottom: 24px;
-        gap: 6px;
+        padding: 8px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 20px;
+        margin-bottom: 28px;
+        gap: 8px;
+        justify-content: center;
     }
 
     .pf-currency-chip {
-        padding: 8px 12px;
-        min-width: 65px;
-        border-radius: 100px;
+        padding: 10px 14px;
+        min-width: 70px;
+        border-radius: 14px;
+        flex: none;
+    }
+
+    .pf-currency-chip.active {
+        background: var(--accent-blue);
+        border-color: var(--accent-blue);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    }
+
+    .pf-currency-chip.active .pf-chip-symbol,
+    .pf-currency-chip.active .pf-chip-code {
+        color: #fff;
     }
 
     /* Centered Huge Budget Input */
     .pf-budget-display {
-        margin: 10px 0 28px 0;
+        margin: 10px 0 32px 0;
         text-align: center;
     }
 
     .pf-budget-numeric-input {
-        font-size: 56px;
+        font-size: clamp(48px, 15vw, 64px);
         font-weight: 900;
         color: #ffffff;
         text-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
@@ -495,26 +533,60 @@
         max-width: 100%;
     }
 
+    .pf-slider-labels {
+        font-size: 10px;
+        color: rgba(255,255,255,0.4);
+    }
+
+    .pf-budget-presets {
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .pf-preset-pill {
+        padding: 10px 18px;
+        font-size: 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.05);
+    }
+
     /* PACE CARDS REFINED */
     .pf-selection-grid {
         grid-template-columns: 1fr;
-        gap: 12px;
+        gap: 16px;
     }
 
     .pf-choice-card {
-        padding: 20px;
-        border-radius: 20px;
-        flex-direction: row;
-        gap: 18px;
-        background: rgba(255, 255, 255, 0.02);
+        padding: 24px;
+        border-radius: 24px;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .pf-choice-icon {
-        width: 54px;
-        height: 54px;
-        min-width: 54px;
-        font-size: 22px;
-        border-radius: 16px;
+        width: 60px;
+        height: 60px;
+        min-width: 60px;
+        font-size: 28px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pf-choice-label {
+        font-size: 18px;
+        margin-bottom: 4px;
+    }
+
+    .pf-choice-desc {
+        font-size: 12px;
+        max-width: 200px;
     }
 
     /* SLEEK FOOTER MOBILE */
@@ -548,17 +620,17 @@
 
     .pf-primary-btn {
         flex: 1;
-        padding: 16px;
-        border-radius: 16px;
-        font-size: 15px;
+        padding: 18px;
+        border-radius: 18px;
+        font-size: 16px;
     }
 
     .pf-secondary-btn {
         flex: 1;
         background: rgba(255, 255, 255, 0.04);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 16px;
+        border-radius: 18px;
+        padding: 18px;
         color: #94a3b8;
         font-weight: 700;
         text-align: center;

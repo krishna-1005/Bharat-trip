@@ -243,7 +243,7 @@ export default function CreatePoll() {
                         
                         <div className="review-cities-grid">
                             {options.map(opt => (
-                                <div key={opt.name} className="dash-tag" style={{ padding: '10px 16px', fontSize: '14px', background: 'rgba(255,255,255,0.05)', borderRadius: '100px' }}>
+                                <div key={opt.name} className="dash-tag" style={{ padding: '10px 16px', fontSize: '14px', background: 'var(--bg-main)', border: '1px solid var(--border-main)', borderRadius: '100px', color: 'var(--text-main)' }}>
                                     {opt.name}
                                 </div>
                             ))}

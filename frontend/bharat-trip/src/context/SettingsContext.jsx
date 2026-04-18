@@ -8,7 +8,16 @@ export const useSettings = () => useContext(SettingsContext);
 export const SettingsProvider = ({ children }) => {
   const [currency, setCurrency] = useState(() => localStorage.getItem("settings_currency") || "INR");
   const [language, setLanguage] = useState(() => localStorage.getItem("settings_language") || "English");
-  const [theme, setTheme] = useState(() => localStorage.getItem("settings_theme") || "dark");
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem("settings_theme");
+    const migrated = localStorage.getItem("theme_migrated_v2");
+    if (!migrated) {
+      localStorage.setItem("theme_migrated_v2", "true");
+      localStorage.setItem("settings_theme", "light");
+      return "light";
+    }
+    return saved || "light";
+  });
 
   const translations = {
     English: {

@@ -363,11 +363,11 @@ export default function PollResults() {
         {/* Sharing Section */}
         <div style={{ textAlign: 'center', marginTop: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
             {joinCode && (
-                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '20px 40px', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                <div style={{ background: 'var(--bg-panel)', padding: '20px 40px', borderRadius: '24px', border: '2px dashed var(--border-main)' }}>
                     <p style={{ fontSize: '12px', color: 'var(--dash-primary)', fontWeight: '800', marginBottom: '8px', textTransform: 'uppercase' }}>Trip Join Code</p>
-                    <h2 style={{ fontSize: '2.5rem', letterSpacing: '8px', margin: 0, color: 'white' }}>{joinCode}</h2>
-                    <button 
-                        className="btn-premium outline" 
+                    <h2 style={{ fontSize: '2.5rem', letterSpacing: '8px', margin: 0, color: 'var(--text-main)' }}>{joinCode}</h2>
+                    <button
+                        className="btn-premium outline"
                         style={{ marginTop: '12px', fontSize: '0.8rem', padding: '6px 12px' }}
                         onClick={() => {
                             navigator.clipboard.writeText(joinCode);
@@ -378,7 +378,6 @@ export default function PollResults() {
                     </button>
                 </div>
             )}
-
             <button 
                 className="btn-premium outline" 
                 style={{ fontSize: '0.85rem', border: 'none', background: 'transparent' }}

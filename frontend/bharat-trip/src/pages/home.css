@@ -3,15 +3,6 @@
    Clean, Structured, Premium, Action-Focused
 ============================================= */
 
-:root {
-  --bg-dark: var(--bg-main);
-  --bg-card-home: var(--glass);
-  --accent-blue-home: var(--accent-blue);
-  --text-main-home: var(--text-main);
-  --text-dim-home: var(--text-dim);
-  --border-main-home: var(--glass-border);
-}
-
 .home-redesign {
   background: var(--bg-main);
   color: var(--text-main);
