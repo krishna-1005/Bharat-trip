@@ -5,6 +5,7 @@ const UsageLog = require("../models/UsageLog");
 const { protect } = require("../middleware/protect");
 const { authLimiter } = require("../middleware/rateLimiter");
 const { signupValidation, loginValidation } = require("../middleware/validator");
+const { sendWelcomeEmail } = require("../services/emailService");
 
 const router = express.Router();
 
@@ -44,6 +45,9 @@ router.post("/signup", authLimiter, signupValidation, async (req, res) => {
     });
 
     const token = signToken(user._id);
+
+    // Send welcome email (background)
+    sendWelcomeEmail(user.email, user.name).catch(e => console.error("Welcome email error:", e.message));
 
     res.status(201).json({
       message: "Account created.",

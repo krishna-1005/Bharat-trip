@@ -2,6 +2,7 @@ const { admin } = require("../firebaseAdmin");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const UsageLog = require("../models/UsageLog");
+const { sendWelcomeEmail } = require("../services/emailService");
 
 const protect = async (req, res, next) => {
   try {
@@ -29,6 +30,9 @@ const protect = async (req, res, next) => {
           name: decoded.name || "User",
           photo: decoded.picture || ""
         });
+
+        // Send welcome email (background)
+        sendWelcomeEmail(user.email, user.name).catch(e => console.error("Social welcome email error:", e.message));
       }
     } catch (firebaseErr) {
       // 2. Try Custom JWT Token
