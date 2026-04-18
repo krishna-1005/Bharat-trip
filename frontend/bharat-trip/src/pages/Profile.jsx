@@ -95,6 +95,7 @@ export default function Profile() {
       });
     }
     const planData = {
+      id: trip.id,
       city: trip.location,
       days: trip.days,
       itinerary: Object.keys(itineryObj).length > 0 ? itineryObj : trip.itinerary,
@@ -102,7 +103,7 @@ export default function Profile() {
       isSaved: true
     };
     localStorage.setItem("tripPlan", JSON.stringify(planData));
-    navigate("/results", { state: { plan: planData } });
+    navigate(`/trip/${trip.id}`, { state: { plan: planData } });
   };
 
   const name = user?.name || user?.email?.split("@")[0] || "Explorer";

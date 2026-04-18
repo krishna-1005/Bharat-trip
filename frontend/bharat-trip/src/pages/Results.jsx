@@ -298,8 +298,11 @@ function Results() {
     if (!plan) return { total: 0, target: 0, percent: 0, isOver: false, targetPercent: 100 };
     const total = Number(plan.totalTripCost || plan.totalCost) || 0;
     
-    // Prioritize budget from original params to avoid 0 if backend doesn't return it
-    const target = Number(plan.totalBudget) || Number(loc.state?.planParams?.budget) || 0;
+    // Check multiple possible budget field names from both live AI and saved DB objects
+    const target = Number(plan.totalBudget) || 
+                   Number(plan.budget) || 
+                   Number(plan.targetBudget) ||
+                   Number(loc.state?.planParams?.budget) || 0;
     
     const max = Math.max(total, target, 1);
     const percent = target > 0 ? (total / target) * 100 : 100;
