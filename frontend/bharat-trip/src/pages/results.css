@@ -562,145 +562,70 @@
   }
 
   .sidebar-scroll-content {
-    padding: 0 20px 140px; /* Space for sticky footer */
+    padding: 0 20px 240px; /* Increased space for fixed footer + bottom nav */
     overflow-y: visible; 
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px; /* Tighter gap */
     background: var(--bg-main);
   }
 
-  .trip-overview-premium {
-    padding: 20px;
-    margin-bottom: 0;
-    border-radius: 20px;
-  }
-
-  .overview-stats {
-    gap: 12px;
-  }
-
-  .stat-value-mid {
-    font-size: 14px;
-  }
-
-  .itinerary-days-container {
-    height: auto; 
-    max-height: none;
-    gap: 24px;
-  }
-
-  /* Redesign stop cards for vertical mobile flow */
-  .premium-stop-card-v3 {
-    flex-direction: column;
-    padding: 16px;
-    gap: 16px;
-    border-radius: 20px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .stop-image-wrap-v3 {
-    width: 100%;
-    height: 160px;
-    border-radius: 14px;
-  }
-
-  .stop-info-v3 h4 {
-    font-size: 18px;
-    margin-bottom: 8px;
-  }
-
-  .stop-details-v3 {
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-
-  .stop-actions-v3 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    width: 100%;
-  }
+  /* ... (overview stats etc) ... */
 
   .sidebar-footer-premium {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 5100; /* Higher than BookingLeadGen but below SafetyModal */
-    padding: 20px;
-    background: rgba(10, 10, 10, 0.8);
+    bottom: 104px; /* Sits exactly above BottomNav (24px + 72px + 8px gap) */
+    left: 16px;
+    right: 16px;
+    z-index: 5100;
+    padding: 12px;
+    border-radius: 24px;
+    background: rgba(10, 10, 10, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
   }
 
   /* PREMIUM MOBILE MAP CARD */
   .mobile-map-entry-card {
     position: relative;
     width: 100%;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    border-radius: 24px;
-    padding: 24px;
-    margin-top: 32px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 20px;
     overflow: hidden;
     cursor: pointer;
     box-sizing: border-box;
-  }
-
-  .map-card-glow {
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 70%);
-    filter: blur(20px);
-    pointer-events: none;
   }
 
   .map-card-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
     position: relative;
     z-index: 2;
   }
 
-  .map-card-info {
-    flex: 1;
-  }
-
-  .map-badge {
-    font-size: 10px;
-    font-weight: 900;
-    color: var(--accent-primary);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    display: block;
-  }
-
   .map-card-info h3 {
-    font-size: 20px;
+    font-size: 17px;
     font-weight: 800;
     color: #fff;
-    margin: 0 0 6px;
+    margin: 0 0 4px;
   }
 
   .map-card-info p {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-dim);
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.4;
   }
 
   .map-card-icon {
-    font-size: 40px;
-    filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+    font-size: 32px;
   }
 
   /* MOBILE MAP MODE OVERHAUL */

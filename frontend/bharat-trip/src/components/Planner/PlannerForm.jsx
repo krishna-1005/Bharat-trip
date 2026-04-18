@@ -71,6 +71,8 @@ function PlannerForm({ onPlanGenerated }) {
   const totalSteps = 3;
 
   const handleSubmit = async () => {
+    if (loading) return;
+    
     if (interests.length === 0) {
       setError("Please select at least one interest to build your journey.");
       return;
@@ -80,25 +82,32 @@ function PlannerForm({ onPlanGenerated }) {
       return;
     }
     setError("");
+    setLoading(true);
     
-    // Convert budget to INR before sending
-    const budgetInINR = toINR(Number(budget), currency);
-    
-    // Prepare the form data to be processed in Results.jsx
-    const queryParams = {
-      city,
-      lat: coordinates.lat,
-      lng: coordinates.lng,
-      days,
-      budget: Math.round(budgetInINR),
-      interests,
-      travelerType,
-      pace
-    };
+    try {
+      // Convert budget to INR before sending
+      const budgetInINR = toINR(Number(budget), currency);
+      
+      // Prepare the form data to be processed in Results.jsx
+      const queryParams = {
+        city,
+        lat: coordinates.lat,
+        lng: coordinates.lng,
+        days,
+        budget: Math.round(budgetInINR),
+        interests,
+        travelerType,
+        pace
+      };
 
-    // Navigate to results with isNew: true and the form data
-    if (onPlanGenerated) {
-      onPlanGenerated(null, queryParams); 
+      // Navigate to results with isNew: true and the form data
+      if (onPlanGenerated) {
+        onPlanGenerated(null, queryParams); 
+      }
+    } catch (err) {
+      console.error("Navigation error:", err);
+      setError("Failed to start generation. Please try again.");
+      setLoading(false);
     }
   };
 

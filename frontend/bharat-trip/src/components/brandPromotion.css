@@ -163,9 +163,83 @@
 }
 
 @media (max-width: 768px) {
-  .promo-title, .promo-title-copy { font-size: 50px; }
-  .brand-promo-container { height: 500px; margin: 40px 10px; }
-  .promo-stats { gap: 20px; flex-wrap: wrap; justify-content: center; }
-  .stat-number { font-size: 28px; }
-  .promo-slogan-active { font-size: 18px; }
+  .brand-promo-container { 
+    height: auto; 
+    padding: 60px 20px;
+    margin: 40px 12px; 
+    border-radius: 32px;
+  }
+
+  .promo-title, .promo-title-copy { 
+    font-size: 48px; 
+  }
+
+  .promo-logo-glitch {
+    margin-bottom: 12px;
+  }
+
+  .promo-slogan-wrapper {
+    height: 30px;
+    margin-bottom: 32px;
+  }
+
+  .promo-slogan-active { 
+    font-size: 16px; 
+  }
+
+  .promo-stats { 
+    gap: 24px; 
+    flex-wrap: nowrap; 
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    padding: 0 20px 10px;
+    margin-bottom: 32px;
+    width: 100%;
+    scrollbar-width: none;
+  }
+
+  .promo-stats::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stat-item {
+    min-width: 120px;
+    flex-shrink: 0;
+  }
+
+  .stat-number { 
+    font-size: 24px; 
+  }
+
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .stat-divider {
+    display: none; /* Hide dividers on mobile for better stacking */
+  }
+
+  .promo-cta {
+    width: 100%;
+    padding: 16px 24px;
+    font-size: 15px;
+    border-radius: 20px;
+  }
+
+  .floating-plane-v2 {
+    font-size: 28px;
+    opacity: 0.2;
+  }
+}
+
+@media (max-width: 480px) {
+  .promo-title, .promo-title-copy { 
+    font-size: 40px; 
+  }
+  
+  .stat-item {
+    min-width: 80px;
+  }
 }

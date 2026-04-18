@@ -88,16 +88,27 @@
 
 @media (max-width: 900px) {
   .booking-sticky-card {
-    padding: 24px 20px;
-    margin-top: 24px;
-    margin-bottom: 24px;
+    padding: 16px;
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
   
   .booking-info h3 {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .booking-info p {
-    font-size: 13px;
+    font-size: 12px;
+  }
+
+  .booking-actions {
+    flex-direction: row; /* Side by side buttons on mobile to save space */
+    gap: 8px;
+  }
+
+  .book-btn {
+    padding: 10px;
+    font-size: 11px;
+    border-radius: 10px;
   }
 }

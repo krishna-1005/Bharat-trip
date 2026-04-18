@@ -481,7 +481,10 @@ async function getCityCoords(city) {
   try {
     const res = await axios.get(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanCity)}&limit=1`,
-      { headers: { "User-Agent": "GoTripo/1.0" } }
+      { 
+        headers: { "User-Agent": "GoTripo/1.0" },
+        timeout: 5000 // 5 second timeout for geocoding
+      }
     );
     if (res.data && res.data.length > 0) {
       return {

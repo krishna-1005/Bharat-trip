@@ -72,7 +72,17 @@ Return valid JSON:
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(prompt);
+    
+    // Add a promise-based timeout wrapper
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("AI Generation Timeout")), 15000)
+    );
+
+    const result = await Promise.race([
+      model.generateContent(prompt),
+      timeoutPromise
+    ]);
+
     const response = await result.response;
     const text = response.text().replace(/```json|```/g, "").trim();
     return JSON.parse(text);

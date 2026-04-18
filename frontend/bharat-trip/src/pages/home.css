@@ -748,6 +748,11 @@ h1, h2, h3 {
     padding: 60px 0;
   }
 
+  .section-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
   .hero-section {
     padding-top: 100px;
     min-height: auto;
@@ -755,10 +760,12 @@ h1, h2, h3 {
 
   .hero-content h1 {
     font-size: 2.2rem;
+    text-align: center;
   }
 
   .hero-content p {
     font-size: 1rem;
+    text-align: center;
   }
 
   .btn-large {
@@ -774,17 +781,91 @@ h1, h2, h3 {
   .hero-actions {
     width: 100%;
     flex-direction: column;
+    gap: 12px;
   }
 
-  .floating-image-card {
-    width: 160px;
-    height: 220px;
+  /* ── DECISION CARDS REFINED ── */
+  .decision-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
-  .card-0 { left: 5%; }
-  .card-1 { right: 5%; }
-  .card-2 { left: 10%; bottom: 5%; }
-  .card-3 { right: 10%; bottom: 0%; }
+  .decision-card {
+    padding: 32px 20px;
+    flex-direction: row; /* Horizontal on mobile for better space usage */
+    text-align: left;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .decision-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .decision-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 4px;
+  }
+
+  .decision-card p {
+    font-size: 0.9rem;
+  }
+
+  /* ── FEATURED CARDS REFINED ── */
+  .featured-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 16px;
+    padding: 10px 20px 30px;
+    margin-left: -20px;
+    margin-right: -20px;
+    scroll-snap-type: x proximity;
+  }
+
+  .featured-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .featured-card {
+    min-width: 300px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    border-radius: 24px;
+  }
+
+  .f-card-img {
+    height: 180px;
+  }
+
+  .f-card-content {
+    padding: 20px;
+  }
+
+  .f-card-content h3 {
+    font-size: 1.1rem;
+  }
+
+  .quick-start-bar {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .final-cta {
+    padding-bottom: 220px; /* Space for BottomNav */
+  }
 }
 
 @media (max-width: 640px) {

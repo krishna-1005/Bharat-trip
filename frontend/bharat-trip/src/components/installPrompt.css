@@ -87,8 +87,15 @@
 
 @media (max-width: 600px) {
   .install-banner {
-    bottom: 90px;
+    top: 100px; /* Below Navbar */
+    bottom: auto;
     left: 10px;
     right: 10px;
+    animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
 }

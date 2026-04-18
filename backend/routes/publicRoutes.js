@@ -89,13 +89,14 @@ router.get("/recent-activity", async (req, res) => {
     // 1. Try to get recent plan generations from usage logs
     const recentLogs = await UsageLog.find({ action: "generate_plan" })
       .sort({ createdAt: -1 })
-      .limit(10);
+      .limit(10)
+      .lean()
+      .catch(() => []); // Silent fallback for DB errors
 
     // 2. Map them to a cleaner format
     let activity = recentLogs.map(log => {
       const city = log.details?.city || "a city";
-      const time = log.createdAt;
-      // We don't expose full names for privacy, just "Someone" or "A traveler"
+      const time = log.createdAt || new Date();
       return {
         id: log._id,
         city: city.charAt(0).toUpperCase() + city.slice(1).toLowerCase(),
@@ -109,21 +110,23 @@ router.get("/recent-activity", async (req, res) => {
     if (activity.length === 0) {
       const recentTrips = await Trip.find({})
         .sort({ createdAt: -1 })
-        .limit(10);
+        .limit(10)
+        .lean()
+        .catch(() => []);
       
       activity = recentTrips.map(trip => ({
         id: trip._id,
-        city: trip.destination,
+        city: trip.destination || "Discovery",
         user: "Someone",
-        time: trip.createdAt,
+        time: trip.createdAt || new Date(),
         type: "Premium"
       }));
     }
 
-    res.json({ activity });
+    res.json({ activity: activity.slice(0, 3) });
   } catch (err) {
-    console.error("Public activity API error:", err);
-    res.status(500).json({ error: "Failed to fetch activity" });
+    console.error("Public activity API error:", err.message);
+    res.json({ activity: [] }); // Never 500 here
   }
 });
 
@@ -182,32 +185,38 @@ router.get("/featured-trips", async (req, res) => {
   try {
     const trips = await Trip.find({ isPublic: true })
       .sort({ likesCount: -1, views: -1 })
-      .limit(6);
+      .limit(6)
+      .lean()
+      .catch(() => []);
     
     // If not enough public trips, just get any recent ones for now
     let finalTrips = trips;
     if (trips.length < 3) {
-      finalTrips = await Trip.find({})
+      const recent = await Trip.find({})
         .sort({ createdAt: -1 })
-        .limit(6);
+        .limit(6)
+        .lean()
+        .catch(() => []);
+      finalTrips = recent;
     }
 
     const enriched = finalTrips.map(t => ({
       id: t._id,
-      title: t.title,
+      title: t.title || `${t.destination} Odyssey`,
       destination: t.destination,
       days: t.days,
-      cost: t.totalTripCost,
+      cost: t.totalTripCost || 0,
       saves: t.savesCount || Math.floor(Math.random() * 500) + 100,
       image: t.image || `https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80`,
-      itinerary: t.itinerary,
+      itinerary: t.itinerary || [],
       views: t.views || 0,
       likes: t.likes ? t.likes.length : 0
     }));
 
     res.json({ trips: enriched });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch featured trips" });
+    console.error("Featured trips error:", err.message);
+    res.json({ trips: [] });
   }
 });
 

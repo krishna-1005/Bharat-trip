@@ -229,7 +229,7 @@
         max-width: 100%;
     }
     .planner-onboarding-page {
-        padding: 20px 10px 150px;
+        padding: 20px 10px 250px; /* Space for fixed navigation/prompts */
     }
     .planner-main-title { font-size: 1.8rem; }
     .tt-main-title { font-size: 2rem; }
@@ -237,31 +237,12 @@
     .persona-tab { font-size: 15px; }
     .mini-spot-card { max-width: 110px; }
     .mini-spot-img-wrap { height: 140px; }
-}
 
-@media (max-width:600px){
-
-  .planner-form-section,
-  .planner-glass-card,
-  .pf-wrap,
-  .pf-step-container,
-  .pf-step,
-  .pf-field{
-      width:100%;
-      max-width:100%;
-      margin:0 auto;
-      box-sizing:border-box;
-  }
-
-  .pf-wrap{
-      padding:0;
-  }
-
-}
-
-@media (max-width:600px){
-   .planner-glass-card{
-      padding-left:14px;
-      padding-right:14px;
-   }
+    .planner-glass-card {
+        width: 100%;
+        max-width: 100%;
+        padding: 24px 12px;
+        margin: 0 auto;
+        overflow: visible;
+    }
 }

@@ -975,6 +975,9 @@ function Results() {
 
             {/* BookingLeadGen is now always inside the sidebar at the end of content */}
             <BookingLeadGen plan={plan} />
+
+            {/* Mobile Scroll Spacer: ensures last card is visible above fixed footer */}
+            {isMobile && <div className="mobile-sidebar-spacer" style={{ height: '120px', width: '100%' }}></div>}
           </div>
         </>
       )}
