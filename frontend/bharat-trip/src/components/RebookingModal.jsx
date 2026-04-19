@@ -6,7 +6,8 @@ const RebookingModal = ({ trip, onExecuted }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  if (!trip.pendingRevision) return null;
+  // Only show if there's actual content to show
+  if (!trip?.pendingRevision || !trip.pendingRevision.impactSummary) return null;
 
   const handleExecute = async () => {
     const id = trip._id || trip.id;
@@ -28,6 +29,12 @@ const RebookingModal = ({ trip, onExecuted }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDismiss = async () => {
+    // Optional: add backend route to clear without applying
+    // For now, we can just reload the local state via onExecuted if backend is updated
+    onExecuted(); 
   };
 
   return (

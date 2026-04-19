@@ -356,7 +356,12 @@ function Results() {
           const data = await res.json();
           if (res.ok && data.trip) {
             const p = data.trip;
-            setPlan({ ...p, itinerary: p.itinerary || [] });
+            // Robust normalization for saved plans
+            let normalizedItin = p.itinerary || [];
+            if (!Array.isArray(normalizedItin) && typeof normalizedItin === 'object') {
+              normalizedItin = Object.entries(normalizedItin).map(([day, val]) => ({ day, ...val }));
+            }
+            setPlan({ ...p, itinerary: normalizedItin });
             setTripTitle(p.title || "");
             setLoading(false);
             return;
@@ -810,17 +815,21 @@ function Results() {
         <RebookingModal 
           trip={{ ...plan, _id: plan.id || routeTripId }} 
           onExecuted={() => {
-            // Update local state to reflect committed itinerary and remove the revision alert
-            setPlan(prev => ({
-              ...prev,
-              itinerary: prev.pendingRevision.itinerary,
-              pendingRevision: null
-            }));
-            // Also update localStorage for persistence
-            const saved = JSON.parse(localStorage.getItem("tripPlan") || "{}");
-            saved.itinerary = plan.pendingRevision.itinerary;
-            delete saved.pendingRevision;
-            localStorage.setItem("tripPlan", JSON.stringify(saved));
+            // Simply trigger a full refresh of the trip data from the server
+            // This is the most reliable way to clear the modal and update the UI
+            const sharedId = new URLSearchParams(loc.search).get("sharedTripId") || routeTripId;
+            if (sharedId) {
+              fetch(`${API}/api/public/trips/${sharedId}`)
+                .then(res => res.json())
+                .then(data => {
+                  if (data.trip) {
+                    setPlan(data.trip);
+                    setTripTitle(data.trip.title || "");
+                  }
+                });
+            } else {
+              window.location.reload();
+            }
           }} 
         />
       )}
