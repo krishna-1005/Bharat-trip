@@ -82,27 +82,72 @@ router.get("/:id", async (req, res) => {
 router.post("/:id/execute-revision", async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.id);
-    if (!trip || !trip.pendingRevision) {
-      return res.status(404).json({ error: "Trip or pending revision not found" });
+    if (!trip) {
+      return res.status(404).json({ error: "Trip not found" });
+    }
+
+    // If revision already cleared, assume success (idempotency)
+    if (!trip.pendingRevision) {
+      console.log(`ℹ️ Trip ${trip._id} already has no pending revision. Likely already executed.`);
+      return res.json({ success: true, message: "Revision already applied or cleared." });
     }
 
     console.log(`⚡ Executing rebooking for Trip ${trip._id}`);
-
-    // 1. Commit the revision
-    trip.itinerary = trip.pendingRevision.itinerary;
     
-    // 2. Clear revision data
-    trip.pendingRevision = undefined;
+    // 1. Commit the revision and update costs
+    const revision = trip.pendingRevision;
+    if (revision && revision.itinerary && revision.itinerary.length > 0) {
+      console.log(`📝 Applying salvaged itinerary with ${revision.itinerary.length} days.`);
+      
+      // Map and ensure we preserve the new AI-calculated times
+      const newItinerary = revision.itinerary.map(day => ({
+        day: day.day,
+        estimatedHours: day.estimatedHours,
+        estimatedCost: day.estimatedCost,
+        places: day.places.map(p => {
+          const po = p.toObject ? p.toObject() : p;
+          return {
+            ...po,
+            bestTime: p.bestTime,
+            timeReason: p.timeReason
+          };
+        })
+      }));
+      
+      // Use trip.set to ensure Mongoose tracks the entire itinerary update
+      trip.set('itinerary', newItinerary);
+      
+      // Recalculate total cost from the new itinerary
+      let newTotalCost = 0;
+      newItinerary.forEach(day => {
+        if (day.places) {
+          day.places.forEach(p => {
+            newTotalCost += Number(p.estimatedCost || 0);
+          });
+        }
+      });
+      trip.totalTripCost = newTotalCost;
+    } else {
+       console.error(`❌ Rebooking failed: Salvaged itinerary is empty for Trip ${trip._id}`);
+       // Safety: clear the corrupted revision without applying
+       trip.pendingRevision = undefined;
+       await trip.save();
+       return res.status(400).json({ error: "Salvaged itinerary was empty. Alert cleared but not applied." });
+    }
+    
+    // 2. Clear revision data ON THE OBJECT so .save() removes it from DB
+    trip.set('pendingRevision', undefined);
 
-    // 3. Fire the Orchestrator (dispatch emails/API calls)
+    // 3. Fire the Orchestrator
     await supplierOrchestrator.executeNotifications(trip);
 
     await trip.save();
+    console.log(`✅ Trip ${trip._id} successfully updated and revision cleared.`);
 
     res.json({ success: true, message: "Rebooking blueprint executed successfully" });
 
   } catch (error) {
-    console.error(error);
+    console.error("Rebooking Execution Error:", error);
     res.status(500).json({ error: "Server error executing rebooking" });
   }
 });

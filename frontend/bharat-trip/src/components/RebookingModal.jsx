@@ -25,7 +25,8 @@ const RebookingModal = ({ trip, onExecuted }) => {
       }
     } catch (err) {
       console.error("Rebooking execution failed:", err);
-      setError("Failed to execute rebooking. Backend is likely unreachable.");
+      const msg = err.response?.data?.error || "Failed to execute rebooking. Please try again.";
+      setError(msg);
     } finally {
       setLoading(false);
     }

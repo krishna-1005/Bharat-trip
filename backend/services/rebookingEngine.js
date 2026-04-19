@@ -2,92 +2,126 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Trip = require("../models/Trip");
 const supplierOrchestrator = require("./supplierOrchestrator");
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 /**
  * Agentic Rebooking Engine
  * Autonomously calculates the ripple effect of disruptions and prepares salvaged itineraries.
  */
 async function processDisruption(trip, eventType, details = {}) {
   try {
-    console.log(`🤖 Rebooking Engine started for Trip: ${trip._id} (${eventType})`);
+    const Groq = require("groq-sdk");
+    
+    if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY.includes("your_")) {
+      console.error("❌ REBOOKING ERROR: GROQ_API_KEY is missing or using a placeholder in .env");
+      return;
+    }
 
-    const delayMinutes = details.delayMinutes || 0;
-    const disruptionContext = `Disruption Type: ${eventType}. Delay: ${delayMinutes} minutes. ${details.notes || ""}`;
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    console.log(`🤖 Rebooking Engine: Preserving Trip ${trip._id} (${eventType})`);
 
-    // 1. Prepare the Prompt for Gemini
+    const delayMinutes = details.delayMinutes || 30; // Default to 30 if not provided
+    const disruptionContext = `Disruption: ${eventType || "General disruption"}. Delay: ${delayMinutes} minutes.`;
+
     const prompt = `
-You are an expert travel logistics AI. A disruption has occurred for an active trip.
-Your goal is to perform a "Ripple-Effect Calculation" and salvage the itinerary.
+You are a travel logistics recovery system. A ${delayMinutes} minute delay has occurred.
+Your ONLY task is to shift the schedule forward for ALL original activities.
 
-### DISRUPTION CONTEXT:
-${disruptionContext}
+### RULES:
+1. DO NOT REMOVE ANY PLACES. All original stops must remain.
+2. DO NOT ADD NEW PLACES.
+3. FOR EVERY PLACE: Take the original "bestTime" (if provided) and shift it forward by ${delayMinutes} minutes.
+4. RETURN: A valid JSON object containing the full updated itinerary.
 
-### CURRENT ITINERARY:
-${JSON.stringify(trip.itinerary)}
+### ORIGINAL STOPS (KEEP ALL):
+${JSON.stringify(trip.itinerary.map(d => ({
+  day: d.day,
+  places: d.places.map(p => ({
+    name: p.name,
+    bestTime: p.bestTime || "10:00 AM", // Fallback if not set
+    category: p.category
+  }))
+})))}
 
-### INSTRUCTIONS:
-1. RECALCULATE: Adjust the start and end times for all subsequent activities on the current and following days.
-2. OPTIMIZE: If the delay is significant (> 3 hours), you may remove low-priority activities or replace them with shorter alternatives nearby to keep the trip on track.
-3. LOGISTICS: Ensure transit times between places remain realistic given the new schedule.
-4. SUMMARY: Provide a concise "Impact Summary" explaining what changed and why (e.g., "Shifted Day 1 evening activities by 2 hours; dropped the museum visit to ensure dinner reservation is kept").
-5. Return ONLY valid JSON mirroring the structure of the provided itinerary but in a "pendingRevision" wrapper.
-
-Return valid JSON in this exact structure:
+### OUTPUT JSON FORMAT:
 {
-  "impactSummary": "Concise explanation of changes",
-  "recalculationReason": "${eventType}",
+  "impactSummary": "Shifted all activities by ${delayMinutes} minutes to account for the delay.",
   "itinerary": {
-    "1": [ { "name": "...", "bestTime": "...", "reason": "...", ... } ],
-    "2": [...]
+    "1": [ { "name": "Exact Place Name", "bestTime": "New Shifted Time", "reason": "Shifted due to delay" } ]
   }
 }
 `;
 
-    // 2. Call Gemini
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text().replace(/```json|```/g, "").trim();
-    
-    let salvagedData;
-    try {
-      salvagedData = JSON.parse(text);
-    } catch (pe) {
-      console.error("❌ AI returned invalid JSON for rebooking:", text);
-      return;
-    }
-
-    // 3. Transform the flat JSON structure into our Schema-compatible structure
-    const updatedItinerary = [];
-    Object.entries(salvagedData.itinerary).forEach(([dayKey, places]) => {
-      updatedItinerary.push({
-        day: `Day ${dayKey}`,
-        places: places.map(p => ({
-          ...p,
-          estimatedHours: p.timeHours || 2, // Map AI field if different
-          estimatedCost: p.avgCost || 0
-        }))
-      });
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama-3.3-70b-versatile",
+      response_format: { type: "json_object" }
     });
 
-    // 4. Update the Trip with the Pending Revision
+    const salvagedData = JSON.parse(chatCompletion.choices[0].message.content);
+    console.log("🤖 AI Salvaged Data:", JSON.stringify(salvagedData));
+
+    const originalPlaces = trip.itinerary.flatMap(d => d.places);
+    const updatedItinerary = [];
+
+    // 3. Robust Data Normalization & Merging
+    const rawItin = salvagedData.itinerary || {};
+    
+    Object.entries(rawItin).forEach(([dayKey, places]) => {
+      // Normalize day label to "Day X"
+      const dayNum = dayKey.replace(/\D/g, "");
+      const dayLabel = dayNum || dayKey;
+      
+      const mergedPlaces = (Array.isArray(places) ? places : []).map(p => {
+        // Try exact match first, then fuzzy match for place names
+        const cleanAIName = (p.name || "").toLowerCase().trim();
+        const original = originalPlaces.find(op => {
+          const cleanOpName = (op.name || "").toLowerCase().trim();
+          return cleanOpName === cleanAIName || cleanOpName.includes(cleanAIName) || cleanAIName.includes(cleanOpName);
+        });
+
+        if (original) {
+          const obj = original.toObject();
+          return {
+            ...obj,
+            bestTime: p.bestTime || obj.bestTime,
+            timeReason: p.reason || `Rescheduled (+${delayMinutes}m)`
+          };
+        }
+        return null;
+      }).filter(p => p !== null);
+
+      if (mergedPlaces.length > 0) {
+        updatedItinerary.push({ day: dayLabel, places: mergedPlaces });
+      }
+    });
+
+    // 4. ULTIMATE FALLBACK: If AI logic failed or returned empty results, manually shift original times
+    if (updatedItinerary.length === 0) {
+      console.warn("⚠️ AI merge failed or was empty. Manually shifting original itinerary as fallback.");
+      trip.itinerary.forEach(day => {
+        updatedItinerary.push({
+          day: day.day,
+          places: day.places.map(p => ({
+            ...p.toObject(),
+            bestTime: p.bestTime ? `Shifted (${p.bestTime})` : "10:30 AM",
+            timeReason: `Manually delayed by ${delayMinutes} mins`
+          }))
+        });
+      });
+    }
+
     trip.pendingRevision = {
       itinerary: updatedItinerary,
-      impactSummary: salvagedData.impactSummary,
-      recalculationReason: salvagedData.recalculationReason || eventType,
+      impactSummary: salvagedData.impactSummary || `Entire schedule shifted by ${delayMinutes} minutes to handle delay.`,
+      recalculationReason: eventType || "Unforeseen Disruption",
       createdAt: new Date()
     };
 
     await trip.save();
-
-    console.log(`✅ Ripple-effect calculation complete for Trip ${trip._id}. Pending revision created.`);
-
-    // 5. Trigger Phase 2 (Supplier Orchestration)
+    console.log(`✅ Itinerary salvaged for Trip ${trip._id}.`);
     await supplierOrchestrator.prepareNotifications(trip); 
 
   } catch (error) {
-    console.error("❌ Rebooking Engine Execution Error:", error.message);
+    console.error("❌ Rebooking Error:", error.message);
   }
 }
 

@@ -5,6 +5,7 @@ import { useSettings } from "../context/SettingsContext";
 import { auth } from "../firebase";
 import SavedTrips from "../components/SavedTrips";
 import SavedMaps from "../components/SavedMaps";
+import Haptics from "../utils/haptics";
 import "../styles/profile.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
@@ -61,10 +62,12 @@ export default function Profile() {
         dates: t.dates || new Date(t.createdAt).toLocaleDateString(),
         location: t.destination || t.city || "Bangalore",
         status: t.status || "upcoming",
-        budget: t.budget,
+        totalBudget: t.totalBudget || t.budget || 0,
         days: t.days,
         totalCost: t.totalTripCost,
         itinerary: t.itinerary,
+        pendingRevision: t.pendingRevision,
+        queuedSupplierNotifications: t.queuedSupplierNotifications,
       }));
       setDbTrips(formatted);
     } catch (err) {
@@ -82,30 +85,42 @@ export default function Profile() {
   }, [user]);
 
   const handleViewTrip = (trip) => {
-    const itineryObj = {};
-    if (Array.isArray(trip.itinerary)) {
-      trip.itinerary.forEach((d, idx) => {
-        const key = d.day || `Day ${idx + 1}`;
-        itineryObj[key] = {
-          places: d.places,
-          estimatedCost: d.estimatedCost,
-          estimatedHours: d.estimatedHours,
-          color: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"][idx % 4]
-        };
-      });
-    }
-    const planData = {
-      id: trip.id,
-      city: trip.location,
-      days: trip.days,
-      itinerary: Object.keys(itineryObj).length > 0 ? itineryObj : trip.itinerary,
-      totalTripCost: trip.totalCost,
-      isSaved: true
-    };
-    localStorage.setItem("tripPlan", JSON.stringify(planData));
-    navigate(`/trip/${trip.id}`, { state: { plan: planData } });
-  };
+    if (Haptics.light) Haptics.light();
 
+    // We should navigate to the unique trip ID URL for saved plans
+    // Results.jsx will handle fetching the plan from the backend via useEffect
+    if (trip.id || trip._id) {
+      navigate(`/trip/${trip.id || trip._id}`);
+    } else {
+      // Fallback to /results with state if no ID found
+      const itineryObj = {};
+      if (Array.isArray(trip.itinerary)) {
+        trip.itinerary.forEach((d, idx) => {
+          const key = d.day || `Day ${idx + 1}`;
+          itineryObj[key] = {
+            places: d.places,
+            estimatedCost: d.estimatedCost,
+            estimatedHours: d.estimatedHours,
+            color: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"][idx % 4]
+          };
+        });
+      }
+
+      const planData = {
+        id: trip.id || trip._id,
+        city: trip.location,
+        days: trip.days,
+        itinerary: Object.keys(itineryObj).length > 0 ? itineryObj : trip.itinerary,
+        totalTripCost: trip.totalCost,
+        totalBudget: trip.totalBudget,
+        pendingRevision: trip.pendingRevision,
+        queuedSupplierNotifications: trip.queuedSupplierNotifications,
+        isSaved: true
+      };
+      localStorage.setItem("tripPlan", JSON.stringify(planData));
+      navigate("/results", { state: { plan: planData } });
+    }
+  };
   const name = user?.name || user?.email?.split("@")[0] || "Explorer";
   const initial = name.charAt(0).toUpperCase();
 

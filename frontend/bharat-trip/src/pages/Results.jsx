@@ -300,9 +300,10 @@ function Results() {
     const total = Number(plan.totalTripCost || plan.totalCost) || 0;
     
     // Check multiple possible budget field names from both live AI and saved DB objects
+    // Prioritize target budget fields
     const target = Number(plan.totalBudget) || 
+                   Number(plan.targetBudget) || 
                    Number(plan.budget) || 
-                   Number(plan.targetBudget) ||
                    Number(loc.state?.planParams?.budget) || 0;
     
     const max = Math.max(total, target, 1);
@@ -361,7 +362,11 @@ function Results() {
             if (!Array.isArray(normalizedItin) && typeof normalizedItin === 'object') {
               normalizedItin = Object.entries(normalizedItin).map(([day, val]) => ({ day, ...val }));
             }
-            setPlan({ ...p, itinerary: normalizedItin });
+            setPlan({ 
+              ...p, 
+              itinerary: normalizedItin,
+              totalBudget: p.totalBudget || p.budget || 0
+            });
             setTripTitle(p.title || "");
             setLoading(false);
             return;
@@ -369,8 +374,14 @@ function Results() {
         }
 
         if (loc.state?.plan) {
-          setPlan(loc.state.plan);
-          setTripTitle(loc.state.plan.title || "");
+          // Robust mapping for plan from state (Profile/MyTrips)
+          const statePlan = loc.state.plan;
+          const normalizedPlan = {
+            ...statePlan,
+            totalBudget: statePlan.totalBudget || statePlan.budget || 0
+          };
+          setPlan(normalizedPlan);
+          setTripTitle(normalizedPlan.title || "");
         } else {
           const savedPlanStr = localStorage.getItem("tripPlan");
           if (savedPlanStr && savedPlanStr !== "undefined") {
@@ -387,6 +398,39 @@ function Results() {
     };
     loadPlan();
   }, [loc.state, routeTripId, loc.search, isGenerating]);
+
+  // Poll for background updates (like rebooking alerts)
+  useEffect(() => {
+    const sharedId = new URLSearchParams(loc.search).get("sharedTripId") || routeTripId;
+    if (!sharedId || isGenerating) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`${API}/api/public/trips/${sharedId}`);
+        const data = await res.json();
+        if (res.ok && data.trip) {
+          // Only update if there's a change in revision to avoid unnecessary re-renders
+          const newRevision = data.trip.pendingRevision;
+          const currentRevision = plan?.pendingRevision;
+          
+          if (JSON.stringify(newRevision) !== JSON.stringify(currentRevision)) {
+            console.log("🔄 Background update: New trip revision detected.");
+            setPlan(prev => ({ 
+              ...data.trip, 
+              // Preserve existing budget/itinerary if not applying revision yet
+              itinerary: prev.itinerary,
+              totalBudget: prev.totalBudget,
+              pendingRevision: newRevision
+            }));
+          }
+        }
+      } catch (e) {
+        // Silent error for polling
+      }
+    }, 15000); // Check every 15 seconds
+
+    return () => clearInterval(interval);
+  }, [routeTripId, loc.search, isGenerating, plan?.pendingRevision]);
 
   // ── GENERATION LOGIC ──
 
@@ -412,9 +456,15 @@ function Results() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate plan");
 
-      setPlan(data.plan);
+      // Ensure data.plan has the budget information we need
+      const planWithBudget = {
+        ...data.plan,
+        totalBudget: data.plan.totalBudget || Number(loc.state.planParams.budget) || 0
+      };
+
+      setPlan(planWithBudget);
       setTripTitle(data.plan.title || "");
-      localStorage.setItem("tripPlan", JSON.stringify(data.plan));
+      localStorage.setItem("tripPlan", JSON.stringify(planWithBudget));
       setApiStatus("success");
       setGenStep("summary");
       
@@ -556,6 +606,17 @@ function Results() {
       if (res.ok) {
         console.log("Trip saved successfully:", data);
         Haptics.success();
+        
+        // Update plan state with the new ID from backend
+        if (data.trip && data.trip._id) {
+          const updatedPlan = { ...plan, id: data.trip._id };
+          setPlan(updatedPlan);
+          // Update localStorage so refresh maintains the ID
+          localStorage.setItem("tripPlan", JSON.stringify(updatedPlan));
+          // Update URL to include the ID without refreshing the page
+          window.history.replaceState(null, "", `/trip/${data.trip._id}`);
+        }
+        
         setSaved(true);
         setSaving(false); // Immediate reset
         localStorage.removeItem("pendingGuestTrip"); // Clear if saved
@@ -825,6 +886,8 @@ function Results() {
                   if (data.trip) {
                     setPlan(data.trip);
                     setTripTitle(data.trip.title || "");
+                    // Update localStorage so refresh maintains the updated itinerary
+                    localStorage.setItem("tripPlan", JSON.stringify(data.trip));
                   }
                 });
             } else {
@@ -982,9 +1045,21 @@ function Results() {
                                 <h4>{place.name}</h4>
                                 
                                 <div className="stop-details-v3">
+                                  {place.bestTime && (
+                                    <span className="detail-item-v3 arrival-time">
+                                      ⏰ {place.bestTime}
+                                    </span>
+                                  )}
                                   <span className="detail-item-v3">🕒 {place.timeHours || 2}h visit</span>
                                   <span className="detail-item-v3">💰 {formatPrice(place.estimatedCost || 0)}</span>
                                 </div>
+
+                                {place.timeReason && (
+                                  <div className="reschedule-notice-v3">
+                                    <span className="reschedule-icon">⚡</span>
+                                    {place.timeReason}
+                                  </div>
+                                )}
 
                                 <p className="stop-reason-v3">
                                   {guideMode && isActive ? (

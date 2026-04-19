@@ -7,12 +7,6 @@ const { sendWelcomeEmail } = require("../services/emailService");
 
 const protect = async (req, res, next) => {
   try {
-    // Check if MongoDB is connected
-    if (mongoose.connection.readyState !== 1) {
-      console.error("❌ Auth Error: MongoDB is not connected");
-      return res.status(503).json({ error: "Database connection error. Please try again later." });
-    }
-
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {

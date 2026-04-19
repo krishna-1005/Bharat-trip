@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
 import { auth } from "../firebase";
 import PlaceImage from "../components/PlaceImage";
+import Haptics from "../utils/haptics";
 import "../styles/profile.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
@@ -57,10 +58,12 @@ export default function MyTrips() {
         dates: t.dates || new Date(t.createdAt).toLocaleDateString(),
         location: t.destination || t.city || "Bangalore",
         status: t.status || "upcoming",
-        budget: t.budget,
+        budget: t.totalBudget || t.budget || 0,
         days: t.days,
         totalCost: t.totalTripCost,
         itinerary: t.itinerary,
+        pendingRevision: t.pendingRevision,
+        queuedSupplierNotifications: t.queuedSupplierNotifications,
         image: t.image,
       }));
       setDbTrips(formatted);
@@ -71,8 +74,14 @@ export default function MyTrips() {
       setLoading(false);
     }
   };
-
-  const handleViewOnMap = (trip) => {
+const handleViewOnMap = (trip) => {
+  if (Haptics.light) Haptics.light();
+  // We should navigate to the unique trip ID URL for saved plans
+  // Results.jsx will handle fetching the plan from the backend via useEffect
+  if (trip.id || trip._id) {
+    navigate(`/trip/${trip.id || trip._id}`);
+  } else {
+    // Fallback to /results with state if no ID found
     const itineryObj = {};
     if (Array.isArray(trip.itinerary)) {
       trip.itinerary.forEach((d, idx) => {
@@ -86,16 +95,19 @@ export default function MyTrips() {
       });
     }
     const planData = {
-      id: trip.id,
+      id: trip.id || trip._id,
       city: trip.location,
       days: trip.days,
       itinerary: Object.keys(itineryObj).length > 0 ? itineryObj : trip.itinerary,
       totalTripCost: trip.totalCost,
+      totalBudget: trip.budget,
+      pendingRevision: trip.pendingRevision,
+      queuedSupplierNotifications: trip.queuedSupplierNotifications,
       isSaved: true
     };
-    localStorage.setItem("tripPlan", JSON.stringify(planData));
-    navigate(`/trip/${trip.id}`, { state: { plan: planData } });
-  };
+    navigate("/results", { state: { plan: planData } });
+  }
+};
 
   const handleShare = async (trip) => {
     const shareUrl = `${window.location.origin}/trip/${trip.id}`;

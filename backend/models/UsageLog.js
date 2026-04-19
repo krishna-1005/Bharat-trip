@@ -7,8 +7,7 @@ const usageLogSchema = new mongoose.Schema({
     default: "generate_plan" 
   },
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    type: String,
     default: null
   },
   isGuest: {

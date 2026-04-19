@@ -1,7 +1,9 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const Trip = require("../models/Trip");
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
+/**
+ * AI Planner Service (Refined via Groq Llama 3.3)
+ * Provides high-precision itinerary optimization.
+ */
 async function analyzeAndRefinePlan({
   city,
   days,
@@ -13,82 +15,67 @@ async function analyzeAndRefinePlan({
   userPreferences = {},
   language = "English"
 }) {
-  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-    console.warn("⚠️ GEMINI_API_KEY missing or invalid");
-    return null;
-  }
-
-  // Build personalization string
-  const { morning, transport, experience, packing } = userPreferences;
-  let personalizationNote = "";
-  if (morning) personalizationNote += `\n- User prefers ${morning} for their ideal travel morning.`;
-  if (transport) personalizationNote += `\n- User's preferred mode of transport is ${transport}.`;
-  if (experience) personalizationNote += `\n- User values ${experience} as their must-have travel experience.`;
-  if (packing) personalizationNote += `\n- User's packing style is ${packing}.`;
-
-  const languageInstruction = language === "Hindi" 
-    ? "IMPORTANT: You MUST return all text content (name, timeReason, reason) in Hindi (Hindi script/Devanagari). The JSON keys must remain in English." 
-    : "Return all text content in English.";
-
-  const prompt = `
-Create a comprehensive ${days}-day travel itinerary for ${city} in ${language}.
-
-### TRIP CONSTRAINTS:
-- Interests: ${interests.join(", ")}
-- Total Budget: ${budget} INR (Covers activities for ALL ${travelerType} travelers).
-- Traveler Type: ${travelerType}
-- Trip Pace: ${pace} (Ensure the number of activities matches this pace).
-
-${languageInstruction}
-
-${personalizationNote ? "### USER STYLE PREFERENCES:" + personalizationNote : ""}
-
-### CANDIDATE PLACES TO USE:
-${JSON.stringify(candidates.map(p => ({ name: p.name, category: p.category, avgCost: p.avgCost })))}
-
-### CRITICAL INSTRUCTIONS:
-1. VOLUME: You MUST include at least 3-4 diverse places/activities per day. Do not leave the user with empty time.
-2. BUDGET: The total "avgCost" of all suggested places MUST stay below ${Math.round(budget * 0.8)} INR.
-3. For each place, suggest a realistic "bestTime" (Morning, Afternoon, Evening, Night) and a "timeReason".
-4. Incorporation: Use the provided candidates as much as possible to build the days.
-5. Return ONLY valid JSON.
-
-Return valid JSON:
-{
-  "1": [
-    { 
-      "name": "Place Name", 
-      "category": "Category", 
-      "avgCost": 0, 
-      "timeHours": 2, 
-      "bestTime": "Morning",
-      "timeReason": "Reason for timing",
-      "reason": "Personalized reason why user will like this"
+  try {
+    const Groq = require("groq-sdk");
+    if (!process.env.GROQ_API_KEY) {
+      console.warn("⚠️ GROQ_API_KEY missing. Falling back to local logic.");
+      return null;
     }
-  ],
-  "2": [...]
+
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    console.log(`🧠 AI Planner starting using Groq (Llama 3.3) for: ${city}`);
+
+    const prompt = `
+You are an elite Indian travel architect. Optimize this ${days}-day trip to ${city} for a ${travelerType} traveler with a ${pace} pace.
+Total Budget: ${budget} INR.
+Interests: ${interests.join(", ")}.
+
+### INPUT DATA:
+${JSON.stringify(candidates)}
+
+### INSTRUCTIONS:
+1. Select the best 3-4 spots per day from the input data.
+2. Group spots by proximity to minimize travel time.
+3. Assign a logical "bestTime" (Morning, Afternoon, Evening) for each.
+4. Provide a 2-sentence "summary" of the overall vibe.
+5. Return ONLY valid JSON in this structure:
+{
+  "summary": "...",
+  "itinerary": {
+    "1": [ { "name": "...", "bestTime": "...", "reason": "Why this spot fits the traveler", "category": "...", "avgCost": 0, "timeHours": 2, "lat": 0, "lng": 0 } ]
+  }
 }
 `;
 
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
-    // Add a promise-based timeout wrapper
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("AI Generation Timeout")), 15000)
-    );
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama-3.3-70b-versatile",
+      response_format: { type: "json_object" }
+    });
 
-    const result = await Promise.race([
-      model.generateContent(prompt),
-      timeoutPromise
-    ]);
+    const data = JSON.parse(chatCompletion.choices[0].message.content);
+    console.log("✅ Main Plan optimized successfully by Groq.");
 
-    const response = await result.response;
-    const text = response.text().replace(/```json|```/g, "").trim();
-    return JSON.parse(text);
+    // Transform to standard array structure
+    const finalizedItinerary = [];
+    Object.entries(data.itinerary).forEach(([dayNum, places]) => {
+      finalizedItinerary.push({
+        day: dayNum.includes("Day") ? dayNum : `Day ${dayNum}`,
+        places: places.map(p => ({
+          ...p,
+          estimatedCost: p.avgCost || 0,
+          estimatedHours: p.timeHours || 2
+        }))
+      });
+    });
+
+    return {
+      summary: data.summary,
+      itinerary: finalizedItinerary
+    };
 
   } catch (err) {
-    console.error("AI Planning Error:", err.message);
+    console.error("Groq Planning Error:", err.message);
     return null;
   }
 }

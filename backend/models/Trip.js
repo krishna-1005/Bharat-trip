@@ -8,8 +8,10 @@ const placeSchema = new mongoose.Schema({
   estimatedHours: Number,
   category: String,
   rating: Number,
-  reviews: Number,
+  reviews: String,
   tag: String,
+  bestTime: String,
+  timeReason: String,
   userReviews: [{
     author: String,
     rating: Number,
