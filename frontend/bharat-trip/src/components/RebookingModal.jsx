@@ -9,16 +9,22 @@ const RebookingModal = ({ trip, onExecuted }) => {
   if (!trip.pendingRevision) return null;
 
   const handleExecute = async () => {
+    const id = trip._id || trip.id;
+    if (!id) {
+      setError("Critical Error: Trip ID not found.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/trips/${trip._id}/execute-revision`);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/trips/${id}/execute-revision`);
       if (res.data.success) {
-        onExecuted(); // Callback to refresh trip data
+        onExecuted(); // This will trigger reload in Results.jsx
       }
     } catch (err) {
       console.error("Rebooking execution failed:", err);
-      setError("Failed to execute rebooking. Please try again.");
+      setError("Failed to execute rebooking. Backend is likely unreachable.");
     } finally {
       setLoading(false);
     }

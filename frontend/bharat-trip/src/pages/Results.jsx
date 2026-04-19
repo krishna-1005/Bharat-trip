@@ -17,6 +17,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import FloatingToggle from "../components/FloatingToggle";
 import ItinerarySlider from "../components/ItinerarySlider";
 import SafetyModal from "../components/SafetyModal";
+import RebookingModal from "../components/RebookingModal";
 import Haptics from "../utils/haptics";
 
 /** ── RIDE MODAL COMPONENT ── **/
@@ -805,6 +806,24 @@ function Results() {
 
   return (
     <div className="anchored-planner-root">
+      {plan?.pendingRevision && (
+        <RebookingModal 
+          trip={{ ...plan, _id: plan.id || routeTripId }} 
+          onExecuted={() => {
+            // Update local state to reflect committed itinerary and remove the revision alert
+            setPlan(prev => ({
+              ...prev,
+              itinerary: prev.pendingRevision.itinerary,
+              pendingRevision: null
+            }));
+            // Also update localStorage for persistence
+            const saved = JSON.parse(localStorage.getItem("tripPlan") || "{}");
+            saved.itinerary = plan.pendingRevision.itinerary;
+            delete saved.pendingRevision;
+            localStorage.setItem("tripPlan", JSON.stringify(saved));
+          }} 
+        />
+      )}
       <aside className="premium-itinerary-sidebar">
         <div className="sidebar-header-premium">
           <div className="header-top-row">
