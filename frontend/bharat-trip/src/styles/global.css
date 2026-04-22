@@ -33,37 +33,16 @@
   --dash-card: #0a0a0a;
 }
 
-.light-theme {
-  --bg-main: #f8fafc;
-  --bg-panel: #ffffff;
-  --bg-card: #ffffff;
-  --glass: rgba(255, 255, 255, 0.8);
-  --glass-border: #0f172a;
-  --text-main: #0f172a;
-  --text-dim: #475569;
-  --border-main: #0f172a;
-  --shadow-main: rgba(15, 23, 42, 0.15);
-  --accent-blue: #2563eb;
-
-  --dash-primary: #2563eb;
-  --dash-accent: #7c3aed;
-  --dash-text: #0f172a;
-  --dash-muted: #475569;
-  --dash-border: #0f172a;
-  --dash-card: #ffffff;
-}
-
 body {
   margin: 0;
   padding: 0;
   background: var(--bg-main);
   color: var(--text-main);
   overflow-x: hidden;
-  transition: background 0.4s ease, color 0.4s ease;
 }
 
 * {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.1s ease;
+  box-sizing: border-box;
 }
 
 /* ── PREMIUM CARDS ── */

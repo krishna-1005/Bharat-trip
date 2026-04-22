@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useMemo, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PlaceImage from "../components/PlaceImage";
 import { useSettings } from "../context/SettingsContext";

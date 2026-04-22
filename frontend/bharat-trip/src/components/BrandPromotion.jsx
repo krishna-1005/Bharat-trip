@@ -19,7 +19,7 @@ const BrandPromotion = () => {
       setIndex((prev) => (prev + 1) % slogans.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slogans.length]);
 
   return (
     <section className="brand-promo-container">

@@ -13,7 +13,6 @@ export default function Settings() {
   const { 
     currency, setCurrency, 
     language, setLanguage,
-    theme, setTheme,
     t 
   } = useSettings();
 
@@ -126,21 +125,6 @@ export default function Settings() {
                   <option value="INR">INR (₹) - Indian Rupee</option>
                   <option value="USD">USD ($) - US Dollar</option>
                   <option value="EUR">EUR (€) - Euro</option>
-                </select>
-              </div>
-
-              <div className="setting-item">
-                <div className="setting-info">
-                  <label>Appearance</label>
-                  <span>{theme === 'dark' ? "Deep Space (Dark)" : "Ocean Breeze (Light)"}</span>
-                </div>
-                <select 
-                  className="setting-select" 
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
-                >
-                  <option value="dark">Deep Space (Dark)</option>
-                  <option value="light">Ocean Breeze (Light)</option>
                 </select>
               </div>
             </div>

@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useContext, useMemo, useCallback, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import MapView from "../components/Map/MapView";
 import PlaceImage from "../components/PlaceImage";
@@ -9,7 +10,6 @@ import BudgetPanel from "../components/BudgetPanel";
 import { calculateDistance, calculateTravelCost, filterAndSortPlaces } from "../utils/travelUtils";
 import { fetchWeatherForecast } from "../services/weatherService";
 import "./results.css";
-import { useState, useEffect, useMemo, useContext, useCallback } from "react";
 import { useSettings } from "../context/SettingsContext";
 import { AuthContext } from "../context/AuthContext";
 import { auth } from "../firebase";
@@ -299,12 +299,13 @@ function Results() {
     if (!plan) return { total: 0, target: 0, percent: 0, isOver: false, targetPercent: 100 };
     const total = Number(plan.totalTripCost || plan.totalCost) || 0;
     
-    // Check multiple possible budget field names from both live AI and saved DB objects
-    // Prioritize target budget fields
-    const target = Number(plan.totalBudget) || 
-                   Number(plan.targetBudget) || 
-                   Number(plan.budget) || 
-                   Number(loc.state?.planParams?.budget) || 0;
+    // Robust target budget detection
+    const target = [
+      plan.totalBudget,
+      plan.targetBudget,
+      plan.budget,
+      loc.state?.planParams?.budget
+    ].find(val => val !== undefined && val !== null && Number(val) > 0) || 0;
     
     const max = Math.max(total, target, 1);
     const percent = target > 0 ? (total / target) * 100 : 100;
@@ -312,7 +313,7 @@ function Results() {
 
     return { 
       total, 
-      target, 
+      target: Number(target), 
       percent: isNaN(percent) ? 0 : percent, 
       isOver: target > 0 && total > target,
       targetPercent: isNaN(targetPercent) ? 100 : targetPercent,
@@ -365,9 +366,11 @@ function Results() {
             setPlan({ 
               ...p, 
               itinerary: normalizedItin,
-              totalBudget: p.totalBudget || p.budget || 0
+              totalBudget: p.totalBudget || p.budget || p.targetBudget || 0,
+              totalTripCost: p.totalTripCost || p.totalCost || p.cost || 0
             });
             setTripTitle(p.title || "");
+            setSaved(true);
             setLoading(false);
             return;
           }
@@ -378,16 +381,27 @@ function Results() {
           const statePlan = loc.state.plan;
           const normalizedPlan = {
             ...statePlan,
-            totalBudget: statePlan.totalBudget || statePlan.budget || 0
+            id: statePlan.id || statePlan._id,
+            totalBudget: Number(statePlan.totalBudget || statePlan.budget || statePlan.targetBudget || 0)
           };
           setPlan(normalizedPlan);
           setTripTitle(normalizedPlan.title || "");
+          setSaved(true);
         } else {
           const savedPlanStr = localStorage.getItem("tripPlan");
           if (savedPlanStr && savedPlanStr !== "undefined") {
             const parsed = JSON.parse(savedPlanStr);
-            setPlan(parsed);
-            setTripTitle(parsed.title || "");
+            const normalizedParsed = {
+              ...parsed,
+              totalBudget: Number(parsed.totalBudget || parsed.budget || parsed.targetBudget || 0)
+            };
+            setPlan({
+              ...normalizedParsed,
+              id: normalizedParsed.id || normalizedParsed._id
+            });
+            setTripTitle(normalizedParsed.title || "");
+            // If it has an ID, it's likely saved
+            if (normalizedParsed.id || normalizedParsed._id) setSaved(true);
           }
         }
       } catch (err) {
@@ -417,9 +431,11 @@ function Results() {
             console.log("🔄 Background update: New trip revision detected.");
             setPlan(prev => ({ 
               ...data.trip, 
-              // Preserve existing budget/itinerary if not applying revision yet
+              // Preserve existing itinerary if not applying revision yet, 
+              // but update budget/cost if they are now available in the backend
               itinerary: prev.itinerary,
-              totalBudget: prev.totalBudget,
+              totalBudget: data.trip.totalBudget || data.trip.budget || prev.totalBudget,
+              totalTripCost: data.trip.totalTripCost || data.trip.totalCost || prev.totalTripCost,
               pendingRevision: newRevision
             }));
           }
@@ -457,9 +473,10 @@ function Results() {
       if (!res.ok) throw new Error(data.error || "Failed to generate plan");
 
       // Ensure data.plan has the budget information we need
+      // Prioritize the user's input budget from planParams
       const planWithBudget = {
         ...data.plan,
-        totalBudget: data.plan.totalBudget || Number(loc.state.planParams.budget) || 0
+        totalBudget: Number(loc.state.planParams.budget) || data.plan.totalBudget || data.plan.budget || data.plan.targetBudget || 0
       };
 
       setPlan(planWithBudget);
@@ -579,8 +596,8 @@ function Results() {
         title: tripTitle || `${planToSave.city} Trip`,
         city: planToSave.city,
         days: planToSave.days || 1,
-        totalCost: planToSave.totalTripCost || planToSave.totalCost,
-        totalBudget: planToSave.totalBudget
+        totalCost: planToSave.totalTripCost || planToSave.totalCost || planToSave.cost,
+        totalBudget: planToSave.totalBudget || planToSave.budget || planToSave.targetBudget
       });
 
       const res = await fetch(`${API}/api/profile/trips`, {
@@ -594,8 +611,8 @@ function Results() {
           city: planToSave.city,
           days: planToSave.days || 1,
           itinerary: planToSave.itinerary,
-          totalCost: planToSave.totalTripCost || planToSave.totalCost,
-          totalBudget: planToSave.totalBudget,
+          totalCost: planToSave.totalTripCost || planToSave.totalCost || planToSave.cost,
+          totalBudget: planToSave.totalBudget || planToSave.budget || planToSave.targetBudget,
           summary: planToSave.summary
         })
       });
@@ -609,12 +626,13 @@ function Results() {
         
         // Update plan state with the new ID from backend
         if (data.trip && data.trip._id) {
-          const updatedPlan = { ...plan, id: data.trip._id };
+          const updatedPlan = { ...plan, id: data.trip._id, isSaved: true };
           setPlan(updatedPlan);
           // Update localStorage so refresh maintains the ID
           localStorage.setItem("tripPlan", JSON.stringify(updatedPlan));
-          // Update URL to include the ID without refreshing the page
-          window.history.replaceState(null, "", `/trip/${data.trip._id}`);
+          
+          // Use navigate to update URL properly so route params update
+          navigate(`/trip/${data.trip._id}`, { replace: true });
         }
         
         setSaved(true);

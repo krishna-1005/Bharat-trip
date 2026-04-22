@@ -1,3 +1,5 @@
+import React, { useState } from "react";
+
 function Cultural() {
   return (
     <div className="page">

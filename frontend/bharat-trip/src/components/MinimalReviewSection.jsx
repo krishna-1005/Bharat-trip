@@ -22,7 +22,7 @@ export default function MinimalReviewSection() {
       setReviews(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error loading reviews:", err);
-      setReviews([]); // Fallback to empty array
+      setReviews([]);
     } finally {
       setIsLoading(false);
     }

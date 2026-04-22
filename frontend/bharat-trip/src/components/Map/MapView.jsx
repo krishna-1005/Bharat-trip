@@ -207,17 +207,9 @@ function TileThemeController({ theme, tileUrls }) {
 // ── MAIN COMPONENT ──
 
 function MapView({ plan, currentIndex, userLocation, setUserLocation, activePlace, onHover, selectedDayIdx }) {
-  const { theme, setTheme } = useSettings();
+  const { theme } = useSettings();
 
-  // 1. Auto-dark mode logic (Bonus: past 7:00 PM)
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour >= 19 || hour < 6) {
-      if (theme !== 'dark') setTheme('dark');
-    }
-  }, []); // Only check on mount to avoid fighting user manual toggle
-
-  // 2. Tile URLs
+  // 1. Tile URLs
   const TILE_URLS = {
     dark: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
     light: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"

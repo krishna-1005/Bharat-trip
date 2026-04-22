@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
@@ -87,10 +87,13 @@ export default function Profile() {
   const handleViewTrip = (trip) => {
     if (Haptics.light) Haptics.light();
 
+    const tripId = trip.id || trip._id;
+    
     // We should navigate to the unique trip ID URL for saved plans
-    // Results.jsx will handle fetching the plan from the backend via useEffect
-    if (trip.id || trip._id) {
-      navigate(`/trip/${trip.id || trip._id}`);
+    if (tripId) {
+      // Ensure tripId is a string if it's a Mongoose ObjectId
+      const idStr = typeof tripId === 'object' ? tripId.toString() : tripId;
+      navigate(`/trip/${idStr}`);
     } else {
       // Fallback to /results with state if no ID found
       const itineryObj = {};
@@ -107,12 +110,12 @@ export default function Profile() {
       }
 
       const planData = {
-        id: trip.id || trip._id,
+        id: null,
         city: trip.location,
         days: trip.days,
         itinerary: Object.keys(itineryObj).length > 0 ? itineryObj : trip.itinerary,
         totalTripCost: trip.totalCost,
-        totalBudget: trip.totalBudget,
+        totalBudget: trip.totalBudget || trip.budget || 0,
         pendingRevision: trip.pendingRevision,
         queuedSupplierNotifications: trip.queuedSupplierNotifications,
         isSaved: true

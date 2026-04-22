@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
@@ -58,7 +58,7 @@ export default function MyTrips() {
         dates: t.dates || new Date(t.createdAt).toLocaleDateString(),
         location: t.destination || t.city || "Bangalore",
         status: t.status || "upcoming",
-        budget: t.totalBudget || t.budget || 0,
+        budget: Number(t.totalBudget || t.budget || 0),
         days: t.days,
         totalCost: t.totalTripCost,
         itinerary: t.itinerary,

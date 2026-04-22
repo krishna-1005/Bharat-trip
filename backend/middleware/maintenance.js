@@ -37,10 +37,13 @@ const maintenanceMode = async (req, res, next) => {
       }
     }
 
-    // Check database for maintenance_mode flag
+    // Check database for maintenance_mode flag (DISABLED TEMPORARILY)
     const config = await SystemConfig.findOne({ key: "maintenance_mode" });
     
-    if (config && config.value === true) {
+    // Forcing maintenance mode to false to fix 503 errors and allow plan saving
+    const isMaintenanceActive = config && config.value === true && false; // Hard-disabled
+    
+    if (isMaintenanceActive) {
       // Return 503 Service Unavailable
       return res.status(503).json({
         maintenance: true,

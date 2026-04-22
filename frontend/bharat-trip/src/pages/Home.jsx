@@ -1,11 +1,10 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useSettings } from "../context/SettingsContext";
 import MinimalReviewSection from "../components/MinimalReviewSection";
 import BrandPromotion from "../components/BrandPromotion";
 import PlaceImage from "../components/PlaceImage";
-import JoinByCode from "../components/JoinByCode";
 import "./home.css";
 
 const FloatingImageCard = ({ place, index, sx, sy }) => {

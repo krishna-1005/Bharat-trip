@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useContext } from 'react';
+import React, { useEffect, useState, useMemo, useContext, Fragment } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
 import { AuthContext } from '../context/AuthContext';
@@ -259,7 +259,7 @@ const MultiCityOverview = () => {
             border: '1px solid var(--border-main)'
           }}>
             {tripStructure.map((item, idx) => (
-              <React.Fragment key={idx}>
+              <Fragment key={idx}>
                 <div style={{ 
                   background: 'rgba(59, 130, 246, 0.1)', 
                   color: 'var(--accent-blue)', 
@@ -275,7 +275,7 @@ const MultiCityOverview = () => {
                 {idx < tripStructure.length - 1 && (
                   <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '20px' }}>→</span>
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
           </div>
         </header>

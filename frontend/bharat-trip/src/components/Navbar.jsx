@@ -1,8 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect, useRef, useContext } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../context/AuthContext";
-import { useSettings } from "../context/SettingsContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import "../styles/navbar.css";
 
@@ -10,7 +9,6 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useContext(AuthContext);
-  const { theme, toggleTheme } = useSettings();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -97,10 +95,6 @@ function Navbar() {
           <div className="desktop-only">
             <LanguageSwitcher />
           </div>
-
-          <button className="nb-icon-btn" onClick={toggleTheme}>
-            {theme === 'dark' ? '🌙' : '☀️'}
-          </button>
 
           {user ? (
             <div style={{ position: 'relative' }} ref={dropdownRef}>

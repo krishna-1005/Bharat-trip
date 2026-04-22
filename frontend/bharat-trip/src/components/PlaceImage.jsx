@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { getPlaceImage } from "../services/imageService";
 
 export default function PlaceImage({ placeName, city, className, style }) {
@@ -7,7 +7,7 @@ export default function PlaceImage({ placeName, city, className, style }) {
 
   useEffect(() => {
     let mounted = true;
-    setImage(null); // Reset image on prop change
+    setImage(null);
     setLoading(true);
 
     const fetchImg = async () => {
@@ -33,7 +33,6 @@ export default function PlaceImage({ placeName, city, className, style }) {
       className={className}
       style={style}
       onError={(e) => {
-        // This shouldn't happen much as imageService now always returns a fallback URL string
         e.target.style.display = 'none';
       }}
     />

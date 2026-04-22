@@ -1,22 +1,25 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 
 const SettingsContext = createContext();
 
 export const useSettings = () => useContext(SettingsContext);
 
 export const SettingsProvider = ({ children }) => {
-  const [currency, setCurrency] = useState(() => localStorage.getItem("settings_currency") || "INR");
-  const [language, setLanguage] = useState(() => localStorage.getItem("settings_language") || "English");
+  const [currency, setCurrency] = useState(() => {
+    if (typeof window === 'undefined') return "INR";
+    return localStorage.getItem("settings_currency") || "INR";
+  });
+  
+  const [language, setLanguage] = useState(() => {
+    if (typeof window === 'undefined') return "English";
+    return localStorage.getItem("settings_language") || "English";
+  });
+  
   const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return "dark";
     const saved = localStorage.getItem("settings_theme");
-    const migrated = localStorage.getItem("theme_migrated_v2");
-    if (!migrated) {
-      localStorage.setItem("theme_migrated_v2", "true");
-      localStorage.setItem("settings_theme", "light");
-      return "light";
-    }
-    return saved || "light";
+    return saved || "dark";
   });
 
   const translations = {
