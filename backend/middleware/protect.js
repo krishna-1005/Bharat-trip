@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { admin } = require("../firebaseAdmin");
+const { admin, initialized } = require("../firebaseAdmin");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const UsageLog = require("../models/UsageLog");
@@ -18,22 +18,27 @@ const protect = async (req, res, next) => {
     let user = null;
 
     try {
-      // 1. Try Firebase Token First
-      const decoded = await admin.auth().verifyIdToken(token);
-      const email = decoded.email;
+      // 1. Try Firebase Token First (If initialized)
+      if (initialized) {
+        const decoded = await admin.auth().verifyIdToken(token);
+        const email = decoded.email;
 
-      user = await User.findOne({ email });
+        user = await User.findOne({ email });
 
-      if (!user) {
-        user = await User.create({
-          firebaseUid: decoded.uid,
-          email: email,
-          name: decoded.name || "User",
-          photo: decoded.picture || ""
-        });
+        if (!user) {
+          user = await User.create({
+            firebaseUid: decoded.uid,
+            email: email,
+            name: decoded.name || "User",
+            photo: decoded.picture || ""
+          });
 
-        // Send welcome email (background)
-        sendWelcomeEmail(user.email, user.name).catch(e => console.error("Social welcome email error:", e.message));
+          // Send welcome email (background)
+          sendWelcomeEmail(user.email, user.name).catch(e => console.error("Social welcome email error:", e.message));
+        }
+      } else {
+        console.warn("Firebase Admin not initialized. Skipping Firebase token verification.");
+        throw new Error("Firebase Admin not initialized");
       }
     } catch (firebaseErr) {
       // 2. Try Custom JWT Token
