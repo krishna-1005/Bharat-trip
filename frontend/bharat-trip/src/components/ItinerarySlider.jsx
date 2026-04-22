@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PlaceImage from './PlaceImage';
 import Haptics from '../utils/haptics';
+import ReactMarkdown from 'react-markdown';
 import './itinerarySlider.css';
 
 const ItinerarySlider = ({ itinerary, onDayChange, planCity, formatPrice, currentIndex, handleVisited, guideMode, setRideModalConfig }) => {
@@ -83,11 +84,11 @@ const ItinerarySlider = ({ itinerary, onDayChange, planCity, formatPrice, curren
                         </div>
                       </div>
 
-                      <p className="stop-reason-v4">
+                      <div className="stop-reason-v4">
                         {guideMode && isActive ? (
-                          <span className="guide-insight-v4">✨ {place.reason}</span>
-                        ) : place.reason}
-                      </p>
+                          <span className="guide-insight-v4">✨ <ReactMarkdown>{place.reason}</ReactMarkdown></span>
+                        ) : <ReactMarkdown>{place.reason}</ReactMarkdown>}
+                      </div>
 
                       <div className="stop-card-actions-v4">
                         <button 

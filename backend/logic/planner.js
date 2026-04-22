@@ -589,7 +589,7 @@ function getCrowdTag(index) {
     "usually less crowded",
     "popular among travelers",
     "a well-known busy spot",
-    "relatively à¤¶à¤¾à¤‚à¤¤ and peaceful"
+    "relatively quiet and peaceful"
   ];
 
   return crowdTypes[index % crowdTypes.length];

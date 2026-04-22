@@ -19,6 +19,7 @@ import ItinerarySlider from "../components/ItinerarySlider";
 import SafetyModal from "../components/SafetyModal";
 import RebookingModal from "../components/RebookingModal";
 import Haptics from "../utils/haptics";
+import ReactMarkdown from "react-markdown";
 
 /** ── RIDE MODAL COMPONENT ── **/
 const RideModal = ({ isOpen, onClose, destination }) => {
@@ -815,7 +816,9 @@ function Results() {
         <span className="ai-sparkle-badge-v2">Neural Synthesis Complete</span>
         <h2>Your Odyssey is Ready</h2>
         <div className="ai-summary-divider"></div>
-        <p className="ai-summary-text-v2">{plan.summary}</p>
+        <div className="ai-summary-text-v2">
+          <ReactMarkdown>{plan.summary}</ReactMarkdown>
+        </div>
         <div className="ai-entry-button-wrap">
             <div className="ai-countdown-loader-v2"></div>
             <span>ENTERING ODYSSEY...</span>
@@ -1055,7 +1058,7 @@ function Results() {
                                 <div className="stop-meta-v3">
                                   <span className="stop-tag-v3">{place.category}</span>
                                   <div className="stop-trust-v3">
-                                    <span className="star-v3">â­</span>
+                                    <span className="star-v3">⭐</span>
                                     <span className="rating-v3">{place.rating || "4.5"}</span>
                                     <span className="reviews-v3">({place.reviews || "1.2k"})</span>
                                   </div>
@@ -1065,7 +1068,7 @@ function Results() {
                                 <div className="stop-details-v3">
                                   {place.bestTime && (
                                     <span className="detail-item-v3 arrival-time">
-                                      â° {place.bestTime}
+                                      ⏰ {place.bestTime}
                                     </span>
                                   )}
                                   <span className="detail-item-v3">🕒 {place.timeHours || 2}h visit</span>
@@ -1074,16 +1077,18 @@ function Results() {
 
                                 {place.timeReason && (
                                   <div className="reschedule-notice-v3">
-                                    <span className="reschedule-icon">âš¡</span>
+                                    <span className="reschedule-icon">⚡</span>
                                     {place.timeReason}
                                   </div>
                                 )}
 
-                                <p className="stop-reason-v3">
+                                <div className="stop-reason-v3">
                                   {guideMode && isActive ? (
-                                    <span className="guide-insight">✨ {place.reason}</span>
-                                  ) : place.reason}
-                                </p>
+                                    <span className="guide-insight">
+                                      ✨ <ReactMarkdown>{place.reason}</ReactMarkdown>
+                                    </span>
+                                  ) : <ReactMarkdown>{place.reason}</ReactMarkdown>}
+                                </div>
 
                                 {place.tags && place.tags.length > 0 && (
                                   <div className="stop-tags-list-v3">
