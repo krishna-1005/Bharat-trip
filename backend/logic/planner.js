@@ -210,14 +210,14 @@ function generateFallbacks(city, coords, count) {
 
 /* ── DETERMINISTIC PRICING RULES ── */
 const COST_RULES = {
-  foodPerDay: 500,
+  foodPerDay: 300, // Reduced from 500 to be more realistic for budget travelers
   hotelPerNight: {
-    low: 1000,
-    medium: 2500,
-    high: 5000
+    low: 800,
+    medium: 1500,
+    high: 4000
   },
-  transportPerKm: 10,
-  activityBase: 100
+  transportPerKm: 8,
+  activityBase: 50
 };
 
 /**
@@ -225,11 +225,12 @@ const COST_RULES = {
  */
 function calculateDeterministicTripCost(itinerary, days, budgetTier, travelerType) {
   const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
-  const nights = Math.max(1, days);
+  const nights = Math.max(1, days - 1); // For a 2-day trip, it's 1 night stay
   
-  // 1. Hotel Cost
+  // 1. Hotel Cost (Assuming 2 people per room)
   const hotelRate = COST_RULES.hotelPerNight[budgetTier] || COST_RULES.hotelPerNight.medium;
-  const totalHotel = hotelRate * nights * (tMult > 2 ? 2 : 1);
+  const roomsNeeded = Math.ceil(tMult / 2);
+  const totalHotel = hotelRate * nights * roomsNeeded;
 
   // 2. Food Cost
   const totalFood = COST_RULES.foodPerDay * days * tMult;
@@ -242,15 +243,21 @@ function calculateDeterministicTripCost(itinerary, days, budgetTier, travelerTyp
     const places = dayData.places || [];
     
     places.forEach((place) => {
-      const baseActivity = place.avgCost || COST_RULES.activityBase;
-      totalActivities += baseActivity * tMult;
+      // Don't charge for "Stay" or "Nature" if they are usually free
+      const cat = (place.category || "").toLowerCase();
+      if (cat === "stay" || cat === "nature" || cat === "religious") {
+        totalActivities += 0;
+      } else {
+        const baseActivity = place.avgCost || COST_RULES.activityBase;
+        totalActivities += baseActivity * tMult;
+      }
     });
 
     for (let i = 0; i < places.length - 1; i++) {
-      const dist = getDistance(places[i].lat, places[i].lng, places[i+1].lat, places[i+1].lng) || 5;
+      const dist = getDistance(places[i].lat, places[i].lng, places[i+1].lat, places[i+1].lng) || 3;
       totalTransport += dist * COST_RULES.transportPerKm;
     }
-    totalTransport += 20 * COST_RULES.transportPerKm; // Daily base commute
+    totalTransport += 10 * COST_RULES.transportPerKm; // Daily base commute
   });
 
   return {
@@ -329,7 +336,16 @@ async function generatePlan({
     (p.tags || []).some(t => interestSet.has(t.toLowerCase()))
   );
 
-  if (filteredPool.length === 0) filteredPool = cityPool;
+  // If we have interests but the filtered pool is too small, mix in some popular general spots
+  // but keep the majority focused on interests.
+  if (interestSet.size > 0 && filteredPool.length < minRequired) {
+    const popularGeneral = cityPool
+      .filter(p => !filteredPool.some(fp => fp.name === p.name))
+      .slice(0, minRequired);
+    filteredPool = [...filteredPool, ...popularGeneral];
+  } else if (filteredPool.length === 0) {
+    filteredPool = cityPool;
+  }
 
   /* STEP 5: SCORING & ENRICHMENT */
   let prioritizedPool = filteredPool
