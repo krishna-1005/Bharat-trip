@@ -51,6 +51,17 @@
   transition: transform 0.3s ease;
 }
 
+.nb-logo-text {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -1px;
+}
+
+.nb-logo-text span {
+  color: #3b82f6;
+}
+
 .nb-brand-logo {
   height: 45px;
   width: auto;

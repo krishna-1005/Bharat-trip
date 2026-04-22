@@ -10,10 +10,10 @@ console.log("useState function:", useState);
 // Helper to get or create guestId
 const getGuestId = () => {
   if (typeof window === 'undefined') return null;
-  let gid = localStorage.getItem("gotripo_guest_id");
+  let gid = localStorage.getItem("GoTripo_guest_id");
   if (!gid) {
     gid = `guest_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
-    localStorage.setItem("gotripo_guest_id", gid);
+    localStorage.setItem("GoTripo_guest_id", gid);
   }
   return gid;
 };
@@ -26,7 +26,7 @@ export default function AuthProvider({ children }) {
 
   const trackActivity = useCallback(async (u, action = "page_view") => {
     try {
-      const gid = localStorage.getItem("gotripo_guest_id");
+      const gid = localStorage.getItem("GoTripo_guest_id");
       if (!gid) return;
 
       const payload = {

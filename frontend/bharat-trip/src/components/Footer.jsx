@@ -30,7 +30,7 @@ export default function Footer() {
           <p>Crafting memories across the Indian subcontinent with cutting-edge AI. Your personal travel assistant, redefined.</p>
           <div className="footer-socials">
             <a href="#" className="social-icon">𝕏</a>
-            <a href="#" className="social-icon">📸</a>
+            <a href="#" className="social-icon">📷</a>
             <a href="#" className="social-icon">💼</a>
           </div>
         </div>
@@ -64,7 +64,7 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <div className="footer-copyright">
-          <span>© 2024 GoTripo AI • Designed for the modern explorer</span>
+          <span>Â© 2024 GoTripo AI â€¢ Designed for the modern explorer</span>
         </div>
         <div className="footer-status">
           <span className="status-dot excellent"></span>

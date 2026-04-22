@@ -73,7 +73,7 @@ function Navbar() {
         
         {/* LEFT: LOGO */}
         <div className="nb-logo-wrap" onClick={() => navigate("/")}>
-          <span className="nb-logo-flag">🇮🇳</span>
+          <span className="nb-logo-flag">🌍</span>
           <span className="nb-logo-text">Go<span>Tripo</span></span>
         </div>
 
@@ -127,7 +127,7 @@ function Navbar() {
                         👤 Profile
                       </button>
                       <button onClick={() => { navigate("/settings"); setProfileOpen(false); }} className="nb-dd-item">
-                        ⚙️ Settings
+                        âš™ï¸ Settings
                       </button>
                       {isAdmin && (
                         <button onClick={() => { navigate("/admin"); setProfileOpen(false); }} className="nb-dd-item">

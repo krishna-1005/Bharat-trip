@@ -23,31 +23,31 @@ export default function VotePoll() {
   const pollRef = useRef(null);
 
   const cityDataMap = {
-    "Goa": { tags: ["Beach", "Nightlife", "Party"], vibe: "Beach • Chill" },
-    "Bangalore": { tags: ["IT Hub", "Gardens", "Weather"], vibe: "Modern • Green" },
-    "Bengaluru": { tags: ["IT Hub", "Gardens", "Weather"], vibe: "Modern • Green" },
-    "Mumbai": { tags: ["Metropolis", "Ocean", "Food"], vibe: "Energetic • Coastal" },
-    "Jaipur": { tags: ["Heritage", "Culture", "Architecture"], vibe: "Royal • Historic" },
-    "Delhi": { tags: ["History", "Food", "Shopping"], vibe: "Historic • Intense" },
-    "New Delhi": { tags: ["History", "Food", "Shopping"], vibe: "Historic • Intense" },
-    "Udaipur": { tags: ["Lakes", "Palaces", "Heritage"], vibe: "Serene • Royal" },
-    "Manali": { tags: ["Adventure", "Mountains", "Snow"], vibe: "Adventurous • Scenic" },
-    "Shimla": { tags: ["Mountains", "Heritage", "Colonial"], vibe: "Scenic • Nostalgic" },
-    "Kochi": { tags: ["Coastal", "Culture", "History"], vibe: "Relaxed • Cultural" },
-    "Varanasi": { tags: ["Spiritual", "Culture", "Heritage"], vibe: "Mystical • Ancient" },
-    "Agra": { tags: ["Heritage", "Iconic", "History"], vibe: "Historic • Iconic" },
-    "Hyderabad": { tags: ["Food", "History", "Pearls"], vibe: "Vibrant • Historic" },
-    "Pondicherry": { tags: ["Coastal", "French", "Peaceful"], vibe: "Quiet • Colonial" },
-    "Gokarna": { tags: ["Beach", "Peaceful", "Spiritual"], vibe: "Bohemian • Natural" },
-    "Rishikesh": { tags: ["Spiritual", "Adventure", "Yoga"], vibe: "Spiritual • Active" },
-    "Mysore": { tags: ["Heritage", "Palace", "Culture"], vibe: "Royal • Traditional" },
-    "Ooty": { tags: ["Mountains", "Tea Gardens", "Weather"], vibe: "Scenic • Refreshing" },
-    "Coorg": { tags: ["Nature", "Coffee", "Mountains"], vibe: "Green • Serene" },
-    "Munnar": { tags: ["Nature", "Tea Gardens", "Mountains"], vibe: "Emerald • Quiet" },
-    "Alleppey": { tags: ["Backwaters", "Nature", "Houseboat"], vibe: "Liquid • Serene" },
-    "Leh": { tags: ["Mountains", "Adventure", "Culture"], vibe: "Epic • Stark" },
-    "Ladakh": { tags: ["Mountains", "Adventure", "Culture"], vibe: "Epic • Stark" },
-    "Hampi": { tags: ["Heritage", "History", "Ruins"], vibe: "Boulder-strewn • Ancient" }
+    "Goa": { tags: ["Beach", "Nightlife", "Party"], vibe: "Beach â€¢ Chill" },
+    "Bangalore": { tags: ["IT Hub", "Gardens", "Weather"], vibe: "Modern â€¢ Green" },
+    "Bengaluru": { tags: ["IT Hub", "Gardens", "Weather"], vibe: "Modern â€¢ Green" },
+    "Mumbai": { tags: ["Metropolis", "Ocean", "Food"], vibe: "Energetic â€¢ Coastal" },
+    "Jaipur": { tags: ["Heritage", "Culture", "Architecture"], vibe: "Royal â€¢ Historic" },
+    "Delhi": { tags: ["History", "Food", "Shopping"], vibe: "Historic â€¢ Intense" },
+    "New Delhi": { tags: ["History", "Food", "Shopping"], vibe: "Historic â€¢ Intense" },
+    "Udaipur": { tags: ["Lakes", "Palaces", "Heritage"], vibe: "Serene â€¢ Royal" },
+    "Manali": { tags: ["Adventure", "Mountains", "Snow"], vibe: "Adventurous â€¢ Scenic" },
+    "Shimla": { tags: ["Mountains", "Heritage", "Colonial"], vibe: "Scenic â€¢ Nostalgic" },
+    "Kochi": { tags: ["Coastal", "Culture", "History"], vibe: "Relaxed â€¢ Cultural" },
+    "Varanasi": { tags: ["Spiritual", "Culture", "Heritage"], vibe: "Mystical â€¢ Ancient" },
+    "Agra": { tags: ["Heritage", "Iconic", "History"], vibe: "Historic â€¢ Iconic" },
+    "Hyderabad": { tags: ["Food", "History", "Pearls"], vibe: "Vibrant â€¢ Historic" },
+    "Pondicherry": { tags: ["Coastal", "French", "Peaceful"], vibe: "Quiet â€¢ Colonial" },
+    "Gokarna": { tags: ["Beach", "Peaceful", "Spiritual"], vibe: "Bohemian â€¢ Natural" },
+    "Rishikesh": { tags: ["Spiritual", "Adventure", "Yoga"], vibe: "Spiritual â€¢ Active" },
+    "Mysore": { tags: ["Heritage", "Palace", "Culture"], vibe: "Royal â€¢ Traditional" },
+    "Ooty": { tags: ["Mountains", "Tea Gardens", "Weather"], vibe: "Scenic â€¢ Refreshing" },
+    "Coorg": { tags: ["Nature", "Coffee", "Mountains"], vibe: "Green â€¢ Serene" },
+    "Munnar": { tags: ["Nature", "Tea Gardens", "Mountains"], vibe: "Emerald â€¢ Quiet" },
+    "Alleppey": { tags: ["Backwaters", "Nature", "Houseboat"], vibe: "Liquid â€¢ Serene" },
+    "Leh": { tags: ["Mountains", "Adventure", "Culture"], vibe: "Epic â€¢ Stark" },
+    "Ladakh": { tags: ["Mountains", "Adventure", "Culture"], vibe: "Epic â€¢ Stark" },
+    "Hampi": { tags: ["Heritage", "History", "Ruins"], vibe: "Boulder-strewn â€¢ Ancient" }
   };
 
   const fetchPoll = async () => {
@@ -165,7 +165,7 @@ export default function VotePoll() {
                 transition={{ delay: 0.2 }}
                 className="dashboard-subtitle"
             >
-                {poll.tripName} • Vote and help decide the best destination
+                {poll.tripName} â€¢ Vote and help decide the best destination
             </motion.p>
             
             <div className="live-voter-count">
@@ -248,8 +248,8 @@ export default function VotePoll() {
         <div className="poll-share-section">
             <h3>Invite your friends to vote</h3>
             <div className="share-buttons-row">
-              <button className="share-btn link" onClick={handleCopyLink}>Copy Link 🔗</button>
-              <button className="share-btn whatsapp" onClick={handleWhatsAppShare}>WhatsApp 📱</button>
+              <button className="share-btn link" onClick={handleCopyLink}>Copy Link 🔍—</button>
+              <button className="share-btn whatsapp" onClick={handleWhatsAppShare}>WhatsApp 📲</button>
             </div>
         </div>
 

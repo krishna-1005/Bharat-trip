@@ -1,18 +1,15 @@
 
 $replaces = @(
-    @("support@bharattrip.ai", "support@gotripo.tech"),
     @("bharattrip@gmail.com", "gotripo@gmail.com"),
+    @("support@bharattrip.ai", "support@gotripo.tech"),
     @("bharat-trip-opal.vercel.app", "gotripo.tech"),
-    @("Bharat <span>Trip</span>", "Go<span>Tripo</span>"),
     @("Bharat Trip", "GoTripo"),
-    @("BharatTrip", "GoTripo"),
     @("bharat-trip", "gotripo"),
-    @("bharattrip", "gotripo"),
     @("BHARAT TRIP", "GOTRIPO"),
-    @("bharat_trip", "gotripo")
+    @("BharatTrip", "GoTripo")
 )
 
-$excludePaths = @("node_modules", ".git", "dist", "build", ".next", "rebrand.ps1")
+$excludePaths = @("node_modules", ".git", "dist", "build", ".next", "rebrand.ps1", "package-lock.json")
 
 Get-ChildItem -Recurse -File | Where-Object { 
     $fullName = $_.FullName
@@ -23,8 +20,8 @@ Get-ChildItem -Recurse -File | Where-Object {
             break
         }
     }
-    # Also exclude the script itself
-    if ($fullName -match "rebrand.ps1") { $match = $true }
+    # Also exclude the script itself and package-lock.json explicitly if not caught
+    if ($fullName -match "rebrand.ps1" -or $fullName -match "package-lock.json") { $match = $true }
     -not $match
 } | ForEach-Object {
     try {

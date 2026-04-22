@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useContext, Component } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -43,9 +44,9 @@ import "./styles/mobile.css";
 import CreatePoll from "./pages/CreatePoll";
 import VotePoll from "./pages/VotePoll";
 import PollResults from "./pages/PollResults";
-import React, { useState, useEffect, useContext, Component } from "react";
 import AuthModal from "./components/AuthModal";
 import { AuthContext } from "./context/AuthContext";
+import { trackActivity } from "./utils/tracker";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
 const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
@@ -74,8 +75,6 @@ class ErrorBoundary extends Component {
     return this.props.children;
   }
 }
-
-import { trackActivity } from "./utils/tracker";
 
 function App() {
   const [isMaintenance, setIsMaintenance] = useState(false);

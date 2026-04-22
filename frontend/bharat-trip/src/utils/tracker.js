@@ -3,10 +3,10 @@ const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://local
 export const trackActivity = async (action, details = {}) => {
   try {
     // Generate or get guest ID from localStorage
-    let guestId = localStorage.getItem('gotripo_guest_id');
+    let guestId = localStorage.getItem('GoTripo_guest_id');
     if (!guestId) {
       guestId = 'guest_' + Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('gotripo_guest_id', guestId);
+      localStorage.setItem('GoTripo_guest_id', guestId);
     }
 
     // Try to get current user from a global way if possible, or just pass it in

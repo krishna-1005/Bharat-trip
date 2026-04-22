@@ -11,7 +11,7 @@ const router = express.Router();
 
 const signToken = (id) => {
   // Fallback to a hardcoded key if environment variable is missing
-  const secret = process.env.JWT_SECRET || "gotripo_temporary_secret_key_12345";
+  const secret = process.env.JWT_SECRET || "GoTripo_temporary_secret_key_12345";
   
   if (!process.env.JWT_SECRET) {
     console.warn("WARNING: JWT_SECRET is missing from environment variables. Using temporary fallback.");

@@ -277,7 +277,7 @@ const handleViewOnMap = (trip) => {
                       </button>
                       
                       <button className="pro-share-btn" onClick={() => handleShare(trip)}>
-                        {shareStatus === trip.id ? "✅ Linked" : "🔗 Share"}
+                        {shareStatus === trip.id ? "✅ Linked" : "🔍— Share"}
                       </button>
 
                       <button className="pro-del-btn" title="Delete" onClick={(e) => deleteTrip(e, trip.id)}>

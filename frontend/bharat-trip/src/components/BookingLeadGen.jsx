@@ -19,7 +19,7 @@ const BookingLeadGen = ({ plan }) => {
     const baseUrl = "https://www.booking.com/searchresults.html";
     const params = new URLSearchParams({
       ss: destination,
-      label: "gotripo-referral", // Your tracking ID
+      label: "GoTripo-referral", // Your tracking ID
       aid: "123456" // Theoretical Affiliate ID
     });
     return `${baseUrl}?${params.toString()}`;

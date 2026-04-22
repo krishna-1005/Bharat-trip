@@ -158,7 +158,7 @@ async function fetchOSMPlaces(lat, lng, radiusKm = 10) {
 
 
   } catch (err) {
-    console.error("⚠️ OSM Fetch Error:", err.message);
+    console.error("âš ï¸ OSM Fetch Error:", err.message);
     return [];
   }
 }

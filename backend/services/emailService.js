@@ -92,7 +92,7 @@ async function sendWelcomeEmail(email, name) {
           </div>
           
           <div style="text-align: center; margin-top: 40px;">
-            <a href="${process.env.FRONTEND_URL || 'https://gotripo.vercel.app'}/planner" style="background-color: #3b82f6; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);">
+            <a href="${process.env.FRONTEND_URL || 'https://gotripo.tech'}/planner" style="background-color: #3b82f6; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);">
               Start Planning Now
             </a>
           </div>

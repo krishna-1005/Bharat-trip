@@ -68,7 +68,7 @@ export default function Contact() {
             <div style={{ marginTop: "20px" }}>
               <h4 className="section-label" style={{ marginBottom: "16px" }}>Follow Our Journey</h4>
               <div style={{ display: "flex", gap: "16px" }}>
-                {["𝕏", "📸", "💼", "📘"].map((icon, i) => (
+                {["𝕏", "📷", "💼", "📓"].map((icon, i) => (
                   <div key={i} className="btn-secondary" style={{ width: '54px', height: '54px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, fontSize: '1.2rem' }}>{icon}</div>
                 ))}
               </div>

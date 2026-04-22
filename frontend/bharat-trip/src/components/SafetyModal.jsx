@@ -79,7 +79,7 @@ const SafetyModal = ({ isOpen, onClose, city, userLocation }) => {
             <div className="safety-modal-header">
               <span className="safety-icon-header">🛡️</span>
               <h3>Safety & Emergency</h3>
-              <button className="close-safety-btn" onClick={onClose}>×</button>
+              <button className="close-safety-btn" onClick={onClose}>Ã—</button>
             </div>
 
             <div className="safety-city-badge">
@@ -98,7 +98,7 @@ const SafetyModal = ({ isOpen, onClose, city, userLocation }) => {
                 <span className="em-number">{contacts.ambulance}</span>
               </a>
               <a href={`tel:${contacts.tourist}`} className="emergency-card tourist">
-                <span className="em-icon">ℹ️</span>
+                <span className="em-icon">â„¹ï¸</span>
                 <span className="em-label">Tourist Help</span>
                 <span className="em-number">{contacts.tourist}</span>
               </a>

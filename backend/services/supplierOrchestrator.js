@@ -52,7 +52,7 @@ async function prepareNotifications(trip) {
     console.log(`✅ Orchestrator: ${notifications.length} notification drafts queued for review.`);
 
   } catch (error) {
-    console.error("❌ Orchestrator Error:", error.message);
+    console.error("âŒ Orchestrator Error:", error.message);
   }
 }
 
@@ -79,7 +79,7 @@ async function executeNotifications(trip) {
     console.log("✅ Orchestrator: All notifications dispatched.");
 
   } catch (error) {
-    console.error("❌ Notification Execution Error:", error.message);
+    console.error("âŒ Notification Execution Error:", error.message);
   }
 }
 

@@ -428,7 +428,7 @@ function Results() {
           const currentRevision = plan?.pendingRevision;
           
           if (JSON.stringify(newRevision) !== JSON.stringify(currentRevision)) {
-            console.log("🔄 Background update: New trip revision detected.");
+            console.log("🔍„ Background update: New trip revision detected.");
             setPlan(prev => ({ 
               ...data.trip, 
               // Preserve existing itinerary if not applying revision yet, 
@@ -681,7 +681,7 @@ function Results() {
     normalizedItinerary.forEach((day, i) => {
       text += `*Day ${i + 1}*\n`;
       day.places?.forEach(p => {
-        text += `• ${p.name} (${p.category})\n`;
+        text += `â€¢ ${p.name} (${p.category})\n`;
       });
       text += `\n`;
     });
@@ -724,7 +724,7 @@ function Results() {
                 <div className="neural-orbit orbit-2"></div>
                 <div className="neural-orbit orbit-3"></div>
                 <div className="neural-center-glow"></div>
-                <div className="neural-brain-icon">🧭</div>
+                <div className="neural-brain-icon">🧠</div>
             </div>
 
             <div className="ai-status-panel">
@@ -925,7 +925,7 @@ function Results() {
               <button className="safety-trigger-btn" onClick={() => setShowSafetyModal(true)}>
                 🚨 <span className="safety-label">Safety</span>
               </button>
-              <button className="back-control" onClick={() => navigate("/planner")}>← Edit</button>
+              <button className="back-control" onClick={() => navigate("/planner")}>â† Edit</button>
             </div>
           </div>
           <motion.h1 
@@ -971,7 +971,7 @@ function Results() {
                   className={`guide-mode-btn ${guideMode ? "active" : ""}`}
                   onClick={() => setGuideMode(!guideMode)}
                 >
-                  {guideMode ? "✨ Guide Me: ON" : "🧭 Enable Guide Mode"}
+                  {guideMode ? "✨ Guide Me: ON" : "🧠 Enable Guide Mode"}
                 </button>
               </div>
               
@@ -1019,7 +1019,7 @@ function Results() {
                         {isLocked && (
                           <div className="glass-lock-overlay">
                             <div className="lock-content">
-                              <span className="lock-icon">🔒</span>
+                              <span className="lock-icon">🔍’</span>
                               <h4>Full Odyssey Locked</h4>
                               <p>Sign in to unlock the remaining {normalizedItinerary.length - 1} days and save this trip to your profile.</p>
                               <button className="unlock-btn" onClick={() => handleSaveTrip()}>
@@ -1055,7 +1055,7 @@ function Results() {
                                 <div className="stop-meta-v3">
                                   <span className="stop-tag-v3">{place.category}</span>
                                   <div className="stop-trust-v3">
-                                    <span className="star-v3">⭐</span>
+                                    <span className="star-v3">â­</span>
                                     <span className="rating-v3">{place.rating || "4.5"}</span>
                                     <span className="reviews-v3">({place.reviews || "1.2k"})</span>
                                   </div>
@@ -1065,7 +1065,7 @@ function Results() {
                                 <div className="stop-details-v3">
                                   {place.bestTime && (
                                     <span className="detail-item-v3 arrival-time">
-                                      ⏰ {place.bestTime}
+                                      â° {place.bestTime}
                                     </span>
                                   )}
                                   <span className="detail-item-v3">🕒 {place.timeHours || 2}h visit</span>
@@ -1074,7 +1074,7 @@ function Results() {
 
                                 {place.timeReason && (
                                   <div className="reschedule-notice-v3">
-                                    <span className="reschedule-icon">⚡</span>
+                                    <span className="reschedule-icon">âš¡</span>
                                     {place.timeReason}
                                   </div>
                                 )}
@@ -1167,7 +1167,7 @@ function Results() {
                     💬 WhatsApp
                   </button>
                   <button className="qr-share-btn-v2" onClick={() => setShowQRModal(true)}>
-                    📱 QR Code
+                    📲 QR Code
                   </button>
                 </div>
               </div>
@@ -1202,7 +1202,7 @@ function Results() {
               💬 WhatsApp
             </button>
             <button className="qr-share-btn" onClick={() => setShowQRModal(true)}>
-              📱 QR Code
+              📲 QR Code
             </button>
           </div>
         </div>

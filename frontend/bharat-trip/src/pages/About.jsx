@@ -91,7 +91,7 @@ export default function About() {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <h3 style={{ margin: 0 }}>{faq.q}</h3>
-                  <span style={{ fontSize: '1.5rem', color: 'var(--accent-blue)' }}>{activeFaq === i ? "−" : "+"}</span>
+                  <span style={{ fontSize: '1.5rem', color: 'var(--accent-blue)' }}>{activeFaq === i ? "âˆ’" : "+"}</span>
                 </div>
                 {activeFaq === i && (
                   <p style={{ marginTop: '16px', borderTop: '1px solid var(--border-main)', paddingTop: '16px' }}>{faq.a}</p>

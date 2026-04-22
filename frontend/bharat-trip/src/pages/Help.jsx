@@ -48,7 +48,7 @@ export default function Help() {
                 boxShadow: "0 10px 30px var(--shadow-main)"
               }}
             />
-            <span style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', fontSize: '20px' }}>🔍</span>
+            <span style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', fontSize: '20px' }}>🔍</span>
           </div>
         </div>
       </section>
@@ -75,7 +75,7 @@ export default function Help() {
             >
               <div className="faq-question">
                 <span>{faq.q}</span>
-                <span className="faq-icon">{activeFaq === i ? "−" : "+"}</span>
+                <span className="faq-icon">{activeFaq === i ? "âˆ’" : "+"}</span>
               </div>
               {activeFaq === i && (
                 <div className="faq-answer">
@@ -107,9 +107,9 @@ export default function Help() {
             <p style={{ fontSize: '14px', color: 'var(--text-dim)' }}>Available 9AM - 6PM IST</p>
           </div>
           <div style={{ textAlign: 'center', minWidth: '200px' }}>
-            <div style={{ fontSize: '24px', marginBottom: '10px' }}>📱</div>
+            <div style={{ fontSize: '24px', marginBottom: '10px' }}>📲</div>
             <h4 style={{ margin: '0 0 5px' }}>Social Media</h4>
-            <p style={{ fontSize: '14px', color: 'var(--text-dim)' }}>@gotripo_ai</p>
+            <p style={{ fontSize: '14px', color: 'var(--text-dim)' }}>@GoTripo_ai</p>
           </div>
         </div>
         <button 
