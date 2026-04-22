@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/Navbar";
 import { auth } from "../firebase";
+import { AuthContext } from "../context/AuthContext";
 import "../styles/global.css";
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "");
+const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
 
 export default function Admin() {
+  const { user: contextUser } = useContext(AuthContext);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -15,6 +18,12 @@ export default function Admin() {
   const [reviews, setReviews] = useState([]);
   const [config, setConfig] = useState({});
   const [broadcastMsg, setBroadcastMsg] = useState("");
+
+  // Robust Admin Check
+  const isAdmin = contextUser && (
+    contextUser.role === "admin" || 
+    ADMIN_EMAILS.includes(contextUser.email?.toLowerCase())
+  );
 
   const fetchData = async (endpoint, setter) => {
     try {
@@ -45,25 +54,35 @@ export default function Admin() {
   };
 
   useEffect(() => {
-    const init = async () => {
-      setLoading(true);
-      await fetchData("stats", setData);
+    console.log("Admin Component State - isAdmin:", isAdmin, "contextUser:", contextUser);
+    
+    if (isAdmin) {
+      const init = async () => {
+        setLoading(true);
+        setError("");
+        console.log("Fetching admin stats...");
+        await fetchData("stats", setData);
+        setLoading(false);
+      };
+      init();
+    } else if (contextUser) {
+      // User is logged in but not an admin according to our local check
       setLoading(false);
-    };
-
-    const unsub = auth.onAuthStateChanged((user) => {
-      if (user) init();
-      else setLoading(false);
-    });
-    return () => unsub();
-  }, []);
+      console.warn("User logged in but isAdmin is false:", contextUser.email);
+    } else {
+      // No user yet
+      setLoading(false);
+    }
+  }, [isAdmin, contextUser]);
 
   useEffect(() => {
+    if (!isAdmin) return;
+    console.log("Active Tab Changed:", activeTab);
     if (activeTab === "users") fetchData("users", setUsers);
     if (activeTab === "intelligence") fetchData("tracked-users", setTrackedUsers);
     if (activeTab === "reviews") fetchData("reviews", setReviews);
     if (activeTab === "media") fetchData("config", setConfig);
-  }, [activeTab]);
+  }, [activeTab, isAdmin]);
 
   const handleUpdateRole = async (userId, newRole) => {
     try {
@@ -129,7 +148,7 @@ export default function Admin() {
   return (
     <div className="admin-page">
       <div className="admin-container">
-        {!auth.currentUser ? (
+        {!isAdmin ? (
           <div className="admin-error">Authentication required. Please login as an administrator.</div>
         ) : loading ? (
           <div className="admin-loading">Initializing Secure Terminal...</div>

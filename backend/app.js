@@ -50,6 +50,8 @@ app.use((req, res, next) => {
     const sanitize = (obj) => {
       for (let key in obj) {
         if (typeof obj[key] === "string") {
+          // Do NOT trim passwords as they may have intentional spaces
+          if (key.toLowerCase().includes("password")) continue;
           obj[key] = obj[key].trim();
         } else if (typeof obj[key] === "object" && obj[key] !== null) {
           sanitize(obj[key]);

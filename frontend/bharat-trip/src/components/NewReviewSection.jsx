@@ -70,9 +70,10 @@ export default function NewReviewSection() {
                     {new Date(r.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="bt-review-stars-display">
-                  {"â˜…".repeat(r.rating)}{"â˜†".repeat(5 - r.rating)}
+                <div className="review-stars-v3">
+                  {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
                 </div>
+
                 <p className="bt-review-text-content">"{r.comment}"</p>
               </div>
             ))
@@ -99,7 +100,7 @@ export default function NewReviewSection() {
                     onMouseEnter={() => setHoverRating(s)}
                     onMouseLeave={() => setHoverRating(0)}
                   >
-                    â˜…
+                    ★
                   </button>
                 ))}
               </div>

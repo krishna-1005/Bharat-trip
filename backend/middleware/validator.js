@@ -16,13 +16,13 @@ const validate = (req, res, next) => {
 
 const signupValidation = [
   body("name").trim().notEmpty().withMessage("Name is required").isLength({ max: 50 }).escape(),
-  body("email").trim().isEmail().withMessage("Valid email is required").normalizeEmail(),
+  body("email").trim().isEmail().withMessage("Valid email is required").toLowerCase(),
   body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
   validate
 ];
 
 const loginValidation = [
-  body("email").trim().isEmail().withMessage("Valid email is required").normalizeEmail(),
+  body("email").trim().isEmail().withMessage("Valid email is required").toLowerCase(),
   body("password").notEmpty().withMessage("Password is required"),
   validate
 ];

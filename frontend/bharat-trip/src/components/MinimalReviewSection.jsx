@@ -152,7 +152,7 @@ export default function MinimalReviewSection() {
                   <span style={{fontSize: "12px", color: "var(--text-dim)", fontWeight: "500"}}>{new Date(r.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div style={{color: "var(--accent-amber)", marginBottom: "16px", letterSpacing: "2px"}}>
-                  {"â˜…".repeat(r.rating)}{"â˜†".repeat(5 - r.rating)}
+                  {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
                 </div>
                 <p style={{color: "var(--text-dim)", lineHeight: "1.7", fontStyle: "italic", fontSize: "15px"}}>"{r.comment}"</p>
               </div>
@@ -178,7 +178,7 @@ export default function MinimalReviewSection() {
                     onMouseOver={(e) => e.target.style.transform = "scale(1.2)"}
                     onMouseOut={(e) => e.target.style.transform = s <= rating ? "scale(1.1)" : "scale(1)"}
                   >
-                    â˜…
+                    ★
                   </button>
                 ))}
               </div>

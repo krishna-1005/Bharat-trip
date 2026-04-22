@@ -306,6 +306,8 @@ async function generatePlan({
 
   const perDayBudget = totalBudget / days;
   const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
+  const minRequired = days * 3;
+
   /* STEP 1: CURATED POOL */
   let curatedPool = allPlacesPool.filter(p => {
     if (p.area && p.area.toLowerCase() === cleanCity) return true;
@@ -358,7 +360,6 @@ async function generatePlan({
     })
     .sort((a, b) => b.score - a.score);
 
-  const minRequired = days * 3;
   if (prioritizedPool.length < minRequired) {
     const needed = minRequired - prioritizedPool.length;
     const fallbacks = generateFallbacks(city, coords, needed).map((p, idx) => {
@@ -403,9 +404,9 @@ async function generatePlan({
   }
 
   /* STEP 6: AI REFINEMENT */
-  let aiItinerary = null;
+  let aiItineraryMap = null;
   try {
-    aiItinerary = await analyzeAndRefinePlan({
+    const aiResponse = await analyzeAndRefinePlan({
       city,
       days,
       budget: totalBudget,
@@ -416,6 +417,15 @@ async function generatePlan({
       userPreferences,
       language
     });
+    
+    if (aiResponse && aiResponse.itinerary) {
+      // Convert array itinerary back to map for easier access by dayNum
+      aiItineraryMap = {};
+      aiResponse.itinerary.forEach(d => {
+        const dNum = d.day.replace(/\D/g, '');
+        aiItineraryMap[dNum] = d.places;
+      });
+    }
   } catch (err) {
     console.warn("AI Refinement skipped or failed:", err.message);
   }
@@ -426,8 +436,8 @@ async function generatePlan({
   
   for (let dayNum = 1; dayNum <= days; dayNum++) {
     let dayPlaces = [];
-    if (aiItinerary && aiItinerary[dayNum.toString()]) {
-      dayPlaces = aiItinerary[dayNum.toString()].map(aiP => {
+    if (aiItineraryMap && aiItineraryMap[dayNum.toString()]) {
+      dayPlaces = aiItineraryMap[dayNum.toString()].map(aiP => {
         const original = candidates.find(c => c.name.toLowerCase() === aiP.name.toLowerCase()) || aiP;
         return { ...original, ...aiP };
       });

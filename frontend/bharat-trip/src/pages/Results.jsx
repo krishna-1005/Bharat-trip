@@ -681,7 +681,7 @@ function Results() {
     normalizedItinerary.forEach((day, i) => {
       text += `*Day ${i + 1}*\n`;
       day.places?.forEach(p => {
-        text += `â€¢ ${p.name} (${p.category})\n`;
+        text += `• ${p.name} (${p.category})\n`;
       });
       text += `\n`;
     });
@@ -925,7 +925,7 @@ function Results() {
               <button className="safety-trigger-btn" onClick={() => setShowSafetyModal(true)}>
                 🚨 <span className="safety-label">Safety</span>
               </button>
-              <button className="back-control" onClick={() => navigate("/planner")}>â† Edit</button>
+              <button className="back-control" onClick={() => navigate("/planner")}>← Edit</button>
             </div>
           </div>
           <motion.h1 

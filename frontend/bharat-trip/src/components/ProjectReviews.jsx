@@ -18,7 +18,7 @@ const StarRating = ({ rating, interactive = false, onRatingChange }) => {
           onMouseEnter={() => interactive && setHover(star)}
           onMouseLeave={() => interactive && setHover(0)}
         >
-          â˜…
+          ★
         </button>
       ))}
     </div>
@@ -84,9 +84,10 @@ export default function ProjectReviews() {
             reviews.map((rev) => (
               <div key={rev._id} className="review-card">
                 <div className="review-user">{rev.userName}</div>
-                <div className="review-rating">
-                  {"â˜…".repeat(rev.rating)}{"â˜†".repeat(5 - rev.rating)}
+                <div className="review-stars">
+                  {"★".repeat(rev.rating)}{"☆".repeat(5 - rev.rating)}
                 </div>
+
                 <div className="review-comment">"{rev.comment}"</div>
                 <div style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.5rem' }}>
                   {new Date(rev.createdAt).toLocaleDateString()}
