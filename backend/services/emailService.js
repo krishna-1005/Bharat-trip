@@ -1,34 +1,57 @@
 const nodemailer = require("nodemailer");
 
 /* 
-  To use this, add these to your backend .env:
-  EMAIL_USER=your-email@gmail.com
-  EMAIL_PASS=your-app-password
+  SECURITY NOTE: 
+  To use Gmail, you MUST use an "App Password" if 2FA is enabled.
+  1. Go to Google Account -> Security
+  2. 2-Step Verification -> App Passwords
+  3. Generate a password for "Mail" and "Other (GoTripo)"
 */
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+let transporter = null;
+
+const getTransporter = () => {
+  if (transporter) return transporter;
+
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.warn("❌ EMAIL_USER or EMAIL_PASS missing in environment variables.");
+    return null;
+  }
+
+  transporter = nodemailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  // Verify connection configuration
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error("❌ Email Transporter Verification Failed:", error.message);
+      transporter = null; // Reset so it tries again next time
+    } else {
+      console.log("✅ Email Transporter is ready to deliver messages");
+    }
+  });
+
+  return transporter;
+};
 
 /**
  * Send a broadcast update to multiple users
- * @param {Array} emails - Array of user emails
- * @param {String} subject - Email subject
- * @param {String} content - HTML or Text content
  */
 async function sendUpdateEmail(emails, subject, content) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log("⚠️ Email credentials missing in .env. Skipping email send.");
-    return;
-  }
+  const currentTransporter = getTransporter();
+  if (!currentTransporter) return;
 
   const mailOptions = {
     from: `"GoTripo Updates" <${process.env.EMAIL_USER}>`,
-    bcc: emails.join(", "), // Use BCC for privacy
+    bcc: emails.join(", "),
     subject: subject,
     html: `
       <div style="font-family: sans-serif; padding: 20px; color: #333;">
@@ -45,7 +68,7 @@ async function sendUpdateEmail(emails, subject, content) {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    await currentTransporter.sendMail(mailOptions);
     console.log(`✅ Update email sent to ${emails.length} users.`);
   } catch (error) {
     console.error("❌ Failed to send update email:", error.message);
@@ -54,12 +77,11 @@ async function sendUpdateEmail(emails, subject, content) {
 
 /**
  * Send a welcome email to a new user
- * @param {String} email - Recipient email
- * @param {String} name - Recipient name
  */
 async function sendWelcomeEmail(email, name) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log("⚠️ Email credentials missing in .env. Skipping welcome email.");
+  const currentTransporter = getTransporter();
+  if (!currentTransporter) {
+    console.log("⚠️ skipping welcome email: transporter not ready");
     return;
   }
 
@@ -107,11 +129,69 @@ async function sendWelcomeEmail(email, name) {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    await currentTransporter.sendMail(mailOptions);
     console.log(`✅ Welcome email sent to ${email}`);
   } catch (error) {
     console.error("❌ Failed to send welcome email:", error.message);
   }
 }
 
-module.exports = { sendUpdateEmail, sendWelcomeEmail };
+/**
+ * Send a login notification email
+ */
+async function sendLoginNotificationEmail(email, name) {
+  const currentTransporter = getTransporter();
+  if (!currentTransporter) return;
+
+  const firstName = name ? name.split(" ")[0] : "Traveler";
+  const loginTime = new Date().toLocaleString();
+
+  const mailOptions = {
+    from: `"GoTripo Security" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `New Login Detected on GoTripo 🔐`,
+    html: `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; color: #1e293b;">
+        <div style="background-color: #0f172a; padding: 30px 20px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: -1px;">GoTripo Security</h1>
+        </div>
+        
+        <div style="padding: 40px 30px;">
+          <h2 style="font-size: 20px; color: #0f172a; margin-top: 0;">Hi ${firstName},</h2>
+          <p style="font-size: 16px; line-height: 1.6; color: #475569;">
+            We noticed a new login to your GoTripo account.
+          </p>
+          
+          <div style="margin: 30px 0; background-color: #f1f5f9; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+            <p style="margin: 0; color: #64748b; font-size: 14px; text-transform: uppercase; font-weight: 700;">Login Details</p>
+            <p style="margin: 10px 0 0; color: #1e293b;"><strong>Time:</strong> ${loginTime}</p>
+            <p style="margin: 5px 0 0; color: #1e293b;"><strong>Account:</strong> ${email}</p>
+          </div>
+          
+          <p style="font-size: 14px; color: #64748b; margin-top: 30px;">
+            If this was you, you can safely ignore this email. If you don't recognize this activity, we recommend changing your password immediately.
+          </p>
+          
+          <div style="text-align: center; margin-top: 40px;">
+            <a href="${process.env.FRONTEND_URL || 'https://gotripo.tech'}/profile" style="background-color: #0f172a; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">
+              Review Account Activity
+            </a>
+          </div>
+        </div>
+        
+        <div style="background-color: #f8fafc; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #f1f5f9;">
+          <p style="margin: 0;">&copy; 2026 GoTripo Security Team</p>
+        </div>
+      </div>
+    `,
+  };
+
+  try {
+    await currentTransporter.sendMail(mailOptions);
+    console.log(`✅ Login notification email sent to ${email}`);
+  } catch (error) {
+    console.error("❌ Failed to send login notification email:", error.message);
+  }
+}
+
+module.exports = { sendUpdateEmail, sendWelcomeEmail, sendLoginNotificationEmail };

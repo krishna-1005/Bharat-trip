@@ -5,7 +5,7 @@ const UsageLog = require("../models/UsageLog");
 const { protect } = require("../middleware/protect");
 const { authLimiter } = require("../middleware/rateLimiter");
 const { signupValidation, loginValidation } = require("../middleware/validator");
-const { sendWelcomeEmail } = require("../services/emailService");
+const { sendWelcomeEmail, sendLoginNotificationEmail } = require("../services/emailService");
 
 const router = express.Router();
 
@@ -83,6 +83,9 @@ router.post("/login", authLimiter, loginValidation, async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials." });
 
     const token = signToken(user._id);
+
+    // Send login notification email (background)
+    sendLoginNotificationEmail(user.email, user.name).catch(e => console.error("Login email error:", e.message));
 
     // Log the login (background)
     UsageLog.create({

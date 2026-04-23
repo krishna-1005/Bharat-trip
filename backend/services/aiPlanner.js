@@ -35,10 +35,12 @@ ${JSON.stringify(candidates)}
 
 ### INSTRUCTIONS:
 1. Select the best 3-4 spots per day from the input data.
-2. Group spots by proximity to minimize travel time.
-3. Assign a logical "bestTime" (Morning, Afternoon, Evening) for each.
-4. Provide a 2-sentence "summary" of the overall vibe.
-5. Return ONLY valid JSON in this structure:
+2. STRICTLY PRIORITIZE the user's selected interests (${interests.join(", ")}). 
+3. Only include other categories (like Nature or Culture) if there are not enough spots matching the interests or if they are essential for a logical flow (e.g., Food for lunch/dinner).
+4. Group spots by proximity to minimize travel time.
+5. Assign a logical "bestTime" (Morning, Afternoon, Evening) for each.
+6. Provide a 2-sentence "summary" of the overall vibe.
+7. Return ONLY valid JSON in this structure:
 {
   "summary": "...",
   "itinerary": {

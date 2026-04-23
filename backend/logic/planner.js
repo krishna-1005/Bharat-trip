@@ -53,12 +53,12 @@ function calculateScore(place, interests, coords, budgetTier, userPreferences = 
 
   const category = (place.category || "").toLowerCase();
 
-  // Boost for CURRENT trip interests
-  if (interestSet.has(category)) score += 5;
-  if ((place.tags || []).some(tag => interestSet.has(tag.toLowerCase()))) score += 3;
+  // HEAVY Boost for CURRENT trip interests
+  if (interestSet.has(category)) score += 25; 
+  if ((place.tags || []).some(tag => interestSet.has(tag.toLowerCase()))) score += 15;
 
   // Boost for USER general interests (Personalization)
-  if (userInterests.some(i => i.toLowerCase() === category)) score += 2;
+  if (userInterests.some(i => i.toLowerCase() === category)) score += 5;
 
   // Learned weights
   const weight = categoryWeights instanceof Map ? (categoryWeights.get(place.category) || 0) : (categoryWeights[place.category] || 0);
@@ -210,7 +210,11 @@ function generateFallbacks(city, coords, count) {
 
 /* ── DETERMINISTIC PRICING RULES ── */
 const COST_RULES = {
-  foodPerDay: 300, // Reduced from 500 to be more realistic for budget travelers
+  foodPerDay: {
+    low: 400,
+    medium: 1000,
+    high: 2500
+  },
   hotelPerNight: {
     low: 800,
     medium: 1500,
@@ -223,52 +227,76 @@ const COST_RULES = {
 /**
  * Deterministically calculates the total trip cost.
  */
-function calculateDeterministicTripCost(itinerary, days, budgetTier, travelerType) {
+function calculateDeterministicTripCost(itinerary, days, budgetTier, travelerType, targetTotalBudget = Infinity) {
   const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
   const nights = Math.max(1, days - 1); // For a 2-day trip, it's 1 night stay
   
-  // 1. Hotel Cost (Assuming 2 people per room)
-  const hotelRate = COST_RULES.hotelPerNight[budgetTier] || COST_RULES.hotelPerNight.medium;
-  const roomsNeeded = Math.ceil(tMult / 2);
-  const totalHotel = hotelRate * nights * roomsNeeded;
+  const calculateWithTier = (tier) => {
+    // 1. Hotel Cost (Assuming 2 people per room)
+    const hotelRate = COST_RULES.hotelPerNight[tier] || COST_RULES.hotelPerNight.medium;
+    const roomsNeeded = Math.ceil(tMult / 2);
+    const totalHotel = hotelRate * nights * roomsNeeded;
 
-  // 2. Food Cost
-  const totalFood = COST_RULES.foodPerDay * days * tMult;
+    // 2. Food Cost
+    const foodRate = COST_RULES.foodPerDay[tier] || COST_RULES.foodPerDay.medium;
+    const totalFood = foodRate * days * tMult;
 
-  // 3. Transport & Activities
-  let totalTransport = 0;
-  let totalActivities = 0;
+    // 3. Transport & Activities
+    let totalTransport = 0;
+    let totalActivities = 0;
 
-  itinerary.forEach((dayData) => {
-    const places = dayData.places || [];
-    
-    places.forEach((place) => {
-      // Don't charge for "Stay" or "Nature" if they are usually free
-      const cat = (place.category || "").toLowerCase();
-      if (cat === "stay" || cat === "nature" || cat === "religious") {
-        totalActivities += 0;
-      } else {
-        const baseActivity = place.avgCost || COST_RULES.activityBase;
-        totalActivities += baseActivity * tMult;
+    itinerary.forEach((dayData) => {
+      const places = dayData.places || [];
+      
+      places.forEach((place) => {
+        const cat = (place.category || "").toLowerCase();
+        if (cat === "stay" || cat === "nature" || cat === "religious") {
+          totalActivities += 0;
+        } else {
+          const baseActivity = place.avgCost || COST_RULES.activityBase;
+          totalActivities += baseActivity * tMult;
+        }
+      });
+
+      for (let i = 0; i < places.length - 1; i++) {
+        const dist = getDistance(places[i].lat, places[i].lng, places[i+1].lat, places[i+1].lng) || 3;
+        totalTransport += dist * COST_RULES.transportPerKm;
       }
+      totalTransport += 10 * COST_RULES.transportPerKm; // Daily base commute
     });
 
-    for (let i = 0; i < places.length - 1; i++) {
-      const dist = getDistance(places[i].lat, places[i].lng, places[i+1].lat, places[i+1].lng) || 3;
-      totalTransport += dist * COST_RULES.transportPerKm;
-    }
-    totalTransport += 10 * COST_RULES.transportPerKm; // Daily base commute
-  });
-
-  return {
-    total: Math.round(totalHotel + totalFood + totalTransport + totalActivities),
-    breakdown: {
-      hotel: Math.round(totalHotel),
-      food: Math.round(totalFood),
-      transport: Math.round(totalTransport),
-      activities: Math.round(totalActivities)
-    }
+    return {
+      total: Math.round(totalHotel + totalFood + totalTransport + totalActivities),
+      breakdown: {
+        hotel: Math.round(totalHotel),
+        food: Math.round(totalFood),
+        transport: Math.round(totalTransport),
+        activities: Math.round(totalActivities)
+      }
+    };
   };
+
+  let currentPricing = calculateWithTier(budgetTier);
+
+  // Safeguard: If over budget, try downgrading hotel tier
+  if (currentPricing.total > targetTotalBudget * 1.05) { // 5% buffer
+    if (budgetTier === "high") {
+      const mediumPricing = calculateWithTier("medium");
+      if (mediumPricing.total <= targetTotalBudget * 1.1 || mediumPricing.total < currentPricing.total) {
+        currentPricing = mediumPricing;
+        budgetTier = "medium";
+      }
+    }
+    if (currentPricing.total > targetTotalBudget * 1.05 && budgetTier === "medium") {
+      const lowPricing = calculateWithTier("low");
+      if (lowPricing.total <= targetTotalBudget * 1.1 || lowPricing.total < currentPricing.total) {
+        currentPricing = lowPricing;
+        budgetTier = "low";
+      }
+    }
+  }
+
+  return currentPricing;
 }
 
 /* ── MAIN FUNCTION ── */
@@ -288,24 +316,26 @@ async function generatePlan({
   // Normalize budget: can be a number (total) or a tier string
   let totalBudget = 5000;
   let budgetTier = "medium";
+  const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
 
   if (typeof budget === 'number' || !isNaN(Number(budget))) {
     totalBudget = Number(budget);
-    const dailyBudget = totalBudget / days;
-    if (totalBudget <= 3500 || dailyBudget <= 1500) {
+    // Budget per person per day
+    const perPersonPerDay = totalBudget / (days * tMult);
+    
+    if (perPersonPerDay <= 1500) {
       budgetTier = "low";
-    } else if (totalBudget <= 12000 || dailyBudget <= 4000) {
+    } else if (perPersonPerDay <= 4000) {
       budgetTier = "medium";
     } else {
       budgetTier = "high";
     }
   } else if (typeof budget === 'string') {
     budgetTier = budget.toLowerCase();
-    totalBudget = { low: 3000, medium: 7000, high: 20000 }[budgetTier] || 5000;
+    totalBudget = ({ low: 3000, medium: 7000, high: 20000 }[budgetTier] || 5000) * tMult;
   }
 
   const perDayBudget = totalBudget / days;
-  const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
   const minRequired = days * 3;
 
   /* STEP 1: CURATED POOL */
@@ -350,12 +380,15 @@ async function generatePlan({
   }
 
   /* STEP 5: SCORING & ENRICHMENT */
+  // Target cost per activity per person
+  const targetActivityCost = (perDayBudget / tMult) * 0.3; // 30% of daily budget for activities
+
   let prioritizedPool = filteredPool
     .map((p, idx) => {
       const enriched = enrichPlace(p, idx);
       return {
         ...enriched,
-        score: calculateScore(enriched, interests, coords, budgetTier, userPreferences, perDayBudget / (tMult * 3))
+        score: calculateScore(enriched, interests, coords, budgetTier, userPreferences, targetActivityCost)
       };
     })
     .sort((a, b) => b.score - a.score);
@@ -465,7 +498,7 @@ async function generatePlan({
   }
 
   /* STEP 8: FINAL DETERMINISTIC COST CALCULATION */
-  const finalPricing = calculateDeterministicTripCost(itineraryDays, days, budgetTier, travelerType);
+  const finalPricing = calculateDeterministicTripCost(itineraryDays, days, budgetTier, travelerType, totalBudget);
 
   return { 
     city, 

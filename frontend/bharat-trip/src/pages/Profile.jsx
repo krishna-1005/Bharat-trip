@@ -12,7 +12,7 @@ const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://local
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
   const { formatPrice } = useSettings();
 
   const [dbTrips, setDbTrips] = useState([]);
@@ -20,10 +20,19 @@ export default function Profile() {
   const [profileData, setProfileData] = useState(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       navigate("/login");
     }
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
+
+  if (authLoading) {
+    return (
+      <div className="global-loader-container">
+        <div className="spinner-v2"></div>
+        <div className="loader-text">Loading Profile...</div>
+      </div>
+    );
+  }
 
   const fetchProfile = async () => {
     try {
