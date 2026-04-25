@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "backend": "cd backend && npm run dev",
-    "frontend": "cd frontend/gotripo && npm run dev",
-    "install-all": "npm install && cd backend && npm install && cd ../frontend/gotripo && npm install"
+    "frontend": "cd frontend/bharat-trip && npm run dev",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend/bharat-trip && npm install"
   },
   "dependencies": {
     "dotenv": "^17.3.1"
