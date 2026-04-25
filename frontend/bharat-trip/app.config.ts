@@ -7,7 +7,7 @@ export default defineConfig({
       tsconfigPaths(),
     ],
   },
-  deployment: {
+  server: {
     preset: 'static',
   },
 })
