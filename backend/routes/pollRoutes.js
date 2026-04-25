@@ -43,6 +43,16 @@ router.post("/create", async (req, res) => {
   }
 });
 
+// Get all polls
+router.get("/list", async (req, res) => {
+  try {
+    const polls = await Poll.find().sort({ createdAt: -1 });
+    res.json(polls);
+  } catch (error) {
+    res.status(500).json({ error: error.message || "Server error fetching polls." });
+  }
+});
+
 // Get poll details
 router.get("/:pollId", async (req, res) => {
   try {
