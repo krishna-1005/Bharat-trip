@@ -8,7 +8,6 @@ export default defineConfig({
     ],
   },
   server: {
-    preset: 'static',
+    preset: 'vercel',
   },
-  ssr: false,
 })
