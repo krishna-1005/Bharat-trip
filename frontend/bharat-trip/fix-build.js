@@ -1,15 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 
-const clientDir = path.join(process.cwd(), 'dist', 'client');
+const distDir = path.join(process.cwd(), 'dist');
+const clientDir = path.join(distDir, 'client');
 const assetsDir = path.join(clientDir, 'assets');
 
 // Find the main index-*.js file
 const files = fs.readdirSync(assetsDir);
-const mainJs = files.find(f => f.startsWith('index-') && f.endsWith('.js') && !f.includes('DmXK5ndi')); // Exclude other index files if necessary
-// Actually, let's just find the largest index file or look for the one that is the entry point
-// In your case it was BxmEjKxu.js
-
 const entryFile = files.find(f => f.startsWith('index-') && f.endsWith('.js') && fs.statSync(path.join(assetsDir, f)).size > 500000);
 
 if (!entryFile) {
@@ -31,5 +28,18 @@ const html = `<!DOCTYPE html>
   </body>
 </html>`;
 
+// Write index.html to BOTH locations just to be safe
 fs.writeFileSync(path.join(clientDir, 'index.html'), html);
-console.log('Generated index.html with entry point:', entryFile);
+fs.writeFileSync(path.join(distDir, 'index.html'), html);
+
+// Copy assets up to dist/assets so Vercel finds them at /assets/
+const targetAssetsDir = path.join(distDir, 'assets');
+if (!fs.existsSync(targetAssetsDir)) {
+    fs.mkdirSync(targetAssetsDir);
+}
+
+files.forEach(file => {
+    fs.copyFileSync(path.join(assetsDir, file), path.join(targetAssetsDir, file));
+});
+
+console.log('Successfully flattened build and generated index.html');
