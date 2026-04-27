@@ -73,19 +73,19 @@ export function MarketingNav() {
       </div>
 
       {open && (
-        <div className="md:hidden mt-2 glass rounded-2xl p-4 text-white space-y-2">
-          <a href="#features" className="block py-2">Features</a>
-          <a href="#destinations" className="block py-2">Destinations</a>
+        <div className="md:hidden absolute top-full left-0 right-0 mt-2 bg-black/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-5 text-white space-y-1 shadow-2xl animate-in fade-in zoom-in duration-200">
+          <a href="#features" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Features</a>
+          <a href="#destinations" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Destinations</a>
           {!user ? (
-            <>
-              <Link to="/auth" className="block py-2">Log in</Link>
-              <Link to="/auth?mode=signup" className="block py-2 font-semibold">Get started</Link>
-            </>
+            <div className="pt-2 space-y-2">
+              <Link to="/auth" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Log in</Link>
+              <Link to="/auth?mode=signup" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl bg-warm-gradient font-bold text-center">Get started</Link>
+            </div>
           ) : (
-            <>
-              <Link to="/profile" className="block py-2 font-semibold border-b border-white/10">My Profile</Link>
-              <Link to="/dashboard" className="block py-2 font-semibold">Dashboard</Link>
-            </>
+            <div className="pt-2 space-y-2">
+              <Link to="/profile" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition font-semibold border-b border-white/5">My Profile</Link>
+              <Link to="/dashboard" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 transition font-bold text-center">Dashboard</Link>
+            </div>
           )}
         </div>
       )}

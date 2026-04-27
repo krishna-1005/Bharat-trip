@@ -28,7 +28,6 @@ const mobileNav = [
   { to: "/trip-type", label: "AI Plan", icon: Sparkles },
   { to: "/trips", label: "Trips", icon: Bookmark },
   { to: "/profile", label: "Profile", icon: User },
-  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -248,6 +247,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   {n.label}
                 </Link>
               ))}
+
+              {isAdmin && (
+                <div className="pt-4 mt-4 border-t border-border">
+                  <Link
+                    to="/admin"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-primary hover:bg-primary/10"
+                  >
+                    <ShieldCheck className="size-[18px]" />
+                    Admin Panel
+                  </Link>
+                </div>
+              )}
             </nav>
           </aside>
         </div>
