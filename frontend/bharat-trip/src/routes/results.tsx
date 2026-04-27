@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { MapPreview } from "@/components/MapPreview";
@@ -28,6 +28,7 @@ import {
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
+import { PDFViewerModal } from "@/components/PDFViewerModal";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   plane: Plane,
@@ -46,6 +47,7 @@ export default function Results() {
 }
 
 function ResultsContent() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const planId = searchParams.get("planId");
   const { user: firebaseUser, loading: authLoading } = useAuth();
@@ -56,6 +58,7 @@ function ResultsContent() {
   const [open, setOpen] = useState<number | null>(1);
   const [activePlace, setActivePlace] = useState<any>(null);
   const [mongoUserId, setMongoUserId] = useState<string | null>(null);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   useEffect(() => {
     if (authLoading || !firebaseUser) return;
@@ -150,6 +153,39 @@ function ResultsContent() {
     }
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `My Trip to ${destinationName}`,
+          text: `Check out my travel plan for ${destinationName}!`,
+          url: url,
+        });
+      } catch (err) {
+        console.error("Error sharing", err);
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard!");
+    }
+  };
+
+  const handleDownloadPDF = () => {
+    setIsPdfModalOpen(true);
+  };
+
+  const handleEdit = () => {
+    // Navigate back to the appropriate planner with current params
+    if (plan?.isMultiCity) {
+      navigate(`/planner-multi`);
+    } else {
+      const dest = plan?.destination || plan?.city || "";
+      const daysNum = plan?.days || 5;
+      navigate(`/planner-single?dest=${encodeURIComponent(dest)}&days=${daysNum}`);
+    }
+  };
+
   if (loading) {
     return (
       <AppShell>
@@ -210,9 +246,9 @@ function ResultsContent() {
                 label={saved ? "Saved to Profile" : saving ? "Saving..." : "Save to Profile"}
                 primary={!saved}
               />
-              <ActionBtn icon={Edit3} label="Edit plan" />
-              <ActionBtn icon={Share2} label="Share" />
-              <ActionBtn icon={Download} label="PDF" />
+              <ActionBtn icon={Edit3} label="Edit plan" onClick={handleEdit} />
+              <ActionBtn icon={Share2} label="Share" onClick={handleShare} />
+              <ActionBtn icon={Download} label="PDF" onClick={handleDownloadPDF} />
             </div>
           </div>
         </div>
@@ -256,63 +292,61 @@ function ResultsContent() {
                       </div>
                     </div>
                     <ChevronDown
-                      className={`size-5 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
+                      className={`size-5 text-muted-foreground transition-transform no-print ${isOpen ? "rotate-180" : ""}`}
                     />
                   </button>
 
-                  {isOpen && (
-                    <div className="px-5 pb-5 pt-1">
-                      <div className="relative ml-6 border-l-2 border-dashed border-border space-y-4 py-2">
-                        {dayActivities.map((it: any, i: number) => {
-                          const Ico = iconMap[it.icon] ?? MapPin;
-                          const placeName = it.name || it.place || it.activity;
-                          const placeDesc = it.tag || it.desc || it.description || it.category;
-                          const placeTime = it.time || it.bestTime || "Scheduled";
-                          const isCurrentlyActive =
-                            activePlace && placeName === (activePlace.name || activePlace.place);
+                  <div className={`px-5 pb-5 pt-1 ${isOpen ? "block" : "hidden"} print:block`}>
+                    <div className="relative ml-6 border-l-2 border-dashed border-border space-y-4 py-2">
+                      {dayActivities.map((it: any, i: number) => {
+                        const Ico = iconMap[it.icon] ?? MapPin;
+                        const placeName = it.name || it.place || it.activity;
+                        const placeDesc = it.tag || it.desc || it.description || it.category;
+                        const placeTime = it.time || it.bestTime || "Scheduled";
+                        const isCurrentlyActive =
+                          activePlace && placeName === (activePlace.name || activePlace.place);
 
-                          return (
-                            <div key={i} className="relative pl-6">
-                              <div
-                                className={`absolute -left-[13px] top-1 size-6 rounded-full border-2 grid place-items-center transition-colors ${
-                                  isCurrentlyActive
-                                    ? "bg-accent border-accent"
-                                    : "bg-card border-accent"
-                                }`}
-                              >
-                                <Ico
-                                  className={`size-3 ${isCurrentlyActive ? "text-white" : "text-accent"}`}
-                                />
-                              </div>
-                              <div
-                                className={`rounded-2xl p-4 transition-all duration-300 ${
-                                  isCurrentlyActive
-                                    ? "bg-accent/10 border border-accent/20"
-                                    : "bg-secondary hover:bg-primary-soft border border-transparent"
-                                }`}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div
-                                    className={`text-xs font-semibold ${isCurrentlyActive ? "text-accent" : "text-primary"}`}
-                                  >
-                                    {placeTime}
-                                  </div>
-                                  <button
-                                    onClick={() => setActivePlace(it)}
-                                    className={`text-xs font-bold transition hover:opacity-70 ${isCurrentlyActive ? "text-accent" : "text-muted-foreground"}`}
-                                  >
-                                    {isCurrentlyActive ? "Focused" : "View on map"}
-                                  </button>
-                                </div>
-                                <div className="font-display font-bold mt-1">{placeName}</div>
-                                <div className="text-sm text-muted-foreground">{placeDesc}</div>
-                              </div>
+                        return (
+                          <div key={i} className="relative pl-6 itinerary-item">
+                            <div
+                              className={`absolute -left-[13px] top-1 size-6 rounded-full border-2 grid place-items-center transition-colors ${
+                                isCurrentlyActive
+                                  ? "bg-accent border-accent"
+                                  : "bg-card border-accent"
+                              }`}
+                            >
+                              <Ico
+                                className={`size-3 ${isCurrentlyActive ? "text-white" : "text-accent"}`}
+                              />
                             </div>
-                          );
-                        })}
-                      </div>
+                            <div
+                              className={`rounded-2xl p-4 transition-all duration-300 ${
+                                isCurrentlyActive
+                                  ? "bg-accent/10 border border-accent/20"
+                                  : "bg-secondary hover:bg-primary-soft border border-transparent"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div
+                                  className={`text-xs font-semibold ${isCurrentlyActive ? "text-accent" : "text-primary"}`}
+                                >
+                                  {placeTime}
+                                </div>
+                                <button
+                                  onClick={() => setActivePlace(it)}
+                                  className={`text-xs font-bold transition hover:opacity-70 no-print ${isCurrentlyActive ? "text-accent" : "text-muted-foreground"}`}
+                                >
+                                  {isCurrentlyActive ? "Focused" : "View on map"}
+                                </button>
+                              </div>
+                              <div className="font-display font-bold mt-1">{placeName}</div>
+                              <div className="text-sm text-muted-foreground">{placeDesc}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}
@@ -377,6 +411,11 @@ function ResultsContent() {
           </aside>
         </div>
       </div>
+      <PDFViewerModal 
+        isOpen={isPdfModalOpen} 
+        onClose={() => setIsPdfModalOpen(false)} 
+        plan={plan} 
+      />
     </AppShell>
   );
 }

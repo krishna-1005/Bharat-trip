@@ -250,3 +250,44 @@
   }
   .animate-progress-bar { animation: progress-bar linear forwards; }
 }
+
+@media print {
+  header, footer, nav, aside, .no-print, button, .ActionBtn {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .max-w-7xl, .max-w-\[1500px\] {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  .shadow-pop, .shadow-soft, .shadow-card, .shadow-cta {
+    box-shadow: none !important;
+  }
+  .bg-hero-gradient {
+    background: #f8fafc !important;
+    color: black !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  .bg-hero-gradient * {
+    color: black !important;
+  }
+  .bg-warm-gradient {
+    background: #f1f5f9 !important;
+    color: black !important;
+  }
+  .rounded-3xl, .rounded-\[2rem\], .rounded-\[40px\] {
+    border-radius: 0.5rem !important;
+  }
+  .print-expand {
+    display: block !important;
+  }
+  .itinerary-item {
+    page-break-inside: avoid;
+  }
+}
