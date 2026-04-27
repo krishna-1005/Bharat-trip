@@ -16,6 +16,7 @@ import { useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "./AuthProvider";
 import { toast } from "sonner";
+import { NotificationBell } from "./NotificationBell";
 
 const adminNav = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -23,6 +24,7 @@ const adminNav = [
   { to: "/admin/trips", label: "Trips", icon: Map },
   { to: "/admin/reviews", label: "Reviews", icon: MessageSquare },
   { to: "/admin/polls", label: "Polls", icon: BarChart3 },
+  { to: "/admin/notifications", label: "Announcements", icon: Bell },
   { to: "/admin/config", label: "System Config", icon: Settings },
 ];
 
@@ -106,9 +108,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="flex-1" />
 
           <ThemeToggle />
-          <button className="size-10 grid place-items-center rounded-xl border border-border hover:bg-secondary transition">
-            <Bell className="size-4" />
-          </button>
+          <NotificationBell />
           <div className="size-10 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold text-sm shadow-sm">
             {user?.email?.charAt(0).toUpperCase()}
           </div>

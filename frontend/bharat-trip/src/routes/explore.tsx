@@ -101,7 +101,7 @@ export default function Explore() {
           <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((d) => (
               <Link
-                to="/trip-details"
+                to={`/trip-details?id=${d.id}`}
                 key={d.id}
                 className="group rounded-3xl overflow-hidden bg-card border border-border shadow-soft hover:shadow-pop hover:-translate-y-0.5 transition-all"
               >

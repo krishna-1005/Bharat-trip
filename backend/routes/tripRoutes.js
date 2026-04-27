@@ -56,7 +56,7 @@ router.post("/:id/like", protect, async (req, res) => {
 router.get("/", protect, async (req, res) => {
   try {
 
-    const trips = await Trip.find({ userId: req.user._id });
+    const trips = await Trip.find({ userId: req.user._id }).sort({ createdAt: -1 });
 
     res.json(trips);
 

@@ -243,6 +243,27 @@ router.patch("/users/:id/role", protect, verifyAdminEmail, async (req, res) => {
   }
 });
 
+/* TRIPS MANAGEMENT */
+router.get("/trips", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const trips = await Trip.find()
+      .populate("userId", "name email")
+      .sort({ createdAt: -1 });
+    res.json(trips);
+  } catch (err) {
+    res.status(500).json({ error: "Error fetching trips" });
+  }
+});
+
+router.delete("/trips/:id", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    await Trip.findByIdAndDelete(req.params.id);
+    res.json({ message: "Trip deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Error deleting trip" });
+  }
+});
+
 /* REVIEWS MODERATION */
 router.get("/reviews", protect, verifyAdminEmail, async (req, res) => {
   try {

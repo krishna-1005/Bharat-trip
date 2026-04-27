@@ -157,7 +157,7 @@ function AdminDashboard() {
                    {stats?.recentRegisteredUsers?.map((user: any) => (
                      <div key={user._id} className="flex items-center gap-3">
                         <div className="size-9 rounded-full bg-secondary grid place-items-center font-bold text-sm">
-                           {user.name[0]}
+                           {user.name?.[0] || "U"}
                         </div>
                         <div className="flex-1 min-w-0">
                            <div className="font-bold truncate text-sm">{user.name}</div>

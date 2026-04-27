@@ -1,7 +1,20 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Mail, MapPin, Wallet, Heart, Edit3, ChevronRight, Loader2, Save, X } from "lucide-react";
+import { 
+  Mail, 
+  MapPin, 
+  Wallet, 
+  Heart, 
+  Edit3, 
+  ChevronRight, 
+  Loader2, 
+  Save, 
+  X, 
+  Calendar,
+  ArrowRight,
+  Bookmark
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -24,6 +37,7 @@ function ProfileContent() {
   const navigate = useNavigate();
 
   const [profileData, setProfileData] = useState<any>(null);
+  const [recentTrips, setRecentTrips] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -32,20 +46,31 @@ function ProfileContent() {
 
   useEffect(() => {
     if (!user) return;
-    api.get("/profile")
-      .then(res => {
-        const u = res.data.user;
+    
+    const fetchData = async () => {
+      try {
+        const [profileRes, tripsRes] = await Promise.all([
+          api.get("/profile"),
+          api.get("/trips")
+        ]);
+        
+        const u = profileRes.data.user;
         setProfileData(u);
         setDisplayName(u.name || "");
         setBio(u.bio || "");
-      })
-      .catch(err => {
-        toast.error("Could not load profile");
+        
+        // Handle different possible backend response shapes for trips
+        const trips = tripsRes.data.trips || tripsRes.data || [];
+        setRecentTrips(trips.slice(0, 3));
+      } catch (err) {
+        toast.error("Could not load profile data");
         console.error(err);
-      })
-      .finally(() => {
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, [user]);
 
   const initial = (displayName || user?.email || "?").charAt(0).toUpperCase();
@@ -75,12 +100,6 @@ function ProfileContent() {
     }
   };
 
-  const handleLogout = async () => {
-    await signOut();
-    toast.success("Signed out");
-    navigate("/auth");
-  };
-
   if (loading) {
     return (
       <AppShell>
@@ -93,7 +112,8 @@ function ProfileContent() {
 
   return (
     <AppShell>
-      <div className="px-4 lg:px-10 py-8 max-w-5xl mx-auto">
+      <div className="px-4 lg:px-10 py-8 max-w-5xl mx-auto space-y-8">
+        {/* Profile Header */}
         <div className="rounded-3xl bg-hero-gradient text-white p-8 relative overflow-hidden shadow-pop">
           <div className="absolute inset-0 bg-mesh opacity-50" />
           <div className="relative flex flex-wrap items-center gap-6">
@@ -150,31 +170,54 @@ function ProfileContent() {
           </div>
         </div>
 
-        {(editing || profileData?.bio) && (
-          <div className="mt-6 rounded-3xl bg-card border border-border p-6 shadow-soft">
-            <div className="flex items-center gap-2 font-display font-bold text-lg">About</div>
-            {editing ? (
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                maxLength={500}
-                placeholder="Tell other travellers about yourself..."
-                rows={3}
-                className="mt-3 w-full rounded-xl border border-border bg-surface p-3 text-sm outline-none focus:border-ring resize-none"
-              />
-            ) : (
-              <p className="mt-3 text-sm text-muted-foreground">{profileData?.bio}</p>
-            )}
-          </div>
-        )}
-
-        <div className="mt-6 grid md:grid-cols-3 gap-4">
+        {/* Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Stat label="Trips planned" v={profileData?.stats?.tripsPlanned?.toString() || "0"} />
           <Stat label="Upcoming" v={profileData?.stats?.upcoming?.toString() || "0"} />
           <Stat label="Completed" v={profileData?.stats?.completed?.toString() || "0"} />
         </div>
 
-        <div className="mt-8 grid lg:grid-cols-2 gap-5">
+        {/* Recent Trips Section */}
+        <div className="rounded-3xl bg-card border border-border p-6 shadow-soft">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-display font-bold text-xl flex items-center gap-2">
+              <Bookmark className="size-5 text-primary" /> Recent Trips
+            </h2>
+            <Link to="/trips" className="text-sm font-semibold text-primary hover:gap-2 inline-flex items-center gap-1 transition-all">
+              View all <ArrowRight className="size-4" />
+            </Link>
+          </div>
+          
+          <div className="grid gap-4">
+            {recentTrips.length > 0 ? recentTrips.map((trip) => (
+              <Link 
+                key={trip._id} 
+                to={`/results?planId=${trip._id}`}
+                className="flex items-center gap-4 p-4 rounded-2xl bg-secondary hover:bg-primary-soft transition group"
+              >
+                <div className="size-12 rounded-xl bg-warm-gradient grid place-items-center text-white font-bold shrink-0">
+                  {trip.destination?.charAt(0) || "T"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold truncate">{trip.title}</div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-3 mt-1">
+                    <span className="flex items-center gap-1"><MapPin className="size-3" /> {trip.destination}</span>
+                    <span className="flex items-center gap-1"><Calendar className="size-3" /> {trip.days} days</span>
+                  </div>
+                </div>
+                <ChevronRight className="size-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+              </Link>
+            )) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground text-sm italic">No trips saved yet.</p>
+                <Link to="/trip-type" className="text-primary font-semibold text-sm mt-2 inline-block">Start planning →</Link>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Preferences & Places */}
+        <div className="grid lg:grid-cols-2 gap-5">
           <div className="rounded-3xl bg-card border border-border p-6 shadow-soft">
             <div className="flex items-center gap-2 font-display font-bold text-lg">
               <Heart className="size-4 text-accent" /> Travel preferences

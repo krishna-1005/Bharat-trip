@@ -8,6 +8,7 @@ import { useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "./AuthProvider";
 import { toast } from "sonner";
+import { NotificationBell } from "./NotificationBell";
 
 const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
 
@@ -18,6 +19,7 @@ const nav = [
   { to: "/trips", label: "My Trips", icon: Map },
   { to: "/collaborate", label: "Group", icon: Users },
   { to: "/profile", label: "Profile", icon: User },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 const mobileNav = [
@@ -26,6 +28,7 @@ const mobileNav = [
   { to: "/trip-type", label: "AI Plan", icon: Sparkles },
   { to: "/trips", label: "Trips", icon: Bookmark },
   { to: "/profile", label: "Profile", icon: User },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -151,9 +154,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             New Trip
           </Link>
           <ThemeToggle />
-          <button className="size-10 grid place-items-center rounded-xl border border-border hover:bg-secondary transition" aria-label="Notifications">
-            <Bell className="size-4" />
-          </button>
+          <NotificationBell />
           <div className="relative">
             <button
               onClick={() => setMenuOpen((o) => !o)}
@@ -178,6 +179,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-secondary transition"
                   >
                     <User className="size-4" /> Profile
+                  </Link>
+                  <Link
+                    to="/settings"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-secondary transition"
+                  >
+                    <Settings className="size-4" /> Settings
                   </Link>
                   <button
                     onClick={() => {

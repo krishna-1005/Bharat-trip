@@ -33,23 +33,32 @@ export function MarketingNav() {
 
           {!loading &&
             (user ? (
-              <Link
-                to="/dashboard"
-                className="text-sm font-semibold px-5 py-2 rounded-xl bg-white/10"
-              >
-                Dashboard <ArrowRight className="size-4 inline" />
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/profile"
+                  className="size-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center font-bold text-sm hover:bg-white/20 transition shadow-sm"
+                  title="My Profile"
+                >
+                  {(user.user_metadata?.display_name as string | undefined)?.charAt(0) || user.email?.charAt(0).toUpperCase() || "P"}
+                </Link>
+                <Link
+                  to="/dashboard"
+                  className="text-sm font-semibold px-5 py-2.5 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition flex items-center gap-2"
+                >
+                  Dashboard <ArrowRight className="size-4" />
+                </Link>
+              </div>
             ) : (
               <>
-                <Link to="/auth" className="text-sm px-4 py-2">
+                <Link to="/auth" className="text-sm px-4 py-2 hover:text-white transition">
                   Log in
                 </Link>
 
                 <Link
                   to="/auth?mode=signup"
-                  className="text-sm font-semibold px-4 py-2 rounded-xl bg-warm-gradient"
+                  className="text-sm font-semibold px-5 py-2.5 rounded-xl bg-warm-gradient shadow-cta hover:opacity-95 transition"
                 >
-                  <Sparkles className="size-4 inline" /> Get started
+                  <Sparkles className="size-4 inline mr-1" /> Get started
                 </Link>
               </>
             ))}
@@ -73,7 +82,10 @@ export function MarketingNav() {
               <Link to="/auth?mode=signup" className="block py-2 font-semibold">Get started</Link>
             </>
           ) : (
-            <Link to="/dashboard" className="block py-2 font-semibold">Dashboard</Link>
+            <>
+              <Link to="/profile" className="block py-2 font-semibold border-b border-white/10">My Profile</Link>
+              <Link to="/dashboard" className="block py-2 font-semibold">Dashboard</Link>
+            </>
           )}
         </div>
       )}

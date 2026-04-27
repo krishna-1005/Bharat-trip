@@ -1,8 +1,25 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
-import jaipur from "@/assets/dest-jaipur.jpg";
-import { Edit3, Share2, Copy, MapPin, Calendar, Wallet, Hotel, Plane, Utensils, Camera } from "lucide-react";
+import { destinations, destinationItineraries } from "@/lib/sample-data";
+import { 
+  Edit3, Share2, Copy, MapPin, Calendar, Wallet, Hotel, Plane, 
+  Utensils, Camera, Landmark, Ship, Music, ShoppingBag, Sun, 
+  Sparkles, Coffee, Compass, Heart
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { MapPreview } from "@/components/MapPreview";
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  plane: Plane,
+  utensils: Utensils,
+  camera: Camera,
+  landmark: Landmark,
+  ship: Ship,
+  music: Music,
+  "shopping-bag": ShoppingBag,
+  sun: Sun,
+};
 
 export default function TripDetails() {
   return (
@@ -13,99 +30,245 @@ export default function TripDetails() {
 }
 
 function TripDetailsContent() {
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
+  const [activePlace, setActivePlace] = useState<any>(null);
+
+  const d = useMemo(() => {
+    return destinations.find((dest) => dest.id === id) || destinations[0];
+  }, [id]);
+
+  const itinerary = useMemo(() => {
+    return destinationItineraries[d.id] || destinationItineraries.jaipur;
+  }, [d.id]);
+
   return (
     <AppShell>
-      <div className="relative">
-        <div className="h-[320px] md:h-[400px] relative overflow-hidden">
-          <img src={jaipur} alt="" className="absolute inset-0 w-full h-full object-cover" width={1024} height={1024} />
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/40 to-foreground/10" />
-          <div className="relative max-w-7xl mx-auto px-4 lg:px-10 h-full flex flex-col justify-end pb-8 text-white">
-            <div className="text-xs font-semibold uppercase tracking-widest text-accent">Heritage · Rajasthan</div>
-            <h1 className="mt-2 font-display font-bold text-4xl md:text-5xl tracking-tight">Royal Rajasthan</h1>
-            <div className="mt-3 flex flex-wrap gap-4 text-sm text-white/80">
-              <span className="inline-flex items-center gap-1.5"><MapPin className="size-4" /> Jaipur, India</span>
-              <span className="inline-flex items-center gap-1.5"><Calendar className="size-4" /> Mar 12 – 16</span>
-              <span className="inline-flex items-center gap-1.5"><Wallet className="size-4" /> ₹38,400</span>
+      <div className="relative pb-20">
+        {/* Premium Header */}
+        <div className="h-[400px] md:h-[500px] relative overflow-hidden group">
+          <img 
+            src={d.img} 
+            alt={d.name} 
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-transparent" />
+          
+          <div className="relative max-w-7xl mx-auto px-4 lg:px-10 h-full flex flex-col justify-end pb-12">
+            <div className="flex items-center gap-2 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <span className="px-3 py-1 rounded-full bg-accent/20 backdrop-blur-md border border-accent/30 text-accent text-[10px] font-bold uppercase tracking-widest">
+                {d.tag}
+              </span>
+              <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-[10px] font-bold uppercase tracking-widest">
+                {d.region}
+              </span>
+            </div>
+            
+            <h1 className="font-display font-bold text-5xl md:text-7xl text-white tracking-tighter max-w-3xl animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-100">
+              {d.id === 'jaipur' ? 'Royal Rajasthan' : `${d.name} Escape`}
+            </h1>
+            
+            <div className="mt-6 flex flex-wrap gap-6 text-white/90 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+              <div className="flex items-center gap-2">
+                <div className="size-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10">
+                  <MapPin className="size-4 text-accent" />
+                </div>
+                <span className="text-sm font-medium">{d.name}, India</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="size-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10">
+                  <Calendar className="size-4 text-accent" />
+                </div>
+                <span className="text-sm font-medium">Available Mar – June</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="size-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10">
+                  <Wallet className="size-4 text-accent" />
+                </div>
+                <span className="text-sm font-medium">{d.price} / person</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 lg:px-10 -mt-8">
-          <div className="rounded-2xl bg-card border border-border shadow-pop p-3 flex flex-wrap gap-2">
-            <Link to="/results" className="h-10 px-4 rounded-xl bg-warm-gradient text-white text-sm font-semibold inline-flex items-center gap-1.5 shadow-cta">
-              <Edit3 className="size-4" /> Edit plan
-            </Link>
-            <button className="h-10 px-4 rounded-xl border border-border text-sm font-semibold inline-flex items-center gap-1.5 hover:bg-secondary">
-              <Share2 className="size-4" /> Share
-            </button>
-            <button className="h-10 px-4 rounded-xl border border-border text-sm font-semibold inline-flex items-center gap-1.5 hover:bg-secondary">
-              <Copy className="size-4" /> Duplicate
-            </button>
+        <div className="max-w-7xl mx-auto px-4 lg:px-10 -mt-10 relative z-10">
+          {/* Action Bar */}
+          <div className="rounded-3xl bg-surface/80 backdrop-blur-2xl border border-white/20 shadow-pop p-4 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-2">
+              <Link to="/results" className="h-12 px-6 rounded-2xl bg-warm-gradient text-white text-sm font-bold inline-flex items-center gap-2 shadow-cta hover:scale-[1.02] active:scale-[0.98] transition-all">
+                <Edit3 className="size-4" /> Edit Itinerary
+              </Link>
+              <button className="h-12 px-6 rounded-2xl bg-secondary hover:bg-secondary/80 text-sm font-bold inline-flex items-center gap-2 transition-all">
+                <Share2 className="size-4" /> Share
+              </button>
+              <button className="h-12 px-6 rounded-2xl bg-secondary hover:bg-secondary/80 text-sm font-bold inline-flex items-center gap-2 transition-all">
+                <Copy className="size-4" /> Duplicate
+              </button>
+            </div>
+            <div className="hidden md:flex items-center gap-4 px-4 text-sm font-medium text-muted-foreground">
+              <span className="flex items-center gap-1.5"><Heart className="size-4 text-destructive" /> 1.2k likes</span>
+              <span className="flex items-center gap-1.5"><Compass className="size-4 text-primary" /> 450+ booked</span>
+            </div>
           </div>
 
-          <div className="mt-8 grid lg:grid-cols-3 gap-6 pb-12">
-            <div className="lg:col-span-2 space-y-4">
-              <div className="rounded-3xl border border-border bg-card p-6 shadow-soft">
-                <div className="font-display font-bold text-lg">Overview</div>
-                <p className="text-muted-foreground mt-2 leading-relaxed">
-                  A 5-day heritage immersion through Jaipur's pink streets, palace courtyards and quiet rooftop dinners. Designed for slow-travel pace with a balance of culture, food and rest.
-                </p>
-                <div className="mt-4 grid grid-cols-3 gap-3">
-                  <Stat icon={Calendar} l="Days" v="5" />
-                  <Stat icon={Hotel} l="Stays" v="2" />
-                  <Stat icon={Plane} l="Transfers" v="4" />
+          <div className="mt-12 grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+              {/* Overview Section */}
+              <section className="space-y-6">
+                <div>
+                  <h2 className="font-display font-bold text-3xl tracking-tight">Experience Overview</h2>
+                  <p className="text-muted-foreground mt-3 text-lg leading-relaxed max-w-3xl">
+                    A {d.days} {d.tag.toLowerCase()} immersion through {d.name}'s most iconic spots. 
+                    Curated for travelers who value authenticity, slow-paced exploration, and premium local experiences.
+                  </p>
                 </div>
-              </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <StatCard icon={Calendar} label="Duration" value={d.days} color="bg-blue-500/10 text-blue-600" />
+                  <StatCard icon={Hotel} label="Stays" value="Luxury Haveli" color="bg-purple-500/10 text-purple-600" />
+                  <StatCard icon={Plane} label="Transfers" value="Included" color="bg-emerald-500/10 text-emerald-600" />
+                  <StatCard icon={Sparkles} label="Style" value="Curated AI" color="bg-amber-500/10 text-amber-600" />
+                </div>
+              </section>
 
-              <div className="rounded-3xl border border-border bg-card p-6 shadow-soft">
-                <div className="font-display font-bold text-lg">Day by day</div>
-                <div className="mt-4 space-y-3">
+              {/* Highlights Section */}
+              <section className="rounded-3xl bg-secondary/30 p-8 border border-border">
+                <h3 className="font-display font-bold text-xl mb-6 flex items-center gap-2">
+                  <Coffee className="size-5 text-accent" /> Quick Highlights
+                </h3>
+                <div className="grid md:grid-cols-2 gap-6">
                   {[
-                    { d: 1, t: "Arrival & Old City", icon: Camera },
-                    { d: 2, t: "Forts & Palaces", icon: Hotel },
-                    { d: 3, t: "Markets & Crafts", icon: Utensils },
-                    { d: 4, t: "Day trip to Pushkar", icon: Plane },
-                    { d: 5, t: "Departure", icon: Plane },
-                  ].map((d) => (
-                    <div key={d.d} className="flex items-center gap-4 rounded-2xl bg-secondary p-4 hover:bg-primary-soft transition">
-                      <div className="size-10 rounded-xl bg-warm-gradient text-white grid place-items-center font-bold text-sm">D{d.d}</div>
-                      <div className="flex-1">
-                        <div className="font-semibold">{d.t}</div>
-                        <div className="text-xs text-muted-foreground">3 stops · ~7 hrs</div>
+                    "Private guided tours of major landmarks",
+                    "Authentic local cuisine tasting experiences",
+                    "Premium stays in heritage properties",
+                    "All intra-city transfers pre-arranged"
+                  ].map((h, i) => (
+                    <div key={i} className="flex gap-3">
+                      <div className="size-6 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
+                        <Sparkles className="size-3 text-accent" />
                       </div>
-                      <d.icon className="size-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground/80">{h}</span>
                     </div>
                   ))}
                 </div>
-              </div>
+              </section>
+
+              {/* Itinerary Section */}
+              <section className="space-y-6">
+                <h2 className="font-display font-bold text-3xl tracking-tight">Day by Day Itinerary</h2>
+                <div className="space-y-6">
+                  {itinerary.map((day) => (
+                    <div key={day.day} className="group rounded-3xl bg-card border border-border shadow-soft overflow-hidden transition-all hover:border-accent/30">
+                       <div className="p-6 bg-secondary/20 flex items-center justify-between border-b border-border">
+                        <div className="flex items-center gap-4">
+                          <div className="size-12 rounded-2xl bg-warm-gradient text-white grid place-items-center font-display font-bold shadow-cta">
+                            D{day.day}
+                          </div>
+                          <div>
+                            <div className="font-display font-bold text-xl">{day.title}</div>
+                            <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Morning · Afternoon · Evening</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-6 pt-2 space-y-6">
+                        <div className="relative ml-6 pl-10 border-l-2 border-dashed border-border/50 space-y-8 py-4">
+                          {day.items.map((it, i) => {
+                            const Icon = iconMap[it.icon] || MapPin;
+                            const isCurrentlyActive = activePlace && (it.place === (activePlace.name || activePlace.place));
+                            
+                            return (
+                              <div key={i} className="relative">
+                                <div className={`absolute -left-[51px] top-0 size-10 rounded-2xl flex items-center justify-center transition-all duration-300 border ${
+                                  isCurrentlyActive ? 'bg-accent border-accent text-white shadow-pop' : 'bg-card border-border text-primary'
+                                }`}>
+                                  <Icon className="size-5" />
+                                </div>
+                                <div className={`rounded-2xl p-5 transition-all duration-300 ${
+                                  isCurrentlyActive ? 'bg-accent/5 border border-accent/20 ring-1 ring-accent/10' : 'bg-secondary/40 hover:bg-secondary border border-transparent'
+                                }`}>
+                                  <div className="flex items-center justify-between">
+                                    <div className={`text-xs font-bold uppercase tracking-widest ${isCurrentlyActive ? 'text-accent' : 'text-primary'}`}>
+                                      {it.time}
+                                    </div>
+                                    <button 
+                                      onClick={() => setActivePlace(it)}
+                                      className={`text-[10px] font-extrabold uppercase tracking-widest px-2 py-1 rounded-md transition-all ${
+                                        isCurrentlyActive 
+                                          ? "bg-accent text-white" 
+                                          : "bg-background text-muted-foreground hover:bg-primary hover:text-white"
+                                      }`}
+                                    >
+                                      {isCurrentlyActive ? "Active" : "Focus on Map"}
+                                    </button>
+                                  </div>
+                                  <div className="font-display font-bold text-lg mt-1">{it.place}</div>
+                                  <div className="text-sm text-muted-foreground leading-relaxed mt-1">{it.desc}</div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
 
-            <aside className="space-y-4">
-              <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-soft">
-                <div className="aspect-square bg-secondary relative">
-                  <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full">
-                    <rect width="300" height="300" fill="oklch(0.96 0.01 250)" />
-                    <path d="M30 250 Q 80 180 150 160 T 270 60" stroke="oklch(0.7 0.2 42)" strokeWidth="3" fill="none" strokeDasharray="6 6" />
-                    {[[30,250],[150,160],[270,60]].map(([x,y],i) => (
-                      <circle key={i} cx={x} cy={y} r="10" fill="white" stroke="oklch(0.32 0.16 268)" strokeWidth="3" />
-                    ))}
-                  </svg>
-                </div>
-                <div className="p-4 text-sm text-muted-foreground">Interactive map · 12 stops</div>
-              </div>
-
-              <div className="rounded-3xl border border-border bg-card p-5 shadow-soft">
-                <div className="font-display font-bold">Stay suggestions</div>
-                <div className="mt-3 space-y-3">
-                  {["Samode Haveli", "The Oberoi Rajvilas", "Bissau Palace"].map((h, i) => (
-                    <div key={h} className="flex items-center gap-3 rounded-xl bg-secondary p-3">
-                      <div className="size-10 rounded-lg bg-warm-gradient" />
-                      <div className="flex-1">
-                        <div className="font-semibold text-sm">{h}</div>
-                        <div className="text-xs text-muted-foreground">Heritage · ₹{6+i},200/night</div>
+            {/* Sidebar Sticky Content */}
+            <aside className="space-y-6">
+              <div className="sticky top-24 space-y-6">
+                {/* Real Map Card */}
+                <div className="rounded-[2.5rem] border border-border bg-card overflow-hidden shadow-pop h-[450px] relative group">
+                  <MapPreview 
+                    itinerary={itinerary} 
+                    activePlace={activePlace} 
+                    onMarkerClick={(p) => setActivePlace(p)} 
+                  />
+                  <div className="absolute top-4 right-4 z-10">
+                    <div className="px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-widest">
+                      Interactive Map
+                    </div>
+                  </div>
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[80%] z-10">
+                    <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-3 shadow-pop border border-white flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="size-8 rounded-xl bg-primary flex items-center justify-center text-white">
+                          <Compass className="size-4" />
+                        </div>
+                        <div className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                          {itinerary.reduce((acc, day) => acc + day.items.length, 0)} Curated Stops
+                        </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                </div>
+
+                {/* Stay Suggestions */}
+                <div className="rounded-[2.5rem] border border-border bg-card p-6 shadow-soft">
+                  <h3 className="font-display font-bold text-lg mb-4 flex items-center justify-between">
+                    Recommended Stays
+                    <Link to="/explore" className="text-[10px] text-accent font-bold uppercase hover:underline">View All</Link>
+                  </h3>
+                  <div className="space-y-3">
+                    {["The Heritage Palace", "The Luxury Boutique", "Royal Haveli"].map((h, i) => (
+                      <div key={h} className="group flex items-center gap-4 rounded-3xl bg-secondary/50 p-3 hover:bg-secondary transition-all cursor-pointer border border-transparent hover:border-border">
+                        <div className="size-16 rounded-2xl bg-warm-gradient shrink-0 shadow-soft group-hover:scale-105 transition-transform overflow-hidden relative">
+                           <div className="absolute inset-0 bg-black/20" />
+                           <Hotel className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/50 size-6" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-bold text-sm">{h}</div>
+                          <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">{d.tag} Property</div>
+                          <div className="text-sm font-bold text-primary mt-1">₹{6+i},200<span className="text-[10px] font-normal text-muted-foreground ml-1">/night</span></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="w-full mt-6 py-3 rounded-2xl bg-secondary font-bold text-sm hover:bg-border transition-colors">
+                    Compare All Hotels
+                  </button>
                 </div>
               </div>
             </aside>
@@ -116,12 +279,14 @@ function TripDetailsContent() {
   );
 }
 
-function Stat({ icon: Icon, l, v }: { icon: React.ComponentType<{ className?: string }>; l: string; v: string }) {
+function StatCard({ icon: Icon, label, value, color }: { icon: any; label: string; value: string, color: string }) {
   return (
-    <div className="rounded-2xl bg-secondary p-4">
-      <Icon className="size-4 text-primary" />
-      <div className="mt-2 font-display font-bold text-xl">{v}</div>
-      <div className="text-xs text-muted-foreground">{l}</div>
+    <div className="rounded-3xl bg-card border border-border p-5 shadow-soft hover:-translate-y-1 transition-transform">
+      <div className={`size-10 rounded-2xl ${color} flex items-center justify-center mb-4`}>
+        <Icon className="size-5" />
+      </div>
+      <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{label}</div>
+      <div className="text-base font-display font-bold text-foreground mt-0.5">{value}</div>
     </div>
   );
 }
