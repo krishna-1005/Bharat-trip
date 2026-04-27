@@ -1,23 +1,21 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useState } from "react";
 import { Bookmark, Plus, MapPin, Calendar, Loader2 } from "lucide-react";
 import api from "@/lib/api";
 
-export const Route = createFileRoute("/trips")({
-  head: () => ({
-    meta: [
-      { title: "My trips — GoTripo" },
-      { name: "description", content: "All your saved and planned trips in one place." },
-    ],
-  }),
-  component: () => (<ProtectedRoute><Trips /></ProtectedRoute>),
-});
-
 const tabs = ["Upcoming", "Drafts", "Saved", "Past"];
 
-function Trips() {
+export default function Trips() {
+  return (
+    <ProtectedRoute>
+      <TripsContent />
+    </ProtectedRoute>
+  );
+}
+
+function TripsContent() {
   const [trips, setTrips] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

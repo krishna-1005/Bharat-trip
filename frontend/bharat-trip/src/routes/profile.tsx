@@ -1,31 +1,25 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Settings, Mail, MapPin, Wallet, Heart, Edit3, ChevronRight, Loader2, LogOut, Save, X } from "lucide-react";
+import { Mail, MapPin, Wallet, Heart, Edit3, ChevronRight, Loader2, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { useAuth } from "@/components/AuthProvider";
 
-export const Route = createFileRoute("/profile")({
-  head: () => ({
-    meta: [
-      { title: "Profile — GoTripo" },
-      { name: "description", content: "Your travel preferences, saved trips and settings." },
-    ],
-  }),
-  component: () => (
-    <ProtectedRoute>
-      <Profile />
-    </ProtectedRoute>
-  ),
-});
-
 const displayNameSchema = z.string().trim().min(1, "Name is required").max(80);
 const bioSchema = z.string().trim().max(500, "Bio must be under 500 characters");
 
-function Profile() {
+export default function Profile() {
+  return (
+    <ProtectedRoute>
+      <ProfileContent />
+    </ProtectedRoute>
+  );
+}
+
+function ProfileContent() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -84,7 +78,7 @@ function Profile() {
   const handleLogout = async () => {
     await signOut();
     toast.success("Signed out");
-    navigate({ to: "/auth" });
+    navigate("/auth");
   };
 
   if (loading) {

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useState } from "react";
@@ -16,16 +16,6 @@ import {
 import api, { generatePlan } from "@/lib/api";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/planner-single")({
-  head: () => ({
-    meta: [
-      { title: "Single trip planner — GoTripo" },
-      { name: "description", content: "Plan a single-destination trip with AI." },
-    ],
-  }),
-  component: () => (<ProtectedRoute><PlannerSingle /></ProtectedRoute>),
-});
-
 const styles = [
   { id: "luxury", label: "Luxury", icon: Sparkles },
   { id: "backpacking", label: "Backpacking", icon: Tent },
@@ -33,7 +23,15 @@ const styles = [
   { id: "adventure", label: "Adventure", icon: Mountain },
 ];
 
-function PlannerSingle() {
+export default function PlannerSingle() {
+  return (
+    <ProtectedRoute>
+      <PlannerSingleContent />
+    </ProtectedRoute>
+  );
+}
+
+function PlannerSingleContent() {
   const [destination, setDestination] = useState("Delhi");
   const [budget, setBudget] = useState(35000);
   const [style, setStyle] = useState("luxury");
@@ -85,7 +83,7 @@ function PlannerSingle() {
         pace: "balanced"
       });
       const planId = plan._id || plan.id;
-      navigate({ to: "/results", search: { planId } as any });
+      navigate(`/results?planId=${planId}`);
     } catch (err: any) {
       toast.error(err.message || "Failed to generate plan");
     } finally {

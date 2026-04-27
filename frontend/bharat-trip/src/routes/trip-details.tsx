@@ -1,21 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import jaipur from "@/assets/dest-jaipur.jpg";
 import { Edit3, Share2, Copy, MapPin, Calendar, Wallet, Hotel, Plane, Utensils, Camera } from "lucide-react";
 
-export const Route = createFileRoute("/trip-details")({
-  head: () => ({
-    meta: [
-      { title: "Trip details — GoTripo" },
-      { name: "description", content: "Full itinerary, stays, logistics and map." },
-      { property: "og:image", content: "/src/assets/dest-jaipur.jpg" },
-    ],
-  }),
-  component: () => (<ProtectedRoute><TripDetails /></ProtectedRoute>),
-});
+export default function TripDetails() {
+  return (
+    <ProtectedRoute>
+      <TripDetailsContent />
+    </ProtectedRoute>
+  );
+}
 
-function TripDetails() {
+function TripDetailsContent() {
   return (
     <AppShell>
       <div className="relative">

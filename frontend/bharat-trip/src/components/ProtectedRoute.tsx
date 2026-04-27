@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from "react";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -9,12 +9,10 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!loading && !user) {
-      // Use window.location to get raw strings for search and hash 
-      // because TanStack Router's location.search is a parsed object.
-      const redirect = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-      navigate({ to: "/auth", search: { redirect } as any, replace: true });
+      const redirect = `${location.pathname}${location.search}${location.hash}`;
+      navigate(`/auth?redirect=${encodeURIComponent(redirect)}`, { replace: true });
     }
-  }, [user, loading, navigate, location.pathname]);
+  }, [user, loading, navigate, location]);
 
   if (loading || !user) {
     return (

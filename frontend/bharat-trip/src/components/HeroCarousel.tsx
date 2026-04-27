@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import ladakh from "@/assets/dest-ladakh.jpg";

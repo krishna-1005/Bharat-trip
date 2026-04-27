@@ -1,5 +1,5 @@
 import { useAuth } from "./AuthProvider";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Loader2, ShieldAlert } from "lucide-react";
 import api from "@/lib/api";
@@ -15,7 +15,7 @@ export function AdminProtectedRoute({ children }: { children: React.ReactNode })
     if (authLoading) return;
 
     if (!user) {
-      navigate({ to: "/admin/login" });
+      navigate("/admin/login");
       return;
     }
 
@@ -59,7 +59,7 @@ export function AdminProtectedRoute({ children }: { children: React.ReactNode })
             </p>
           </div>
           <button 
-            onClick={() => navigate({ to: "/" })}
+            onClick={() => navigate("/")}
             className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-bold shadow-lg"
           >
             Return to GoTripo

@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -10,7 +10,6 @@ import {
   ChevronLeft,
   Menu,
   Bell,
-  Search,
   Database
 } from "lucide-react";
 import { useState } from "react";
@@ -37,7 +36,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const handleSignOut = async () => {
     await signOut();
     toast.success("Admin signed out");
-    navigate({ to: "/admin/login" });
+    navigate("/admin/login");
   };
 
   return (
@@ -67,7 +66,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             return (
               <Link
                 key={n.to}
-                to={n.to as any}
+                to={n.to}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                   active
                     ? "bg-primary text-primary-foreground shadow-md"
@@ -133,7 +132,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               {adminNav.map((n) => (
                 <Link
                   key={n.to}
-                  to={n.to as any}
+                  to={n.to}
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground hover:bg-secondary"
                 >

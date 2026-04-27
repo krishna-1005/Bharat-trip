@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { useSearchParams } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { MapPreview } from "@/components/MapPreview";
@@ -6,34 +6,27 @@ import { sampleItinerary } from "@/lib/sample-data";
 import { useEffect, useState } from "react";
 import {
   Edit3, Share2, Download, MapPin, Plane, Utensils, Camera, Landmark, Ship, Music,
-  ShoppingBag, ChevronDown, Sparkles, Wallet, Calendar, Hotel, Receipt, Loader2,
+  ShoppingBag, ChevronDown, Sparkles, Wallet, Calendar, Receipt, Loader2,
 } from "lucide-react";
-import { z } from "zod";
 import api from "@/lib/api";
 import { toast } from "sonner";
-
-const resultsSearchSchema = z.object({
-  planId: z.string().optional(),
-});
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   plane: Plane, utensils: Utensils, camera: Camera, landmark: Landmark,
   ship: Ship, music: Music, "shopping-bag": ShoppingBag,
 };
 
-export const Route = createFileRoute("/results")({
-  validateSearch: resultsSearchSchema,
-  head: () => ({
-    meta: [
-      { title: "Your AI itinerary — GoTripo" },
-      { name: "description", content: "AI-generated day-by-day itinerary, costs and map." },
-    ],
-  }),
-  component: () => (<ProtectedRoute><Results /></ProtectedRoute>),
-});
+export default function Results() {
+  return (
+    <ProtectedRoute>
+      <ResultsContent />
+    </ProtectedRoute>
+  );
+}
 
-function Results() {
-  const { planId } = useSearch({ from: "/results" });
+function ResultsContent() {
+  const [searchParams] = useSearchParams();
+  const planId = searchParams.get("planId");
   const [plan, setPlan] = useState<any>(null);
   const [loading, setLoading] = useState(!!planId);
   const [open, setOpen] = useState<number | null>(1);

@@ -1,24 +1,22 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { destinations } from "@/lib/sample-data";
 import { Sparkles, Compass, Users, ArrowRight, MapPin, Calendar, TrendingUp, Plus } from "lucide-react";
 
-export const Route = createFileRoute("/dashboard")({
-  head: () => ({
-    meta: [
-      { title: "Dashboard — GoTripo" },
-      { name: "description", content: "Your trips, AI suggestions and trending destinations in one place." },
-    ],
-  }),
-  component: () => (<ProtectedRoute><Dashboard /></ProtectedRoute>),
-});
+export default function Dashboard() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
+  );
+}
 
 const recent = destinations.slice(0, 4);
 const suggested = destinations.slice(2, 6);
 const trending = destinations.slice(1, 5);
 
-function Dashboard() {
+function DashboardContent() {
   return (
     <AppShell>
       <div className="px-4 lg:px-10 py-8 max-w-7xl mx-auto space-y-12">

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Lock, Mail, ArrowRight, ChevronLeft, ShieldCheck, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -6,19 +6,9 @@ import { auth } from "@/firebase";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useAuth } from "@/components/AuthProvider";
 
-export const Route = createFileRoute("/admin/login")({
-  head: () => ({
-    meta: [
-      { title: "Admin Portal — GoTripo" },
-      { name: "description", content: "Administrative access for system management." },
-    ],
-  }),
-  component: AdminLoginPage,
-});
-
 const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
 
-function AdminLoginPage() {
+export default function AdminLoginPage() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   
@@ -29,7 +19,7 @@ function AdminLoginPage() {
   useEffect(() => {
     if (!authLoading && user) {
         if (ADMIN_EMAILS.includes(user.email?.toLowerCase() || "")) {
-            navigate({ to: "/admin" });
+            navigate("/admin");
         }
     }
   }, [user, authLoading, navigate]);
@@ -47,7 +37,7 @@ function AdminLoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast.success("Welcome, Administrator.");
-      navigate({ to: "/admin" });
+      navigate("/admin");
     } catch (err: any) {
       toast.error(err.message || "Authentication failed");
     } finally {
@@ -64,7 +54,7 @@ function AdminLoginPage() {
       
       if (ADMIN_EMAILS.includes(result.user.email?.toLowerCase() || "")) {
           toast.success("Identity verified.");
-          navigate({ to: "/admin" });
+          navigate("/admin");
       } else {
           toast.error("This account is not authorized for administrative access.");
           await auth.signOut();

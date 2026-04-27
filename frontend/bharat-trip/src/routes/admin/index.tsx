@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { AdminProtectedRoute } from "@/components/AdminProtectedRoute";
 import { AdminShell } from "@/components/AdminShell";
 import { useEffect, useState } from "react";
@@ -16,13 +15,13 @@ import {
   Loader2
 } from "lucide-react";
 
-export const Route = createFileRoute("/admin/")({
-  component: () => (
+export default function AdminDashboardPage() {
+  return (
     <AdminProtectedRoute>
       <AdminDashboard />
     </AdminProtectedRoute>
-  ),
-});
+  );
+}
 
 function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);

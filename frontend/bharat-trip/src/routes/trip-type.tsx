@@ -1,19 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { MapPin, Route as RouteIcon, ArrowRight, Sparkles } from "lucide-react";
 
-export const Route = createFileRoute("/trip-type")({
-  head: () => ({
-    meta: [
-      { title: "Choose trip type — GoTripo" },
-      { name: "description", content: "Plan a single-destination escape or a multi-city journey." },
-    ],
-  }),
-  component: () => (<ProtectedRoute><TripType /></ProtectedRoute>),
-});
+export default function TripType() {
+  return (
+    <ProtectedRoute>
+      <TripTypeContent />
+    </ProtectedRoute>
+  );
+}
 
-function TripType() {
+function TripTypeContent() {
   return (
     <AppShell>
       <div className="px-4 lg:px-10 py-12 max-w-6xl mx-auto">

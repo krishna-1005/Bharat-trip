@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Compass, Sparkles, Map, User, Search, Bell, Plus,
   LayoutGrid, Users, Bookmark, Settings, ChevronLeft, Menu, LogOut,
@@ -48,7 +48,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const handleSignOut = async () => {
     await signOut();
     toast.success("Signed out");
-    navigate({ to: "/auth" });
+    navigate("/auth");
   };
 
   const isAdmin = user && ADMIN_EMAILS.includes(user.email?.toLowerCase() || "");

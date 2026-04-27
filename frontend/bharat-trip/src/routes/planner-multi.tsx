@@ -1,22 +1,20 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
-import { Plus, X, ArrowRight, Plane, Train, Car, Sparkles, Clock, MoveHorizontal, Loader2 } from "lucide-react";
+import { X, ArrowRight, Plane, Train, Car, Sparkles, Clock, MoveHorizontal, Loader2 } from "lucide-react";
 import { useState } from "react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/planner-multi")({
-  head: () => ({
-    meta: [
-      { title: "Multi-city planner — GoTripo" },
-      { name: "description", content: "Build a multi-city journey with smart routing." },
-    ],
-  }),
-  component: () => (<ProtectedRoute><PlannerMulti /></ProtectedRoute>),
-});
+export default function PlannerMulti() {
+  return (
+    <ProtectedRoute>
+      <PlannerMultiContent />
+    </ProtectedRoute>
+  );
+}
 
-function PlannerMulti() {
+function PlannerMultiContent() {
   const [stops, setStops] = useState(["Bengaluru", "Mysuru", "Coorg"]);
   const [newStop, setNewStop] = useState("");
   const [mode, setMode] = useState("car");
@@ -37,8 +35,6 @@ function PlannerMulti() {
     }
     setLoading(true);
     try {
-      // We'll use the same generation endpoint but pass multiple cities
-      // The backend will be updated to handle 'cities' array
       const res = await api.post("/plan/generate", {
         cities: stops,
         city: stops[0], // fallback for old code
@@ -52,7 +48,7 @@ function PlannerMulti() {
       
       const plan = res.data.plan;
       const planId = plan._id || plan.id;
-      navigate({ to: "/results", search: { planId } as any });
+      navigate(`/results?planId=${planId}`);
     } catch (err: any) {
       toast.error(err.message || "Failed to generate multi-city plan");
     } finally {

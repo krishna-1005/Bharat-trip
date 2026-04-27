@@ -1,24 +1,8 @@
-import { createFileRoute, useSearch } from "@tanstack/react-router";
+import { useSearchParams } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { Polls } from "@/components/Polls";
-import { Send, Plus, MapPin, Check, Calendar } from "lucide-react";
-import { z } from "zod";
-
-const collaborateSearchSchema = z.object({
-  tripId: z.string().optional(),
-});
-
-export const Route = createFileRoute("/collaborate")({
-  validateSearch: collaborateSearchSchema,
-  head: () => ({
-    meta: [
-      { title: "Group planning — GoTripo" },
-      { name: "description", content: "Vote on destinations and dates with your travel crew." },
-    ],
-  }),
-  component: () => (<ProtectedRoute><Collab /></ProtectedRoute>),
-});
+import { Send, Plus } from "lucide-react";
 
 const people = [
   { name: "Aarav", color: "bg-warm-gradient" },
@@ -34,8 +18,17 @@ const messages = [
   { who: "Aarav", text: "Let's poll it. GoTripo will pull together both itineraries either way.", time: "10:45" },
 ];
 
+export default function Collaborate() {
+  return (
+    <ProtectedRoute>
+      <Collab />
+    </ProtectedRoute>
+  );
+}
+
 function Collab() {
-  const { tripId } = useSearch({ from: "/collaborate" });
+  const [searchParams] = useSearchParams();
+  const tripId = searchParams.get("tripId");
 
   return (
     <AppShell>
@@ -48,7 +41,7 @@ function Collab() {
           <div className="flex items-center gap-3">
             <div className="flex -space-x-2">
               {people.map((p) => (
-                <div key={p.name} className={`size-10 rounded-full ${p.color} text-white grid place-items-center font-bold text-sm border-2 border-background`}>
+                <div key={p.name} className={`size-10 rounded-full ${p.color} text-white grid place-items-center font-bold text-sm border-2 border-background`} title={p.name}>
                   {p.name[0]}
                 </div>
               ))}
@@ -62,7 +55,7 @@ function Collab() {
         <div className="mt-8 grid lg:grid-cols-[1fr_380px] gap-8">
           {/* Polls Section */}
           <div className="space-y-8">
-            <Polls tripId={tripId} />
+            <Polls tripId={tripId || ""} />
           </div>
 
           {/* Chat */}

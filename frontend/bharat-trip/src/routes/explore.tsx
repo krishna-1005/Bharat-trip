@@ -1,18 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { destinations } from "@/lib/sample-data";
 import { Search, SlidersHorizontal, MapPin, Star, ImageOff } from "lucide-react";
 import { useMemo, useState } from "react";
-
-export const Route = createFileRoute("/explore")({
-  head: () => ({
-    meta: [
-      { title: "Explore — GoTripo" },
-      { name: "description", content: "Browse curated Indian destinations by mood, budget and season." },
-    ],
-  }),
-  component: Explore,
-});
 
 const cats = ["All", "Beaches", "Spiritual", "Mountains", "Heritage", "Nature", "Hills"];
 
@@ -47,7 +37,7 @@ function DestinationImage({ src, alt }: { src?: string; alt: string }) {
   );
 }
 
-function Explore() {
+export default function Explore() {
   const [cat, setCat] = useState("All");
   const [query, setQuery] = useState("");
 

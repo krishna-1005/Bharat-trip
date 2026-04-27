@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MarketingNav } from "@/components/MarketingNav";
 import { HeroCarousel } from "@/components/HeroCarousel";
@@ -11,18 +11,6 @@ import goa from "@/assets/dest-goa.jpg";
 import jaipur from "@/assets/dest-jaipur.jpg";
 import rishikesh from "@/assets/dest-rishikesh.jpg";
 import kerala from "@/assets/dest-kerala.jpg";
-
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "GoTripo — Plan Smarter. Travel Better." },
-      { name: "description", content: "AI-powered personalized travel planning across India. Itineraries, group polls, and budgets — built in minutes." },
-      { property: "og:title", content: "GoTripo — Plan Smarter. Travel Better." },
-      { property: "og:description", content: "AI-powered travel planning across India." },
-    ],
-  }),
-  component: Landing,
-});
 
 const features = [
   { icon: Sparkles, title: "AI Itinerary", desc: "A senior travel planner in your pocket. Day-by-day plans tuned to your style in seconds." },
@@ -179,3 +167,5 @@ function Landing() {
     </div>
   );
 }
+
+export default Landing;

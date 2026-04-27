@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Sparkles, Mail, Lock, ArrowRight, ChevronLeft, User as UserIcon, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -15,30 +15,16 @@ import {
 } from "firebase/auth";
 import { useAuth } from "@/components/AuthProvider";
 
-const searchSchema = z.object({
-  redirect: z.string().optional(),
-});
-
-export const Route = createFileRoute("/auth")({
-  validateSearch: searchSchema,
-  head: () => ({
-    meta: [
-      { title: "Sign in — GoTripo" },
-      { name: "description", content: "Sign in or create your GoTripo account to start planning trips with AI." },
-    ],
-  }),
-  component: AuthPage,
-});
-
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 const passwordSchema = z.string().min(8, "Password must be at least 8 characters").max(72);
 const nameSchema = z.string().trim().min(1, "Name is required").max(80);
 
 type Mode = "signin" | "signup";
 
-function AuthPage() {
+export default function AuthPage() {
   const navigate = useNavigate();
-  const search = useSearch({ from: "/auth" });
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get("redirect");
   const { user, loading: authLoading } = useAuth();
 
   const [mode, setMode] = useState<Mode>("signin");
@@ -50,9 +36,9 @@ function AuthPage() {
   // Redirect away if already signed in
   useEffect(() => {
     if (!authLoading && user) {
-      navigate({ to: (search.redirect ?? "/dashboard") as any });
+      navigate(redirect ?? "/dashboard");
     }
-  }, [user, authLoading, navigate, search.redirect]);
+  }, [user, authLoading, navigate, redirect]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
