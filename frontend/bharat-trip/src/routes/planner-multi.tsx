@@ -1,25 +1,52 @@
 import { useNavigate } from "react-router-dom";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { X, ArrowRight, Plane, Train, Car, Sparkles, Clock, MoveHorizontal, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function PlannerMulti() {
   return (
-    <ProtectedRoute>
-      <PlannerMultiContent />
-    </ProtectedRoute>
+    <PlannerMultiContent />
   );
 }
 
 function PlannerMultiContent() {
+  const { user, loading: authLoading } = useAuth();
   const [stops, setStops] = useState(["Bengaluru", "Mysuru", "Coorg"]);
   const [newStop, setNewStop] = useState("");
   const [mode, setMode] = useState("car");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Auto-trigger generation if we just logged in and have pending data
+  useEffect(() => {
+    if (authLoading || !user) return;
+    
+    const pending = sessionStorage.getItem("pending_plan_multi");
+    if (pending) {
+      sessionStorage.removeItem("pending_plan_multi");
+      const data = JSON.parse(pending);
+      setStops(data.cities);
+      setMode(data.mode);
+      
+      const runGeneration = async () => {
+        setLoading(true);
+        try {
+          const res = await api.post("/plan/generate", data);
+          const plan = res.data.plan;
+          const planId = plan._id || plan.id;
+          navigate(`/results?planId=${planId}`);
+        } catch (err: any) {
+          toast.error(err.message || "Failed to generate multi-city plan");
+        } finally {
+          setLoading(false);
+        }
+      };
+      runGeneration();
+    }
+  }, [user, authLoading, navigate]);
 
   const handleAddStop = () => {
     if (newStop.trim()) {
@@ -33,18 +60,30 @@ function PlannerMultiContent() {
       toast.error("Please add at least 2 destinations for a multi-city trip");
       return;
     }
+
+    const planData = {
+      cities: stops,
+      city: stops[0], // fallback for old code
+      days: stops.length * 2, // Estimate 2 days per city
+      budget: 50000,
+      interests: ["Sightseeing", "Nature"],
+      travelerType: "friends",
+      pace: "balanced",
+      isMultiCity: true,
+      mode: mode
+    };
+
+    if (!user) {
+      // Save data and redirect to auth
+      sessionStorage.setItem("pending_plan_multi", JSON.stringify(planData));
+      toast.info("Please sign in to save and view your journey");
+      navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await api.post("/plan/generate", {
-        cities: stops,
-        city: stops[0], // fallback for old code
-        days: stops.length * 2, // Estimate 2 days per city
-        budget: 50000,
-        interests: ["Sightseeing", "Nature"],
-        travelerType: "friends",
-        pace: "balanced",
-        isMultiCity: true
-      });
+      const res = await api.post("/plan/generate", planData);
       
       const plan = res.data.plan;
       const planId = plan._id || plan.id;

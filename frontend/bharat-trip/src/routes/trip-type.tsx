@@ -5,9 +5,7 @@ import { MapPin, Route as RouteIcon, ArrowRight, Sparkles } from "lucide-react";
 
 export default function TripType() {
   return (
-    <ProtectedRoute>
-      <TripTypeContent />
-    </ProtectedRoute>
+    <TripTypeContent />
   );
 }
 

@@ -41,16 +41,14 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default function Results() {
   return (
-    <ProtectedRoute>
-      <ResultsContent />
-    </ProtectedRoute>
+    <ResultsContent />
   );
 }
 
 function ResultsContent() {
   const [searchParams] = useSearchParams();
   const planId = searchParams.get("planId");
-  const { user: firebaseUser } = useAuth();
+  const { user: firebaseUser, loading: authLoading } = useAuth();
   const [plan, setPlan] = useState<any>(null);
   const [loading, setLoading] = useState(!!planId);
   const [saving, setSaving] = useState(false);
@@ -60,6 +58,8 @@ function ResultsContent() {
   const [mongoUserId, setMongoUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading || !firebaseUser) return;
+    
     // Fetch user profile to get MongoDB ID
     api
       .get("/profile")
@@ -67,7 +67,7 @@ function ResultsContent() {
         setMongoUserId(res.data.user._id);
       })
       .catch((err) => console.error("Failed to fetch profile", err));
-  }, [firebaseUser]);
+  }, [firebaseUser, authLoading]);
 
   useEffect(() => {
     if (planId) {

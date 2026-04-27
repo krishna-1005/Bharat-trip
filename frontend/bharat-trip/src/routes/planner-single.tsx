@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useState } from "react";
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import api, { generatePlan } from "@/lib/api";
 import { toast } from "sonner";
+import { useAuth } from "@/components/AuthProvider";
 
 const styles = [
   { id: "luxury", label: "Luxury", icon: Sparkles },
@@ -25,20 +26,57 @@ const styles = [
 
 export default function PlannerSingle() {
   return (
-    <ProtectedRoute>
-      <PlannerSingleContent />
-    </ProtectedRoute>
+    <PlannerSingleContent />
   );
 }
 
 function PlannerSingleContent() {
-  const [destination, setDestination] = useState("Delhi");
+  const { user, loading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const initialDest = searchParams.get("dest") || "Delhi";
+  const initialDays = parseInt(searchParams.get("days") || "5");
+
+  const [destination, setDestination] = useState(initialDest);
+  const [days, setDays] = useState(initialDays);
   const [budget, setBudget] = useState(35000);
   const [style, setStyle] = useState("luxury");
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [fetchingPreview, setFetchingPreview] = useState(false);
-  const navigate = useNavigate();
+
+  // Auto-trigger generation if we just logged in and have pending data
+  useEffect(() => {
+    if (authLoading || !user) return;
+    
+    const pending = sessionStorage.getItem("pending_plan_single");
+    if (pending) {
+      sessionStorage.removeItem("pending_plan_single");
+      const data = JSON.parse(pending);
+      // Restore state if needed, but the data is already in the function call below
+      setDestination(data.city);
+      setDays(data.days);
+      setBudget(data.budget);
+      setStyle(data.travelerType);
+      
+      // We can't call handleGenerate directly because it needs the latest state
+      // but we can pass the data to a helper or just run it with the parsed data
+      const runGeneration = async () => {
+        setLoading(true);
+        try {
+          const plan = await generatePlan(data);
+          const planId = plan._id || plan.id;
+          navigate(`/results?planId=${planId}`);
+        } catch (err: any) {
+          toast.error(err.message || "Failed to generate plan");
+        } finally {
+          setLoading(false);
+        }
+      };
+      runGeneration();
+    }
+  }, [user, authLoading, navigate]);
 
   // Fetch quick preview data when destination changes
   useEffect(() => {
@@ -72,16 +110,27 @@ function PlannerSingleContent() {
       toast.error("Please enter a destination");
       return;
     }
+
+    const planData = {
+      city: destination,
+      days: days,
+      budget,
+      interests: ["Photography", "Food trail"],
+      travelerType: style,
+      pace: "balanced"
+    };
+
+    if (!user) {
+      // Save data and redirect to auth
+      sessionStorage.setItem("pending_plan_single", JSON.stringify(planData));
+      toast.info("Please sign in to save and view your plan");
+      navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+      return;
+    }
+
     setLoading(true);
     try {
-      const plan = await generatePlan({
-        city: destination,
-        days: 5,
-        budget,
-        interests: ["Photography", "Food trail"],
-        travelerType: style,
-        pace: "balanced"
-      });
+      const plan = await generatePlan(planData);
       const planId = plan._id || plan.id;
       navigate(`/results?planId=${planId}`);
     } catch (err: any) {
@@ -172,7 +221,7 @@ function PlannerSingleContent() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">Live preview</div>
-                <div className="font-display font-bold text-xl mt-1 capitalize">{destination || "Planning"} · 5 days</div>
+                <div className="font-display font-bold text-xl mt-1 capitalize">{destination || "Planning"} · {days} days</div>
               </div>
               <div className="size-9 rounded-full bg-warm-gradient grid place-items-center text-white shadow-cta">
                 <Sparkles className="size-4" />
