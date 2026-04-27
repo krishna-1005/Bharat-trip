@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 import Home from "./routes/index";
 import AuthPage from "./routes/auth";
 import Collaborate from "./routes/collaborate";
@@ -24,8 +25,10 @@ import AdminConfigPage from "./routes/admin/config";
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Home />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/collaborate" element={<Collaborate />} />
       <Route path="/dashboard" element={<Dashboard />} />
@@ -50,5 +53,6 @@ export default function App() {
       <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
       <Route path="/admin/config" element={<AdminConfigPage />} />
     </Routes>
+    </>
   );
 }

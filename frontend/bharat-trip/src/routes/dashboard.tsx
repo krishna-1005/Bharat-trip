@@ -193,9 +193,10 @@ function DashboardContent() {
         >
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {trending.map((d, i) => (
-              <div
+              <Link
                 key={d.id}
-                className="rounded-3xl border border-border bg-card p-5 shadow-soft hover:shadow-pop hover:-translate-y-0.5 transition-all"
+                to={`/trip-details?id=${d.id}`}
+                className="rounded-3xl border border-border bg-card p-5 shadow-soft hover:shadow-pop hover:-translate-y-0.5 transition-all block"
               >
                 <div className="flex items-start justify-between">
                   <div className="size-10 rounded-xl bg-accent-soft text-accent grid place-items-center font-bold">
@@ -210,7 +211,7 @@ function DashboardContent() {
                 <div className="mt-4 h-1.5 rounded-full bg-secondary overflow-hidden">
                   <div className="h-full bg-warm-gradient" style={{ width: `${60 + i * 8}%` }} />
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </Section>
@@ -318,7 +319,7 @@ function HorizontalCards({ items }: { items: any[] }) {
 function DestinationCard({ d }: { d: (typeof destinations)[number] }) {
   return (
     <Link
-      to="/trip-details"
+      to={`/trip-details?id=${d.id}`}
       className="group rounded-3xl overflow-hidden bg-card border border-border shadow-soft hover:shadow-pop hover:-translate-y-0.5 transition-all"
     >
       <div className="aspect-[4/3] relative overflow-hidden">

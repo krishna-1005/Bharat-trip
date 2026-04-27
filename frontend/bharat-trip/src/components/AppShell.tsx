@@ -107,6 +107,36 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
           )}
+
+          {!collapsed && (
+            <div className="mt-8 space-y-6 px-1">
+              {/* Travel Tip */}
+              <div className="rounded-2xl bg-secondary/30 p-4 border border-border/50">
+                <div className="flex items-center gap-2 text-accent">
+                  <Bookmark className="size-3.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Travel Tip</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
+                  Book flights on Tuesdays for the best deals on domestic travel.
+                </p>
+              </div>
+
+              {/* Featured destination */}
+              <div>
+                <div className="px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center justify-between">
+                  <span>Featured</span>
+                  <Sparkles className="size-3 text-accent" />
+                </div>
+                <Link to="/trip-details?id=kerala" className="group block rounded-2xl overflow-hidden bg-secondary/20 border border-border/50 hover:border-accent/30 transition-all">
+                  <div className="h-20 bg-[url('https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=400&q=80')] bg-cover bg-center group-hover:scale-110 transition-transform duration-500" />
+                  <div className="p-2.5">
+                    <div className="text-xs font-bold">Kerala Backwaters</div>
+                    <div className="text-[10px] text-muted-foreground">South India · 6 days</div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          )}
         </nav>
 
         {!collapsed && (

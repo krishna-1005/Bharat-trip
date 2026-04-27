@@ -5,6 +5,9 @@ const axios = require("axios");
  * Standard categories: Nature, Food, Culture, Shopping, Adventure, Nightlife
  */
 function mapCategory(tags = {}) {
+  // ACCOMMODATION
+  if (tags.tourism === "hotel" || tags.tourism === "hostel" || tags.tourism === "guest_house" || tags.tourism === "motel" || tags.tourism === "apartment") return "Stay";
+
   // SPIRITUAL (Maps to Culture for trip themes)
   if (tags.amenity === "place_of_worship" || tags.religion) return "Culture";
   
@@ -100,8 +103,8 @@ async function fetchOSMPlaces(lat, lng, radiusKm = 10) {
   const query = `
   [out:json][timeout:30];
   (
-    node["tourism"~"attraction|museum|viewpoint|art_gallery|zoo|aquarium"](${minLat},${minLng},${maxLat},${maxLng});
-    way["tourism"~"attraction|museum|viewpoint|art_gallery|zoo|aquarium"](${minLat},${minLng},${maxLat},${maxLng});
+    node["tourism"~"attraction|museum|viewpoint|art_gallery|zoo|aquarium|hotel|hostel|guest_house|motel"](${minLat},${minLng},${maxLat},${maxLng});
+    way["tourism"~"attraction|museum|viewpoint|art_gallery|zoo|aquarium|hotel|hostel|guest_house|motel"](${minLat},${minLng},${maxLat},${maxLng});
     
     node["leisure"~"park|garden|nature_reserve|theme_park|water_park|adventure_park|stadium|playground"](${minLat},${minLng},${maxLat},${maxLng});
     way["leisure"~"park|garden|nature_reserve|theme_park|water_park|adventure_park|stadium|playground"](${minLat},${minLng},${maxLat},${maxLng});

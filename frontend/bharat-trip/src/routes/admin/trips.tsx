@@ -195,7 +195,7 @@ function AdminTrips() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <a 
-                          href={`/trip-details/${trip._id}`}
+                          href={`/trip-details?id=${trip.destination?.toLowerCase()}`}
                           target="_blank"
                           rel="noreferrer"
                           className="p-1.5 rounded-lg hover:bg-primary/10 hover:text-primary text-muted-foreground transition"

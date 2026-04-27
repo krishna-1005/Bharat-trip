@@ -37,9 +37,11 @@ function distance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+const fetchOSMPlaces = require("../services/osmPlaces");
+
 router.post("/", async (req, res) => {
   try {
-    let { lat, lng, city, radius = 10 } = req.body;
+    let { lat, lng, city, radius = 10, category } = req.body;
 
     // If city name is provided, geocode it first
     if (city && (!lat || !lng)) {
@@ -59,16 +61,32 @@ router.post("/", async (req, res) => {
     }
 
     // Filter local data
-    const localMatches = allPlaces
+    let localMatches = allPlaces
       .map(place => ({ ...place, distance: distance(lat, lng, place.lat, place.lng) }))
-      .filter(place => place.distance <= radius)
-      .sort((a, b) => a.distance - b.distance);
+      .filter(place => place.distance <= radius);
+    
+    if (category) {
+      localMatches = localMatches.filter(p => p.category.toLowerCase() === category.toLowerCase());
+    }
 
-    if (localMatches.length > 5) {
+    localMatches = localMatches.sort((a, b) => a.distance - b.distance);
+
+    if (localMatches.length > 2) {
       return res.json(localMatches.slice(0, 10));
     }
 
-    // If outside local data range (like Delhi), return generic suggestions based on city name
+    // Try OSM if local data is thin
+    const osmPlaces = await fetchOSMPlaces(lat, lng, radius);
+    let filteredOsm = osmPlaces;
+    if (category) {
+      filteredOsm = osmPlaces.filter(p => p.category.toLowerCase() === category.toLowerCase());
+    }
+
+    if (filteredOsm.length > 0) {
+      return res.json(filteredOsm.slice(0, 10));
+    }
+
+    // Final fallback
     const fallbacks = [
       { name: "City Center", category: "Landmark" },
       { name: "Historical Monument", category: "Culture" },

@@ -21,6 +21,9 @@ import {
   Wallet,
   Calendar,
   Receipt,
+  Hotel,
+  ArrowRight,
+  X,
   Loader2,
   Bookmark,
   Check,
@@ -30,6 +33,128 @@ import api from "@/lib/api";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
 import { PDFViewerModal } from "@/components/PDFViewerModal";
+
+function StayRecommendations({ lat, lng, city, budgetTier }: { lat: number; lng: number; city: string; budgetTier: string }) {
+  const [stays, setStays] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    api.post("/nearby", { lat, lng, city, category: "Stay", radius: 15 })
+      .then(res => {
+        setStays(res.data.slice(0, 3));
+      })
+      .catch(err => console.error("Stays fetch error", err))
+      .finally(() => setLoading(false));
+  }, [lat, lng, city]);
+
+  const getStayType = () => {
+    if (budgetTier === "low") return "Hostels & Lodges";
+    if (budgetTier === "medium") return "Boutique Hotels";
+    return "Luxury Stays";
+  };
+
+  const getStayPrice = (index: number) => {
+    const base = budgetTier === "low" ? 800 : budgetTier === "medium" ? 2500 : 6000;
+    return base + (index * 450);
+  };
+
+  return (
+    <div className="rounded-3xl border border-border bg-card p-6 shadow-soft">
+      <h3 className="font-display font-bold text-lg mb-4 flex items-center justify-between">
+        Nearby {getStayType()}
+        <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full uppercase tracking-widest font-bold">Matched to Budget</span>
+      </h3>
+      
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-2xl w-full" />)}
+        </div>
+      ) : stays.length > 0 ? (
+        <div className="space-y-3">
+          {stays.map((s, i) => (
+            <div key={i} className="group flex items-center gap-4 rounded-2xl bg-secondary/50 p-3 hover:bg-secondary transition-all cursor-pointer border border-transparent hover:border-border">
+              <div className="size-14 rounded-xl bg-warm-gradient shrink-0 shadow-soft group-hover:scale-105 transition-transform overflow-hidden relative grid place-items-center">
+                 <Hotel className="text-white/70 size-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-sm truncate">{s.name}</div>
+                <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                  {s.distance ? `${s.distance.toFixed(1)} km away` : "Nearby Landmark"}
+                </div>
+                <div className="text-sm font-bold text-primary mt-0.5">₹{getStayPrice(i).toLocaleString("en-IN")}<span className="text-[10px] font-normal text-muted-foreground ml-1">/night</span></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-sm text-muted-foreground italic text-center py-4">No specific stays found nearby.</div>
+      )}
+      
+      <button 
+        onClick={() => setIsModalOpen(true)}
+        className="w-full mt-6 py-3 rounded-2xl bg-secondary font-bold text-sm hover:bg-border transition-colors flex items-center justify-center gap-2"
+      >
+        Explore All Accommodations <ArrowRight className="size-4" />
+      </button>
+
+      {/* Expanded Stays Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] grid place-items-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="relative w-full max-w-2xl bg-card border border-border rounded-[2.5rem] shadow-pop overflow-hidden max-h-[80vh] flex flex-col">
+            <div className="p-8 border-b border-border flex items-center justify-between bg-secondary/20">
+              <div>
+                <h2 className="text-2xl font-display font-bold">Accommodations in {city}</h2>
+                <p className="text-sm text-muted-foreground mt-1">Showing top matches for your {budgetTier} budget.</p>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="size-10 rounded-full bg-background border border-border grid place-items-center hover:bg-secondary transition">
+                <X className="size-5" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {stays.map((s, i) => (
+                <div key={i} className="flex items-center justify-between p-4 rounded-3xl bg-secondary/30 border border-transparent hover:border-border transition-all">
+                  <div className="flex items-center gap-5">
+                    <div className="size-16 rounded-2xl bg-warm-gradient grid place-items-center shadow-soft">
+                      <Hotel className="text-white size-8" />
+                    </div>
+                    <div>
+                      <div className="font-display font-bold text-lg">{s.name}</div>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground font-medium">
+                        <span className="flex items-center gap-1"><MapPin className="size-3" /> {s.distance ? `${s.distance.toFixed(2)} km from center` : "Central Location"}</span>
+                        <span className="flex items-center gap-1"><Sparkles className="size-3 text-accent" /> Recommended</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xl font-display font-bold text-primary">₹{getStayPrice(i).toLocaleString("en-IN")}</div>
+                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Per Night</div>
+                  </div>
+                </div>
+              ))}
+              
+              <div className="p-8 rounded-3xl border-2 border-dashed border-border text-center">
+                <p className="text-sm text-muted-foreground">Looking for something specific?</p>
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  <a href={`https://www.google.com/maps/search/hotels+in+${city}`} target="_blank" className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:scale-105 transition">Google Maps</a>
+                  <a href={`https://www.booking.com/searchresults.html?ss=${city}`} target="_blank" className="px-4 py-2 rounded-xl bg-[#003580] text-white text-xs font-bold hover:scale-105 transition">Booking.com</a>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 bg-secondary/10 border-t border-border flex justify-end">
+              <button onClick={() => setIsModalOpen(false)} className="px-6 py-2 rounded-xl bg-foreground text-background text-sm font-bold">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   plane: Plane,
@@ -372,7 +497,7 @@ function ResultsContent() {
           {/* RIGHT: Map + cost + summary */}
           <aside className="space-y-4">
             {/* Real Map */}
-            <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-soft h-[500px] sticky top-6">
+            <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-soft h-[500px]">
               <MapPreview
                 itinerary={itinerary}
                 activePlace={activePlace}
@@ -380,49 +505,94 @@ function ResultsContent() {
               />
             </div>
 
+            <StayRecommendations 
+              lat={plan?.coordinates?.lat || 28.6139} 
+              lng={plan?.coordinates?.lng || 77.2090} 
+              city={plan?.city || plan?.destination || "Delhi"}
+              budgetTier={plan?.totalBudget / (plan?.days * 2) < 2000 ? "low" : plan?.totalBudget / (plan?.days * 2) < 5000 ? "medium" : "high"}
+            />
+
             {/* Cost breakdown */}
-            <div className="rounded-3xl border border-border bg-card p-5 shadow-soft">
-              <div className="flex items-center gap-2 font-display font-bold">
-                <Receipt className="size-4 text-accent" /> Cost breakdown
+            <div className="rounded-3xl border border-border bg-card p-6 shadow-soft">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2 font-display font-bold text-lg">
+                  <Receipt className="size-5 text-accent" /> Budget Control
+                </div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground bg-secondary px-2 py-0.5 rounded">AI Estimate</div>
               </div>
-              <div className="mt-4 space-y-3">
+              
+              <div className="space-y-5">
                 {[
                   {
                     l: "Stays",
-                    v: (plan?.totalBudget || plan?.budget || 38400) * 0.5,
-                    c: "bg-primary",
+                    v: plan?.costBreakdown?.hotel || (plan?.totalBudget || plan?.budget || 38400) * 0.45,
+                    c: "bg-indigo-500",
+                    i: Hotel
                   },
                   {
-                    l: "Travel",
-                    v: (plan?.totalBudget || plan?.budget || 38400) * 0.2,
-                    c: "bg-accent",
+                    l: "Food & Drinks",
+                    v: plan?.costBreakdown?.food || (plan?.totalBudget || plan?.budget || 38400) * 0.25,
+                    c: "bg-orange-500",
+                    i: Utensils
                   },
                   {
-                    l: "Food & experiences",
-                    v: (plan?.totalBudget || plan?.budget || 38400) * 0.25,
-                    c: "bg-success",
+                    l: "Transport",
+                    v: plan?.costBreakdown?.transport || (plan?.totalBudget || plan?.budget || 38400) * 0.15,
+                    c: "bg-sky-500",
+                    i: Plane
                   },
                   {
-                    l: "Buffer",
-                    v: (plan?.totalBudget || plan?.budget || 38400) * 0.05,
-                    c: "bg-muted-foreground",
+                    l: "Activities",
+                    v: plan?.costBreakdown?.activities || (plan?.totalBudget || plan?.budget || 38400) * 0.15,
+                    c: "bg-rose-500",
+                    i: Camera
                   },
-                ].map((r) => (
-                  <div key={r.l}>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{r.l}</span>
-                      <span className="font-semibold">₹{Number(r.v).toLocaleString("en-IN")}</span>
+                ].map((r) => {
+                  const total = plan?.totalTripCost || plan?.totalBudget || plan?.budget || 38400;
+                  const percentage = Math.round((r.v / total) * 100);
+                  
+                  return (
+                    <div key={r.l} className="group">
+                      <div className="flex justify-between items-center text-sm mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className={`size-8 rounded-lg ${r.c} bg-opacity-10 flex items-center justify-center`}>
+                            <r.i className={`size-4 ${r.c.replace('bg-', 'text-')}`} />
+                          </div>
+                          <span className="font-medium text-foreground/80">{r.l}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold">₹{Number(r.v).toLocaleString("en-IN")}</div>
+                          <div className="text-[10px] text-muted-foreground font-bold">{percentage}%</div>
+                        </div>
+                      </div>
+                      <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                        <div
+                          className={`h-full ${r.c} transition-all duration-1000 group-hover:brightness-110`}
+                          style={{
+                            width: `${percentage}%`,
+                          }}
+                        />
+                      </div>
                     </div>
-                    <div className="mt-1 h-1.5 rounded-full bg-secondary overflow-hidden">
-                      <div
-                        className={`h-full ${r.c}`}
-                        style={{
-                          width: `${(r.v / (plan?.totalBudget || plan?.budget || 38400)) * 100}%`,
-                        }}
-                      />
+                  );
+                })}
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-border">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Estimated Total</div>
+                    <div className="text-2xl font-display font-bold text-primary">
+                      ₹{Number(plan?.totalTripCost || plan?.totalBudget || plan?.budget || 38400).toLocaleString("en-IN")}
                     </div>
                   </div>
-                ))}
+                  <div className="text-right">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-success">Remaining</div>
+                    <div className="text-lg font-display font-bold text-success">
+                      ₹{Number((plan?.totalBudget || 40000) - (plan?.totalTripCost || 38400)).toLocaleString("en-IN")}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </aside>

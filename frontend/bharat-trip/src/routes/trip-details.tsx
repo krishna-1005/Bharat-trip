@@ -216,9 +216,9 @@ function TripDetailsContent() {
               </section>
             </div>
 
-            {/* Sidebar Sticky Content */}
+            {/* Sidebar Content */}
             <aside className="space-y-6">
-              <div className="sticky top-24 space-y-6">
+              <div className="space-y-6">
                 {/* Real Map Card */}
                 <div className="rounded-[2.5rem] border border-border bg-card overflow-hidden shadow-pop h-[450px] relative group">
                   <MapPreview 
@@ -241,6 +241,57 @@ function TripDetailsContent() {
                           {itinerary.reduce((acc, day) => acc + day.items.length, 0)} Curated Stops
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Budget Control Card */}
+                <div className="rounded-[2.5rem] border border-border bg-card p-6 shadow-pop">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="font-display font-bold text-lg flex items-center gap-2">
+                      <Wallet className="size-5 text-accent" /> Budget Control
+                    </h3>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground bg-secondary px-2 py-0.5 rounded">AI Estimate</div>
+                  </div>
+
+                  <div className="space-y-5">
+                    {[
+                      { l: "Stays", p: 45, c: "bg-indigo-500", i: Hotel },
+                      { l: "Food", p: 25, c: "bg-orange-500", i: Utensils },
+                      { l: "Transport", p: 15, c: "bg-sky-500", i: Plane },
+                      { l: "Activities", p: 15, c: "bg-rose-500", i: Camera },
+                    ].map((r) => {
+                      const totalNum = parseInt(d.price.replace(/[^\d]/g, ""));
+                      const amount = Math.round((totalNum * r.p) / 100);
+                      return (
+                        <div key={r.l} className="group">
+                          <div className="flex justify-between items-center text-sm mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className={`size-8 rounded-lg ${r.c} bg-opacity-10 flex items-center justify-center`}>
+                                <r.i className={`size-4 ${r.c.replace('bg-', 'text-')}`} />
+                              </div>
+                              <span className="font-medium text-foreground/80">{r.l}</span>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold">₹{amount.toLocaleString("en-IN")}</div>
+                              <div className="text-[10px] text-muted-foreground font-bold">{r.p}%</div>
+                            </div>
+                          </div>
+                          <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                            <div
+                              className={`h-full ${r.c} transition-all duration-1000 group-hover:brightness-110`}
+                              style={{ width: `${r.p}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-border">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total Estimate</div>
+                    <div className="text-2xl font-display font-bold text-primary mt-1">
+                      {d.price} <span className="text-sm font-normal text-muted-foreground">/ person</span>
                     </div>
                   </div>
                 </div>
