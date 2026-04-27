@@ -9,6 +9,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "./AuthProvider";
 import { toast } from "sonner";
 import { NotificationBell } from "./NotificationBell";
+import { Logo } from "./Logo";
 
 const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
 
@@ -65,8 +66,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         <div className="h-16 flex items-center justify-between px-5 border-b border-border">
           <Link to="/" className="flex items-center gap-2">
-            <div className="size-8 rounded-xl bg-warm-gradient grid place-items-center text-white font-bold shadow-cta">G</div>
-            {!collapsed && <span className="font-display font-bold text-lg tracking-tight">GoTripo</span>}
+            <Logo iconOnly={collapsed} className={collapsed ? "scale-75" : "scale-90"} />
           </Link>
           <button
             onClick={() => setCollapsed((c) => !c)}
@@ -131,7 +131,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Menu className="size-5" />
           </button>
           <Link to="/" className="flex items-center gap-2 lg:hidden">
-            <div className="size-8 rounded-xl bg-warm-gradient grid place-items-center text-white font-bold">G</div>
+            <Logo iconOnly className="scale-75" />
             <span className="font-display font-bold">GoTripo</span>
           </Link>
 
@@ -233,9 +233,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="lg:hidden fixed inset-0 z-50" onClick={() => setMobileOpen(false)}>
           <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
           <aside className="absolute top-0 left-0 h-full w-72 bg-surface p-5 shadow-pop">
-            <Link to="/" className="flex items-center gap-2 mb-6">
-              <div className="size-9 rounded-xl bg-warm-gradient grid place-items-center text-white font-bold">G</div>
-              <span className="font-display font-bold text-lg">GoTripo</span>
+            <Link to="/" className="flex items-center gap-2 mb-6" onClick={() => setMobileOpen(false)}>
+              <Logo className="scale-90 origin-left" />
             </Link>
             <nav className="space-y-1">
               {nav.map((n) => (

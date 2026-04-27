@@ -14,6 +14,7 @@ import {
   signInWithPopup 
 } from "firebase/auth";
 import { useAuth } from "@/components/AuthProvider";
+import { Logo } from "@/components/Logo";
 
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 const passwordSchema = z.string().min(8, "Password must be at least 8 characters").max(72);
@@ -113,10 +114,7 @@ export default function AuthPage() {
 
         <div className="flex-1 grid place-items-center">
           <div className="w-full max-w-md">
-            <div className="flex items-center gap-2">
-              <div className="size-10 rounded-xl bg-warm-gradient grid place-items-center text-white font-bold shadow-cta">G</div>
-              <span className="font-display font-bold text-xl">GoTripo</span>
-            </div>
+            <Logo className="mb-8" />
 
             <AnimatePresence mode="wait">
               <motion.div

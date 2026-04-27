@@ -3,6 +3,7 @@ import { Sparkles, Menu, X, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "./AuthProvider";
+import { Logo } from "./Logo";
 
 export function MarketingNav() {
   const [open, setOpen] = useState(false);
@@ -13,12 +14,7 @@ export function MarketingNav() {
       <div className="max-w-7xl mx-auto bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-3 flex items-center justify-between text-white shadow-2xl">
 
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="size-8 rounded-xl bg-warm-gradient grid place-items-center font-bold shadow-cta group-hover:scale-110 transition-transform">
-            G
-          </div>
-          <span className="font-display font-bold text-lg tracking-tight">
-            GoTripo
-          </span>
+          <Logo variant="light" className="scale-90 origin-left" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-white/80">
@@ -77,6 +73,9 @@ export function MarketingNav() {
         <div className="md:hidden absolute top-full left-0 right-0 mt-2 bg-black/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-5 text-white space-y-1 shadow-2xl animate-in fade-in zoom-in duration-200">
           <a href="#features" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Features</a>
           <a href="#destinations" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Destinations</a>
+          <a href="#voices" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Stories</a>
+          <Link to="/pricing" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Pricing</Link>
+          <Link to="/explore" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Explore</Link>
           {!user ? (
             <div className="pt-2 space-y-2">
               <Link to="/auth" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Log in</Link>
