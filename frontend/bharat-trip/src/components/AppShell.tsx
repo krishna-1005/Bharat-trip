@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
 
-  const userInitials = (user?.user_metadata?.display_name as string | undefined)
+  const userInitials = (user?.displayName as string | undefined)
     ?.split(" ")
     .map((s) => s[0])
     .slice(0, 2)
@@ -168,7 +168,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <div className="absolute right-0 top-12 z-40 w-56 rounded-xl bg-surface border border-border shadow-pop p-1.5">
                   <div className="px-3 py-2 border-b border-border">
                     <div className="text-sm font-semibold truncate">
-                      {(user?.user_metadata?.display_name as string | undefined) || user?.email?.split("@")[0]}
+                      {(user?.displayName as string | undefined) || user?.email?.split("@")[0]}
                     </div>
                     <div className="text-xs text-muted-foreground truncate">{user?.email}</div>
                   </div>

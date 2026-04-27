@@ -39,7 +39,7 @@ export function MarketingNav() {
                   className="size-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center font-bold text-sm hover:bg-white/20 transition shadow-sm"
                   title="My Profile"
                 >
-                  {(user.user_metadata?.display_name as string | undefined)?.charAt(0) || user.email?.charAt(0).toUpperCase() || "P"}
+                  {(user.displayName as string | undefined)?.charAt(0) || user.email?.charAt(0).toUpperCase() || "P"}
                 </Link>
                 <Link
                   to="/dashboard"
