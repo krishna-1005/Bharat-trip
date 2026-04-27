@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Bookmark
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -103,8 +104,30 @@ function ProfileContent() {
   if (loading) {
     return (
       <AppShell>
-        <div className="min-h-[60vh] grid place-items-center">
-          <Loader2 className="size-10 animate-spin text-primary" />
+        <div className="px-4 lg:px-10 py-8 max-w-5xl mx-auto space-y-8">
+          {/* Header Skeleton */}
+          <Skeleton className="h-48 rounded-3xl w-full" />
+          
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-2xl" />)}
+          </div>
+
+          {/* Recent Trips Skeleton */}
+          <div className="rounded-3xl border border-border p-6 shadow-soft space-y-6">
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-7 w-40" />
+              <Skeleton className="h-5 w-20" />
+            </div>
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-2xl w-full" />)}
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-5">
+            <Skeleton className="h-48 rounded-3xl w-full" />
+            <Skeleton className="h-48 rounded-3xl w-full" />
+          </div>
         </div>
       </AppShell>
     );

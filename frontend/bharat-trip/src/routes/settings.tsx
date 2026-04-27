@@ -17,6 +17,7 @@ import {
   Heart
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { useAuth } from "@/components/AuthProvider";
@@ -90,8 +91,20 @@ function SettingsContent() {
   if (loading) {
     return (
       <AppShell>
-        <div className="min-h-[60vh] grid place-items-center">
-          <Loader2 className="size-10 animate-spin text-primary" />
+        <div className="px-4 lg:px-10 py-8 max-w-4xl mx-auto space-y-10">
+          <div className="space-y-2">
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+
+          <div className="grid gap-8">
+            {[1, 2, 3].map(i => (
+              <section key={i} className="space-y-4">
+                <Skeleton className="h-7 w-40" />
+                <Skeleton className="h-48 rounded-3xl w-full" />
+              </section>
+            ))}
+          </div>
         </div>
       </AppShell>
     );

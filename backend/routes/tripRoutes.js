@@ -79,11 +79,13 @@ router.get("/:id", async (req, res) => {
 });
 
 /* JOIN TRIP */
-router.post("/:id/join", async (req, res) => {
+router.post("/:id/join", protect, async (req, res) => {
   try {
-    const { userId, userName } = req.body;
     const trip = await Trip.findById(req.params.id);
     if (!trip) return res.status(404).json({ error: "Trip not found" });
+
+    const userId = req.user.firebaseUid || req.user._id.toString();
+    const userName = req.user.name || "Traveller";
 
     // Check if user is already a member
     const isMember = trip.members.some(m => m.userId === userId);
@@ -98,11 +100,19 @@ router.post("/:id/join", async (req, res) => {
 });
 
 /* EXECUTE REBOOKING REVISION */
-router.post("/:id/execute-revision", async (req, res) => {
+router.post("/:id/execute-revision", protect, async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.id);
     if (!trip) {
       return res.status(404).json({ error: "Trip not found" });
+    }
+
+    // Authorization check: Only trip owner or a member can execute revision
+    const isOwner = trip.userId && trip.userId.toString() === req.user._id.toString();
+    const isMember = trip.members.some(m => m.userId === (req.user.firebaseUid || req.user._id.toString()));
+    
+    if (!isOwner && !isMember) {
+      return res.status(403).json({ error: "Not authorized to execute revision for this trip" });
     }
 
     // If revision already cleared, assume success (idempotency)

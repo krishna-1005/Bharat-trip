@@ -14,6 +14,7 @@ import {
   Radio,
   ToggleLeft
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 export default function AdminConfigPage() {
@@ -66,8 +67,29 @@ function AdminConfig() {
   if (loading) {
     return (
       <AdminShell>
-        <div className="h-[60vh] flex items-center justify-center">
-          <Loader2 className="size-8 animate-spin text-primary" />
+        <div className="space-y-8">
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-64" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="rounded-3xl border border-border p-6 shadow-sm space-y-6">
+                <div className="flex gap-4">
+                  <Skeleton className="size-10 rounded-xl" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-40" />
+                    <Skeleton className="h-4 w-64" />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <Skeleton className="h-20 w-full rounded-2xl" />
+                  <Skeleton className="h-20 w-full rounded-2xl" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </AdminShell>
     );

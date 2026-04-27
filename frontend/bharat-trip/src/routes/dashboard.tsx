@@ -13,6 +13,7 @@ import {
   Plus,
   Loader2,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import { useAuth } from "@/components/AuthProvider";
@@ -47,6 +48,48 @@ function DashboardContent() {
         setLoading(false);
       });
   }, []);
+
+  if (loading) {
+    return (
+      <AppShell>
+        <div className="px-4 lg:px-10 py-8 max-w-7xl mx-auto space-y-12">
+          {/* Greeting Skeleton */}
+          <Skeleton className="h-64 rounded-3xl w-full" />
+          
+          {/* Recent Trips Skeleton */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-8 w-40" />
+              <Skeleton className="h-5 w-20" />
+            </div>
+            <div className="flex gap-5 overflow-hidden">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="shrink-0 w-[280px] rounded-3xl border border-border bg-card overflow-hidden h-[300px]">
+                  <Skeleton className="h-[180px] w-full rounded-none" />
+                  <div className="p-4 space-y-3">
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                    <div className="pt-4 flex justify-between">
+                      <Skeleton className="h-5 w-20" />
+                      <Skeleton className="size-8 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Other Sections Skeleton */}
+          <div className="space-y-8">
+            <Skeleton className="h-8 w-48" />
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64 rounded-3xl" />)}
+            </div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

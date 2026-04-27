@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   XCircle
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 export default function AdminUsersPage() {
@@ -66,8 +67,30 @@ function AdminUsers() {
   if (loading && users.length === 0) {
     return (
       <AdminShell>
-        <div className="h-[60vh] flex items-center justify-center">
-          <Loader2 className="size-8 animate-spin text-primary" />
+        <div className="space-y-8">
+          <div className="flex justify-between items-center">
+            <div className="space-y-2">
+              <Skeleton className="h-9 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+            <Skeleton className="h-10 w-64 rounded-xl" />
+          </div>
+          <div className="rounded-3xl border border-border overflow-hidden">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="p-6 border-b border-border flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="size-10 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-48" />
+                  </div>
+                </div>
+                <Skeleton className="h-6 w-20 rounded-full" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-8 w-24 rounded-lg" />
+              </div>
+            ))}
+          </div>
         </div>
       </AdminShell>
     );

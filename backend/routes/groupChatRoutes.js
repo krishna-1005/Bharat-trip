@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Message = require("../models/Message");
+const { protect } = require("../middleware/protect");
+
+// All group chat routes require authentication
+router.use(protect);
 
 // Get messages for a trip
 router.get("/:tripId", async (req, res) => {
@@ -17,15 +21,15 @@ router.get("/:tripId", async (req, res) => {
 // Send a message
 router.post("/send", async (req, res) => {
   try {
-    const { tripId, userId, userName, text } = req.body;
+    const { tripId, text } = req.body;
     if (!tripId || !text) {
       return res.status(400).json({ error: "TripId and text are required" });
     }
 
     const newMessage = new Message({
       tripId,
-      userId,
-      userName,
+      userId: req.user.firebaseUid || req.user._id,
+      userName: req.user.name || "Traveller",
       text
     });
 

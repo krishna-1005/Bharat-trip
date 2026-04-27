@@ -51,10 +51,10 @@ export function Footer() {
             <ul className="space-y-4 text-sm">
               <li><Link to="/settings" className="text-slate-600 dark:text-slate-400 hover:text-primary transition">Account Settings</Link></li>
               <li><a href="mailto:support@gotripo.tech" className="text-slate-600 dark:text-slate-400 hover:text-primary transition flex items-center gap-2">
-                <Mail className="size-4" /> support@gotripo.tech
+                <Mail className="size-4" /> gotripo081@gmail.com
               </a></li>
               <li><a href="tel:+1234567890" className="text-slate-600 dark:text-slate-400 hover:text-primary transition flex items-center gap-2">
-                <Phone className="size-4" /> +91 (800) GOTRIPO
+                <Phone className="size-4" /> +91 6361890349
               </a></li>
               <li className="text-slate-600 dark:text-slate-400 flex items-start gap-2">
                 <MapPin className="size-4 shrink-0 mt-0.5" /> 

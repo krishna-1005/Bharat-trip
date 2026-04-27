@@ -21,12 +21,7 @@ function getInitialTheme(): Theme {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
-
-  // Hydrate after mount to avoid SSR mismatch
-  useEffect(() => {
-    setThemeState(getInitialTheme());
-  }, []);
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme());
 
   useEffect(() => {
     const root = document.documentElement;

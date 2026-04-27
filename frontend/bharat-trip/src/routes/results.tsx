@@ -25,6 +25,7 @@ import {
   Bookmark,
   Check,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
@@ -189,10 +190,26 @@ function ResultsContent() {
   if (loading) {
     return (
       <AppShell>
-        <div className="min-h-[60vh] grid place-items-center">
-          <div className="text-center">
-            <Loader2 className="size-10 animate-spin mx-auto text-primary" />
-            <p className="mt-4 text-muted-foreground font-display">Fetching your AI itinerary...</p>
+        <div className="px-4 lg:px-8 py-6 max-w-[1500px] mx-auto space-y-6">
+          <Skeleton className="h-40 md:h-48 rounded-3xl w-full" />
+          <div className="mt-6 grid lg:grid-cols-[1fr_400px] gap-6">
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="rounded-3xl border border-border overflow-hidden">
+                  <div className="p-5 flex items-center gap-4">
+                    <Skeleton className="size-12 rounded-2xl" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-1/3" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <aside className="space-y-4">
+              <Skeleton className="h-[500px] rounded-3xl w-full" />
+              <Skeleton className="h-60 rounded-3xl w-full" />
+            </aside>
           </div>
         </div>
       </AppShell>

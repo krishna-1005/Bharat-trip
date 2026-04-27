@@ -6,11 +6,11 @@ const User = require("../models/User");
 const { v4: uuidv4 } = require("uuid");
 const { protect } = require("../middleware/protect");
 
-// Create a new poll
-router.post("/create", async (req, res) => {
+// Create a new poll (Authenticated only)
+router.post("/create", protect, async (req, res) => {
   console.time(`Poll Creation: ${req.body.tripName}`);
   try {
-    const { tripName, options, groupSize, totalMembers, userId } = req.body;
+    const { tripName, options, groupSize, totalMembers } = req.body;
     if (!tripName || !options || options.length < 2) {
       return res.status(400).json({ error: "Trip name and at least 2 options are required." });
     }
@@ -28,7 +28,7 @@ router.post("/create", async (req, res) => {
         vibe: opt.vibe || "",
         votes: 0 
       })),
-      createdBy: userId || undefined
+      createdBy: req.user.firebaseUid || req.user._id
     });
 
     console.log(`DEBUG: Saving new poll: ${pollId}`);
@@ -43,7 +43,7 @@ router.post("/create", async (req, res) => {
   }
 });
 
-// Get all polls
+// Get all polls (Public)
 router.get("/list", async (req, res) => {
   try {
     const polls = await Poll.find().sort({ createdAt: -1 });
@@ -53,7 +53,7 @@ router.get("/list", async (req, res) => {
   }
 });
 
-// Get poll details
+// Get poll details (Public)
 router.get("/:pollId", async (req, res) => {
   try {
     const poll = await Poll.findOne({ pollId: req.params.pollId });
@@ -64,7 +64,7 @@ router.get("/:pollId", async (req, res) => {
   }
 });
 
-// Submit a vote (Optionally protected to capture preferences)
+// Submit a vote (Public/Semi-protected internal check)
 router.post("/vote", async (req, res) => {
   try {
     const { pollId, optionName, userId, userName } = req.body;
@@ -166,8 +166,8 @@ router.post("/vote", async (req, res) => {
   }
 });
 
-// Manual override to finalize poll
-router.post("/finalize-now", async (req, res) => {
+// Manual override to finalize poll (Authenticated only)
+router.post("/finalize-now", protect, async (req, res) => {
   try {
     const { pollId } = req.body;
     const poll = await Poll.findOne({ pollId });
@@ -175,6 +175,14 @@ router.post("/finalize-now", async (req, res) => {
 
     if (poll.isClosed) {
       return res.status(400).json({ error: "Poll is already finalized." });
+    }
+
+    // Only creator or admin can finalize manually
+    const isAdmin = req.user.role === "admin";
+    const isCreator = poll.createdBy === (req.user.firebaseUid || req.user._id.toString());
+    
+    if (!isAdmin && !isCreator) {
+      return res.status(403).json({ error: "Not authorized to finalize this poll." });
     }
 
     const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);

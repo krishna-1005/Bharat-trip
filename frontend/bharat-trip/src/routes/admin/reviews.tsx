@@ -6,16 +6,16 @@ import {
   MessageSquare, 
   Search, 
   Star, 
-  Trash2, 
+  Trash2,
   Loader2,
   Calendar,
   User as UserIcon,
   CheckCircle2,
   XCircle,
   Quote
-} from "lucide-react";
-import { toast } from "sonner";
-
+  } from "lucide-react";
+  import { Skeleton } from "@/components/ui/skeleton";
+  import { toast } from "sonner";
 export default function AdminReviewsPage() {
   return (
     <AdminProtectedRoute>
@@ -65,8 +65,35 @@ function AdminReviews() {
   if (loading && reviews.length === 0) {
     return (
       <AdminShell>
-        <div className="h-[60vh] flex items-center justify-center">
-          <Loader2 className="size-8 animate-spin text-primary" />
+        <div className="space-y-8">
+          <div className="flex justify-between items-center">
+            <div className="space-y-2">
+              <Skeleton className="h-9 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+            <Skeleton className="h-10 w-64 rounded-xl" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="rounded-3xl border border-border p-6 shadow-sm space-y-4">
+                <div className="flex items-start gap-4">
+                  <Skeleton className="size-12 rounded-2xl" />
+                  <div className="flex-1 space-y-2">
+                    <div className="flex justify-between">
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-4 w-20" />
+                    </div>
+                    <Skeleton className="h-3 w-40" />
+                  </div>
+                </div>
+                <Skeleton className="h-16 w-full rounded-xl" />
+                <div className="pt-4 border-t border-border flex justify-between">
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </AdminShell>
     );

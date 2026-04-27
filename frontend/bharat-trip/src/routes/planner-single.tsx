@@ -38,13 +38,45 @@ function PlannerSingleContent() {
   const initialDest = searchParams.get("dest") || "Delhi";
   const initialDays = parseInt(searchParams.get("days") || "5");
 
+  const getLocalDateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayStr = getLocalDateString(new Date());
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + initialDays - 1);
+  const futureStr = getLocalDateString(futureDate);
+
   const [destination, setDestination] = useState(initialDest);
+  const [startDate, setStartDate] = useState(todayStr);
+  const [endDate, setEndDate] = useState(futureStr);
   const [days, setDays] = useState(initialDays);
   const [budget, setBudget] = useState(35000);
   const [style, setStyle] = useState("luxury");
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [fetchingPreview, setFetchingPreview] = useState(false);
+
+  // Update days when dates change
+  useEffect(() => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (end < start) {
+      setEndDate(startDate);
+      setDays(1);
+      return;
+    }
+
+    const diffTime = end.getTime() - start.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    if (!isNaN(diffDays)) {
+      setDays(diffDays);
+    }
+  }, [startDate, endDate]);
 
   // Auto-trigger generation if we just logged in and have pending data
   useEffect(() => {
@@ -160,10 +192,22 @@ function PlannerSingleContent() {
 
             <div className="grid grid-cols-2 gap-4">
               <Field label="From" icon={<Calendar className="size-4" />}>
-                <input type="date" defaultValue="2025-03-12" className="w-full h-12 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm" />
+                <input
+                  type="date"
+                  value={startDate}
+                  min={todayStr}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full h-12 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm"
+                />
               </Field>
               <Field label="To" icon={<Calendar className="size-4" />}>
-                <input type="date" defaultValue="2025-03-16" className="w-full h-12 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm" />
+                <input
+                  type="date"
+                  value={endDate}
+                  min={startDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full h-12 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm"
+                />
               </Field>
             </div>
 

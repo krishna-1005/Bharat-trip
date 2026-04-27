@@ -3,6 +3,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useState } from "react";
 import { Bookmark, Plus, MapPin, Calendar, Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api";
 
 const tabs = ["Upcoming", "Drafts", "Saved", "Past"];
@@ -59,9 +60,21 @@ function TripsContent() {
         </div>
 
         {loading ? (
-          <div className="mt-20 text-center">
-            <Loader2 className="size-8 animate-spin mx-auto text-primary" />
-            <p className="mt-4 text-muted-foreground">Loading your trips...</p>
+          <div className="mt-8 grid lg:grid-cols-2 gap-5">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-3xl overflow-hidden bg-card border border-border shadow-soft flex flex-col sm:flex-row h-[200px]">
+                <Skeleton className="sm:w-56 h-full shrink-0 rounded-none" />
+                <div className="p-5 flex-1 space-y-3">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                  <div className="pt-4 space-y-2">
+                    <Skeleton className="h-2 w-full rounded-full" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="mt-8 grid lg:grid-cols-2 gap-5">
