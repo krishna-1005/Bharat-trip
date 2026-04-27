@@ -59,7 +59,7 @@ export function Polls({ tripId }: { tripId?: string }) {
       // For now, we fetch a sample or all polls if tripId isn't specific
       // In a real app, we'd filter by tripId
       // Since backend doesn't have list by tripId yet, we'll try to get one or use sample logic
-      const res = await api.get("/poll/list").catch(() => ({ data: [] })); 
+      const res = await api.get("/polls/list").catch(() => ({ data: [] })); 
       // If we don't have list endpoint, we might need to handle single poll or mock
       setPolls(res.data);
     } catch (err) {
@@ -92,15 +92,27 @@ export function Polls({ tripId }: { tripId?: string }) {
       </div>
 
       {polls.length === 0 ? (
-        <div className="rounded-3xl border-2 border-dashed border-border p-12 text-center space-y-4">
-          <div className="size-16 rounded-full bg-secondary grid place-items-center mx-auto">
-            <Users className="size-8 text-muted-foreground" />
+        <div className="rounded-3xl border-2 border-dashed border-border p-12 text-center space-y-6 bg-secondary/10">
+          <div className="size-20 rounded-full bg-secondary grid place-items-center mx-auto shadow-inner">
+            <Users className="size-10 text-muted-foreground" />
           </div>
           <div>
-            <h3 className="font-display font-bold text-lg">No active polls</h3>
-            <p className="text-sm text-muted-foreground mt-1">Start a poll to decide your next destination or dates.</p>
+            <h3 className="font-display font-bold text-2xl tracking-tight">Your crew hasn't started any polls yet</h3>
+            <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">Start a poll to decide your next destination or share this page with friends to get them involved!</p>
           </div>
-          <CreatePollDialog onCreated={fetchPolls} trigger={<Button variant="outline" className="rounded-xl">Create your first poll</Button>} />
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <CreatePollDialog tripId={tripId} onCreated={fetchPolls} trigger={<Button className="rounded-xl bg-warm-gradient text-white shadow-cta h-11 px-8">Start First Poll</Button>} />
+            <Button 
+              variant="outline" 
+              className="rounded-xl h-11 px-8"
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                toast.success("Collaboration link copied! Send it to your crew.");
+              }}
+            >
+              Invite Crew
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="grid gap-6">
@@ -128,7 +140,7 @@ function PollCard({ poll, onVote }: { poll: Poll; onVote: () => void }) {
 
     setVoting(true);
     try {
-      await api.post("/poll/vote", {
+      await api.post("/polls/vote", {
         pollId: poll.pollId,
         optionName,
         userId: user.uid,
@@ -256,7 +268,7 @@ function CreatePollDialog({ onCreated, trigger }: { onCreated: () => void; trigg
 
     setLoading(true);
     try {
-      await api.post("/poll/create", {
+      await api.post("/polls/create", {
         tripName,
         totalMembers: parseInt(totalMembers),
         options,

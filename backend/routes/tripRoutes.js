@@ -78,6 +78,25 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+/* JOIN TRIP */
+router.post("/:id/join", async (req, res) => {
+  try {
+    const { userId, userName } = req.body;
+    const trip = await Trip.findById(req.params.id);
+    if (!trip) return res.status(404).json({ error: "Trip not found" });
+
+    // Check if user is already a member
+    const isMember = trip.members.some(m => m.userId === userId);
+    if (!isMember) {
+      trip.members.push({ userId, userName });
+      await trip.save();
+    }
+    res.json(trip);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 /* EXECUTE REBOOKING REVISION */
 router.post("/:id/execute-revision", async (req, res) => {
   try {

@@ -100,6 +100,12 @@ const tripSchema = new mongoose.Schema({
     default: ""
   },
 
+  members: [{
+    userId: String,
+    userName: String,
+    joinedAt: { type: Date, default: Date.now }
+  }],
+
   /* ── REBOOKING ENGINE DATA ── */
   disruptionAlerts: [{
     type: { type: String }, // e.g., "flight_delay", "weather"

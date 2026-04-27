@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MarketingNav } from "@/components/MarketingNav";
 import { HeroCarousel } from "@/components/HeroCarousel";
+import { Footer } from "@/components/Footer";
 import { FadeUp, StaggerGroup, StaggerItem, HoverLift, dur, ease } from "@/components/motion/primitives";
 import {
   Sparkles, Users, Wallet, Star, ArrowRight, Plane, X, MapPin, Clock, Calendar
@@ -313,19 +314,7 @@ function Landing() {
         </FadeUp>
       </section>
 
-      <footer className="border-t border-border py-10 text-sm text-muted-foreground">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 flex flex-wrap justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="size-7 rounded-lg bg-warm-gradient grid place-items-center text-white font-bold text-xs">G</div>
-            © {new Date().getFullYear()} GoTripo. Made for the road.
-          </div>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-foreground">Privacy</a>
-            <a href="#" className="hover:text-foreground">Terms</a>
-            <a href="#" className="hover:text-foreground">Contact</a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

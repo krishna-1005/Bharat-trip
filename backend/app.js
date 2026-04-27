@@ -22,6 +22,7 @@ const projectReviewRoutes = require("./routes/projectReviewRoutes");
 const pollRoutes = require("./routes/pollRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 const webhookRoutes = require("./routes/webhookRoutes");
+const groupChatRoutes = require("./routes/groupChatRoutes");
 
 // Per-environment CORS configuration
 const app = express();
@@ -85,6 +86,7 @@ app.use("/api/reviews", projectReviewRoutes);
 app.use("/api/polls", pollRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/webhooks", webhookRoutes);
+app.use("/api/group-chat", groupChatRoutes);
 
 // health check
 app.get("/", (req, res) => {
