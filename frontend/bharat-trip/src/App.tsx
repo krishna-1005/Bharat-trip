@@ -9,6 +9,7 @@ import PlannerSingle from "./routes/planner-single";
 import Profile from "./routes/profile";
 import SettingsPage from "./routes/settings";
 import Results from "./routes/results";
+import Pricing from "./routes/pricing";
 import TripDetails from "./routes/trip-details";
 import TripType from "./routes/trip-type";
 import Trips from "./routes/trips";
@@ -29,6 +30,7 @@ export default function App() {
       <Route path="/collaborate" element={<Collaborate />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/explore" element={<Explore />} />
+      <Route path="/pricing" element={<Pricing />} />
       <Route path="/planner-multi" element={<PlannerMulti />} />
       <Route path="/planner-single" element={<PlannerSingle />} />
       <Route path="/profile" element={<Profile />} />

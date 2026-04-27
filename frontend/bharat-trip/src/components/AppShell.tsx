@@ -114,9 +114,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="text-xs uppercase tracking-widest opacity-70">Pro</div>
             <div className="font-display font-bold mt-1">Unlock AI co-pilot</div>
             <p className="text-xs text-white/70 mt-1">Multi-city, real-time sync, offline maps.</p>
-            <button className="mt-3 w-full rounded-lg bg-warm-gradient text-white text-xs font-semibold py-2 shadow-cta">
-              Upgrade
-            </button>
+            <Link to="/pricing">
+              <button className="mt-3 w-full rounded-lg bg-warm-gradient text-white text-xs font-semibold py-2 shadow-cta">
+                Upgrade
+              </button>
+            </Link>
           </div>
         )}
       </aside>

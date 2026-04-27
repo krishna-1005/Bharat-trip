@@ -25,6 +25,7 @@ export function MarketingNav() {
           <a href="#features">Features</a>
           <a href="#destinations">Destinations</a>
           <a href="#voices">Stories</a>
+          <Link to="/pricing">Pricing</Link>
           <Link to="/explore">Explore</Link>
         </nav>
 
