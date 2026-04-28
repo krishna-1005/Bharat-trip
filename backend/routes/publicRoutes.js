@@ -5,6 +5,7 @@ const Trip = require("../models/Trip");
 const JobApplication = require("../models/JobApplication");
 const { db } = require("../firebaseAdmin");
 const { sendJobApplicationNotification } = require("../services/emailService");
+const fetchOSMPlaces = require("../services/osmPlaces");
 
 const fs = require("fs");
 const path = require("path");
@@ -14,11 +15,22 @@ let firestoreEnabled = true;
 /* ── HELPER: Load India Places Data ── */
 const loadIndiaPlaces = () => {
   try {
-    const dataPath = path.join(__dirname, "../data/indiaPlaces.json");
-    const rawData = fs.readFileSync(dataPath, "utf8");
-    return JSON.parse(rawData);
+    const dataFiles = ["indiaPlaces.json", "bangalorePlaces.json", "bengaluruPlaces.json"];
+    let allData = [];
+    
+    dataFiles.forEach(file => {
+      const dataPath = path.join(__dirname, "../data", file);
+      if (fs.existsSync(dataPath)) {
+        const rawData = fs.readFileSync(dataPath, "utf8");
+        const parsed = JSON.parse(rawData);
+        if (Array.isArray(parsed)) {
+          allData = allData.concat(parsed);
+        }
+      }
+    });
+    return allData;
   } catch (err) {
-    console.error("Error loading indiaPlaces.json:", err);
+    console.error("Error loading place data:", err);
     return [];
   }
 };
@@ -31,41 +43,72 @@ router.get("/explore-places", async (req, res) => {
     
     let results = [];
 
-    // Flatten all places into a single list with city info
+    // 1. Flatten all local places
     allCities.forEach(cityData => {
+      if (!cityData.places) return;
       cityData.places.forEach(place => {
         results.push({
           ...place,
-          id: place.name.toLowerCase().replace(/\s+/g, "-"),
+          id: `local-${place.name.toLowerCase().replace(/\s+/g, "-")}`,
           city: cityData.city,
-          img: `https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80`, // Fallback image
+          img: place.img || `https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80`,
         });
       });
     });
 
-    // Filter by query if provided
+    // 2. Initial Local Filter
+    let filtered = results;
     if (q) {
       const query = q.toLowerCase();
-      results = results.filter(p => 
+      filtered = filtered.filter(p => 
         p.name.toLowerCase().includes(query) || 
         p.city.toLowerCase().includes(query) ||
         (p.tags && p.tags.some(t => t.toLowerCase().includes(query)))
       );
     }
 
-    // Filter by category if provided
     if (category && category !== "All") {
       const cat = category.toLowerCase();
-      results = results.filter(p => 
-        p.category.toLowerCase() === cat ||
+      filtered = filtered.filter(p => 
+        (p.category && p.category.toLowerCase() === cat) ||
         (p.tags && p.tags.some(t => t.toLowerCase() === cat))
       );
     }
 
-    // Sort by rating and reviews for relevance
-    results.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    // 3. Dynamic Fallback to OSM for broader results if few local matches
+    if (filtered.length < 10 && q && q.length > 2) {
+      console.log(`Searching OSM for broader results: ${q}`);
+      try {
+        // Search OSM for the query as a place name or category
+        // We'll use a neutral India center for general searches or search around major cities
+        const osmResults = await fetchOSMPlaces(20.5937, 78.9629, 500); // Broad radius
+        
+        const normalizedOSM = osmResults
+          .filter(p => !filtered.some(local => local.name.toLowerCase() === p.name.toLowerCase()))
+          .map(p => ({
+            ...p,
+            id: `osm-${p.name.toLowerCase().replace(/\s+/g, "-")}`,
+            city: "India",
+            img: `https://source.unsplash.com/800x600/?${encodeURIComponent(p.name + "," + p.category)}`
+          }));
+        
+        // Final filter for OSM results based on query
+        const query = q.toLowerCase();
+        const relevantOSM = normalizedOSM.filter(p => 
+          p.name.toLowerCase().includes(query) || 
+          p.category.toLowerCase().includes(query)
+        );
 
-    res.json(results.slice(0, 50)); // Return top 50 matches
+        filtered = [...filtered, ...relevantOSM];
+      } catch (osmErr) {
+        console.error("OSM Fallback error:", osmErr.message);
+      }
+    }
+
+    // Sort by rating and reviews
+    filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+
+    res.json(filtered.slice(0, 60));
   } catch (err) {
     console.error("Explore places error:", err);
     res.status(500).json({ error: "Failed to fetch explore places" });
