@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Compass, Sparkles, Map, User, Search, Bell, Plus,
   LayoutGrid, Users, Bookmark, Settings, ChevronLeft, Menu, LogOut,
-  ShieldCheck
+  ShieldCheck, Globe
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
@@ -15,7 +15,8 @@ const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
 
 const nav = [
   { to: "/dashboard", label: "Home", icon: Home },
-  { to: "/explore", label: "Explore", icon: Compass },
+  { to: "/explore-india", label: "Explore India", icon: Compass },
+  { to: "/explore-international", label: "International", icon: Globe },
   { to: "/trip-type", label: "AI Plan", icon: Sparkles },
   { to: "/trips", label: "My Trips", icon: Map },
   { to: "/collaborate", label: "Group", icon: Users },
@@ -25,8 +26,8 @@ const nav = [
 
 const mobileNav = [
   { to: "/dashboard", label: "Home", icon: Home },
-  { to: "/explore", label: "Explore", icon: Compass },
-  { to: "/trip-type", label: "AI Plan", icon: Sparkles },
+  { to: "/explore-india", label: "India", icon: Compass },
+  { to: "/explore-international", label: "Global", icon: Globe },
   { to: "/trips", label: "Trips", icon: Bookmark },
   { to: "/profile", label: "Profile", icon: User },
 ];

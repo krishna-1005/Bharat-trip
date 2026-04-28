@@ -37,13 +37,22 @@ function DestinationImage({ src, alt }: { src?: string; alt: string }) {
   );
 }
 
-export default function Explore() {
+export default function Explore({ isInternational = false }: { isInternational?: boolean }) {
   const [cat, setCat] = useState("All");
   const [query, setQuery] = useState("");
 
+  // Shuffle destinations once on mount, filtered by isInternational
+  const filteredByRegion = useMemo(() => {
+    return destinations.filter(d => d.isInternational === isInternational);
+  }, [isInternational]);
+
+  const shuffledDestinations = useMemo(() => {
+    return [...filteredByRegion].sort(() => Math.random() - 0.5);
+  }, [filteredByRegion]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return destinations.filter((d) => {
+    return shuffledDestinations.filter((d) => {
       const matchCat = cat === "All" || d.tag === cat;
       const matchQuery =
         !q ||
@@ -52,13 +61,19 @@ export default function Explore() {
         d.tag.toLowerCase().includes(q);
       return matchCat && matchQuery;
     });
-  }, [cat, query]);
+  }, [cat, query, shuffledDestinations]);
 
   return (
     <AppShell>
       <div className="px-4 lg:px-10 py-8 max-w-7xl mx-auto">
-        <h1 className="font-display font-bold text-3xl md:text-4xl tracking-tight">Explore India</h1>
-        <p className="text-muted-foreground mt-1">Hand-picked places, sorted by what you might love.</p>
+        <h1 className="font-display font-bold text-3xl md:text-4xl tracking-tight">
+          {isInternational ? "Explore the World" : "Explore India"}
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          {isInternational 
+            ? "Iconic global tourist spots, curated for you." 
+            : "Hand-picked places across India, sorted by what you might love."}
+        </p>
 
         <div className="mt-6 flex gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[260px]">

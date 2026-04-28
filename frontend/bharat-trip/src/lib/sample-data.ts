@@ -10,16 +10,22 @@ import ladakhImg from "@/assets/dest-ladakh.jpg";
 import hampiImg from "@/assets/dest-hampi.jpg";
 
 export const destinations = [
-  { id: "jaipur", name: "Jaipur", region: "Rajasthan", tag: "Heritage", days: "4 days", price: "₹18,500", rating: 4.8, img: jaipurImg },
-  { id: "goa", name: "Goa", region: "West Coast", tag: "Beaches", days: "5 days", price: "₹22,900", rating: 4.7, img: goaImg },
-  { id: "rishikesh", name: "Rishikesh", region: "Uttarakhand", tag: "Spiritual", days: "3 days", price: "₹14,200", rating: 4.6, img: rishikeshImg },
-  { id: "kerala", name: "Kerala Backwaters", region: "Kerala", tag: "Nature", days: "6 days", price: "₹28,400", rating: 4.9, img: keralaImg },
-  { id: "varanasi", name: "Varanasi", region: "Uttar Pradesh", tag: "Spiritual", days: "3 days", price: "₹12,800", rating: 4.5, img: varanasiImg },
-  { id: "himalayas", name: "Himalayas", region: "Himachal", tag: "Mountains", days: "7 days", price: "₹32,000", rating: 4.9, img: himalayasImg },
-  { id: "coorg", name: "Coorg", region: "Karnataka", tag: "Hills", days: "4 days", price: "₹19,600", rating: 4.7, img: coorgImg },
-  { id: "munnar", name: "Munnar", region: "Kerala", tag: "Hills", days: "4 days", price: "₹17,900", rating: 4.6, img: munnarImg },
-  { id: "ladakh", name: "Ladakh", region: "Ladakh", tag: "Mountains", days: "8 days", price: "₹39,500", rating: 4.9, img: ladakhImg },
-  { id: "hampi", name: "Hampi", region: "Karnataka", tag: "Heritage", days: "3 days", price: "₹13,400", rating: 4.7, img: hampiImg },
+  { id: "jaipur", name: "Jaipur", region: "Rajasthan", tag: "Heritage", days: "4 days", price: "₹18,500", rating: 4.8, img: jaipurImg, isInternational: false },
+  { id: "goa", name: "Goa", region: "West Coast", tag: "Beaches", days: "5 days", price: "₹22,900", rating: 4.7, img: goaImg, isInternational: false },
+  { id: "rishikesh", name: "Rishikesh", region: "Uttarakhand", tag: "Spiritual", days: "3 days", price: "₹14,200", rating: 4.6, img: rishikeshImg, isInternational: false },
+  { id: "kerala", name: "Kerala Backwaters", region: "Kerala", tag: "Nature", days: "6 days", price: "₹28,400", rating: 4.9, img: keralaImg, isInternational: false },
+  { id: "varanasi", name: "Varanasi", region: "Uttar Pradesh", tag: "Spiritual", days: "3 days", price: "₹12,800", rating: 4.5, img: varanasiImg, isInternational: false },
+  { id: "himalayas", name: "Himalayas", region: "Himachal", tag: "Mountains", days: "7 days", price: "₹32,000", rating: 4.9, img: himalayasImg, isInternational: false },
+  { id: "coorg", name: "Coorg", region: "Karnataka", tag: "Hills", days: "4 days", price: "₹19,600", rating: 4.7, img: coorgImg, isInternational: false },
+  { id: "munnar", name: "Munnar", region: "Kerala", tag: "Hills", days: "4 days", price: "₹17,900", rating: 4.6, img: munnarImg, isInternational: false },
+  { id: "ladakh", name: "Ladakh", region: "Ladakh", tag: "Mountains", days: "8 days", price: "₹39,500", rating: 4.9, img: ladakhImg, isInternational: false },
+  { id: "hampi", name: "Hampi", region: "Karnataka", tag: "Heritage", days: "3 days", price: "₹13,400", rating: 4.7, img: hampiImg, isInternational: false },
+  { id: "paris", name: "Paris", region: "France", tag: "Heritage", days: "5 days", price: "₹1,25,000", rating: 4.9, img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80", isInternational: true },
+  { id: "dubai", name: "Dubai", region: "UAE", tag: "Modern", days: "4 days", price: "₹85,000", rating: 4.8, img: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80", isInternational: true },
+  { id: "bali", name: "Bali", region: "Indonesia", tag: "Nature", days: "6 days", price: "₹65,000", rating: 4.9, img: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80", isInternational: true },
+  { id: "tokyo", name: "Tokyo", region: "Japan", tag: "Culture", days: "5 days", price: "₹1,45,000", rating: 4.9, img: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=80", isInternational: true },
+  { id: "singapore", name: "Singapore", region: "Singapore", tag: "Modern", days: "4 days", price: "₹75,000", rating: 4.7, img: "https://images.unsplash.com/photo-1525625230556-8e8ad36c6eb2?auto=format&fit=crop&w=800&q=80", isInternational: true },
+  { id: "rome", name: "Rome", region: "Italy", tag: "Heritage", days: "5 days", price: "₹1,15,000", rating: 4.8, img: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80", isInternational: true },
 ];
 
 export const destinationItineraries: Record<string, any[]> = {
@@ -227,6 +233,364 @@ export const destinationItineraries: Record<string, any[]> = {
         { time: "08:30", place: "Top Station", desc: "Breathtaking views of Tamil Nadu", icon: "camera", lat: 10.1224, lng: 77.2443 },
         { time: "12:00", place: "Marayoor Sandalwood", desc: "Ancient dolmens exploration", icon: "landmark", lat: 10.2800, lng: 77.1500 },
         { time: "16:00", place: "Departure", desc: "Transfer back to Kochi", icon: "plane", lat: 10.1520, lng: 76.3920 },
+      ],
+    },
+  ],
+  varanasi: [
+    {
+      day: 1,
+      title: "The Holy City",
+      items: [
+        { time: "11:00", place: "Lal Bahadur Shastri Airport", desc: "Transfer to ghat-side boutique hotel", icon: "plane", lat: 25.4497, lng: 82.8593 },
+        { time: "16:00", place: "Old City Walk", desc: "Guided narrow alley exploration", icon: "landmark", lat: 25.3176, lng: 83.0062 },
+        { time: "18:30", place: "Dashashwamedh Ghat", desc: "Witness the grand evening Ganga Aarti", icon: "music", lat: 25.3068, lng: 83.0103 },
+      ],
+    },
+    {
+      day: 2,
+      title: "Ghats & Sarnath",
+      items: [
+        { time: "05:30", place: "Subah-e-Banaras", desc: "Sunrise boat ride on the Ganges", icon: "ship", lat: 25.3100, lng: 83.0100 },
+        { time: "10:30", place: "Sarnath", desc: "Visit the Dhamek Stupa and museum", icon: "landmark", lat: 25.3762, lng: 83.0227 },
+        { time: "17:00", place: "Assi Ghat", desc: "Cultural evening and snacks", icon: "utensils", lat: 25.2897, lng: 83.0065 },
+      ],
+    },
+  ],
+  himalayas: [
+    {
+      day: 1,
+      title: "Mountain Gateway",
+      items: [
+        { time: "10:00", place: "Shimla Mall Road", desc: "Walk through colonial architecture", icon: "landmark", lat: 31.1048, lng: 77.1734 },
+        { time: "14:00", place: "Jakhu Temple", desc: "Hilltop temple with monkey views", icon: "camera", lat: 31.1011, lng: 77.1852 },
+      ],
+    },
+    {
+      day: 2,
+      title: "Apple Orchards & Valleys",
+      items: [
+        { time: "09:00", place: "Kufri", desc: "Snow point and panoramic views", icon: "sun", lat: 31.1000, lng: 77.2667 },
+        { time: "15:00", place: "Narkanda", desc: "Drive through dense cedar forests", icon: "camera", lat: 31.2583, lng: 77.4586 },
+      ],
+    },
+  ],
+  coorg: [
+    {
+      day: 1,
+      title: "Coffee & Culture",
+      items: [
+        { time: "11:00", place: "Madikeri Fort", desc: "Historic fort and museum tour", icon: "landmark", lat: 12.4217, lng: 75.7383 },
+        { time: "15:00", place: "Abbey Falls", desc: "Lush waterfall exploration", icon: "camera", lat: 12.4411, lng: 75.7214 },
+      ],
+    },
+    {
+      day: 2,
+      title: "Elephant Camp & Monasteries",
+      items: [
+        { time: "09:00", place: "Dubare Elephant Camp", desc: "Interaction and bathing experience", icon: "sun", lat: 12.3686, lng: 75.9039 },
+        { time: "14:00", place: "Namdroling Monastery", desc: "Golden Temple Tibetan architecture", icon: "landmark", lat: 12.4286, lng: 75.9686 },
+      ],
+    },
+  ],
+  ladakh: [
+    {
+      day: 1,
+      title: "Acclimatization in Leh",
+      items: [
+        { time: "09:00", place: "Leh Airport", desc: "Transfer to hotel and rest for altitude", icon: "plane", lat: 34.1444, lng: 77.5551 },
+        { time: "16:00", place: "Shanti Stupa", desc: "Sunset views over Leh city", icon: "landmark", lat: 34.1683, lng: 77.5775 },
+      ],
+    },
+    {
+      day: 2,
+      title: "Monasteries & Markets",
+      items: [
+        { time: "10:00", place: "Thiksey Monastery", desc: "Morning prayers and art tour", icon: "landmark", lat: 34.0561, lng: 77.6669 },
+        { time: "15:00", place: "Leh Main Bazaar", desc: "Shopping for local handicrafts", icon: "shopping-bag", lat: 34.1642, lng: 77.5848 },
+      ],
+    },
+  ],
+  hampi: [
+    {
+      day: 1,
+      title: "The Lost Kingdom",
+      items: [
+        { time: "09:00", place: "Virupaksha Temple", desc: "Guided tour of the ancient living temple", icon: "landmark", lat: 15.3350, lng: 76.4580 },
+        { time: "15:00", place: "Vittala Temple", desc: "Stone chariot and musical pillars", icon: "camera", lat: 15.3391, lng: 76.4789 },
+        { time: "18:00", place: "Matanga Hill", desc: "Short trek for the best Hampi sunset", icon: "camera", lat: 15.3333, lng: 76.4667 },
+      ],
+    },
+    {
+      day: 2,
+      title: "Riverside Ruins",
+      items: [
+        { time: "10:00", place: "Tungabhadra River", desc: "Coracle boat ride through boulder landscapes", icon: "ship", lat: 15.3400, lng: 76.4600 },
+        { time: "14:00", place: "Lotus Mahal", desc: "Indo-Islamic architectural gems", icon: "landmark", lat: 15.3283, lng: 76.4700 },
+      ],
+    },
+  ],
+  paris: [
+    {
+      day: 1,
+      title: "Arrival & Eiffel Magic",
+      items: [
+        { time: "10:00", place: "CDG Airport", desc: "Private transfer to luxury hotel in Le Marais", icon: "plane", lat: 49.0097, lng: 2.5479 },
+        { time: "14:00", place: "Le Marais District", desc: "Guided walk through historic alleys and cafes", icon: "landmark", lat: 48.8575, lng: 2.3600 },
+        { time: "18:00", place: "Eiffel Tower", desc: "Champagne toast and sunset photography", icon: "camera", lat: 48.8584, lng: 2.2945 },
+      ],
+    },
+    {
+      day: 2,
+      title: "Art & Culture Immersion",
+      items: [
+        { time: "09:00", place: "The Louvre", desc: "VIP skip-the-line tour of masterworks", icon: "landmark", lat: 48.8606, lng: 2.3376 },
+        { time: "13:00", place: "Jardin des Tuileries", desc: "Al-fresco lunch in the royal gardens", icon: "utensils", lat: 48.8635, lng: 2.3275 },
+        { time: "16:00", place: "Montmartre", desc: "Artist square and Sacré-Cœur Basilica", icon: "camera", lat: 48.8867, lng: 2.3431 },
+      ],
+    },
+    {
+      day: 3,
+      title: "Palatial Grandeur",
+      items: [
+        { time: "09:30", place: "Versailles Palace", desc: "Full day exploration of royal gardens and hall of mirrors", icon: "landmark", lat: 48.8049, lng: 2.1204 },
+        { time: "19:00", place: "Seine River Cruise", desc: "Gourmet dinner cruise through the heart of Paris", icon: "ship", lat: 48.8617, lng: 2.3275 },
+      ],
+    },
+    {
+      day: 4,
+      title: "Bohemian Rhythms",
+      items: [
+        { time: "10:00", place: "Saint-Germain-des-Prés", desc: "Historic literary cafes and boutiques", icon: "shopping-bag", lat: 48.8533, lng: 2.3333 },
+        { time: "15:00", place: "Musée d'Orsay", desc: "Impressionist masterpieces in a grand station", icon: "landmark", lat: 48.8594, lng: 2.3265 },
+        { time: "20:00", place: "Latin Quarter", desc: "Evening walk and traditional bistro dinner", icon: "utensils", lat: 48.8500, lng: 2.3444 },
+      ],
+    },
+    {
+      day: 5,
+      title: "Leisure & Departure",
+      items: [
+        { time: "10:00", place: "Canal Saint-Martin", desc: "Relaxing walk along the trendy waterways", icon: "sun", lat: 48.8714, lng: 2.3622 },
+        { time: "13:00", place: "Galeries Lafayette", desc: "Luxury shopping and rooftop views", icon: "shopping-bag", lat: 48.8736, lng: 2.3322 },
+        { time: "17:00", place: "CDG Airport", desc: "Departure transfer", icon: "plane", lat: 49.0097, lng: 2.5479 },
+      ],
+    },
+  ],
+  dubai: [
+    {
+      day: 1,
+      title: "Skyline & Shopping",
+      items: [
+        { time: "11:00", place: "Dubai International", desc: "Luxury car transfer to Downtown hotel", icon: "plane", lat: 25.2532, lng: 55.3657 },
+        { time: "15:00", place: "Dubai Mall", desc: "Explore the world's largest mall and aquarium", icon: "shopping-bag", lat: 25.1972, lng: 55.2797 },
+        { time: "18:30", place: "Burj Khalifa", desc: "Sunset views from the 148th floor", icon: "camera", lat: 25.1972, lng: 55.2744 },
+      ],
+    },
+    {
+      day: 2,
+      title: "Desert & Heritage",
+      items: [
+        { time: "09:00", place: "Old Dubai & Souks", desc: "Gold and spice market cultural walk", icon: "landmark", lat: 25.2697, lng: 55.2975 },
+        { time: "15:00", place: "Desert Safari", desc: "Dune bashing, camel riding and starlit BBQ", icon: "sun", lat: 24.9500, lng: 55.3500 },
+      ],
+    },
+    {
+      day: 3,
+      title: "Island Luxury",
+      items: [
+        { time: "10:00", place: "Palm Jumeirah", desc: "Visit Atlantis and The View at The Palm", icon: "sun", lat: 25.1124, lng: 55.1390 },
+        { time: "15:00", place: "Dubai Marina", desc: "Luxury yacht cruise along the skyline", icon: "ship", lat: 25.0805, lng: 55.1403 },
+        { time: "20:00", place: "JBR The Walk", desc: "Beachfront dining and evening stroll", icon: "utensils", lat: 25.0760, lng: 55.1300 },
+      ],
+    },
+    {
+      day: 4,
+      title: "Modern Marvels & Departure",
+      items: [
+        { time: "10:00", place: "Museum of the Future", desc: "Exploring tomorrow's technology", icon: "landmark", lat: 25.2192, lng: 55.2819 },
+        { time: "14:00", place: "Madinat Jumeirah", desc: "Traditional souk with Burj Al Arab views", icon: "shopping-bag", lat: 25.1328, lng: 55.1844 },
+        { time: "18:00", place: "Dubai International", desc: "Departure transfer", icon: "plane", lat: 25.2532, lng: 55.3657 },
+      ],
+    },
+  ],
+  bali: [
+    {
+      day: 1,
+      title: "Ubud Serenity",
+      items: [
+        { time: "10:00", place: "Ngurah Rai Airport", desc: "Transfer to lush Ubud villa", icon: "plane", lat: -8.7481, lng: 115.1671 },
+        { time: "15:00", place: "Sacred Monkey Forest", desc: "Walk through the ancient forest sanctuary", icon: "camera", lat: -8.5193, lng: 115.2588 },
+        { time: "18:00", place: "Ubud Art Market", desc: "Traditional crafts and evening vibes", icon: "shopping-bag", lat: -8.5069, lng: 115.2625 },
+      ],
+    },
+    {
+      day: 2,
+      title: "Temples & Terraces",
+      items: [
+        { time: "08:00", place: "Tegalalang Rice Terrace", desc: "Morning walk through green landscapes", icon: "sun", lat: -8.4333, lng: 115.2833 },
+        { time: "13:00", place: "Tirta Empul", desc: "Holy water temple spiritual experience", icon: "landmark", lat: -8.4117, lng: 115.2875 },
+        { time: "17:30", place: "Tanah Lot", desc: "Sunset views at the iconic sea temple", icon: "camera", lat: -8.6212, lng: 115.0868 },
+      ],
+    },
+    {
+      day: 3,
+      title: "Coastal Bliss",
+      items: [
+        { time: "10:00", place: "Seminyak Beach", desc: "Surfing and beach club relaxation", icon: "sun", lat: -8.6913, lng: 115.1554 },
+        { time: "16:00", place: "Uluwatu Temple", desc: "Cliffside temple and Kecak fire dance", icon: "landmark", lat: -8.8291, lng: 115.0849 },
+      ],
+    },
+    {
+      day: 4,
+      title: "Nusa Penida Adventure",
+      items: [
+        { time: "08:00", place: "Sanur Port", desc: "Fast boat to Nusa Penida island", icon: "ship", lat: -8.6750, lng: 115.2639 },
+        { time: "11:00", place: "Kelingking Beach", desc: "The famous T-Rex shaped cliff view", icon: "camera", lat: -8.7391, lng: 115.0868 },
+      ],
+    },
+    {
+      day: 5,
+      title: "Waterfalls & Lakes",
+      items: [
+        { time: "09:00", place: "Ulun Danu Beratan", desc: "The iconic lake temple in the highlands", icon: "landmark", lat: -8.2752, lng: 115.1664 },
+        { time: "14:00", place: "Sekumpul Waterfall", desc: "Trekking to Bali's most beautiful falls", icon: "sun", lat: -8.1733, lng: 115.1819 },
+      ],
+    },
+    {
+      day: 6,
+      title: "South Bali Vibes & Departure",
+      items: [
+        { time: "10:00", place: "Canggu Village", desc: "Cafes and boutique shopping", icon: "shopping-bag", lat: -8.6478, lng: 115.1385 },
+        { time: "17:00", place: "Ngurah Rai Airport", desc: "Departure transfer", icon: "plane", lat: -8.7481, lng: 115.1671 },
+      ],
+    },
+  ],
+  tokyo: [
+    {
+      day: 1,
+      title: "Neon & Tradition",
+      items: [
+        { time: "11:00", place: "Narita Airport", desc: "Skyliner transfer to Shinjuku", icon: "plane", lat: 35.7720, lng: 140.3929 },
+        { time: "15:00", place: "Meiji Jingu Shrine", desc: "Peaceful forest walk in the heart of the city", icon: "landmark", lat: 35.6764, lng: 139.6993 },
+        { time: "19:00", place: "Shinjuku Omoide Yokocho", desc: "Izakaya dinner in historic narrow alleys", icon: "utensils", lat: 35.6931, lng: 139.6999 },
+      ],
+    },
+    {
+      day: 2,
+      title: "Pop Culture & Views",
+      items: [
+        { time: "10:00", place: "Harajuku Takeshita Street", desc: "Teen fashion and quirky snacks", icon: "shopping-bag", lat: 35.6715, lng: 139.7032 },
+        { time: "14:00", place: "Shibuya Crossing", desc: "World's busiest intersection experience", icon: "camera", lat: 35.6595, lng: 139.7005 },
+        { time: "18:00", place: "Shibuya Sky", desc: "Panoramic city views at sunset", icon: "sun", lat: 35.6585, lng: 139.7015 },
+      ],
+    },
+    {
+      day: 3,
+      title: "Ancient Temples & Otaku Culture",
+      items: [
+        { time: "09:00", place: "Senso-ji Temple", desc: "Tokyo's oldest temple in historic Asakusa", icon: "landmark", lat: 35.7148, lng: 139.7967 },
+        { time: "13:00", place: "Akihabara Electric Town", desc: "Anime, gaming and electronics exploration", icon: "shopping-bag", lat: 35.6984, lng: 139.7700 },
+        { time: "18:00", place: "Sumida River Cruise", desc: "Evening boat ride to Odaiba", icon: "ship", lat: 35.7100, lng: 139.8000 },
+      ],
+    },
+    {
+      day: 4,
+      title: "Mount Fuji Day Trip",
+      items: [
+        { time: "08:00", place: "Lake Kawaguchi", desc: "Stunning views of Mt. Fuji across the water", icon: "sun", lat: 35.5171, lng: 138.7518 },
+        { time: "13:00", place: "Oishi Park", desc: "Seasonal flowers with a mountain backdrop", icon: "camera", lat: 35.5235, lng: 138.7464 },
+        { time: "16:00", place: "Chureito Pagoda", desc: "The iconic view of Fuji with the red pagoda", icon: "landmark", lat: 35.4968, lng: 138.8014 },
+      ],
+    },
+    {
+      day: 5,
+      title: "Digital Art & Luxury",
+      items: [
+        { time: "10:00", place: "teamLab Borderless", desc: "Immersive digital art museum experience", icon: "camera", lat: 35.6263, lng: 139.7753 },
+        { time: "14:00", place: "Ginza District", desc: "Luxury shopping and high-end architecture", icon: "shopping-bag", lat: 35.6717, lng: 139.7650 },
+        { time: "18:00", place: "Haneda Airport", desc: "Departure transfer", icon: "plane", lat: 35.5494, lng: 139.7798 },
+      ],
+    },
+  ],
+  singapore: [
+    {
+      day: 1,
+      title: "Garden City Arrival",
+      items: [
+        { time: "10:00", place: "Changi Airport", desc: "Explore Jewel Changi and waterfalls", icon: "plane", lat: 1.3644, lng: 103.9915 },
+        { time: "15:00", place: "Gardens by the Bay", desc: "Cloud Forest and Supertree Grove tour", icon: "sun", lat: 1.2816, lng: 103.8636 },
+        { time: "19:00", place: "Marina Bay Sands", desc: "Spectra light and water show", icon: "camera", lat: 1.2847, lng: 103.8610 },
+      ],
+    },
+    {
+      day: 2,
+      title: "Culture & Cuisine",
+      items: [
+        { time: "09:30", place: "Chinatown Heritage", desc: "Temples and traditional shophouses", icon: "landmark", lat: 1.2841, lng: 103.8448 },
+        { time: "12:30", place: "Maxwell Food Centre", desc: "Lunch at famous hawker stalls", icon: "utensils", lat: 1.2804, lng: 103.8448 },
+        { time: "16:00", place: "Sentosa Island", desc: "Beach clubs and cable car ride", icon: "ship", lat: 1.2494, lng: 103.8303 },
+      ],
+    },
+    {
+      day: 3,
+      title: "Zoo & Night Safaris",
+      items: [
+        { time: "10:00", place: "Singapore Zoo", desc: "Open-concept rainforest zoo experience", icon: "sun", lat: 1.4043, lng: 103.7930 },
+        { time: "19:30", place: "Night Safari", desc: "World's first nocturnal wildlife park", icon: "camera", lat: 1.4022, lng: 103.7880 },
+      ],
+    },
+    {
+      day: 4,
+      title: "Orchard Luxury & Departure",
+      items: [
+        { time: "10:00", place: "Orchard Road", desc: "Premier shopping belt exploration", icon: "shopping-bag", lat: 1.3048, lng: 103.8318 },
+        { time: "15:00", place: "Fort Canning Park", desc: "Historic hill with scenic tunnels", icon: "landmark", lat: 1.2953, lng: 103.8463 },
+        { time: "19:00", place: "Changi Airport", desc: "Departure transfer", icon: "plane", lat: 1.3644, lng: 103.9915 },
+      ],
+    },
+  ],
+  rome: [
+    {
+      day: 1,
+      title: "Empire & Ruins",
+      items: [
+        { time: "10:00", place: "Fiumicino Airport", desc: "Transfer to historic center", icon: "plane", lat: 41.7999, lng: 12.2462 },
+        { time: "14:00", place: "Colosseum", desc: "Guided tour of the gladiatorial arena", icon: "landmark", lat: 41.8902, lng: 12.4922 },
+        { time: "17:00", place: "Roman Forum", desc: "Walk through the ancient heart of Rome", icon: "camera", lat: 41.8925, lng: 12.4853 },
+      ],
+    },
+    {
+      day: 2,
+      title: "Art & Faith",
+      items: [
+        { time: "09:00", place: "Vatican Museums", desc: "Sistine Chapel and Raphael rooms", icon: "landmark", lat: 41.9065, lng: 12.4534 },
+        { time: "14:00", place: "St. Peter's Basilica", desc: "Explore the world's largest church", icon: "camera", lat: 41.9022, lng: 12.4539 },
+        { time: "19:00", place: "Trastevere", desc: "Traditional dinner in a lively neighborhood", icon: "utensils", lat: 41.8894, lng: 12.4667 },
+      ],
+    },
+    {
+      day: 3,
+      title: "Piazzas & Fountains",
+      items: [
+        { time: "09:30", place: "Pantheon", desc: "Ancient temple with the giant dome", icon: "landmark", lat: 41.8986, lng: 12.4769 },
+        { time: "12:00", place: "Trevi Fountain", desc: "Coin toss and gelato break", icon: "camera", lat: 41.9009, lng: 12.4833 },
+        { time: "16:00", place: "Spanish Steps", desc: "Fashion district walk and sunset view", icon: "shopping-bag", lat: 41.9057, lng: 12.4823 },
+      ],
+    },
+    {
+      day: 4,
+      title: "Borghese Gardens",
+      items: [
+        { time: "10:00", place: "Borghese Gallery", desc: "Masterpieces of Bernini and Caravaggio", icon: "landmark", lat: 41.9142, lng: 12.4921 },
+        { time: "15:00", place: "Villa Borghese Park", desc: "Relaxing walk and lake rowing", icon: "sun", lat: 41.9128, lng: 12.4853 },
+      ],
+    },
+    {
+      day: 5,
+      title: "Appian Way & Departure",
+      items: [
+        { time: "09:00", place: "Catacombs of Rome", desc: "Underground history exploration", icon: "landmark", lat: 41.8600, lng: 12.5100 },
+        { time: "14:00", place: "Testaccio Market", desc: "Last authentic Roman food experience", icon: "utensils", lat: 41.8778, lng: 12.4761 },
+        { time: "18:00", place: "Fiumicino Airport", desc: "Departure transfer", icon: "plane", lat: 41.7999, lng: 12.2462 },
       ],
     },
   ],

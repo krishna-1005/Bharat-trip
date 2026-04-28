@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import Home from "./routes/index";
 import AuthPage from "./routes/auth";
@@ -11,6 +11,11 @@ import Profile from "./routes/profile";
 import SettingsPage from "./routes/settings";
 import Results from "./routes/results";
 import Pricing from "./routes/pricing";
+import Privacy from "./routes/privacy";
+import Terms from "./routes/terms";
+import Cookies from "./routes/cookies";
+import About from "./routes/about";
+import Careers from "./routes/careers";
 import TripDetails from "./routes/trip-details";
 import TripType from "./routes/trip-type";
 import Trips from "./routes/trips";
@@ -32,8 +37,15 @@ export default function App() {
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/collaborate" element={<Collaborate />} />
       <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/explore" element={<Explore />} />
+      <Route path="/explore" element={<Navigate to="/explore-india" replace />} />
+      <Route path="/explore-india" element={<Explore isInternational={false} />} />
+      <Route path="/explore-international" element={<Explore isInternational={true} />} />
       <Route path="/pricing" element={<Pricing />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/cookies" element={<Cookies />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/careers" element={<Careers />} />
       <Route path="/planner-multi" element={<PlannerMulti />} />
       <Route path="/planner-single" element={<PlannerSingle />} />
       <Route path="/profile" element={<Profile />} />

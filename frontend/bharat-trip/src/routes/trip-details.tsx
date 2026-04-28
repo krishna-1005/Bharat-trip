@@ -74,7 +74,7 @@ function TripDetailsContent() {
                 <div className="size-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10">
                   <MapPin className="size-4 text-accent" />
                 </div>
-                <span className="text-sm font-medium">{d.name}, India</span>
+                <span className="text-sm font-medium">{d.name}, {d.isInternational ? d.region : "India"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="size-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10">
