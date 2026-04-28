@@ -194,4 +194,49 @@ async function sendLoginNotificationEmail(email, name) {
   }
 }
 
-module.exports = { sendUpdateEmail, sendWelcomeEmail, sendLoginNotificationEmail };
+/**
+ * Send notification to admin when a new job application is submitted
+ */
+async function sendJobApplicationNotification(application) {
+  const currentTransporter = getTransporter();
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+  
+  if (!currentTransporter || !adminEmail) return;
+
+  const mailOptions = {
+    from: `"GoTripo Hiring" <${process.env.EMAIL_USER}>`,
+    to: adminEmail,
+    subject: `New Job Application: ${application.jobTitle} - ${application.name} 💼`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px; overflow: hidden;">
+        <div style="background-color: #3b82f6; color: white; padding: 20px; text-align: center;">
+          <h2 style="margin: 0;">New Application Received</h2>
+        </div>
+        <div style="padding: 30px;">
+          <p><strong>Applicant Name:</strong> ${application.name}</p>
+          <p><strong>Email:</strong> ${application.email}</p>
+          <p><strong>Position:</strong> ${application.jobTitle}</p>
+          <p><strong>Note:</strong> ${application.note || 'No note provided'}</p>
+          <div style="margin-top: 30px; text-align: center;">
+            <a href="${application.resume}" style="background-color: #10b981; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-right: 10px;">View Resume</a>
+            <a href="${process.env.FRONTEND_URL || 'https://gotripo.tech'}/admin/applications" style="background-color: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Review in Dashboard</a>
+          </div>
+        </div>
+      </div>
+    `,
+  };
+
+  try {
+    await currentTransporter.sendMail(mailOptions);
+    console.log(`✅ Admin notification sent for application from ${application.email}`);
+  } catch (error) {
+    console.error("❌ Failed to send admin notification:", error.message);
+  }
+}
+
+module.exports = { 
+  sendUpdateEmail, 
+  sendWelcomeEmail, 
+  sendLoginNotificationEmail,
+  sendJobApplicationNotification
+};

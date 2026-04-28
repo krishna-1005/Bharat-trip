@@ -6,6 +6,7 @@ import { Briefcase, MapPin, Clock, ArrowRight, ChevronDown, CheckCircle2, Send, 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import api from "@/lib/api";
 
 const jobs = [
   {
@@ -99,11 +100,20 @@ function JobCard({ job }: { job: typeof jobs[0] }) {
   const [isApplying, setIsApplying] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", resume: "", note: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Application submitted successfully! Our team will get back to you soon.");
-    setIsApplying(false);
-    setFormData({ name: "", email: "", resume: "", note: "" });
+    try {
+      await api.post("/public/careers/apply", {
+        ...formData,
+        jobId: job.id,
+        jobTitle: job.title
+      });
+      toast.success("Application submitted successfully! Our team will get back to you soon.");
+      setIsApplying(false);
+      setFormData({ name: "", email: "", resume: "", note: "" });
+    } catch (err) {
+      toast.error("Failed to submit application. Please try again.");
+    }
   };
 
   return (
@@ -270,11 +280,20 @@ export default function Careers() {
   const [showOpenApp, setShowOpenApp] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", resume: "", note: "" });
 
-  const handleOpenAppSubmit = (e: React.FormEvent) => {
+  const handleOpenAppSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Open application submitted! We'll keep you in mind for future roles.");
-    setShowOpenApp(false);
-    setFormData({ name: "", email: "", resume: "", note: "" });
+    try {
+      await api.post("/public/careers/apply", {
+        ...formData,
+        jobId: "open",
+        jobTitle: "Open Application"
+      });
+      toast.success("Open application submitted! We'll keep you in mind for future roles.");
+      setShowOpenApp(false);
+      setFormData({ name: "", email: "", resume: "", note: "" });
+    } catch (err) {
+      toast.error("Failed to submit application. Please try again.");
+    }
   };
 
   const content = (

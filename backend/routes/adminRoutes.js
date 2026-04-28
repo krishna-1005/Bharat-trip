@@ -4,6 +4,7 @@ const UsageLog = require("../models/UsageLog");
 const Trip = require("../models/Trip");
 const ProjectReview = require("../models/ProjectReview");
 const Poll = require("../models/Poll");
+const JobApplication = require("../models/JobApplication");
 const { protect, adminOnly } = require("../middleware/protect");
 const { admin, db } = require("../firebaseAdmin");
 
@@ -105,6 +106,7 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     const totalSavedTrips = await Trip.countDocuments();
     const totalReviews = await ProjectReview.countDocuments();
     const totalPolls = await Poll.countDocuments();
+    const totalApplications = await JobApplication.countDocuments();
 
     // Fetch Guest vs Logged-in stats from Firestore (with fallback)
     let guestCount = 0;
@@ -156,6 +158,7 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
         totalTripsSavedByUsers: totalSavedTrips,
         totalReviews,
         totalPolls,
+        totalApplications,
         guestCount: finalGuestCount,
         trackedUserCount: finalTrackedCount,
         totalConversions
@@ -290,6 +293,39 @@ router.delete("/polls/:id", protect, verifyAdminEmail, async (req, res) => {
     res.json({ message: "Poll deleted" });
   } catch (err) {
     res.status(500).json({ error: "Error deleting poll" });
+  }
+});
+
+/* CAREERS APPLICATIONS MANAGEMENT */
+router.get("/applications", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const applications = await JobApplication.find().sort({ createdAt: -1 });
+    res.json(applications);
+  } catch (err) {
+    res.status(500).json({ error: "Error fetching applications" });
+  }
+});
+
+router.patch("/applications/:id/status", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const application = await JobApplication.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+    res.json(application);
+  } catch (err) {
+    res.status(500).json({ error: "Error updating application status" });
+  }
+});
+
+router.delete("/applications/:id", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    await JobApplication.findByIdAndDelete(req.params.id);
+    res.json({ message: "Application deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Error deleting application" });
   }
 });
 

@@ -2,9 +2,34 @@ const express = require("express");
 const router = express.Router();
 const UsageLog = require("../models/UsageLog");
 const Trip = require("../models/Trip");
+const JobApplication = require("../models/JobApplication");
 const { db } = require("../firebaseAdmin");
+const { sendJobApplicationNotification } = require("../services/emailService");
 
 let firestoreEnabled = true;
+
+/* ── CAREERS ── */
+router.post("/careers/apply", async (req, res) => {
+  try {
+    const { name, email, resume, note, jobId, jobTitle } = req.body;
+    const application = await JobApplication.create({
+      name,
+      email,
+      resume,
+      note,
+      jobId,
+      jobTitle,
+    });
+    
+    // Notify admin
+    await sendJobApplicationNotification(application);
+
+    res.status(201).json({ success: true, application });
+  } catch (err) {
+    console.error("Application error:", err);
+    res.status(500).json({ error: "Failed to submit application" });
+  }
+});
 
 /* ── TRACKING ── */
 router.post("/track", async (req, res) => {
