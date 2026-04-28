@@ -43,7 +43,7 @@ app.use(
 );
 
 // Payload size limit to prevent oversized requests
-app.use(express.json({ limit: "10kb" }));
+app.use(express.json({ limit: "100kb" }));
 
 // Global input sanitization
 app.use((req, res, next) => {

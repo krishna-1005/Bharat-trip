@@ -56,9 +56,20 @@ function PlannerSingleContent() {
   const [days, setDays] = useState(initialDays);
   const [budget, setBudget] = useState(35000);
   const [style, setStyle] = useState("luxury");
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(["Photography", "Food trail"]);
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [fetchingPreview, setFetchingPreview] = useState(false);
+
+  const allInterests = ["Photography", "Food trail", "Nature", "Heritage", "Adventure", "Spiritual", "Shopping", "Nightlife"];
+
+  const toggleInterest = (interest: string) => {
+    setSelectedInterests(prev => 
+      prev.includes(interest) 
+        ? prev.filter(i => i !== interest) 
+        : [...prev, interest]
+    );
+  };
 
   // Update days when dates change
   useEffect(() => {
@@ -91,6 +102,7 @@ function PlannerSingleContent() {
       setDays(data.days);
       setBudget(data.budget);
       setStyle(data.travelerType);
+      setSelectedInterests(data.interests || ["Photography", "Food trail"]);
       
       // We can't call handleGenerate directly because it needs the latest state
       // but we can pass the data to a helper or just run it with the parsed data
@@ -143,11 +155,16 @@ function PlannerSingleContent() {
       return;
     }
 
+    if (selectedInterests.length === 0) {
+      toast.error("Please select at least one interest");
+      return;
+    }
+
     const planData = {
       city: destination,
       days: days,
       budget,
-      interests: ["Photography", "Food trail"],
+      interests: selectedInterests,
       travelerType: style,
       pace: "balanced"
     };
@@ -225,6 +242,28 @@ function PlannerSingleContent() {
                 <span>₹10k</span><span>₹80k</span><span>₹1.5L</span>
               </div>
             </Field>
+
+            <div>
+              <div className="text-sm font-medium mb-3">Your Interests</div>
+              <div className="flex flex-wrap gap-2">
+                {allInterests.map((i) => {
+                  const active = selectedInterests.includes(i);
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => toggleInterest(i)}
+                      className={`px-4 py-2 rounded-full text-xs font-semibold transition ${
+                        active
+                          ? "bg-primary text-primary-foreground shadow-pop"
+                          : "bg-secondary text-muted-foreground hover:bg-border"
+                      }`}
+                    >
+                      {i}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <div>
               <div className="text-sm font-medium mb-3">Travel style</div>

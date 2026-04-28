@@ -27,6 +27,7 @@ import {
   Loader2,
   Bookmark,
   Check,
+  ExternalLink,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api";
@@ -201,11 +202,27 @@ function ResultsContent() {
   useEffect(() => {
     if (planId) {
       setLoading(true);
+      const CACHE_KEY = `gotripo-plan-${planId}`;
+      
+      // Try to load from cache first
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          const tripData = JSON.parse(cached);
+          setPlan(tripData);
+          if (mongoUserId && tripData.userId === mongoUserId) {
+            setSaved(true);
+          }
+          // We still fetch from API to ensure fresh data, but UI is responsive
+        } catch (e) {}
+      }
+
       api
         .get(`/trips/${planId}`)
         .then((res) => {
           const tripData = res.data;
           setPlan(tripData);
+          localStorage.setItem(CACHE_KEY, JSON.stringify(tripData));
 
           // Check if it's already saved for THIS user
           if (mongoUserId && tripData.userId === mongoUserId) {
@@ -213,7 +230,11 @@ function ResultsContent() {
           }
         })
         .catch((err) => {
-          toast.error("Failed to fetch plan");
+          if (!plan) {
+            toast.error("Failed to fetch plan and no cache found");
+          } else {
+            toast.info("Showing cached offline version");
+          }
           console.error(err);
         })
         .finally(() => {
@@ -474,12 +495,22 @@ function ResultsContent() {
                                 >
                                   {placeTime}
                                 </div>
-                                <button
-                                  onClick={() => setActivePlace(it)}
-                                  className={`text-xs font-bold transition hover:opacity-70 no-print ${isCurrentlyActive ? "text-accent" : "text-muted-foreground"}`}
-                                >
-                                  {isCurrentlyActive ? "Focused" : "View on map"}
-                                </button>
+                                <div className="flex items-center gap-3 no-print">
+                                  <button
+                                    onClick={() => setActivePlace(it)}
+                                    className={`text-xs font-bold transition hover:opacity-70 ${isCurrentlyActive ? "text-accent" : "text-muted-foreground"}`}
+                                  >
+                                    {isCurrentlyActive ? "Focused" : "Preview"}
+                                  </button>
+                                  <a
+                                    href={`https://www.google.com/maps/search/?api=1&query=${it.lat},${it.lng}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-xs font-bold text-muted-foreground hover:text-accent transition"
+                                  >
+                                    <ExternalLink className="size-3" /> Maps
+                                  </a>
+                                </div>
                               </div>
                               <div className="font-display font-bold mt-1">{placeName}</div>
                               <div className="text-sm text-muted-foreground">{placeDesc}</div>

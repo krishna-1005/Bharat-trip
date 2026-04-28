@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Bookmark, Plus, MapPin, Calendar, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api";
+import { toast } from "sonner";
 
 const tabs = ["Upcoming", "Drafts", "Saved", "Past"];
 
@@ -21,12 +22,26 @@ function TripsContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const CACHE_KEY = "gotripo-cached-trips";
+    
+    // Try to load from cache first for immediate UI
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        setTrips(JSON.parse(cached));
+        setLoading(false);
+      } catch (e) {}
+    }
+
     api.get("/trips")
       .then(res => {
-        setTrips(res.data.trips || res.data || []);
+        const data = res.data.trips || res.data || [];
+        setTrips(data);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       })
       .catch(err => {
         console.error("Failed to fetch trips", err);
+        toast.error("Offline: Showing cached trips");
       })
       .finally(() => {
         setLoading(false);

@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 // Set up worker for react-pdf
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface PDFViewerModalProps {
   isOpen: boolean;

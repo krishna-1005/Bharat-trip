@@ -36,7 +36,7 @@ const reviewValidation = [
 
 const planValidation = [
   body("city").trim().notEmpty().withMessage("City is required").isLength({ max: 50 }).escape(),
-  body("days").isInt({ min: 1, max: 10 }).withMessage("Days must be between 1 and 10"),
+  body("days").isInt({ min: 1, max: 30 }).withMessage("Days must be between 1 and 30"),
   body("budget")
     .custom((value) => {
       if (typeof value === 'string' && ["low", "medium", "high"].includes(value)) return true;

@@ -1,8 +1,20 @@
 import { Link } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { destinations } from "@/lib/sample-data";
-import { Search, SlidersHorizontal, MapPin, Star, ImageOff } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Star, ImageOff, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+  SheetClose,
+} from "@/components/ui/sheet";
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 
 const cats = ["All", "Beaches", "Spiritual", "Mountains", "Heritage", "Nature", "Hills"];
 
@@ -40,6 +52,10 @@ function DestinationImage({ src, alt }: { src?: string; alt: string }) {
 export default function Explore({ isInternational = false }: { isInternational?: boolean }) {
   const [cat, setCat] = useState("All");
   const [query, setQuery] = useState("");
+  
+  // Filter States
+  const [priceRange, setPriceRange] = useState([200000]); // Max price
+  const [durationRange, setDurationRange] = useState([15]); // Max days
 
   // Shuffle destinations once on mount, filtered by isInternational
   const filteredByRegion = useMemo(() => {
@@ -53,15 +69,36 @@ export default function Explore({ isInternational = false }: { isInternational?:
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return shuffledDestinations.filter((d) => {
+      // Category Match
       const matchCat = cat === "All" || d.tag === cat;
+      
+      // Search Query Match
       const matchQuery =
         !q ||
         d.name.toLowerCase().includes(q) ||
         d.region.toLowerCase().includes(q) ||
         d.tag.toLowerCase().includes(q);
-      return matchCat && matchQuery;
+        
+      // Price Match (Parsing "₹18,500" -> 18500)
+      const numericPrice = parseInt(d.price.replace(/[^\d]/g, "")) || 0;
+      const matchPrice = numericPrice <= priceRange[0];
+      
+      // Duration Match (Parsing "4 days" -> 4)
+      const numericDays = parseInt(d.days.replace(/[^\d]/g, "")) || 0;
+      const matchDuration = numericDays <= durationRange[0];
+      
+      return matchCat && matchQuery && matchPrice && matchDuration;
     });
-  }, [cat, query, shuffledDestinations]);
+  }, [cat, query, shuffledDestinations, priceRange, durationRange]);
+
+  const resetFilters = () => {
+    setPriceRange([200000]);
+    setDurationRange([15]);
+    setCat("All");
+    setQuery("");
+  };
+
+  const hasActiveFilters = cat !== "All" || priceRange[0] < 200000 || durationRange[0] < 15;
 
   return (
     <AppShell>
@@ -85,9 +122,103 @@ export default function Explore({ isInternational = false }: { isInternational?:
               className="w-full h-12 pl-10 pr-4 rounded-xl bg-secondary border border-transparent focus:bg-surface focus:border-ring outline-none text-sm"
             />
           </div>
-          <button className="h-12 px-4 rounded-xl border border-border bg-surface inline-flex items-center gap-2 text-sm font-semibold">
-            <SlidersHorizontal className="size-4" /> Filters
-          </button>
+          
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className={`h-12 px-4 rounded-xl border inline-flex items-center gap-2 text-sm font-semibold transition-all ${
+                hasActiveFilters ? "bg-primary text-primary-foreground border-primary" : "bg-surface border-border"
+              }`}>
+                <SlidersHorizontal className="size-4" /> 
+                Filters
+                {hasActiveFilters && <span className="size-2 rounded-full bg-accent animate-pulse" />}
+              </button>
+            </SheetTrigger>
+            <SheetContent className="w-full sm:max-w-md">
+              <SheetHeader>
+                <SheetTitle className="text-2xl font-display">Filters</SheetTitle>
+                <SheetDescription>
+                  Refine your search to find the perfect trip.
+                </SheetDescription>
+              </SheetHeader>
+              
+              <div className="py-8 space-y-10">
+                {/* Budget Filter */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <label className="text-sm font-bold uppercase tracking-wider opacity-60">Max Budget</label>
+                    <span className="text-xl font-display font-bold text-primary">₹{priceRange[0].toLocaleString()}</span>
+                  </div>
+                  <Slider 
+                    value={priceRange} 
+                    onValueChange={setPriceRange} 
+                    max={200000} 
+                    step={5000}
+                    className="py-4"
+                  />
+                  <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
+                    <span>₹5,000</span>
+                    <span>₹2,00,000+</span>
+                  </div>
+                </div>
+
+                {/* Duration Filter */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <label className="text-sm font-bold uppercase tracking-wider opacity-60">Max Duration</label>
+                    <span className="text-xl font-display font-bold text-primary">{durationRange[0]} Days</span>
+                  </div>
+                  <Slider 
+                    value={durationRange} 
+                    onValueChange={setDurationRange} 
+                    max={15} 
+                    step={1}
+                    className="py-4"
+                  />
+                  <div className="flex justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
+                    <span>1 Day</span>
+                    <span>15+ Days</span>
+                  </div>
+                </div>
+
+                {/* Categories in Sheet for mobile */}
+                <div className="space-y-4">
+                  <label className="text-sm font-bold uppercase tracking-wider opacity-60">Category</label>
+                  <div className="flex flex-wrap gap-2">
+                    {cats.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setCat(c)}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                          c === cat 
+                            ? "bg-primary text-primary-foreground border-primary shadow-md" 
+                            : "bg-secondary/50 text-muted-foreground border-transparent hover:border-border"
+                        }`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <SheetFooter className="absolute bottom-0 left-0 w-full p-6 border-t border-border bg-card">
+                <div className="flex gap-3 w-full">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 h-12 rounded-xl"
+                    onClick={resetFilters}
+                  >
+                    Reset All
+                  </Button>
+                  <SheetClose asChild>
+                    <Button className="flex-1 h-12 rounded-xl bg-warm-gradient border-none text-white font-bold">
+                      Show {filtered.length} Results
+                    </Button>
+                  </SheetClose>
+                </div>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
         </div>
 
         <div className="mt-6 flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 lg:mx-0 lg:px-0">
@@ -108,9 +239,15 @@ export default function Explore({ isInternational = false }: { isInternational?:
         </div>
 
         {filtered.length === 0 ? (
-          <div className="mt-16 text-center text-muted-foreground">
-            <p className="text-lg font-semibold text-foreground">No destinations match your search</p>
-            <p className="text-sm mt-1">Try a different category or clear your filters.</p>
+          <div className="mt-16 text-center text-muted-foreground bg-secondary/20 rounded-[40px] py-20 border border-dashed border-border">
+            <div className="size-20 rounded-3xl bg-background border border-border mx-auto flex items-center justify-center mb-6">
+              <Search className="size-10 opacity-20" />
+            </div>
+            <p className="text-xl font-display font-bold text-foreground">No destinations match your criteria</p>
+            <p className="text-sm mt-1 mb-8">Try adjusting your budget or duration filters.</p>
+            <Button variant="outline" onClick={resetFilters} className="rounded-xl">
+              <X className="size-4 mr-2" /> Clear All Filters
+            </Button>
           </div>
         ) : (
           <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

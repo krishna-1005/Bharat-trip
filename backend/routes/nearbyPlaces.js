@@ -9,6 +9,7 @@ let allPlaces = [];
 try {
   const curated = require("../data/bengaluruPlaces.json");
   const bulk = require("../data/bangalorePlaces.json");
+  const indiaPlaces = require("../data/indiaPlaces.json");
 
   const normalizedCurated = curated.flat().filter(p => p && p.name).map(p => ({
     name: p.name,
@@ -26,7 +27,18 @@ try {
     source: "bulk"
   }));
 
-  allPlaces = [...normalizedCurated, ...normalizedBulk];
+  const normalizedIndia = indiaPlaces.flatMap(cityData => 
+    cityData.places.map(p => ({
+      name: p.name,
+      lat: Number(p.lat),
+      lng: Number(p.lng),
+      category: p.category || "Other",
+      source: "india_places",
+      city: cityData.city
+    }))
+  );
+
+  allPlaces = [...normalizedCurated, ...normalizedBulk, ...normalizedIndia];
 } catch (e) {}
 
 function distance(lat1, lon1, lat2, lon2) {

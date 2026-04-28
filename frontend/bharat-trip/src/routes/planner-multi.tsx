@@ -17,8 +17,19 @@ function PlannerMultiContent() {
   const [stops, setStops] = useState(["Bengaluru", "Mysuru", "Coorg"]);
   const [newStop, setNewStop] = useState("");
   const [mode, setMode] = useState("car");
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(["Sightseeing", "Nature"]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const allInterests = ["Sightseeing", "Nature", "Heritage", "Adventure", "Spiritual", "Shopping", "Nightlife", "Food trail"];
+
+  const toggleInterest = (interest: string) => {
+    setSelectedInterests(prev => 
+      prev.includes(interest) 
+        ? prev.filter(i => i !== interest) 
+        : [...prev, interest]
+    );
+  };
 
   // Auto-trigger generation if we just logged in and have pending data
   useEffect(() => {
@@ -30,6 +41,7 @@ function PlannerMultiContent() {
       const data = JSON.parse(pending);
       setStops(data.cities);
       setMode(data.mode);
+      setSelectedInterests(data.interests || ["Sightseeing", "Nature"]);
       
       const runGeneration = async () => {
         setLoading(true);
@@ -61,12 +73,17 @@ function PlannerMultiContent() {
       return;
     }
 
+    if (selectedInterests.length === 0) {
+      toast.error("Please select at least one interest");
+      return;
+    }
+
     const planData = {
       cities: stops,
       city: stops[0], // fallback for old code
       days: stops.length * 2, // Estimate 2 days per city
       budget: 50000,
-      interests: ["Sightseeing", "Nature"],
+      interests: selectedInterests,
       travelerType: "friends",
       pace: "balanced",
       isMultiCity: true,
@@ -102,35 +119,59 @@ function PlannerMultiContent() {
         <h1 className="mt-2 font-display font-bold text-3xl md:text-4xl tracking-tight">Chart your journey.</h1>
 
         {/* Stops input */}
-        <div className="mt-8 rounded-3xl bg-card border border-border p-6 shadow-soft">
-          <div className="text-sm font-medium mb-3">Destinations</div>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {stops.map((s, i) => (
-              <span key={i} className="inline-flex items-center gap-2 pl-3 pr-2 py-2 rounded-full bg-primary-soft text-primary text-sm font-semibold">
-                <span className="size-5 rounded-full bg-primary text-primary-foreground grid place-items-center text-[11px]">{i + 1}</span>
-                {s}
-                <button onClick={() => setStops(stops.filter((_, idx) => idx !== i))} className="hover:bg-primary/10 rounded-full p-0.5"><X className="size-3.5" /></button>
-              </span>
-            ))}
-          </div>
-          
-          <div className="flex gap-2 max-w-md">
-            <input 
-              value={newStop}
-              onChange={(e) => setNewStop(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddStop()}
-              placeholder="Add another city..."
-              className="flex-1 h-11 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm"
-            />
-            <button 
-              onClick={handleAddStop}
-              className="h-11 px-4 rounded-xl bg-secondary text-sm font-semibold hover:bg-border transition"
-            >
-              Add
-            </button>
+        <div className="mt-8 rounded-3xl bg-card border border-border p-6 shadow-soft space-y-7">
+          <div>
+            <div className="text-sm font-medium mb-3">Destinations</div>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {stops.map((s, i) => (
+                <span key={i} className="inline-flex items-center gap-2 pl-3 pr-2 py-2 rounded-full bg-primary-soft text-primary text-sm font-semibold">
+                  <span className="size-5 rounded-full bg-primary text-primary-foreground grid place-items-center text-[11px]">{i + 1}</span>
+                  {s}
+                  <button onClick={() => setStops(stops.filter((_, idx) => idx !== i))} className="hover:bg-primary/10 rounded-full p-0.5"><X className="size-3.5" /></button>
+                </span>
+              ))}
+            </div>
+            
+            <div className="flex gap-2 max-w-md">
+              <input 
+                value={newStop}
+                onChange={(e) => setNewStop(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddStop()}
+                placeholder="Add another city..."
+                className="flex-1 h-11 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm"
+              />
+              <button 
+                onClick={handleAddStop}
+                className="h-11 px-4 rounded-xl bg-secondary text-sm font-semibold hover:bg-border transition"
+              >
+                Add
+              </button>
+            </div>
           </div>
 
-          <div className="mt-6 flex items-center gap-3">
+          <div>
+            <div className="text-sm font-medium mb-3">Your Interests</div>
+            <div className="flex flex-wrap gap-2">
+              {allInterests.map((i) => {
+                const active = selectedInterests.includes(i);
+                return (
+                  <button
+                    key={i}
+                    onClick={() => toggleInterest(i)}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold transition ${
+                      active
+                        ? "bg-primary text-primary-foreground shadow-pop"
+                        : "bg-secondary text-muted-foreground hover:bg-border"
+                    }`}
+                  >
+                    {i}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
             <div className="text-sm font-medium">Travel mode:</div>
             {[
               { id: "car", label: "Car", icon: Car },
