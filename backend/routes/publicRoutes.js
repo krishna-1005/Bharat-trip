@@ -6,7 +6,71 @@ const JobApplication = require("../models/JobApplication");
 const { db } = require("../firebaseAdmin");
 const { sendJobApplicationNotification } = require("../services/emailService");
 
+const fs = require("fs");
+const path = require("path");
+
 let firestoreEnabled = true;
+
+/* ── HELPER: Load India Places Data ── */
+const loadIndiaPlaces = () => {
+  try {
+    const dataPath = path.join(__dirname, "../data/indiaPlaces.json");
+    const rawData = fs.readFileSync(dataPath, "utf8");
+    return JSON.parse(rawData);
+  } catch (err) {
+    console.error("Error loading indiaPlaces.json:", err);
+    return [];
+  }
+};
+
+/* ── EXPLORE PLACES ── */
+router.get("/explore-places", async (req, res) => {
+  try {
+    const { q, category } = req.query;
+    const allCities = loadIndiaPlaces();
+    
+    let results = [];
+
+    // Flatten all places into a single list with city info
+    allCities.forEach(cityData => {
+      cityData.places.forEach(place => {
+        results.push({
+          ...place,
+          id: place.name.toLowerCase().replace(/\s+/g, "-"),
+          city: cityData.city,
+          img: `https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80`, // Fallback image
+        });
+      });
+    });
+
+    // Filter by query if provided
+    if (q) {
+      const query = q.toLowerCase();
+      results = results.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        p.city.toLowerCase().includes(query) ||
+        (p.tags && p.tags.some(t => t.toLowerCase().includes(query)))
+      );
+    }
+
+    // Filter by category if provided
+    if (category && category !== "All") {
+      const cat = category.toLowerCase();
+      results = results.filter(p => 
+        p.category.toLowerCase() === cat ||
+        (p.tags && p.tags.some(t => t.toLowerCase() === cat))
+      );
+    }
+
+    // Sort by rating and reviews for relevance
+    results.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+
+    res.json(results.slice(0, 50)); // Return top 50 matches
+  } catch (err) {
+    console.error("Explore places error:", err);
+    res.status(500).json({ error: "Failed to fetch explore places" });
+  }
+});
 
 /* ── CAREERS ── */
 router.post("/careers/apply", async (req, res) => {
