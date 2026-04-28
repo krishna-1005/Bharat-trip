@@ -15,6 +15,18 @@ import {
   Loader2
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  AreaChart,
+  Area
+} from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 export default function AdminDashboardPage() {
   return (
@@ -64,6 +76,18 @@ function AdminDashboard() {
   }
 
   const s = stats?.summary || {};
+  const chartData = stats?.growthChart || [];
+
+  const chartConfig = {
+    plans: {
+      label: "Plans Generated",
+      color: "hsl(var(--primary))",
+    },
+    users: {
+      label: "New Users",
+      color: "hsl(var(--accent))",
+    },
+  };
 
   return (
     <AdminShell>
@@ -106,17 +130,63 @@ function AdminDashboard() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Activity Chart Area (Placeholder) */}
+          {/* Main Activity Chart Area */}
           <div className="lg:col-span-2 space-y-6">
             <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
                <div className="flex items-center justify-between mb-6">
                   <div className="font-display font-bold text-lg">Growth & Engagement</div>
                   <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground bg-secondary px-3 py-1 rounded-full">
-                    Last 30 Days <ArrowUpRight className="size-3" />
+                    Last 7 Days <ArrowUpRight className="size-3" />
                   </div>
                </div>
-               <div className="h-[300px] w-full bg-secondary/30 rounded-2xl border border-dashed border-border grid place-items-center text-muted-foreground italic text-sm">
-                  Interactive chart will render here.
+               <div className="h-[300px] w-full">
+                  <ChartContainer config={chartConfig} className="h-full w-full">
+                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorPlans" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="var(--color-plans)" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="var(--color-plans)" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="var(--color-users)" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="var(--color-users)" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                      <XAxis 
+                        dataKey="date" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                        tickFormatter={(str) => {
+                          const d = new Date(str);
+                          return d.toLocaleDateString("en-IN", { weekday: 'short' });
+                        }}
+                      />
+                      <YAxis 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                      />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Area 
+                        type="monotone" 
+                        dataKey="plans" 
+                        stroke="var(--color-plans)" 
+                        strokeWidth={2}
+                        fillOpacity={1} 
+                        fill="url(#colorPlans)" 
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="users" 
+                        stroke="var(--color-users)" 
+                        strokeWidth={2}
+                        fillOpacity={1} 
+                        fill="url(#colorUsers)" 
+                      />
+                    </AreaChart>
+                  </ChartContainer>
                </div>
             </div>
 

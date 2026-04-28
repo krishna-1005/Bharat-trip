@@ -201,7 +201,7 @@ function ProfileContent() {
         </div>
 
         {/* Recent Trips Section */}
-        <div className="rounded-3xl bg-card border border-border p-6 shadow-soft">
+        <div className="rounded-3xl bg-card border border-border p-6 shadow-soft overflow-hidden">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-display font-bold text-xl flex items-center gap-2">
               <Bookmark className="size-5 text-primary" /> Recent Trips
@@ -211,29 +211,30 @@ function ProfileContent() {
             </Link>
           </div>
           
-          <div className="grid gap-4">
+          <div className="space-y-3">
             {recentTrips.length > 0 ? recentTrips.map((trip) => (
               <Link 
                 key={trip._id} 
                 to={`/results?planId=${trip._id}`}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-secondary hover:bg-primary-soft transition group"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/50 hover:bg-primary-soft hover:translate-x-1 border border-transparent hover:border-primary/10 transition-all group"
               >
-                <div className="size-12 rounded-xl bg-warm-gradient grid place-items-center text-white font-bold shrink-0">
+                <div className="size-12 rounded-xl bg-warm-gradient grid place-items-center text-white font-bold shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
                   {trip.destination?.charAt(0) || "T"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold truncate">{trip.title}</div>
-                  <div className="text-xs text-muted-foreground flex items-center gap-3 mt-1">
-                    <span className="flex items-center gap-1"><MapPin className="size-3" /> {trip.destination}</span>
-                    <span className="flex items-center gap-1"><Calendar className="size-3" /> {trip.days} days</span>
+                  <div className="font-bold truncate text-foreground group-hover:text-primary transition-colors">{trip.title}</div>
+                  <div className="text-[11px] text-muted-foreground flex items-center gap-3 mt-1.5">
+                    <span className="flex items-center gap-1 shrink-0"><MapPin className="size-3 text-accent" /> <span className="truncate max-w-[120px]">{trip.destination}</span></span>
+                    <span className="flex items-center gap-1 shrink-0"><Calendar className="size-3 text-primary" /> {trip.days} days</span>
                   </div>
                 </div>
-                <ChevronRight className="size-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="size-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-1 transition-all" />
               </Link>
             )) : (
-              <div className="text-center py-8">
+              <div className="text-center py-10 rounded-2xl bg-secondary/20 border border-dashed border-border">
+                <Bookmark className="size-8 text-muted-foreground/20 mx-auto mb-3" />
                 <p className="text-muted-foreground text-sm italic">No trips saved yet.</p>
-                <Link to="/trip-type" className="text-primary font-semibold text-sm mt-2 inline-block">Start planning →</Link>
+                <Link to="/trip-type" className="text-primary font-bold text-sm mt-3 inline-block hover:underline">Start planning your first trip →</Link>
               </div>
             )}
           </div>

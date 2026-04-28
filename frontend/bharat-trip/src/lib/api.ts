@@ -16,19 +16,24 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-export async function generatePlan(data: any) {
+export const generatePlan = async (data: any) => {
   const res = await api.post("/plan/generate", data);
   return res.data.plan ?? res.data;
-}
+};
 
-export async function fetchTrips() {
+export const askAI = async (message: string, history: any[]) => {
+  const res = await api.post("/chat", { message, history });
+  return res.data;
+};
+
+export const fetchTrips = async () => {
   const res = await api.get("/trips");
   return res.data;
-}
+};
 
-export async function fetchReviews() {
+export const fetchReviews = async () => {
   const res = await api.get("/reviews");
   return res.data;
-}
+};
 
 export default api;

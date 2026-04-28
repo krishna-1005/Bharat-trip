@@ -137,6 +137,50 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     // The most accurate "registered" count is usually MongoDB, but some might be Firebase-only
     const totalRegisteredCount = Math.max(totalUsers, trackedUserCount);
 
+    // Get time-series data for the last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const growthData = await UsageLog.aggregate([
+      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          plans: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    const userData = await User.aggregate([
+      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          users: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Merge growth and user data
+    const chartData = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      
+      const plansEntry = growthData.find(g => g._id === dateStr);
+      const usersEntry = userData.find(u => u._id === dateStr);
+      
+      chartData.push({
+        date: dateStr,
+        plans: plansEntry ? plansEntry.plans : 0,
+        users: usersEntry ? usersEntry.users : 0
+      });
+    }
+    chartData.reverse();
+
     const recentUsers = await User.find()
       .select("name email role createdAt")
       .sort({ createdAt: -1 })
@@ -163,6 +207,7 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
         trackedUserCount: finalTrackedCount,
         totalConversions
       },
+      growthChart: chartData,
       recentRegisteredUsers: recentUsers,
       recentActivityLogs: recentUsage,
       recentReviews

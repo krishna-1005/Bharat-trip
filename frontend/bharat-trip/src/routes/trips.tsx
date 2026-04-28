@@ -19,6 +19,7 @@ export default function Trips() {
 
 function TripsContent() {
   const [trips, setTrips] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("Upcoming");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,6 +49,13 @@ function TripsContent() {
       });
   }, []);
 
+  const filteredTrips = trips.filter(t => {
+    if (activeTab === "Upcoming") return t.status === "upcoming" || t.status === "ongoing" || !t.status;
+    if (activeTab === "Past") return t.status === "completed";
+    if (activeTab === "Saved" || activeTab === "Drafts") return true; // Placeholder logic
+    return true;
+  });
+
   return (
     <AppShell>
       <div className="px-4 lg:px-10 py-8 max-w-7xl mx-auto">
@@ -62,11 +70,12 @@ function TripsContent() {
         </div>
 
         <div className="mt-6 flex gap-2 border-b border-border">
-          {tabs.map((t, i) => (
+          {tabs.map((t) => (
             <button
               key={t}
+              onClick={() => setActiveTab(t)}
               className={`px-4 h-11 text-sm font-semibold border-b-2 -mb-px transition ${
-                i === 0 ? "border-accent text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
+                activeTab === t ? "border-accent text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               {t}
@@ -93,7 +102,7 @@ function TripsContent() {
           </div>
         ) : (
           <div className="mt-8 grid lg:grid-cols-2 gap-5">
-            {trips.length > 0 ? trips.map((d) => (
+            {filteredTrips.length > 0 ? filteredTrips.map((d) => (
               <Link to={`/results?planId=${d._id}`} key={d._id} className="group rounded-3xl overflow-hidden bg-card border border-border shadow-soft hover:shadow-pop hover:-translate-y-0.5 transition-all flex flex-col sm:flex-row">
                 <div className="sm:w-56 aspect-[4/3] sm:aspect-auto relative overflow-hidden shrink-0 bg-secondary grid place-items-center">
                    <MapPin className="size-8 text-muted-foreground/30" />

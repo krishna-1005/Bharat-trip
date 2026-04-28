@@ -57,15 +57,17 @@ export default function App() {
       <Route path="/trips" element={<Trips />} />
       
       {/* Admin Routes */}
-      <Route path="/admin" element={<AdminDashboardPage />} />
-      <Route path="/admin/login" element={<AdminLoginPage />} />
-      <Route path="/admin/users" element={<AdminUsersPage />} />
-      <Route path="/admin/trips" element={<AdminTripsPage />} />
-      <Route path="/admin/applications" element={<AdminJobApplicationsPage />} />
-      <Route path="/admin/reviews" element={<AdminReviewsPage />} />
-      <Route path="/admin/polls" element={<AdminPollsPage />} />
-      <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
-      <Route path="/admin/config" element={<AdminConfigPage />} />
+      <Route path="/admin">
+        <Route index element={<AdminDashboardPage />} />
+        <Route path="login" element={<AdminLoginPage />} />
+        <Route path="users" element={<AdminUsersPage />} />
+        <Route path="trips" element={<AdminTripsPage />} />
+        <Route path="applications" element={<AdminJobApplicationsPage />} />
+        <Route path="reviews" element={<AdminReviewsPage />} />
+        <Route path="polls" element={<AdminPollsPage />} />
+        <Route path="notifications" element={<AdminNotificationsPage />} />
+        <Route path="config" element={<AdminConfigPage />} />
+      </Route>
     </Routes>
     </>
   );

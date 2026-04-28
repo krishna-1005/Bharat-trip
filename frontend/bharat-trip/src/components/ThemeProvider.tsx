@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 
 type Theme = "light" | "dark";
 type ThemeContextValue = {
@@ -20,7 +20,7 @@ function getInitialTheme(): Theme {
   return "light";
 }
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme());
 
   useEffect(() => {
