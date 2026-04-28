@@ -16,19 +16,30 @@ let firestoreEnabled = true;
 const loadIndiaPlaces = () => {
   try {
     const dataFiles = ["indiaPlaces.json", "bangalorePlaces.json", "bengaluruPlaces.json"];
-    let allData = [];
+    let allPlaces = [];
     
     dataFiles.forEach(file => {
       const dataPath = path.join(__dirname, "../data", file);
       if (fs.existsSync(dataPath)) {
         const rawData = fs.readFileSync(dataPath, "utf8");
         const parsed = JSON.parse(rawData);
+        
         if (Array.isArray(parsed)) {
-          allData = allData.concat(parsed);
+          parsed.forEach(item => {
+            if (item.city && Array.isArray(item.places)) {
+              // it's a city object with places array (like indiaPlaces.json)
+              item.places.forEach(p => {
+                allPlaces.push({ ...p, city: item.city });
+              });
+            } else if (item.name && item.category) {
+              // it's a flat place object (like bangalorePlaces.json)
+              allPlaces.push({ ...item, city: item.city || item.area || "Bengaluru" });
+            }
+          });
         }
       }
     });
-    return allData;
+    return allPlaces;
   } catch (err) {
     console.error("Error loading place data:", err);
     return [];
@@ -39,22 +50,14 @@ const loadIndiaPlaces = () => {
 router.get("/explore-places", async (req, res) => {
   try {
     const { q, category } = req.query;
-    const allCities = loadIndiaPlaces();
+    const allPlaces = loadIndiaPlaces();
     
-    let results = [];
-
-    // 1. Flatten all local places
-    allCities.forEach(cityData => {
-      if (!cityData.places) return;
-      cityData.places.forEach(place => {
-        results.push({
-          ...place,
-          id: `local-${place.name.toLowerCase().replace(/\s+/g, "-")}`,
-          city: cityData.city,
-          img: place.img || `https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80`,
-        });
-      });
-    });
+    // Normalize places
+    const results = allPlaces.map(place => ({
+      ...place,
+      id: `local-${place.name.toLowerCase().replace(/\s+/g, "-")}`,
+      img: place.img || `https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80`,
+    }));
 
     // 2. Initial Local Filter
     let filtered = results;
@@ -62,7 +65,7 @@ router.get("/explore-places", async (req, res) => {
       const query = q.toLowerCase();
       filtered = filtered.filter(p => 
         p.name.toLowerCase().includes(query) || 
-        p.city.toLowerCase().includes(query) ||
+        (p.city && p.city.toLowerCase().includes(query)) ||
         (p.tags && p.tags.some(t => t.toLowerCase().includes(query)))
       );
     }
@@ -76,12 +79,10 @@ router.get("/explore-places", async (req, res) => {
     }
 
     // 3. Dynamic Fallback to OSM for broader results if few local matches
-    if (filtered.length < 10 && q && q.length > 2) {
+    if (filtered.length < 5 && q && q.length > 2) {
       console.log(`Searching OSM for broader results: ${q}`);
       try {
-        // Search OSM for the query as a place name or category
-        // We'll use a neutral India center for general searches or search around major cities
-        const osmResults = await fetchOSMPlaces(20.5937, 78.9629, 500); // Broad radius
+        const osmResults = await fetchOSMPlaces(20.5937, 78.9629, 500); 
         
         const normalizedOSM = osmResults
           .filter(p => !filtered.some(local => local.name.toLowerCase() === p.name.toLowerCase()))
@@ -92,7 +93,6 @@ router.get("/explore-places", async (req, res) => {
             img: `https://source.unsplash.com/800x600/?${encodeURIComponent(p.name + "," + p.category)}`
           }));
         
-        // Final filter for OSM results based on query
         const query = q.toLowerCase();
         const relevantOSM = normalizedOSM.filter(p => 
           p.name.toLowerCase().includes(query) || 
