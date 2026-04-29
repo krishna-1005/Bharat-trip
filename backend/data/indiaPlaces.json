@@ -115,5 +115,25 @@
       { "name": "Commercial Street", "category": "Shopping", "avgCost": 500, "timeHours": 3, "lat": 12.9822, "lng": 77.6083, "rating": 4.3, "reviews": 28000, "tags": ["Shopping", "Market", "Vibrant"] },
       { "name": "Nandi Hills", "category": "Nature", "avgCost": 150, "timeHours": 4, "lat": 13.3702, "lng": 77.6835, "rating": 4.5, "reviews": 45000, "tags": ["Nature", "Viewpoint", "Sunrise"] }
     ]
+  },
+  {
+    "city": "Patna",
+    "coordinates": { "lat": 25.5941, "lng": 85.1376 },
+    "places": [
+      { "name": "Golghar", "category": "Culture", "avgCost": 10, "timeHours": 1, "lat": 25.6176, "lng": 85.1326, "rating": 4.2, "reviews": 8000, "tags": ["History", "Viewpoint", "Architecture"] },
+      { "name": "Patna Museum", "category": "Culture", "avgCost": 50, "timeHours": 2.5, "lat": 25.6111, "lng": 85.1311, "rating": 4.4, "reviews": 5000, "tags": ["Museum", "History", "Antiques"] },
+      { "name": "Takht Sri Patna Sahib", "category": "Spiritual", "avgCost": 0, "timeHours": 2, "lat": 25.5925, "lng": 85.2264, "rating": 4.8, "reviews": 12000, "tags": ["Gurudwara", "Spiritual", "Peaceful"] },
+      { "name": "Bihar Museum", "category": "Culture", "avgCost": 100, "timeHours": 3, "lat": 25.6100, "lng": 85.1200, "rating": 4.7, "reviews": 6000, "tags": ["Museum", "Modern", "History"] }
+    ]
+  },
+  {
+    "city": "Varanasi",
+    "coordinates": { "lat": 25.3176, "lng": 82.9739 },
+    "places": [
+      { "name": "Kashi Vishwanath Temple", "category": "Spiritual", "avgCost": 0, "timeHours": 2, "lat": 25.3109, "lng": 83.0104, "rating": 4.9, "reviews": 45000, "tags": ["Temple", "Iconic", "Spiritual"] },
+      { "name": "Dashashwamedh Ghat", "category": "Spiritual", "avgCost": 0, "timeHours": 2, "lat": 25.3068, "lng": 83.0103, "rating": 4.8, "reviews": 35000, "tags": ["Ghat", "Ganga Aarti", "Spirituality"] },
+      { "name": "Sarnath", "category": "Culture", "avgCost": 100, "timeHours": 4, "lat": 25.3761, "lng": 83.0227, "rating": 4.7, "reviews": 20000, "tags": ["Buddhist", "History", "Heritage"] },
+      { "name": "Assi Ghat", "category": "Spiritual", "avgCost": 0, "timeHours": 2, "lat": 25.2897, "lng": 83.0064, "rating": 4.6, "reviews": 15000, "tags": ["Ghat", "Morning", "Peaceful"] }
+    ]
   }
 ]

@@ -11,17 +11,19 @@ import {
   Tent, 
   Heart, 
   Loader2, 
-  Flame 
+  Flame,
+  User,
+  Users
 } from "lucide-react";
 import api, { generatePlan } from "@/lib/api";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
 
 const styles = [
-  { id: "luxury", label: "Luxury", icon: Sparkles },
+  { id: "solo", label: "Solo", icon: User },
+  { id: "family", label: "Family", icon: Users },
   { id: "backpacking", label: "Backpacking", icon: Tent },
-  { id: "spiritual", label: "Spiritual", icon: Heart },
-  { id: "adventure", label: "Adventure", icon: Mountain },
+  { id: "luxury", label: "Luxury", icon: Sparkles },
 ];
 
 export default function PlannerSingle() {
@@ -51,11 +53,13 @@ function PlannerSingleContent() {
   const futureStr = getLocalDateString(futureDate);
 
   const [destination, setDestination] = useState(initialDest);
+  const [sourceCity, setSourceCity] = useState("");
   const [startDate, setStartDate] = useState(todayStr);
   const [endDate, setEndDate] = useState(futureStr);
   const [days, setDays] = useState(initialDays);
   const [budget, setBudget] = useState(35000);
   const [style, setStyle] = useState("luxury");
+  const [dietary, setDietary] = useState("any");
   const [selectedInterests, setSelectedInterests] = useState<string[]>(["Photography", "Food trail"]);
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<any[]>([]);
@@ -162,11 +166,15 @@ function PlannerSingleContent() {
 
     const planData = {
       city: destination,
+      sourceCity: sourceCity.trim() || undefined,
       days: days,
       budget,
       interests: selectedInterests,
       travelerType: style,
-      pace: "balanced"
+      pace: "balanced",
+      userPreferences: {
+        dietary: dietary
+      }
     };
 
     if (!user) {
@@ -198,14 +206,24 @@ function PlannerSingleContent() {
         <div className="mt-8 grid lg:grid-cols-2 gap-8">
           {/* LEFT: Inputs */}
           <div className="rounded-3xl bg-card border border-border p-7 shadow-soft space-y-7">
-            <Field label="Destination" icon={<MapPin className="size-4" />}>
-              <input
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                placeholder="Where to?"
-                className="w-full h-12 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm"
-              />
-            </Field>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field label="Current Location" icon={<MapPin className="size-4" />}>
+                <input
+                  value={sourceCity}
+                  onChange={(e) => setSourceCity(e.target.value)}
+                  placeholder="Your city (e.g. Patna)"
+                  className="w-full h-12 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm"
+                />
+              </Field>
+              <Field label="Destination" icon={<MapPin className="size-4" />}>
+                <input
+                  value={destination}
+                  onChange={(e) => setDestination(e.target.value)}
+                  placeholder="Where to? (e.g. Banaras)"
+                  className="w-full h-12 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm"
+                />
+              </Field>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <Field label="From" icon={<Calendar className="size-4" />}>
@@ -242,6 +260,29 @@ function PlannerSingleContent() {
                 <span>₹10k</span><span>₹80k</span><span>₹1.5L</span>
               </div>
             </Field>
+
+            <div>
+              <div className="text-sm font-medium mb-3">Dietary preference</div>
+              <div className="flex gap-3">
+                {[
+                  { id: "any", label: "Any" },
+                  { id: "veg", label: "Veg Only (Save ~20%)" },
+                  { id: "non-veg", label: "Non-Veg" }
+                ].map((d) => (
+                  <button
+                    key={d.id}
+                    onClick={() => setDietary(d.id)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold border transition ${
+                      dietary === d.id
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-secondary/50 text-muted-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div>
               <div className="text-sm font-medium mb-3">Your Interests</div>

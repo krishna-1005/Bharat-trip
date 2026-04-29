@@ -103,12 +103,20 @@ function calculateDynamicPrice(place, budgetTier) {
 
 /* ── LOAD DATA ── */
 let allPlacesPool = [];
+let accommodationPool = [];
 
 function loadData() {
   try {
     const curated = require(path.join(__dirname, "../data/bengaluruPlaces.json"));
     const bulk = require(path.join(__dirname, "../data/bangalorePlaces.json"));
     const indiaPlaces = require(path.join(__dirname, "../data/indiaPlaces.json"));
+    
+    try {
+      accommodationPool = require(path.join(__dirname, "../data/accommodations.json"));
+    } catch (e) {
+      console.warn("Accommodations data not found, using fallbacks.");
+      accommodationPool = [];
+    }
 
     const flatIndia = indiaPlaces.flatMap(cityData => 
       cityData.places.map(p => ({ ...p, area: cityData.city }))
@@ -208,6 +216,88 @@ function generateFallbacks(city, coords, count) {
   return results;
 }
 
+/* ── STAY RECOMMENDATION ── */
+function getRecommendedStay(city, travelerType, budgetTier) {
+  const cleanCity = city.trim().toLowerCase();
+  const cityData = accommodationPool.find(c => c.city.toLowerCase() === cleanCity);
+  
+  if (!cityData) return null;
+
+  let selection = [];
+  let stayType = "Hotel";
+
+  if (travelerType === "solo" || travelerType === "backpacking") {
+    selection = cityData.hostels || [];
+    stayType = "Hostel";
+  } else if (travelerType === "family") {
+    selection = cityData.airbnbs || [];
+    stayType = "Airbnb (with Kitchen)";
+  } else {
+    // Default to a mix or high-rated hostels/airbnbs as "Boutique stays" if no hotels in pool
+    selection = [...(cityData.hostels || []), ...(cityData.airbnbs || [])];
+  }
+
+  if (selection.length === 0) return null;
+
+  // Filter by budget if possible
+  let filtered = selection;
+  if (budgetTier === "low") {
+    filtered = selection.filter(s => s.avgCost < 1000);
+  } else if (budgetTier === "medium") {
+    filtered = selection.filter(s => s.avgCost < 3000);
+  }
+  
+  const finalSelection = filtered.length > 0 ? filtered : selection;
+  const picked = finalSelection[Math.floor(Math.random() * finalSelection.length)];
+
+  return {
+    ...picked,
+    stayType,
+    category: "Stay"
+  };
+}
+
+/* ── TRANSPORTATION RECOMMENDATION ── */
+function getRecommendedTransport(dist) {
+  if (dist < 400) {
+    return {
+      mode: "Bus / Car",
+      reason: "Short distance, most convenient and cost-effective for road travel.",
+      icon: "car"
+    };
+  } else if (dist < 800) {
+    return {
+      mode: "Train",
+      reason: "Comfortable mid-range journey with scenic views and better connectivity.",
+      icon: "train"
+    };
+  } else {
+    return {
+      mode: "Flight",
+      reason: "Long distance, saves significant time for a faster arrival.",
+      icon: "plane"
+    };
+  }
+}
+
+const CITY_COST_MULTIPLIERS = {
+  "mumbai": 1.4,
+  "delhi": 1.2,
+  "new delhi": 1.2,
+  "bengaluru": 1.3,
+  "bangalore": 1.3,
+  "chennai": 1.1,
+  "hyderabad": 1.1,
+  "goa": 1.5,
+  "agra": 1.1,
+  "jaipur": 1.0,
+  "varanasi": 0.8,
+  "patna": 0.7,
+  "rishikesh": 0.9,
+  "amritsar": 0.8,
+  "kerala": 1.1
+};
+
 /* ── DETERMINISTIC PRICING RULES ── */
 const COST_RULES = {
   foodPerDay: {
@@ -227,19 +317,45 @@ const COST_RULES = {
 /**
  * Deterministically calculates the total trip cost.
  */
-function calculateDeterministicTripCost(itinerary, days, budgetTier, travelerType, targetTotalBudget = Infinity) {
-  const tMult = { solo: 1, couple: 2, family: 3, friends: 4 }[travelerType] || 1;
-  const nights = Math.max(1, days - 1); // For a 2-day trip, it's 1 night stay
+function calculateDeterministicTripCost(itinerary, days, budgetTier, travelerType, targetTotalBudget = Infinity, recommendedStay = null, dietary = "any", city = "") {
+  const tMult = { solo: 1, couple: 2, family: 3, friends: 4, backpacking: 1 }[travelerType] || 1;
+  const nights = Math.max(1, days - 1); 
   
+  const cityKey = city.trim().toLowerCase();
+  const cityMultiplier = CITY_COST_MULTIPLIERS[cityKey] || 1.0;
+
   const calculateWithTier = (tier) => {
-    // 1. Hotel Cost (Assuming 2 people per room)
-    const hotelRate = COST_RULES.hotelPerNight[tier] || COST_RULES.hotelPerNight.medium;
-    const roomsNeeded = Math.ceil(tMult / 2);
+    // 1. Hotel Cost
+    let hotelRate = (COST_RULES.hotelPerNight[tier] || COST_RULES.hotelPerNight.medium) * cityMultiplier;
+    
+    // If we have a recommended stay, use its cost
+    if (recommendedStay && recommendedStay.avgCost) {
+      hotelRate = recommendedStay.avgCost;
+    }
+
+    const roomsNeeded = travelerType === "solo" || travelerType === "backpacking" ? 1 : Math.ceil(tMult / 2);
     const totalHotel = hotelRate * nights * roomsNeeded;
 
     // 2. Food Cost
-    const foodRate = COST_RULES.foodPerDay[tier] || COST_RULES.foodPerDay.medium;
-    const totalFood = foodRate * days * tMult;
+    let foodRate = (COST_RULES.foodPerDay[tier] || COST_RULES.foodPerDay.medium) * cityMultiplier;
+    
+    // Veg preference is usually ~20% cheaper in India
+    if (dietary === "veg") {
+      foodRate = foodRate * 0.8;
+    }
+
+    // Spiritual places check for Prasadam recommendation
+    let spiritualBonus = 0;
+    const hasSpiritualStops = itinerary.some(d => 
+      (d.places || []).some(p => (p.category || "").toLowerCase() === "spiritual" || (p.tags || []).some(t => t.toLowerCase() === "temple"))
+    );
+
+    if (hasSpiritualStops) {
+      // Suggesting Prasadam can save around 15% of food cost if user chooses it
+      spiritualBonus = 0.15;
+    }
+
+    const totalFood = foodRate * days * tMult * (1 - spiritualBonus);
 
     // 3. Transport & Activities
     let totalTransport = 0;
@@ -250,7 +366,7 @@ function calculateDeterministicTripCost(itinerary, days, budgetTier, travelerTyp
       
       places.forEach((place) => {
         const cat = (place.category || "").toLowerCase();
-        if (cat === "stay" || cat === "nature" || cat === "religious") {
+        if (cat === "stay" || cat === "nature" || cat === "religious" || cat === "spiritual") {
           totalActivities += 0;
         } else {
           const baseActivity = place.avgCost || COST_RULES.activityBase;
@@ -271,7 +387,8 @@ function calculateDeterministicTripCost(itinerary, days, budgetTier, travelerTyp
         hotel: Math.round(totalHotel),
         food: Math.round(totalFood),
         transport: Math.round(totalTransport),
-        activities: Math.round(totalActivities)
+        activities: Math.round(totalActivities),
+        hasSpiritualSavings: spiritualBonus > 0
       }
     };
   };
@@ -279,7 +396,7 @@ function calculateDeterministicTripCost(itinerary, days, budgetTier, travelerTyp
   let currentPricing = calculateWithTier(budgetTier);
 
   // Safeguard: If over budget, try downgrading hotel tier
-  if (currentPricing.total > targetTotalBudget * 1.05) { // 5% buffer
+  if (currentPricing.total > targetTotalBudget * 1.05) { 
     if (budgetTier === "high") {
       const mediumPricing = calculateWithTier("medium");
       if (mediumPricing.total <= targetTotalBudget * 1.1 || mediumPricing.total < currentPricing.total) {
@@ -308,10 +425,26 @@ async function generatePlan({
   travelerType,
   pace,
   userPreferences = {},
-  language = "English"
+  language = "English",
+  sourceCity = null
 }) {
   const coords = await getCityCoords(city);
   const cleanCity = city.trim().toLowerCase();
+  
+  // Calculate transport recommendation if sourceCity provided
+  let recommendedTransport = null;
+  if (sourceCity) {
+    try {
+      const sourceCoords = await getCityCoords(sourceCity);
+      const distanceToDest = getDistance(sourceCoords.lat, sourceCoords.lng, coords.lat, coords.lng);
+      recommendedTransport = getRecommendedTransport(distanceToDest);
+      recommendedTransport.distance = Math.round(distanceToDest);
+      recommendedTransport.from = sourceCity;
+      recommendedTransport.to = city;
+    } catch (err) {
+      console.warn("Transport recommendation failed:", err.message);
+    }
+  }
   
   // Normalize budget: can be a number (total) or a tier string
   let totalBudget = 5000;
@@ -436,6 +569,9 @@ async function generatePlan({
     candidates = [...candidates, ...remaining.slice(0, maxPlacesNeeded - candidates.length)];
   }
 
+  /* STEP 5.1: STAY RECOMMENDATION */
+  const recommendedStay = getRecommendedStay(city, travelerType, budgetTier);
+
   /* STEP 6: AI REFINEMENT */
   let aiItineraryMap = null;
   try {
@@ -448,7 +584,8 @@ async function generatePlan({
       pace,
       candidates,
       userPreferences,
-      language
+      language,
+      recommendedStay // Pass stay to AI
     });
     
     if (aiResponse && aiResponse.itinerary) {
@@ -498,12 +635,15 @@ async function generatePlan({
   }
 
   /* STEP 8: FINAL DETERMINISTIC COST CALCULATION */
-  const finalPricing = calculateDeterministicTripCost(itineraryDays, days, budgetTier, travelerType, totalBudget);
+  const dietary = userPreferences.dietary || "any";
+  const finalPricing = calculateDeterministicTripCost(itineraryDays, days, budgetTier, travelerType, totalBudget, recommendedStay, dietary, city);
 
   return { 
     city, 
     days: parseInt(days),
     itinerary: itineraryDays, 
+    recommendedStay,
+    recommendedTransport,
     coordinates: coords,
     totalBudget,
     totalTripCost: finalPricing.total,

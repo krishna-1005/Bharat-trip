@@ -167,7 +167,7 @@ function ProfileContent() {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="h-10 px-4 rounded-xl bg-white text-foreground text-sm font-semibold inline-flex items-center gap-1.5 disabled:opacity-60"
+                  className="h-10 px-4 rounded-xl bg-white text-slate-900 text-sm font-semibold inline-flex items-center gap-1.5 disabled:opacity-60"
                 >
                   {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Save
                 </button>

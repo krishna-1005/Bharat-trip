@@ -6,10 +6,15 @@ const { generateReviews } = require("../services/reviewService");
 
 /* ── Load local datasets ── */
 let allPlaces = [];
+let accommodationPool = [];
 try {
   const curated = require("../data/bengaluruPlaces.json");
   const bulk = require("../data/bangalorePlaces.json");
   const indiaPlaces = require("../data/indiaPlaces.json");
+  
+  try {
+    accommodationPool = require("../data/accommodations.json");
+  } catch (e) {}
 
   const normalizedCurated = curated.flat().filter(p => p && p.name).map(p => ({
     name: p.name,
@@ -53,7 +58,7 @@ const fetchOSMPlaces = require("../services/osmPlaces");
 
 router.post("/", async (req, res) => {
   try {
-    let { lat, lng, city, radius = 10, category } = req.body;
+    let { lat, lng, city, radius = 10, category, travelerType } = req.body;
 
     // If city name is provided, geocode it first
     if (city && (!lat || !lng)) {
@@ -70,6 +75,31 @@ router.post("/", async (req, res) => {
 
     if (!lat || !lng) {
       lat = 12.9716; lng = 77.5946; // Fallback
+    }
+
+    // SPECIAL HANDLING FOR ACCOMMODATIONS FROM OUR NEW POOL
+    if (category?.toLowerCase() === "stay" && city) {
+      const cityAcc = accommodationPool.find(a => a.city.toLowerCase() === city.toLowerCase());
+      if (cityAcc) {
+        let matches = [];
+        if (travelerType === "solo" || travelerType === "backpacking") {
+          matches = (cityAcc.hostels || []).map(h => ({ ...h, category: "Stay", stayType: "Hostel" }));
+        } else if (travelerType === "family") {
+          matches = (cityAcc.airbnbs || []).map(a => ({ ...a, category: "Stay", stayType: "Airbnb" }));
+        } else {
+          matches = [
+            ...(cityAcc.hostels || []).map(h => ({ ...h, category: "Stay" })),
+            ...(cityAcc.airbnbs || []).map(a => ({ ...a, category: "Stay" }))
+          ];
+        }
+
+        if (matches.length > 0) {
+          return res.json(matches.map(m => ({
+            ...m,
+            distance: m.lat ? distance(lat, lng, m.lat, m.lng) : 0
+          })).sort((a, b) => a.distance - b.distance));
+        }
+      }
     }
 
     // Filter local data

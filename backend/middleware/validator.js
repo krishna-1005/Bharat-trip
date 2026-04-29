@@ -36,6 +36,7 @@ const reviewValidation = [
 
 const planValidation = [
   body("city").trim().notEmpty().withMessage("City is required").isLength({ max: 50 }).escape(),
+  body("sourceCity").optional().trim().isString().isLength({ max: 50 }).escape(),
   body("days").isInt({ min: 1, max: 30 }).withMessage("Days must be between 1 and 30"),
   body("budget")
     .custom((value) => {

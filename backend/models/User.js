@@ -56,6 +56,7 @@ const userSchema = new mongoose.Schema(
     interests: { type: [String], default: [] },
     avoidedCategories: { type: [String], default: [] },
     preferredBudget: { type: String, default: "medium" }, // low, medium, high
+    dietary: { type: String, enum: ["veg", "non-veg", "any"], default: "any" },
     
     /* SCORING WEIGHTS */
     categoryWeights: {

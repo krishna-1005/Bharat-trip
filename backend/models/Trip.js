@@ -68,6 +68,25 @@ const tripSchema = new mongoose.Schema({
   summary: String,
   travelerType: String,
   pace: String,
+
+  recommendedStay: {
+    name: String,
+    avgCost: Number,
+    rating: Number,
+    tags: [String],
+    lat: Number,
+    lng: Number,
+    stayType: String
+  },
+
+  recommendedTransport: {
+    mode: String,
+    reason: String,
+    icon: String,
+    distance: Number,
+    from: String,
+    to: String
+  },
   
   status: {
     type: String,

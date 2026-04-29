@@ -255,6 +255,15 @@ export const destinationItineraries: Record<string, any[]> = {
         { time: "17:00", place: "Assi Ghat", desc: "Cultural evening and snacks", icon: "utensils", lat: 25.2897, lng: 83.0065 },
       ],
     },
+    {
+      day: 3,
+      title: "Temple Trail & Silk",
+      items: [
+        { time: "09:00", place: "Kashi Vishwanath", desc: "Visit the golden temple of Shiva", icon: "landmark", lat: 25.3109, lng: 83.0107 },
+        { time: "12:00", place: "Banaras Weaving Centre", desc: "Experience famous silk weaving", icon: "shopping-bag", lat: 25.3300, lng: 83.0000 },
+        { time: "15:00", place: "Departure", desc: "Transfer to airport", icon: "plane", lat: 25.4497, lng: 82.8593 },
+      ],
+    },
   ],
   himalayas: [
     {
@@ -263,6 +272,7 @@ export const destinationItineraries: Record<string, any[]> = {
       items: [
         { time: "10:00", place: "Shimla Mall Road", desc: "Walk through colonial architecture", icon: "landmark", lat: 31.1048, lng: 77.1734 },
         { time: "14:00", place: "Jakhu Temple", desc: "Hilltop temple with monkey views", icon: "camera", lat: 31.1011, lng: 77.1852 },
+        { time: "17:00", place: "Ridge Walk", desc: "Panoramic views of the peaks", icon: "camera", lat: 31.1044, lng: 77.1722 },
       ],
     },
     {
@@ -271,6 +281,48 @@ export const destinationItineraries: Record<string, any[]> = {
       items: [
         { time: "09:00", place: "Kufri", desc: "Snow point and panoramic views", icon: "sun", lat: 31.1000, lng: 77.2667 },
         { time: "15:00", place: "Narkanda", desc: "Drive through dense cedar forests", icon: "camera", lat: 31.2583, lng: 77.4586 },
+        { time: "19:00", place: "Local Homestay", desc: "Traditional Pahari dinner", icon: "utensils", lat: 31.2500, lng: 77.4500 },
+      ],
+    },
+    {
+      day: 3,
+      title: "Manali Drive & Beas River",
+      items: [
+        { time: "08:00", place: "Pandoh Dam", desc: "Scenic stop on the way to Manali", icon: "camera", lat: 31.6700, lng: 77.0700 },
+        { time: "15:00", place: "Old Manali", desc: "Riverside cafes and cedar forests", icon: "utensils", lat: 32.2475, lng: 77.1800 },
+        { time: "18:00", place: "Hadimba Temple", desc: "Ancient wooden temple in the woods", icon: "landmark", lat: 32.2483, lng: 77.1781 },
+      ],
+    },
+    {
+      day: 4,
+      title: "Solang Valley Adventure",
+      items: [
+        { time: "09:00", place: "Solang Valley", desc: "Paragliding and snow activities", icon: "sun", lat: 32.3167, lng: 77.1500 },
+        { time: "14:00", place: "Vashisht Hot Springs", desc: "Natural thermal baths", icon: "sun", lat: 32.2600, lng: 77.1900 },
+      ],
+    },
+    {
+      day: 5,
+      title: "Rohtang Pass Experience",
+      items: [
+        { time: "08:00", place: "Rohtang Pass", desc: "High altitude snow desert exploration", icon: "camera", lat: 32.3700, lng: 77.2400 },
+        { time: "16:00", place: "Mall Road Manali", desc: "Evening shopping and snacks", icon: "shopping-bag", lat: 32.2400, lng: 77.1900 },
+      ],
+    },
+    {
+      day: 6,
+      title: "Kasol & Manikaran",
+      items: [
+        { time: "09:00", place: "Kasol", desc: "Mini Israel of India riverside walk", icon: "sun", lat: 32.0100, lng: 77.3100 },
+        { time: "13:00", place: "Manikaran Sahib", desc: "Hot springs and holy shrine", icon: "landmark", lat: 32.0200, lng: 77.3400 },
+      ],
+    },
+    {
+      day: 7,
+      title: "Kullu Valley & Departure",
+      items: [
+        { time: "10:00", place: "Kullu Shawl Factory", desc: "Authentic weaving experience", icon: "shopping-bag", lat: 31.9500, lng: 77.1000 },
+        { time: "15:00", place: "Departure", desc: "Transfer to airport/station", icon: "plane", lat: 31.9500, lng: 77.1000 },
       ],
     },
   ],
@@ -281,6 +333,7 @@ export const destinationItineraries: Record<string, any[]> = {
       items: [
         { time: "11:00", place: "Madikeri Fort", desc: "Historic fort and museum tour", icon: "landmark", lat: 12.4217, lng: 75.7383 },
         { time: "15:00", place: "Abbey Falls", desc: "Lush waterfall exploration", icon: "camera", lat: 12.4411, lng: 75.7214 },
+        { time: "18:00", place: "Raja's Seat", desc: "Panoramic sunset garden", icon: "camera", lat: 12.4131, lng: 75.7383 },
       ],
     },
     {
@@ -289,6 +342,25 @@ export const destinationItineraries: Record<string, any[]> = {
       items: [
         { time: "09:00", place: "Dubare Elephant Camp", desc: "Interaction and bathing experience", icon: "sun", lat: 12.3686, lng: 75.9039 },
         { time: "14:00", place: "Namdroling Monastery", desc: "Golden Temple Tibetan architecture", icon: "landmark", lat: 12.4286, lng: 75.9686 },
+        { time: "17:00", place: "Cauvery Nisargadhama", desc: "Bamboo forest and river island", icon: "sun", lat: 12.4500, lng: 75.9300 },
+      ],
+    },
+    {
+      day: 3,
+      title: "Tala Kaveri Spiritual Journey",
+      items: [
+        { time: "09:00", place: "Tala Kaveri", desc: "Source of River Kaveri in Brahmagiri hills", icon: "landmark", lat: 12.3800, lng: 75.4800 },
+        { time: "13:00", place: "Bhagamandala", desc: "Temple at the confluence of three rivers", icon: "landmark", lat: 12.3900, lng: 75.5300 },
+        { time: "16:00", place: "Coffee Plantation", desc: "Guided bean-to-cup coffee tour", icon: "camera", lat: 12.4200, lng: 75.7400 },
+      ],
+    },
+    {
+      day: 4,
+      title: "Wildlife & Departure",
+      items: [
+        { time: "08:00", place: "Nagarhole Park", desc: "Early morning safari (nearby)", icon: "sun", lat: 12.0300, lng: 76.1200 },
+        { time: "13:00", place: "Iruppu Falls", desc: "Freshwater cascade in the jungle", icon: "camera", lat: 12.0300, lng: 75.9500 },
+        { time: "16:00", place: "Departure", desc: "Transfer to Mangalore/Mysore", icon: "plane", lat: 12.4200, lng: 75.7300 },
       ],
     },
   ],
@@ -299,6 +371,7 @@ export const destinationItineraries: Record<string, any[]> = {
       items: [
         { time: "09:00", place: "Leh Airport", desc: "Transfer to hotel and rest for altitude", icon: "plane", lat: 34.1444, lng: 77.5551 },
         { time: "16:00", place: "Shanti Stupa", desc: "Sunset views over Leh city", icon: "landmark", lat: 34.1683, lng: 77.5775 },
+        { time: "18:00", place: "Leh Palace", desc: "Evening walk through the royal ruins", icon: "landmark", lat: 34.1663, lng: 77.5855 },
       ],
     },
     {
@@ -306,7 +379,57 @@ export const destinationItineraries: Record<string, any[]> = {
       title: "Monasteries & Markets",
       items: [
         { time: "10:00", place: "Thiksey Monastery", desc: "Morning prayers and art tour", icon: "landmark", lat: 34.0561, lng: 77.6669 },
-        { time: "15:00", place: "Leh Main Bazaar", desc: "Shopping for local handicrafts", icon: "shopping-bag", lat: 34.1642, lng: 77.5848 },
+        { time: "13:00", place: "Hemis Monastery", desc: "Hidden spiritual giant in the valley", icon: "landmark", lat: 33.9125, lng: 77.7011 },
+        { time: "16:00", place: "Leh Main Bazaar", desc: "Shopping for local handicrafts", icon: "shopping-bag", lat: 34.1642, lng: 77.5848 },
+      ],
+    },
+    {
+      day: 3,
+      title: "Nubra Valley via Khardung La",
+      items: [
+        { time: "08:00", place: "Khardung La", desc: "Pass at world's highest motorable road", icon: "camera", lat: 34.2700, lng: 77.6000 },
+        { time: "14:00", place: "Diskit Monastery", desc: "Giant Buddha overlooking the valley", icon: "landmark", lat: 34.5400, lng: 77.5600 },
+        { time: "17:00", place: "Hunder Sand Dunes", desc: "Double-humped camel safari", icon: "sun", lat: 34.5800, lng: 77.4700 },
+      ],
+    },
+    {
+      day: 4,
+      title: "Pangong Lake Experience",
+      items: [
+        { time: "09:00", place: "Pangong Tso", desc: "Breathtaking high-altitude blue lake", icon: "camera", lat: 33.7500, lng: 78.6667 },
+        { time: "15:00", place: "Chang La Pass", desc: "Rugged beauty at 17,500 feet", icon: "camera", lat: 34.0400, lng: 77.9300 },
+      ],
+    },
+    {
+      day: 5,
+      title: "Tso Moriri Journey",
+      items: [
+        { time: "09:00", place: "Tso Moriri", desc: "Hidden salt water lake exploration", icon: "camera", lat: 32.9000, lng: 78.3100 },
+        { time: "16:00", place: "Korzok Village", desc: "Experience nomadic life and culture", icon: "landmark", lat: 32.9600, lng: 78.3300 },
+      ],
+    },
+    {
+      day: 6,
+      title: "Magnetic Hill & Hall of Fame",
+      items: [
+        { time: "10:00", place: "Magnetic Hill", desc: "Gravity-defying natural phenomenon", icon: "sun", lat: 34.1700, lng: 77.4100 },
+        { time: "13:00", place: "Hall of Fame", desc: "War museum dedicated to soldiers", icon: "landmark", lat: 34.1500, lng: 77.5400 },
+      ],
+    },
+    {
+      day: 7,
+      title: "Alchi & Lamayuru",
+      items: [
+        { time: "09:00", place: "Alchi Monastery", desc: "Oldest monastery complex in Ladakh", icon: "landmark", lat: 34.2200, lng: 77.1700 },
+        { time: "14:00", place: "Lamayuru Moonland", desc: "Breathtaking lunar landscapes", icon: "camera", lat: 34.2800, lng: 76.7700 },
+      ],
+    },
+    {
+      day: 8,
+      title: "Final Souvenirs & Departure",
+      items: [
+        { time: "09:00", place: "Leh Market", desc: "Last minute shopping for apricot and woolens", icon: "shopping-bag", lat: 34.1600, lng: 77.5800 },
+        { time: "13:00", place: "Departure", desc: "Transfer to Leh Airport", icon: "plane", lat: 34.1400, lng: 77.5500 },
       ],
     },
   ],
@@ -326,6 +449,16 @@ export const destinationItineraries: Record<string, any[]> = {
       items: [
         { time: "10:00", place: "Tungabhadra River", desc: "Coracle boat ride through boulder landscapes", icon: "ship", lat: 15.3400, lng: 76.4600 },
         { time: "14:00", place: "Lotus Mahal", desc: "Indo-Islamic architectural gems", icon: "landmark", lat: 15.3283, lng: 76.4700 },
+        { time: "17:00", place: "Elephant Stables", desc: "Royal structures from the empire", icon: "landmark", lat: 15.3300, lng: 76.4750 },
+      ],
+    },
+    {
+      day: 3,
+      title: "Anegundi & Departure",
+      items: [
+        { time: "09:00", place: "Hanuman Temple", desc: "Climbing Anjanadri Hill for views", icon: "landmark", lat: 15.3400, lng: 76.4800 },
+        { time: "12:00", place: "Hazara Rama Temple", desc: "Epic carvings and royal enclosure", icon: "landmark", lat: 15.3280, lng: 76.4650 },
+        { time: "15:00", place: "Departure", desc: "Transfer to Hospet station", icon: "plane", lat: 15.2689, lng: 76.3909 },
       ],
     },
   ],

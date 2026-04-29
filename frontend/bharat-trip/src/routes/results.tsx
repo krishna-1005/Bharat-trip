@@ -28,34 +28,99 @@ import {
   Bookmark,
   Check,
   ExternalLink,
+  Train,
+  Car,
+  Info
 } from "lucide-react";
+
+function TransportRecommendation({ transport }: { transport?: any }) {
+  if (!transport) return null;
+
+  const Icon = transport.icon === "train" ? Train : transport.icon === "car" ? Car : Plane;
+
+  return (
+    <div className="rounded-3xl border border-border bg-card p-6 shadow-soft">
+      <h3 className="font-display font-bold text-lg mb-4 flex items-center justify-between">
+        Travel from {transport.from}
+        <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-widest font-bold">Recommended</span>
+      </h3>
+      
+      <div className="flex items-center gap-5 p-4 rounded-2xl bg-secondary/40 border border-border/50">
+        <div className="size-14 rounded-xl bg-warm-gradient text-white grid place-items-center shrink-0 shadow-soft">
+          <Icon className="size-7" />
+        </div>
+        <div>
+          <div className="font-display font-bold text-xl text-primary">{transport.mode}</div>
+          <div className="text-xs text-muted-foreground font-medium mt-0.5 flex items-center gap-1.5">
+            <MapPin className="size-3" /> {transport.distance} km total distance
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 flex gap-3 p-3 rounded-xl bg-accent/5 border border-accent/10">
+        <Info className="size-4 text-accent shrink-0 mt-0.5" />
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          {transport.reason}
+        </p>
+      </div>
+      
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <a 
+          href={`https://www.google.com/search?q=${transport.mode}+from+${transport.from}+to+${transport.to}`}
+          target="_blank"
+          className="py-2.5 rounded-xl bg-foreground text-background text-[11px] font-bold text-center hover:opacity-90 transition"
+        >
+          Check Schedules
+        </a>
+        <a 
+          href={`https://www.ixigo.com/search/result/${transport.icon === "plane" ? "flight" : transport.icon === "train" ? "train" : "bus"}/${transport.from}/${transport.to}`}
+          target="_blank"
+          className="py-2.5 rounded-xl border border-border text-[11px] font-bold text-center hover:bg-secondary transition"
+        >
+          Book Now
+        </a>
+      </div>
+    </div>
+  );
+}
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
 import { PDFViewerModal } from "@/components/PDFViewerModal";
 
-function StayRecommendations({ lat, lng, city, budgetTier }: { lat: number; lng: number; city: string; budgetTier: string }) {
+function StayRecommendations({ lat, lng, city, budgetTier, recommendedStay, travelerType }: { lat: number; lng: number; city: string; budgetTier: string; recommendedStay?: any; travelerType?: string }) {
   const [stays, setStays] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    api.post("/nearby", { lat, lng, city, category: "Stay", radius: 15 })
+    setLoading(true);
+    api.post("/nearby", { lat, lng, city, category: "Stay", radius: 15, travelerType })
       .then(res => {
-        setStays(res.data.slice(0, 3));
+        let nearbyStays = res.data.slice(0, 3);
+        // If we have a recommended stay from the planner, put it at the top
+        if (recommendedStay) {
+          nearbyStays = [recommendedStay, ...nearbyStays.filter((s: any) => s.name !== recommendedStay.name)].slice(0, 3);
+        }
+        setStays(nearbyStays);
       })
-      .catch(err => console.error("Stays fetch error", err))
+      .catch(err => {
+        console.error("Stays fetch error", err);
+        if (recommendedStay) setStays([recommendedStay]);
+      })
       .finally(() => setLoading(false));
-  }, [lat, lng, city]);
+  }, [lat, lng, city, recommendedStay]);
 
   const getStayType = () => {
+    if (recommendedStay?.stayType) return recommendedStay.stayType;
     if (budgetTier === "low") return "Hostels & Lodges";
     if (budgetTier === "medium") return "Boutique Hotels";
     return "Luxury Stays";
   };
 
-  const getStayPrice = (index: number) => {
+  const getStayPrice = (s: any, index: number) => {
+    if (s.avgCost) return s.avgCost;
     const base = budgetTier === "low" ? 800 : budgetTier === "medium" ? 2500 : 6000;
     return base + (index * 450);
   };
@@ -80,10 +145,17 @@ function StayRecommendations({ lat, lng, city, budgetTier }: { lat: number; lng:
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-sm truncate">{s.name}</div>
-                <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                  {s.distance ? `${s.distance.toFixed(1)} km away` : "Nearby Landmark"}
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {(s.tags || []).slice(0, 2).map((tag: string, ti: number) => (
+                    <span key={ti} className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">{tag}</span>
+                  ))}
+                  {!s.tags && (
+                    <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+                      {s.distance ? `${s.distance.toFixed(1)} km away` : "Nearby Landmark"}
+                    </div>
+                  )}
                 </div>
-                <div className="text-sm font-bold text-primary mt-0.5">₹{getStayPrice(i).toLocaleString("en-IN")}<span className="text-[10px] font-normal text-muted-foreground ml-1">/night</span></div>
+                <div className="text-sm font-bold text-primary mt-1">₹{getStayPrice(s, i).toLocaleString("en-IN")}<span className="text-[10px] font-normal text-muted-foreground ml-1">/night</span></div>
               </div>
             </div>
           ))}
@@ -123,14 +195,18 @@ function StayRecommendations({ lat, lng, city, budgetTier }: { lat: number; lng:
                     </div>
                     <div>
                       <div className="font-display font-bold text-lg">{s.name}</div>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground font-medium">
+                      <div className="flex flex-wrap gap-2 mt-1 mb-2">
+                        {(s.tags || ["Verified", "Comfort"]).map((tag: string, ti: number) => (
+                          <span key={ti} className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">{tag}</span>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium">
                         <span className="flex items-center gap-1"><MapPin className="size-3" /> {s.distance ? `${s.distance.toFixed(2)} km from center` : "Central Location"}</span>
-                        <span className="flex items-center gap-1"><Sparkles className="size-3 text-accent" /> Recommended</span>
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-display font-bold text-primary">₹{getStayPrice(i).toLocaleString("en-IN")}</div>
+                    <div className="text-xl font-display font-bold text-primary">₹{getStayPrice(s, i).toLocaleString("en-IN")}</div>
                     <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Per Night</div>
                   </div>
                 </div>
@@ -536,11 +612,15 @@ function ResultsContent() {
               />
             </div>
 
+            <TransportRecommendation transport={plan?.recommendedTransport} />
+
             <StayRecommendations 
               lat={plan?.coordinates?.lat || 28.6139} 
               lng={plan?.coordinates?.lng || 77.2090} 
               city={plan?.city || plan?.destination || "Delhi"}
               budgetTier={plan?.totalBudget / (plan?.days * 2) < 2000 ? "low" : plan?.totalBudget / (plan?.days * 2) < 5000 ? "medium" : "high"}
+              recommendedStay={plan?.recommendedStay}
+              travelerType={plan?.travelerType}
             />
 
             {/* Cost breakdown */}

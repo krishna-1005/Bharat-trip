@@ -5,14 +5,16 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 import { Footer } from "@/components/Footer";
 import { FadeUp, StaggerGroup, StaggerItem, HoverLift, dur, ease } from "@/components/motion/primitives";
 import {
-  Sparkles, Users, Wallet, Star, ArrowRight, Plane, X, MapPin, Clock, Calendar
+  Sparkles, Users, Wallet, Star, ArrowRight, Plane, X, MapPin, Clock, Calendar, CheckCircle2, Bookmark
 } from "lucide-react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import heroImg from "@/assets/hero-jaipur.jpg";
 import goa from "@/assets/dest-goa.jpg";
 import jaipur from "@/assets/dest-jaipur.jpg";
 import rishikesh from "@/assets/dest-rishikesh.jpg";
 import kerala from "@/assets/dest-kerala.jpg";
+import { getNextThreeMonths } from "@/lib/utils";
+import { toast } from "sonner";
 
 const destinations = [
   { 
@@ -65,7 +67,7 @@ const features = [
   { icon: Wallet, title: "Budget Control", desc: "See exactly where every rupee goes — flights, stays, food, and experiences." },
 ];
 
-function DestinationCard({ d, onShowDetails }: { d: any, onShowDetails: (d: any) => void }) {
+function DestinationCard({ d, onShowDetails, isVisited }: { d: any, onShowDetails: (d: any) => void, isVisited: boolean }) {
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
@@ -101,13 +103,23 @@ function DestinationCard({ d, onShowDetails }: { d: any, onShowDetails: (d: any)
             alt={d.name}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-transparent to-transparent" />
-          <div className="absolute top-4 left-4">
-            <span className="text-[11px] font-semibold uppercase tracking-widest bg-white text-foreground px-2.5 py-1 rounded-full">{d.tag}</span>
+          {/* Enhanced gradient for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
+          
+          <div className="absolute top-4 left-4 flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em] bg-black/40 backdrop-blur-md text-white border border-white/20 px-3 py-1.5 rounded-lg shadow-sm">
+              {d.tag}
+            </span>
+            {isVisited && (
+              <div className="size-7 rounded-lg bg-emerald-500 text-white grid place-items-center shadow-sm">
+                <CheckCircle2 className="size-4" />
+              </div>
+            )}
           </div>
+          
           <div className="absolute bottom-5 left-5 right-5 text-white">
-            <div className="font-display font-bold text-2xl">{d.name}</div>
-            <div className="text-sm text-white/80 mt-1">From ₹14,200 · {d.days} days</div>
+            <div className="font-display font-bold text-2xl drop-shadow-md">{d.name}</div>
+            <div className="text-sm text-white/90 mt-1 font-medium drop-shadow-sm">From ₹14,200 · {d.days} days</div>
           </div>
         </div>
 
@@ -131,7 +143,7 @@ function DestinationCard({ d, onShowDetails }: { d: any, onShowDetails: (d: any)
               e.stopPropagation();
               onShowDetails(d);
             }}
-            className="mt-8 px-5 py-2 rounded-xl bg-white text-foreground text-xs font-bold uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-transform"
+            className="mt-8 px-5 py-2 rounded-xl bg-white text-slate-900 text-xs font-bold uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-transform"
           >
              Explore Details
           </button>
@@ -143,9 +155,24 @@ function DestinationCard({ d, onShowDetails }: { d: any, onShowDetails: (d: any)
 
 function Landing() {
   const [selectedDest, setSelectedDest] = useState<any>(null);
+  const [visited, setVisited] = useState<string[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("visited_destinations");
+    if (saved) setVisited(JSON.parse(saved));
+  }, []);
+
+  const toggleVisited = (name: string) => {
+    const next = visited.includes(name) 
+      ? visited.filter(n => n !== name) 
+      : [...visited, name];
+    setVisited(next);
+    localStorage.setItem("visited_destinations", JSON.stringify(next));
+    toast.success(visited.includes(name) ? "Removed from visited destinations" : `Marked ${name} as visited!`);
+  };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <MarketingNav />
 
       {/* HERO CAROUSEL */}
@@ -194,7 +221,11 @@ function Landing() {
           <StaggerGroup gap={0.07} className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {destinations.map((d) => (
               <StaggerItem key={d.name}>
-                <DestinationCard d={d} onShowDetails={setSelectedDest} />
+                <DestinationCard 
+                  d={d} 
+                  onShowDetails={setSelectedDest} 
+                  isVisited={visited.includes(d.name)}
+                />
               </StaggerItem>
             ))}
           </StaggerGroup>
@@ -216,52 +247,84 @@ function Landing() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-4xl bg-card rounded-[40px] overflow-hidden shadow-2xl border border-border"
+              className="relative w-full max-w-5xl bg-card rounded-[40px] shadow-2xl border border-border overflow-y-auto max-h-[90vh] lg:overflow-hidden"
             >
               <button 
                 onClick={() => setSelectedDest(null)}
-                className="absolute top-6 right-6 z-10 size-12 rounded-full bg-black/20 hover:bg-black/40 text-white grid place-items-center transition-colors backdrop-blur-md"
+                className="absolute top-6 right-6 z-20 size-12 rounded-full bg-black/40 hover:bg-black/60 text-white grid place-items-center transition-colors backdrop-blur-md border border-white/20"
               >
                 <X className="size-6" />
               </button>
 
-              <div className="grid lg:grid-cols-2">
-                <div className="h-64 lg:h-[500px] relative">
-                  <img src={selectedDest.img} alt="" className="size-full object-cover" />
+              <div className="grid lg:grid-cols-12 min-h-[500px]">
+                {/* Image Section */}
+                <div className="lg:col-span-5 relative h-72 lg:h-auto group">
+                  <img src={selectedDest.img} alt="" className="size-full object-cover transition-transform duration-1000 group-hover:scale-105" />
                   <div className={`absolute inset-0 ${selectedDest.gradient} opacity-20`} />
-                  <div className="absolute bottom-8 left-8">
-                     <span className="px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white text-xs font-bold uppercase tracking-widest border border-white/20">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent lg:hidden" />
+                  
+                  <div className="absolute bottom-6 left-6 flex flex-wrap gap-2">
+                     <span className="px-4 py-1.5 rounded-xl bg-white/20 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest border border-white/20">
                         {selectedDest.tag}
                      </span>
+                     {visited.includes(selectedDest.name) && (
+                       <span className="px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+                          <CheckCircle2 className="size-3" /> Visited
+                       </span>
+                     )}
                   </div>
                 </div>
-                <div className="p-8 md:p-12 flex flex-col justify-center">
-                  <h2 className="font-display font-bold text-4xl md:text-5xl tracking-tight mb-6">
-                    {selectedDest.name}
-                  </h2>
-                  <div className="flex flex-wrap gap-6 mb-8">
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
-                       <MapPin className="size-4 text-primary" /> India
+
+                {/* Content Section */}
+                <div className="lg:col-span-7 p-8 md:p-14 flex flex-col justify-between bg-card relative">
+                  <div>
+                    <div className="flex items-center justify-between gap-4 mb-2">
+                      <div className="text-[10px] font-bold text-accent uppercase tracking-[0.2em]">Destinations India</div>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => toggleVisited(selectedDest.name)}
+                          className={`p-2 rounded-xl transition-all border ${
+                            visited.includes(selectedDest.name) 
+                              ? "bg-emerald-50 border-emerald-100 text-emerald-600" 
+                              : "bg-secondary hover:bg-border border-transparent text-muted-foreground"
+                          }`}
+                          title={visited.includes(selectedDest.name) ? "Unmark as visited" : "Mark as visited"}
+                        >
+                          <CheckCircle2 className="size-5" />
+                        </button>
+                        <button className="p-2 rounded-xl bg-secondary hover:bg-border text-muted-foreground transition-all">
+                          <Bookmark className="size-5" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
-                       <Clock className="size-4 text-primary" /> {selectedDest.days} Days Trip
+                    
+                    <h2 className="font-display font-bold text-5xl md:text-6xl tracking-tighter mb-8 bg-warm-gradient bg-clip-text text-transparent">
+                      {selectedDest.name}
+                    </h2>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-10">
+                      <StatItem icon={<MapPin />} label="Region" value="North India" />
+                      <StatItem icon={<Clock />} label="Duration" value={`${selectedDest.days} Days`} />
+                      <StatItem icon={<Calendar />} label="Best Time" value={getNextThreeMonths()} />
                     </div>
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
-                       <Calendar className="size-4 text-primary" /> Best: Oct - Mar
+
+                    <div className="relative p-7 rounded-3xl bg-secondary/50 border border-border/50 mb-10">
+                      <Sparkles className="absolute -top-3 -right-3 size-8 text-accent opacity-20" />
+                      <p className="text-foreground/80 text-lg leading-relaxed italic font-medium">
+                        "{selectedDest.details}"
+                      </p>
                     </div>
                   </div>
-                  <p className="text-foreground/80 text-lg leading-relaxed italic mb-8 border-l-4 border-primary pl-6">
-                    "{selectedDest.details}"
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-4">
+
+                  <div className="flex flex-col sm:flex-row gap-4 mt-auto">
                     <Link 
                       to={`/planner-single?dest=${encodeURIComponent(selectedDest.name)}&days=${selectedDest.days}`}
-                      className="flex-1 h-14 rounded-2xl bg-warm-gradient text-white font-bold flex items-center justify-center gap-2 shadow-cta hover:opacity-95 transition"
+                      className="flex-[2] h-16 rounded-2xl bg-warm-gradient text-white font-display font-bold text-lg flex items-center justify-center gap-3 shadow-cta hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
-                      Plan this trip <ArrowRight className="size-4" />
+                      Plan this trip <ArrowRight className="size-5" />
                     </Link>
-                    <button className="flex-1 h-14 rounded-2xl bg-secondary text-foreground font-bold hover:bg-secondary/80 transition">
-                      Save destination
+                    <button className="flex-1 h-16 rounded-2xl bg-secondary text-foreground font-bold hover:bg-border transition-all flex items-center justify-center gap-2">
+                       Learn More
                     </button>
                   </div>
                 </div>
@@ -315,6 +378,20 @@ function Landing() {
       </section>
 
       <Footer />
+    </div>
+  );
+}
+
+function StatItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-2 text-primary">
+        <div className="size-8 rounded-xl bg-primary/10 flex items-center justify-center">
+          {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "size-4" }) : icon}
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
+      </div>
+      <div className="font-semibold text-sm pl-10">{value}</div>
     </div>
   );
 }

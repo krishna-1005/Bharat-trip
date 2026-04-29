@@ -5,10 +5,11 @@ import { destinations, destinationItineraries } from "@/lib/sample-data";
 import { 
   Edit3, Share2, Copy, MapPin, Calendar, Wallet, Hotel, Plane, 
   Utensils, Camera, Landmark, Ship, Music, ShoppingBag, Sun, 
-  Sparkles, Coffee, Compass, Heart
+  Sparkles, Coffee, Compass, Heart, ExternalLink
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { MapPreview } from "@/components/MapPreview";
+import { getNextThreeMonths } from "@/lib/utils";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   plane: Plane,
@@ -80,7 +81,7 @@ function TripDetailsContent() {
                 <div className="size-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10">
                   <Calendar className="size-4 text-accent" />
                 </div>
-                <span className="text-sm font-medium">Available Mar – June</span>
+                <span className="text-sm font-medium">Available {getNextThreeMonths()}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="size-8 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10">
@@ -191,16 +192,26 @@ function TripDetailsContent() {
                                     <div className={`text-xs font-bold uppercase tracking-widest ${isCurrentlyActive ? 'text-accent' : 'text-primary'}`}>
                                       {it.time}
                                     </div>
-                                    <button 
-                                      onClick={() => setActivePlace(it)}
-                                      className={`text-[10px] font-extrabold uppercase tracking-widest px-2 py-1 rounded-md transition-all ${
-                                        isCurrentlyActive 
-                                          ? "bg-accent text-white" 
-                                          : "bg-background text-muted-foreground hover:bg-primary hover:text-white"
-                                      }`}
-                                    >
-                                      {isCurrentlyActive ? "Active" : "Focus on Map"}
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                      <button 
+                                        onClick={() => setActivePlace(it)}
+                                        className={`text-[10px] font-extrabold uppercase tracking-widest px-2 py-1 rounded-md transition-all ${
+                                          isCurrentlyActive 
+                                            ? "bg-accent text-white" 
+                                            : "bg-background text-muted-foreground hover:bg-primary hover:text-white"
+                                        }`}
+                                      >
+                                        {isCurrentlyActive ? "Active" : "Focus on Map"}
+                                      </button>
+                                      <a
+                                        href={`https://www.google.com/maps/search/?api=1&query=${it.lat},${it.lng}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-widest px-2 py-1 rounded-md bg-background text-muted-foreground hover:bg-accent hover:text-white transition-all border border-border"
+                                      >
+                                        <ExternalLink className="size-3" /> Maps
+                                      </a>
+                                    </div>
                                   </div>
                                   <div className="font-display font-bold text-lg mt-1">{it.place}</div>
                                   <div className="text-sm text-muted-foreground leading-relaxed mt-1">{it.desc}</div>

@@ -279,7 +279,7 @@ function HorizontalCards({ items }: { items: any[] }) {
             ) : (
               <MapPin className="size-10 text-muted-foreground/20" />
             )}
-            <div className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest bg-white/90 text-foreground px-2 py-0.5 rounded-md shadow-sm">
+            <div className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest bg-white/90 text-slate-900 px-2 py-0.5 rounded-md shadow-sm">
               {d.travelerType || "Trip"}
             </div>
           </div>
@@ -329,7 +329,7 @@ function DestinationCard({ d }: { d: (typeof destinations)[number] }) {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />
-        <div className="absolute top-3 left-3 text-[11px] font-semibold uppercase tracking-widest bg-white/95 text-foreground px-2.5 py-1 rounded-full">
+        <div className="absolute top-3 left-3 text-[11px] font-semibold uppercase tracking-widest bg-white/95 text-slate-900 px-2.5 py-1 rounded-full">
           {d.tag}
         </div>
       </div>

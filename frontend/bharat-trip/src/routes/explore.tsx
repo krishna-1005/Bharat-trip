@@ -228,8 +228,10 @@ export default function Explore({ isInternational = false }: { isInternational?:
               <button
                 key={c}
                 onClick={() => setCat(c)}
-                className={`shrink-0 px-4 h-10 rounded-full text-sm font-semibold transition ${
-                  active ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"
+                className={`shrink-0 px-5 h-10 rounded-full text-sm font-bold border transition-all duration-200 ${
+                  active 
+                    ? "bg-primary text-primary-foreground border-primary shadow-md scale-105" 
+                    : "bg-card text-muted-foreground border-border hover:border-primary/50 hover:text-primary hover:bg-primary/5"
                 }`}
               >
                 {c}
@@ -259,10 +261,16 @@ export default function Explore({ isInternational = false }: { isInternational?:
               >
                 <div className="aspect-[4/3] relative overflow-hidden bg-secondary">
                   <DestinationImage src={d.img} alt={d.name} />
-                  <div className="absolute top-3 left-3 text-[11px] font-semibold uppercase tracking-widest bg-white/95 text-foreground px-2.5 py-1 rounded-full z-10">
-                    {d.tag}
+                  {/* Protective gradient for badges */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent opacity-60" />
+                  
+                  <div className="absolute top-3 left-3 z-10">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] bg-black/40 backdrop-blur-md text-white border border-white/20 px-2.5 py-1 rounded-lg shadow-sm">
+                      {d.tag}
+                    </span>
                   </div>
-                  <div className="absolute top-3 right-3 inline-flex items-center gap-1 bg-foreground/70 text-white text-xs font-semibold px-2 py-1 rounded-full backdrop-blur z-10">
+                  
+                  <div className="absolute top-3 right-3 inline-flex items-center gap-1 bg-black/40 backdrop-blur-md text-white text-[11px] font-bold px-2 py-1 rounded-lg border border-white/20 z-10 shadow-sm">
                     <Star className="size-3 fill-current text-accent" /> {d.rating?.toFixed(1) ?? "4.8"}
                   </div>
                 </div>

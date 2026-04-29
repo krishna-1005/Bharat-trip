@@ -1,0 +1,57 @@
+[
+  {
+    "city": "Agra",
+    "hostels": [
+      { "name": "Zostel Agra", "avgCost": 600, "rating": 4.5, "tags": ["Social", "Rooftop View", "Budget"], "lat": 27.1610, "lng": 78.0400 },
+      { "name": "Moustache Hostel", "avgCost": 550, "rating": 4.3, "tags": ["Vibrant", "Backpackers", "Cheap"], "lat": 27.1650, "lng": 78.0420 }
+    ],
+    "airbnbs": [
+      { "name": "Taj Homestay with Kitchen", "avgCost": 2500, "rating": 4.8, "tags": ["Family", "Kitchen", "Quiet"], "lat": 27.1700, "lng": 78.0500 },
+      { "name": "Heritage Villa Agra", "avgCost": 3500, "rating": 4.7, "tags": ["Spacious", "Garden", "Local Food"], "lat": 27.1800, "lng": 78.0200 }
+    ]
+  },
+  {
+    "city": "Jaipur",
+    "hostels": [
+      { "name": "Zostel Jaipur", "avgCost": 700, "rating": 4.6, "tags": ["Social", "Old City", "Rooftop"], "lat": 26.9200, "lng": 75.8200 },
+      { "name": "The Hosteller Jaipur", "avgCost": 650, "rating": 4.4, "tags": ["Clean", "Modern", "Friendly"], "lat": 26.9150, "lng": 75.8000 }
+    ],
+    "airbnbs": [
+      { "name": "Pink City Studio with Kitchenette", "avgCost": 2800, "rating": 4.9, "tags": ["Cozy", "Central", "Cooking"], "lat": 26.9300, "lng": 75.8100 },
+      { "name": "Traditional Haveli Airbnb", "avgCost": 4500, "rating": 4.7, "tags": ["Royal", "Large Groups", "Courtyard"], "lat": 26.9400, "lng": 75.8300 }
+    ]
+  },
+  {
+    "city": "Mumbai",
+    "hostels": [
+      { "name": "Bombay Backpackers", "avgCost": 900, "rating": 4.2, "tags": ["Bandra", "Social", "Lively"], "lat": 19.0600, "lng": 72.8300 },
+      { "name": "Zostel Mumbai", "avgCost": 950, "rating": 4.4, "tags": ["Andheri", "Modern", "Safe"], "lat": 19.1100, "lng": 72.8700 }
+    ],
+    "airbnbs": [
+      { "name": "Sea View Apartment Bandra", "avgCost": 5500, "rating": 4.8, "tags": ["Ocean View", "Kitchen", "Premium"], "lat": 19.0500, "lng": 72.8200 },
+      { "name": "Colaba Heritage Stay", "avgCost": 4000, "rating": 4.6, "tags": ["History", "Walkable", "Spacious"], "lat": 18.9200, "lng": 72.8300 }
+    ]
+  },
+  {
+    "city": "New Delhi",
+    "hostels": [
+      { "name": "Joey's Hostel", "avgCost": 750, "rating": 4.5, "tags": ["Lively", "Metro Near", "Backpackers"], "lat": 28.6300, "lng": 77.2800 },
+      { "name": "Madpackers Delhi", "avgCost": 800, "rating": 4.6, "tags": ["South Delhi", "Vibrant", "Social"], "lat": 28.5400, "lng": 77.2000 }
+    ],
+    "airbnbs": [
+      { "name": "Modern Flat in Hauz Khas", "avgCost": 3500, "rating": 4.9, "tags": ["Stylish", "Park View", "Kitchen"], "lat": 28.5500, "lng": 77.1900 },
+      { "name": "Independent Floor Greater Kailash", "avgCost": 4500, "rating": 4.7, "tags": ["Family Friendly", "Secure", "Cooking"], "lat": 28.5400, "lng": 77.2400 }
+    ]
+  },
+  {
+    "city": "Bengaluru",
+    "hostels": [
+      { "name": "Zostel Bangalore", "avgCost": 800, "rating": 4.5, "tags": ["Indiranagar", "Cafes", "Social"], "lat": 12.9700, "lng": 77.6400 },
+      { "name": "The Hibernatus", "avgCost": 700, "rating": 4.3, "tags": ["Koramangala", "Quiet", "Work-friendly"], "lat": 12.9300, "lng": 77.6200 }
+    ],
+    "airbnbs": [
+      { "name": "Penthouse in Indiranagar", "avgCost": 4000, "rating": 4.8, "tags": ["Terrace", "Kitchen", "Prime Location"], "lat": 12.9800, "lng": 77.6400 },
+      { "name": "Family Suite in Jayanagar", "avgCost": 3200, "rating": 4.7, "tags": ["Traditional", "Greenery", "Quiet"], "lat": 12.9200, "lng": 77.5900 }
+    ]
+  }
+]
