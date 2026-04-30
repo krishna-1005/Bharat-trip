@@ -135,5 +135,35 @@
       { "name": "Sarnath", "category": "Culture", "avgCost": 100, "timeHours": 4, "lat": 25.3761, "lng": 83.0227, "rating": 4.7, "reviews": 20000, "tags": ["Buddhist", "History", "Heritage"] },
       { "name": "Assi Ghat", "category": "Spiritual", "avgCost": 0, "timeHours": 2, "lat": 25.2897, "lng": 83.0064, "rating": 4.6, "reviews": 15000, "tags": ["Ghat", "Morning", "Peaceful"] }
     ]
+  },
+  {
+    "city": "Shimla",
+    "coordinates": { "lat": 31.1048, "lng": 77.1734 },
+    "places": [
+      { "name": "The Ridge", "category": "Culture", "avgCost": 0, "timeHours": 2, "lat": 31.1044, "lng": 77.1722, "rating": 4.6, "reviews": 15000, "tags": ["Viewpoint", "Heart of Shimla", "Photography"] },
+      { "name": "Mall Road", "category": "Shopping", "avgCost": 500, "timeHours": 3, "lat": 31.1048, "lng": 77.1734, "rating": 4.5, "reviews": 25000, "tags": ["Shopping", "Food", "Colonial"] },
+      { "name": "Jakhu Temple", "category": "Spiritual", "avgCost": 0, "timeHours": 1.5, "lat": 31.1011, "lng": 77.1852, "rating": 4.4, "reviews": 12000, "tags": ["Temple", "Monkeys", "Viewpoint"] },
+      { "name": "Kufri", "category": "Adventure", "avgCost": 1000, "timeHours": 5, "lat": 31.1000, "lng": 77.2667, "rating": 4.3, "reviews": 18000, "tags": ["Snow", "Adventure", "Horse Riding"] }
+    ]
+  },
+  {
+    "city": "Manali",
+    "coordinates": { "lat": 32.2432, "lng": 77.1892 },
+    "places": [
+      { "name": "Hadimba Devi Temple", "category": "Culture", "avgCost": 0, "timeHours": 1.5, "lat": 32.2483, "lng": 77.1781, "rating": 4.7, "reviews": 20000, "tags": ["Ancient", "Temple", "Forest"] },
+      { "name": "Solang Valley", "category": "Adventure", "avgCost": 2000, "timeHours": 6, "lat": 32.3167, "lng": 77.1500, "rating": 4.6, "reviews": 35000, "tags": ["Paragliding", "Snow Sports", "Adventure"] },
+      { "name": "Rohtang Pass", "category": "Nature", "avgCost": 500, "timeHours": 8, "lat": 32.3700, "lng": 77.2400, "rating": 4.8, "reviews": 50000, "tags": ["High Altitude", "Snow", "Scenic"] },
+      { "name": "Old Manali", "category": "Culture", "avgCost": 500, "timeHours": 4, "lat": 32.2475, "lng": 77.1800, "rating": 4.5, "reviews": 15000, "tags": ["Cafes", "Riverside", "Vibe"] }
+    ]
+  },
+  {
+    "city": "Munnar",
+    "coordinates": { "lat": 10.0889, "lng": 77.0595 },
+    "places": [
+      { "name": "Eravikulam National Park", "category": "Nature", "avgCost": 200, "timeHours": 4, "lat": 10.1500, "lng": 77.0600, "rating": 4.6, "reviews": 12000, "tags": ["Wildlife", "Trekking", "Scenic"] },
+      { "name": "Tea Museum", "category": "Culture", "avgCost": 150, "timeHours": 2, "lat": 10.0935, "lng": 77.0601, "rating": 4.4, "reviews": 8000, "tags": ["Tea", "History", "Education"] },
+      { "name": "Mattupetty Dam", "category": "Nature", "avgCost": 100, "timeHours": 2, "lat": 10.1060, "lng": 77.1240, "rating": 4.5, "reviews": 10000, "tags": ["Lake", "Boating", "Elephants"] },
+      { "name": "Top Station", "category": "Nature", "avgCost": 0, "timeHours": 3, "lat": 10.1224, "lng": 77.2443, "rating": 4.7, "reviews": 15000, "tags": ["Viewpoint", "Clouds", "Hills"] }
+    ]
   }
 ]

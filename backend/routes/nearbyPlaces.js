@@ -10,11 +10,16 @@ let accommodationPool = [];
 try {
   const curated = require("../data/bengaluruPlaces.json");
   const bulk = require("../data/bangalorePlaces.json");
-  const indiaPlaces = require("../data/indiaPlaces.json");
-  
+const indiaPlaces = require("../data/indiaPlaces.json");
+
   try {
     accommodationPool = require("../data/accommodations.json");
   } catch (e) {}
+
+  const cityCoordsMap = {};
+  indiaPlaces.forEach(c => {
+    cityCoordsMap[c.city.toLowerCase()] = c.coordinates;
+  });
 
   const normalizedCurated = curated.flat().filter(p => p && p.name).map(p => ({
     name: p.name,
@@ -56,25 +61,61 @@ function distance(lat1, lon1, lat2, lon2) {
 
 const fetchOSMPlaces = require("../services/osmPlaces");
 
+const REGION_TO_CITY = {
+  "himalayas": "Shimla",
+  "kerala": "Munnar",
+  "himachal": "Shimla",
+  "uttarakhand": "Rishikesh",
+  "rajasthan": "Jaipur",
+  "karnataka": "Bengaluru"
+};
+
 router.post("/", async (req, res) => {
   try {
     let { lat, lng, city, radius = 10, category, travelerType } = req.body;
 
     // If city name is provided, geocode it first
     if (city && (!lat || !lng)) {
-      try {
-        const geo = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}&limit=1`, {
-          headers: { "User-Agent": "GoTripo/1.0" }
-        });
-        if (geo.data && geo.data.length > 0) {
-          lat = Number(geo.data[0].lat);
-          lng = Number(geo.data[0].lon);
+      // 1. Map common regions to representative cities
+      const normalizedInput = city.toLowerCase().trim();
+      const lookupCity = REGION_TO_CITY[normalizedInput] || city;
+
+      // 2. Try our local high-speed map first
+      const normalizedCity = lookupCity.toLowerCase();
+      if (cityCoordsMap[normalizedCity]) {
+        lat = cityCoordsMap[normalizedCity].lat;
+        lng = cityCoordsMap[normalizedCity].lng;
+      } else {
+        // 2. Try Nominatim (External)
+        try {
+          const geo = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}&limit=1`, {
+            headers: { "User-Agent": "GoTripo/1.0" }
+          });
+          if (geo.data && geo.data.length > 0) {
+            lat = Number(geo.data[0].lat);
+            lng = Number(geo.data[0].lon);
+          }
+        } catch (e) {
+          console.error("Geocoding failed for:", city);
         }
-      } catch (e) {}
+      }
     }
 
+    // If we still don't have coordinates, we can't search effectively
     if (!lat || !lng) {
-      lat = 12.9716; lng = 77.5946; // Fallback
+      const cityLabel = city || "Selected City";
+      const fallbacks = [
+        { name: "City Center", category: "Landmark" },
+        { name: "Historical Monument", category: "Culture" },
+        { name: "Local Food Street", category: "Food" },
+        { name: "Central Park", category: "Nature" }
+      ].map(f => ({
+        ...f,
+        name: `${cityLabel} ${f.name}`,
+        distance: 0,
+        lat: 0, lng: 0
+      }));
+      return res.json(fallbacks);
     }
 
     // SPECIAL HANDLING FOR ACCOMMODATIONS FROM OUR NEW POOL
