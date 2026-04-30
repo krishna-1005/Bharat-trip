@@ -7,8 +7,43 @@ const { admin } = require("../firebaseAdmin");
 const User         = require("../models/User");
 const jwt          = require("jsonwebtoken");
 const { planValidation } = require("../middleware/validator");
+const { getVibeSuggestions, getDreamWeaverSuggestions } = require("../services/aiPlanner");
 
 const router = express.Router();
+
+/* ── Route Verification ── */
+router.get("/ping", (req, res) => res.json({ status: "plan router ok" }));
+
+/* ── Vibe-Based Suggestions ── */
+router.get("/vibe-suggestions", async (req, res) => {
+  const { adventure, modern, social } = req.query;
+  
+  try {
+    const suggestions = await getVibeSuggestions({
+      adventure: adventure !== undefined ? parseInt(adventure) : 50,
+      modern: modern !== undefined ? parseInt(modern) : 50,
+      social: social !== undefined ? parseInt(social) : 50
+    });
+    
+    res.json({ suggestions });
+  } catch (err) {
+    console.error("Vibe suggestions error:", err);
+    res.status(500).json({ error: "Failed to get suggestions" });
+  }
+});
+
+/* ── AI Dream Weaver ── */
+router.post("/dream-weaver", async (req, res) => {
+  const { prompt } = req.body;
+  
+  try {
+    const suggestions = await getDreamWeaverSuggestions(prompt);
+    res.json({ suggestions });
+  } catch (err) {
+    console.error("Dream Weaver route error:", err);
+    res.status(500).json({ error: "Failed to weave your dream" });
+  }
+});
 
 /* ── Generate Trip Plan ── */
 router.post("/generate", planValidation, async (req, res) => {

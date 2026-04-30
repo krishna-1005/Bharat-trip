@@ -19,6 +19,7 @@ import Careers from "./routes/careers";
 import TripDetails from "./routes/trip-details";
 import TripType from "./routes/trip-type";
 import Trips from "./routes/trips";
+import PassportPage from "./routes/passport";
 import AdminDashboardPage from "./routes/admin/index";
 import AdminLoginPage from "./routes/admin/login";
 import AdminUsersPage from "./routes/admin/users";
@@ -28,6 +29,11 @@ import AdminPollsPage from "./routes/admin/polls";
 import AdminNotificationsPage from "./routes/admin/notifications";
 import AdminConfigPage from "./routes/admin/config";
 import AdminJobApplicationsPage from "./routes/admin/job-applications";
+
+import YatraHub from "./routes/yatra/index";
+import YatraDetail from "./routes/yatra/detail";
+import YatraWishlist from "./routes/yatra/wishlist";
+import YatraPlanner from "./routes/yatra/planner";
 
 export default function App() {
   return (
@@ -55,6 +61,13 @@ export default function App() {
       <Route path="/trip-details" element={<TripDetails />} />
       <Route path="/trip-type" element={<TripType />} />
       <Route path="/trips" element={<Trips />} />
+      <Route path="/passport" element={<PassportPage />} />
+      
+      {/* Yatra Module */}
+      <Route path="/yatra" element={<YatraHub />} />
+      <Route path="/yatra/:id" element={<YatraDetail />} />
+      <Route path="/yatra/wishlist" element={<YatraWishlist />} />
+      <Route path="/yatra/planner" element={<YatraPlanner />} />
       
       {/* Admin Routes */}
       <Route path="/admin">

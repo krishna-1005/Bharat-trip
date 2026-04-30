@@ -38,6 +38,7 @@ export function Footer() {
             <h4 className="font-bold text-slate-900 dark:text-white mb-6 uppercase tracking-wider text-xs">Product</h4>
             <ul className="space-y-4 text-sm">
               <li><Link to="/explore-india" className="text-slate-600 dark:text-slate-400 hover:text-primary transition">Explore India</Link></li>
+              <li><Link to="/yatra" className="text-slate-600 dark:text-slate-400 hover:text-primary transition">Yatra</Link></li>
               <li><Link to="/explore-international" className="text-slate-600 dark:text-slate-400 hover:text-primary transition">International Trips</Link></li>
               <li><Link to="/trip-type" className="text-slate-600 dark:text-slate-400 hover:text-primary transition">AI Trip Planner</Link></li>
               <li><Link to="/pricing" className="text-slate-600 dark:text-slate-400 hover:text-primary transition">Pricing & Pro</Link></li>

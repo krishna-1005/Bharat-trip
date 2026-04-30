@@ -2,6 +2,7 @@ const express = require("express");
 const jwt     = require("jsonwebtoken");
 const User    = require("../models/User");
 const UsageLog = require("../models/UsageLog");
+const { admin, initialized } = require("../firebaseAdmin");
 const { protect } = require("../middleware/protect");
 const { authLimiter } = require("../middleware/rateLimiter");
 const { signupValidation, loginValidation } = require("../middleware/validator");
@@ -43,6 +44,32 @@ router.post("/signup", authLimiter, signupValidation, async (req, res) => {
       password,
       // firebaseUid: null
     });
+
+    // Create user in Firebase too for frontend consistency
+    if (initialized) {
+      try {
+        const fbUser = await admin.auth().createUser({
+          email,
+          password,
+          displayName: name
+        });
+        user.firebaseUid = fbUser.uid;
+        await user.save();
+        console.log(`✅ Firebase user created for ${email}`);
+      } catch (fbErr) {
+        if (fbErr.code === 'auth/email-already-in-use') {
+          console.warn(`⚠️ Firebase user already exists for ${email}. Skipping Firebase creation.`);
+          // Link existing Firebase UID if possible
+          try {
+            const existingFbUser = await admin.auth().getUserByEmail(email);
+            user.firebaseUid = existingFbUser.uid;
+            await user.save();
+          } catch (e) {}
+        } else {
+          console.error("Firebase signup sync error:", fbErr.message);
+        }
+      }
+    }
 
     const token = signToken(user._id);
 
@@ -126,6 +153,19 @@ router.put("/change-password", protect, authLimiter, async (req, res) => {
 
     user.password = newPassword;
     await user.save();
+
+    // Sync with Firebase too
+    if (initialized) {
+      try {
+        const fbUser = await admin.auth().getUserByEmail(user.email);
+        await admin.auth().updateUser(fbUser.uid, {
+          password: newPassword
+        });
+        console.log(`✅ Firebase password synced for ${user.email}`);
+      } catch (e) {
+        console.error("Firebase password sync error:", e.message);
+      }
+    }
 
     res.json({ message: "Password changed successfully." });
   } catch (err) {

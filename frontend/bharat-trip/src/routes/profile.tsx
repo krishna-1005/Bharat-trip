@@ -13,7 +13,9 @@ import {
   X, 
   Calendar,
   ArrowRight,
-  Bookmark
+  Bookmark,
+  Award,
+  Sparkles
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
@@ -90,7 +92,10 @@ function ProfileContent() {
 
     setSaving(true);
     try {
-      const res = await api.put("/profile", { name: displayName, bio });
+      const res = await api.put("/profile", { 
+        name: displayName, 
+        bio
+      });
       setProfileData(res.data.user);
       setEditing(false);
       toast.success("Profile updated");
@@ -240,7 +245,7 @@ function ProfileContent() {
           </div>
         </div>
 
-        {/* Preferences & Places */}
+        {/* Preferences & Achievements */}
         <div className="grid lg:grid-cols-2 gap-5">
           <div className="rounded-3xl bg-card border border-border p-6 shadow-soft">
             <div className="flex items-center gap-2 font-display font-bold text-lg">
@@ -253,22 +258,60 @@ function ProfileContent() {
           </div>
 
           <div className="rounded-3xl bg-card border border-border p-6 shadow-soft">
-            <div className="flex items-center gap-2 font-display font-bold text-lg">
-              <Wallet className="size-4 text-primary" /> Saved places
+            <div className="flex items-center justify-between gap-2 font-display font-bold text-lg mb-5">
+              <div className="flex items-center gap-2">
+                <Award className="size-4 text-primary" /> Travel Badges
+              </div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                <Sparkles className="size-3 text-accent" /> {profileData?.badges?.length || 0} Earned
+              </div>
             </div>
-            <div className="mt-5 space-y-3">
-              {(profileData?.savedPlaces || []).length > 0 ? profileData.savedPlaces.map((p: any) => (
-                <div key={p.name} className="flex items-center justify-between rounded-2xl bg-secondary p-4">
-                  <div>
-                    <div className="font-semibold text-sm">{p.name}</div>
-                    <div className="text-xs text-muted-foreground">{p.tag}</div>
+            
+            <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
+              {(profileData?.badges || []).length > 0 ? profileData.badges.map((badge: any) => (
+                <div 
+                  key={badge.name} 
+                  className="group relative aspect-square rounded-2xl bg-secondary/50 border border-border/50 flex items-center justify-center text-2xl hover:bg-accent/5 hover:border-accent/30 hover:scale-105 transition-all cursor-help"
+                  title={`${badge.name}: ${badge.description}`}
+                >
+                  {badge.icon}
+                  <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-[10px] font-bold px-2 py-1 rounded border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                    {badge.name}
                   </div>
-                  <ChevronRight className="size-4 text-muted-foreground" />
                 </div>
               )) : (
-                <p className="text-sm text-muted-foreground italic">No places saved yet.</p>
+                <div className="col-span-full py-8 text-center rounded-2xl bg-secondary/20 border border-dashed border-border">
+                  <Award className="size-8 text-muted-foreground/20 mx-auto mb-2" />
+                  <p className="text-xs text-muted-foreground italic">No badges earned yet.</p>
+                </div>
               )}
+              {/* Locked Badges Placeholder */}
+              {[...Array(Math.max(0, 5 - (profileData?.badges?.length || 0)))].map((_, i) => (
+                <div key={i} className="aspect-square rounded-2xl border border-dashed border-border flex items-center justify-center text-muted-foreground/20 grayscale opacity-50">
+                   🔒
+                </div>
+              ))}
             </div>
+          </div>
+        </div>
+
+        {/* Saved Places */}
+        <div className="rounded-3xl bg-card border border-border p-6 shadow-soft">
+          <div className="flex items-center gap-2 font-display font-bold text-lg">
+            <Wallet className="size-4 text-primary" /> Saved places
+          </div>
+          <div className="mt-5 space-y-3">
+            {(profileData?.savedPlaces || []).length > 0 ? profileData.savedPlaces.map((p: any) => (
+              <div key={p.name} className="flex items-center justify-between rounded-2xl bg-secondary p-4">
+                <div>
+                  <div className="font-semibold text-sm">{p.name}</div>
+                  <div className="text-xs text-muted-foreground">{p.tag}</div>
+                </div>
+                <ChevronRight className="size-4 text-muted-foreground" />
+              </div>
+            )) : (
+              <p className="text-sm text-muted-foreground italic">No places saved yet.</p>
+            )}
           </div>
         </div>
       </div>

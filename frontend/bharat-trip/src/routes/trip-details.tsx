@@ -97,7 +97,7 @@ function TripDetailsContent() {
           {/* Action Bar */}
           <div className="rounded-3xl bg-surface/80 backdrop-blur-2xl border border-white/20 shadow-pop p-4 flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap gap-2">
-              <Link to="/results" className="h-12 px-6 rounded-2xl bg-warm-gradient text-white text-sm font-bold inline-flex items-center gap-2 shadow-cta hover:scale-[1.02] active:scale-[0.98] transition-all">
+              <Link to={`/results?sampleId=${d.id}`} className="h-12 px-6 rounded-2xl bg-warm-gradient text-white text-sm font-bold inline-flex items-center gap-2 shadow-cta hover:scale-[1.02] active:scale-[0.98] transition-all">
                 <Edit3 className="size-4" /> Edit Itinerary
               </Link>
               <button className="h-12 px-6 rounded-2xl bg-secondary hover:bg-secondary/80 text-sm font-bold inline-flex items-center gap-2 transition-all">

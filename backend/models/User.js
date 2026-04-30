@@ -77,7 +77,15 @@ const userSchema = new mongoose.Schema(
   savedPlaces: {
     type: [Object],
     default: []
-  }
+  },
+
+  /* ACHIEVEMENTS */
+  badges: [{
+    name: { type: String, required: true },
+    icon: { type: String, default: "🏅" },
+    description: { type: String },
+    earnedAt: { type: Date, default: Date.now }
+  }]
 
 },
 { timestamps: true }

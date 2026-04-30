@@ -24,34 +24,41 @@ const publicRoutes = require("./routes/publicRoutes");
 const webhookRoutes = require("./routes/webhookRoutes");
 const groupChatRoutes = require("./routes/groupChatRoutes");
 
-// Per-environment CORS configuration
 const app = express();
 const maintenanceMode = require("./middleware/maintenance");
 const { globalLimiter } = require("./middleware/rateLimiter");
 
+/* ── 1. GLOBAL MIDDLEWARE ── */
+
 // Security Headers
 app.use(helmet());
 
-// More permissive CORS for troubleshooting
+// CORS - Must be before routes to handle preflight
 app.use(
   cors({
-    origin: true, // Reflect request origin back
+    origin: true, 
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
   })
 );
 
-// Payload size limit to prevent oversized requests
+// Body Parser
 app.use(express.json({ limit: "100kb" }));
 
-// Global input sanitization
+// Diagnostic Logging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  res.setHeader("X-GoTripo-Server", "active-v2");
+  next();
+});
+
+// Input Sanitization
 app.use((req, res, next) => {
   if (req.body) {
     const sanitize = (obj) => {
       for (let key in obj) {
         if (typeof obj[key] === "string") {
-          // Do NOT trim passwords as they may have intentional spaces
           if (key.toLowerCase().includes("password")) continue;
           obj[key] = obj[key].trim();
         } else if (typeof obj[key] === "object" && obj[key] !== null) {
@@ -64,15 +71,27 @@ app.use((req, res, next) => {
   next();
 });
 
+// Operational Middleware
 app.use(maintenanceMode);
 app.use(globalLimiter);
 
-/* ── MongoDB Connection ── */
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("✅ MongoDB connected"))
-.catch(err => console.error("MongoDB error:", err));
+/* ── 2. SPECIAL ROUTES ── */
 
-/* ── routes ── */
+// health check
+app.get("/", (req, res) => {
+  res.json({ status: "GoTripo API running 🚀" });
+});
+
+app.get("/api/ping", (req, res) => {
+  res.status(200).json({ message: "GoTripo API alive 🚀" });
+});
+
+app.get("/ping", (req, res) => {
+  res.status(200).send("GoTripo server alive 🚀");
+});
+
+/* ── 3. API ROUTES ── */
+
 app.use("/api/plan", planRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/nearby", nearbyPlaces);
@@ -88,21 +107,21 @@ app.use("/api/public", publicRoutes);
 app.use("/api/webhooks", webhookRoutes);
 app.use("/api/group-chat", groupChatRoutes);
 
-// health check
-app.get("/", (req, res) => {
-  res.json({
-    status: "GoTripo API running 🚀"
+/* ── 4. ERROR HANDLING ── */
+
+// 404 Handler
+app.use((req, res) => {
+  console.log(`[404] ${req.method} ${req.url}`);
+  res.status(404).json({ 
+    error: "Not Found", 
+    message: `Route [${req.method} ${req.url}] not found.`,
+    server: "GoTripo-Backend"
   });
 });
 
-/* ── ping route ── */
-app.get("/ping", (req, res) => {
-  res.status(200).send("GoTripo server alive 🚀");
-});
-
-// 404 Handler with CORS support
-app.use((req, res) => {
-  res.status(404).json({ error: "Not Found", message: "The requested API route does not exist." });
-});
+/* ── DB CONNECTION ── */
+mongoose.connect(process.env.MONGO_URI)
+.then(() => console.log("✅ MongoDB connected"))
+.catch(err => console.error("MongoDB error:", err));
 
 module.exports = app;

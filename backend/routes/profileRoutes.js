@@ -15,13 +15,35 @@ router.use(protect);
 /* GET /api/profile  — full profile + live stats */
 router.get("/", async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    let user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
     const tripsCount = await Trip.countDocuments({ userId: req.user._id });
     const upcoming = await Trip.countDocuments({userId: req.user._id,status: "upcoming"});
     const completed = await Trip.countDocuments({userId: req.user._id, status: "completed"});
+    
+    // Auto-grant badges if they don't have them
+    let badgesUpdated = false;
+    if (tripsCount > 0 && (!user.badges || user.badges.length === 0)) {
+      user.badges.push({
+        name: "First Step",
+        icon: "🚶",
+        description: "Started the journey with the first planned trip."
+      });
+      badgesUpdated = true;
+    }
+    if (completed > 0 && !user.badges.find(b => b.name === "Explorer")) {
+      user.badges.push({
+        name: "Explorer",
+        icon: "🧭",
+        description: "Successfully completed your first adventure."
+      });
+      badgesUpdated = true;
+    }
+    
+    if (badgesUpdated) await user.save();
+
     res.json({
       user: {
         ...user.toJSON(),

@@ -23,6 +23,7 @@ export function MarketingNav() {
           <a href="#voices">Stories</a>
           <Link to="/pricing">Pricing</Link>
           <Link to="/explore-india">Explore</Link>
+          <Link to="/yatra">Yatra</Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-2">
@@ -76,6 +77,7 @@ export function MarketingNav() {
           <a href="#voices" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Stories</a>
           <Link to="/pricing" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Pricing</Link>
           <Link to="/explore-india" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Explore</Link>
+          <Link to="/yatra" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Yatra</Link>
           {!user ? (
             <div className="pt-2 space-y-2">
               <Link to="/auth" onClick={() => setOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-white/10 transition">Log in</Link>

@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { MapPreview } from "@/components/MapPreview";
-import { sampleItinerary } from "@/lib/sample-data";
+import { sampleItinerary, destinationItineraries, destinations } from "@/lib/sample-data";
 import { useEffect, useState } from "react";
 import {
   Edit3,
@@ -253,6 +253,7 @@ function ResultsContent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const planId = searchParams.get("planId");
+  const sampleId = searchParams.get("sampleId");
   const { user: firebaseUser, loading: authLoading } = useAuth();
   const [plan, setPlan] = useState<any>(null);
   const [loading, setLoading] = useState(!!planId);
@@ -316,8 +317,28 @@ function ResultsContent() {
         .finally(() => {
           setLoading(false);
         });
+    } else if (sampleId) {
+      const sample = destinationItineraries[sampleId];
+      const destInfo = destinations.find(d => d.id === sampleId);
+      
+      if (sample && destInfo) {
+        setPlan({
+          title: `${destInfo.name} Escape`,
+          destination: destInfo.name,
+          city: destInfo.name,
+          days: parseInt(destInfo.days),
+          itinerary: sample,
+          totalBudget: parseInt(destInfo.price.replace(/[^\d]/g, "")),
+          budget: parseInt(destInfo.price.replace(/[^\d]/g, "")),
+          travelerType: "balanced",
+          pace: "moderate",
+          summary: `A curated ${destInfo.days} immersion through ${destInfo.name}'s most iconic spots.`,
+          isSample: true,
+          id: sampleId
+        });
+      }
     }
-  }, [planId, mongoUserId]);
+  }, [planId, sampleId, mongoUserId]);
 
   const handleSave = async () => {
     if (saved) return;

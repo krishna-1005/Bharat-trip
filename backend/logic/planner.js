@@ -1,7 +1,7 @@
 const path = require("path");
 const fetchOSMPlaces = require("../services/osmPlaces");
 const { generateReviews: fetchUserReviews } = require("../services/reviewService");
-const analyzeAndRefinePlan = require("../services/aiPlanner");
+const { analyzeAndRefinePlan } = require("../services/aiPlanner");
 
 /* ── CONFIG ── */
 const MAX_HOURS_PER_DAY = 8;
@@ -429,6 +429,10 @@ async function generatePlan({
   sourceCity = null
 }) {
   const coords = await getCityCoords(city);
+  if (!coords) {
+    throw new Error(`Location not found: ${city}. Please check the spelling or try a different destination.`);
+  }
+
   const cleanCity = city.trim().toLowerCase();
   
   // Calculate transport recommendation if sourceCity provided
@@ -436,11 +440,20 @@ async function generatePlan({
   if (sourceCity) {
     try {
       const sourceCoords = await getCityCoords(sourceCity);
-      const distanceToDest = getDistance(sourceCoords.lat, sourceCoords.lng, coords.lat, coords.lng);
-      recommendedTransport = getRecommendedTransport(distanceToDest);
-      recommendedTransport.distance = Math.round(distanceToDest);
-      recommendedTransport.from = sourceCity;
-      recommendedTransport.to = city;
+      if (sourceCoords) {
+        const distanceToDest = getDistance(sourceCoords.lat, sourceCoords.lng, coords.lat, coords.lng);
+        recommendedTransport = getRecommendedTransport(distanceToDest);
+        recommendedTransport.distance = Math.round(distanceToDest);
+        recommendedTransport.from = sourceCity;
+        recommendedTransport.to = city;
+        
+        // Safety check for 0km distance (if source is same as dest)
+        if (recommendedTransport.distance < 1) {
+          recommendedTransport.distance = 0;
+          recommendedTransport.mode = "Local Commute";
+          recommendedTransport.reason = "You are already in or very near the destination.";
+        }
+      }
     } catch (err) {
       console.warn("Transport recommendation failed:", err.message);
     }
@@ -695,7 +708,7 @@ async function getCityCoords(city) {
     console.error("Geocoding failed for:", cleanCity, err.message);
   }
 
-  return map["bengaluru"];
+  return null; // Return null instead of defaulting to Bengaluru
 }
 
 function generateReason(place, interests, budgetTier, index) {

@@ -6,9 +6,8 @@ import {
   ChevronLeft, ChevronRight, ZoomIn, ZoomOut, 
   Download, Loader2, FileText, Smartphone, Monitor
 } from 'lucide-react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { ItineraryPrintTemplate } from './ItineraryPrintTemplate';
+import { pdf } from '@react-pdf/renderer';
+import { ItineraryPDF } from './ItineraryPDF';
 import {
   Dialog,
   DialogContent,
@@ -32,7 +31,6 @@ export const PDFViewerModal = ({ isOpen, onClose, plan }: PDFViewerModalProps) =
   const [scale, setScale] = useState(1.0);
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
-  const printRef = useRef<HTMLDivElement>(null);
 
   // Responsive scaling
   useEffect(() => {
@@ -55,52 +53,11 @@ export const PDFViewerModal = ({ isOpen, onClose, plan }: PDFViewerModalProps) =
   }, [isOpen, plan]);
 
   const generatePDF = async () => {
-    if (!printRef.current) return;
     setGenerating(true);
     
     try {
-      // Use a timeout to ensure the print template is fully rendered
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const canvas = await html2canvas(printRef.current, {
-        scale: 2, // Higher quality
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-      
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: 'a4'
-      });
-      
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
-      
-      // Calculate scaled dimensions to fit A4
-      const canvasPageHeight = (imgHeight * pageWidth) / imgWidth;
-      
-      let heightLeft = canvasPageHeight;
-      let position = 0;
-      
-      // Add first page
-      pdf.addImage(imgData, 'JPEG', 0, position, pageWidth, canvasPageHeight, undefined, 'FAST');
-      heightLeft -= pageHeight;
-      
-      // Add subsequent pages if content is long
-      while (heightLeft >= 0) {
-        position = heightLeft - canvasPageHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, pageWidth, canvasPageHeight, undefined, 'FAST');
-        heightLeft -= pageHeight;
-      }
-
-      const blob = pdf.output('blob');
+      // Use @react-pdf/renderer to generate a high-quality PDF
+      const blob = await pdf(<ItineraryPDF plan={plan} />).toBlob();
       const url = URL.createObjectURL(blob);
       setPdfBlobUrl(url);
     } catch (error) {
@@ -134,11 +91,6 @@ export const PDFViewerModal = ({ isOpen, onClose, plan }: PDFViewerModalProps) =
 
   return (
     <>
-      {/* Hidden template for PDF generation */}
-      <div className="fixed -left-[9999px] top-0 no-print" aria-hidden="true">
-        <ItineraryPrintTemplate ref={printRef} plan={plan} />
-      </div>
-
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-[95vw] lg:max-w-5xl h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-zinc-900 border-zinc-800 rounded-2xl sm:rounded-3xl">
           <DialogHeader className="p-4 sm:p-5 border-b border-zinc-800 flex flex-row items-center justify-between bg-zinc-900 text-white shrink-0">
