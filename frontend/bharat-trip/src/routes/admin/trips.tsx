@@ -13,7 +13,9 @@ import {
   Trash2,
   ExternalLink,
   MapPin,
-  Clock
+  Clock,
+  Star,
+  Zap
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -62,6 +64,25 @@ function AdminTrips() {
       fetchTrips();
     } catch (err) {
       toast.error("Failed to delete trip");
+    }
+  };
+
+  const toggleFeature = async (tripId: string, currentFeatured: boolean) => {
+    try {
+      let reason = "";
+      if (!currentFeatured) {
+        reason = prompt("Why is this trip being featured?", "Hand-picked for exceptional local experiences.") || "";
+        if (reason === null) return;
+      }
+
+      await api.patch(`/admin/trips/${tripId}/feature`, { 
+        isFeatured: !currentFeatured,
+        featuredReason: reason
+      });
+      toast.success(currentFeatured ? "Removed from Spotlight" : "Added to Community Spotlight!");
+      fetchTrips();
+    } catch (err) {
+      toast.error("Failed to update spotlight status");
     }
   };
 
@@ -136,6 +157,7 @@ function AdminTrips() {
                 <tr>
                   <th className="px-6 py-4">Trip Info</th>
                   <th className="px-6 py-4">Created By</th>
+                  <th className="px-6 py-4">Spotlight</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Date</th>
                   <th className="px-6 py-4 text-right">Actions</th>
@@ -176,6 +198,19 @@ function AdminTrips() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
+                      <button 
+                        onClick={() => toggleFeature(trip._id, trip.isFeatured)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight transition-all border ${
+                          trip.isFeatured 
+                            ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20 shadow-sm shadow-yellow-500/10" 
+                            : "bg-secondary/50 text-muted-foreground border-transparent hover:border-yellow-500/30 hover:text-yellow-600"
+                        }`}
+                      >
+                        <Star className={`size-3 ${trip.isFeatured ? "fill-yellow-500" : ""}`} />
+                        {trip.isFeatured ? "Featured" : "Spotlight"}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight ${
                         trip.isPublic 
                           ? "bg-emerald-500/10 text-emerald-500" 
@@ -195,7 +230,7 @@ function AdminTrips() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <a 
-                          href={`/trip-details?id=${trip.destination?.toLowerCase()}`}
+                          href={`/trip-details?id=${trip._id}`}
                           target="_blank"
                           rel="noreferrer"
                           className="p-1.5 rounded-lg hover:bg-primary/10 hover:text-primary text-muted-foreground transition"
@@ -216,7 +251,7 @@ function AdminTrips() {
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground italic">
+                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground italic">
                       No trips found.
                     </td>
                   </tr>

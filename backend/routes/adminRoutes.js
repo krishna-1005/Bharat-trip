@@ -5,35 +5,69 @@ const Trip = require("../models/Trip");
 const ProjectReview = require("../models/ProjectReview");
 const Poll = require("../models/Poll");
 const JobApplication = require("../models/JobApplication");
+const Announcement = require("../models/Announcement");
 const { protect, adminOnly } = require("../middleware/protect");
 const { admin, db } = require("../firebaseAdmin");
 
 const router = express.Router();
 
-// Only you can access this - Hardcoded for maximum security
-const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
+// ... (existing verifyAdminEmail and other routes)
 
-// Middleware to double check admin email
-const verifyAdminEmail = async (req, res, next) => {
-  const userEmail = req.user?.email?.toLowerCase();
-  const authorized = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(userEmail);
-  
-  console.log(`Admin Access Attempt by: ${userEmail}`);
-  
-  if (!authorized) {
-    console.log(`Access Denied: ${userEmail} is not in the authorized list.`);
-    return res.status(403).json({ error: "Access denied. Extreme security active." });
+/* ANNOUNCEMENTS MANAGEMENT */
+router.get("/announcements", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const announcements = await Announcement.find().sort({ createdAt: -1 });
+    res.json(announcements);
+  } catch (err) {
+    res.status(500).json({ error: "Error fetching announcements" });
   }
+});
 
-  // Ensure user also has admin role in DB for other middleware (adminOnly)
-  if (req.user && req.user.role !== "admin") {
-    req.user.role = "admin";
-    await req.user.save();
-    console.log(`Auto-promoted ${userEmail} to admin role in database.`);
+router.post("/announcements", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const announcement = new Announcement({
+      ...req.body,
+      createdBy: req.user._id
+    });
+    await announcement.save();
+    res.json(announcement);
+  } catch (err) {
+    res.status(500).json({ error: "Error creating announcement" });
   }
+});
 
-  next();
-};
+router.patch("/announcements/:id", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const announcement = await Announcement.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(announcement);
+  } catch (err) {
+    res.status(500).json({ error: "Error updating announcement" });
+  }
+});
+
+router.delete("/announcements/:id", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    await Announcement.findByIdAndDelete(req.params.id);
+    res.json({ message: "Announcement deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Error deleting announcement" });
+  }
+});
+
+/* TRIPS MANAGEMENT (CURATION) */
+router.patch("/trips/:id/feature", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const { isFeatured, featuredReason } = req.body;
+    const trip = await Trip.findByIdAndUpdate(
+      req.params.id,
+      { isFeatured, featuredReason },
+      { new: true }
+    );
+    res.json(trip);
+  } catch (err) {
+    res.status(500).json({ error: "Error featuring trip" });
+  }
+});
 
 /* GET /api/admin/whoami - Debug identity */
 router.get("/whoami", protect, (req, res) => {
@@ -134,6 +168,63 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     const finalGuestCount = guestCount > 0 ? guestCount : guestLogsCount;
     const finalTrackedCount = trackedUserCount > 0 ? trackedUserCount : trackedUserCountFromLogs;
 
+    // --- Retention Calculation (Original Data) ---
+    // Registered Users Retention (Visited on 2+ different days)
+    const returningUsersAgg = await UsageLog.aggregate([
+      { $match: { userId: { $ne: null } } },
+      {
+        $group: {
+          _id: "$userId",
+          distinctDays: { 
+            $addToSet: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } } 
+          }
+        }
+      },
+      { $project: { dayCount: { $size: "$distinctDays" } } },
+      { $match: { dayCount: { $gte: 2 } } },
+      { $count: "count" }
+    ]);
+    const returningUsersCount = returningUsersAgg.length > 0 ? returningUsersAgg[0].count : 0;
+
+    // Guest Retention (Visited on 2+ different days using guestId or IP)
+    const returningGuestsAgg = await UsageLog.aggregate([
+      { $match: { userId: null } },
+      {
+        $group: {
+          _id: { $ifNull: ["$details.guestId", "$ipAddress"] },
+          distinctDays: { 
+            $addToSet: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } } 
+          }
+        }
+      },
+      { $project: { dayCount: { $size: "$distinctDays" } } },
+      { $match: { dayCount: { $gte: 2 } } },
+      { $count: "count" }
+    ]);
+    const returningGuestsCount = returningGuestsAgg.length > 0 ? returningGuestsAgg[0].count : 0;
+
+    // Total Retention Rate
+    const totalVisitorsCount = await UsageLog.aggregate([
+      { $group: { _id: { $ifNull: ["$userId", { $ifNull: ["$details.guestId", "$ipAddress"] }] } } },
+      { $count: "count" }
+    ]);
+    const totalUniqueVisitors = totalVisitorsCount.length > 0 ? totalVisitorsCount[0].count : 0;
+    const totalReturningCount = returningUsersCount + returningGuestsCount;
+    const totalRetentionRate = totalUniqueVisitors > 0 ? ((totalReturningCount / totalUniqueVisitors) * 100).toFixed(1) : 0;
+
+    // Retention Rate for registered users
+    const retentionRate = totalUsers > 0 ? ((returningUsersCount / totalUsers) * 100).toFixed(1) : 0;
+
+    // Monthly Active Users (MAU) - Simple version: users with activity in last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const mauAgg = await UsageLog.aggregate([
+      { $match: { createdAt: { $gte: thirtyDaysAgo }, userId: { $ne: null } } },
+      { $group: { _id: "$userId" } },
+      { $count: "count" }
+    ]);
+    const mauCount = mauAgg.length > 0 ? mauAgg[0].count : 0;
+
     // The most accurate "registered" count is usually MongoDB, but some might be Firebase-only
     const totalRegisteredCount = Math.max(totalUsers, trackedUserCount);
 
@@ -205,7 +296,13 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
         totalApplications,
         guestCount: finalGuestCount,
         trackedUserCount: finalTrackedCount,
-        totalConversions
+        totalConversions,
+        returningUsersCount,
+        returningGuestsCount,
+        totalUniqueVisitors,
+        totalRetentionRate,
+        retentionRate,
+        mauCount
       },
       growthChart: chartData,
       recentRegisteredUsers: recentUsers,

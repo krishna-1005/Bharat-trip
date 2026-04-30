@@ -10,6 +10,7 @@ import { useAuth } from "./AuthProvider";
 import { toast } from "sonner";
 import { NotificationBell } from "./NotificationBell";
 import { Logo } from "./Logo";
+import { AnnouncementBanner } from "./AnnouncementBanner";
 
 const ADMIN_EMAILS = ["gotripo@gmail.com", "krishkulkarni1005@gmail.com"];
 
@@ -160,6 +161,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
+        <AnnouncementBanner />
         {/* Topbar */}
         <header className="h-16 sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border flex items-center gap-3 px-4 lg:px-8">
           <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">

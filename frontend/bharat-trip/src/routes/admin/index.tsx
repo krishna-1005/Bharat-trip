@@ -12,7 +12,9 @@ import {
   Activity,
   UserCheck,
   MousePointer2,
-  Loader2
+  Loader2,
+  RefreshCw,
+  Globe
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
@@ -100,11 +102,18 @@ function AdminDashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard 
-            label="Registered Users" 
-            value={s.totalRegisteredUsers} 
-            icon={Users} 
-            trend="+12%" 
-            color="bg-blue-500" 
+            label="Total Visitors" 
+            value={s.totalUniqueVisitors} 
+            icon={Globe} 
+            trend="+15%" 
+            color="bg-blue-600" 
+          />
+          <StatCard 
+            label="Overall Retention" 
+            value={`${s.totalRetentionRate}%`} 
+            icon={RefreshCw} 
+            trend={`${s.returningUsersCount + s.returningGuestsCount} Returners`}
+            color="bg-emerald-500" 
           />
           <StatCard 
             label="Plans Generated" 
@@ -114,18 +123,11 @@ function AdminDashboard() {
             color="bg-purple-500" 
           />
           <StatCard 
-            label="Saved Trips" 
-            value={s.totalTripsSavedByUsers} 
-            icon={Map} 
+            label="User Conversion" 
+            value={s.totalConversions} 
+            icon={TrendingUp} 
             trend="+8%" 
-            color="bg-emerald-500" 
-          />
-          <StatCard 
-            label="Total Reviews" 
-            value={s.totalReviews} 
-            icon={MessageSquare} 
-            trend="+15%" 
-            color="bg-orange-500" 
+            color="bg-indigo-500" 
           />
         </div>
 
@@ -232,11 +234,13 @@ function AdminDashboard() {
           {/* Sidebar Stats */}
           <div className="space-y-6">
              <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-                <h3 className="font-display font-bold text-lg mb-4">Traffic Insights</h3>
+                <h3 className="font-display font-bold text-lg mb-4">Retention Breakdown</h3>
                 <div className="space-y-4">
+                   <TrafficItem label="Returning Users" value={s.returningUsersCount} icon={UserCheck} color="text-emerald-500" />
+                   <TrafficItem label="Returning Guests" value={s.returningGuestsCount} icon={RefreshCw} color="text-amber-500" />
                    <TrafficItem label="Guest Sessions" value={s.guestCount} icon={MousePointer2} color="text-orange-500" />
-                   <TrafficItem label="Verified Users" value={s.trackedUserCount} icon={UserCheck} color="text-blue-500" />
-                   <TrafficItem label="Conversions" value={s.totalConversions} icon={TrendingUp} color="text-emerald-500" />
+                   <TrafficItem label="Registered Users" value={s.totalRegisteredUsers} icon={Users} color="text-blue-500" />
+                   <TrafficItem label="Monthly Active" value={s.mauCount} icon={Activity} color="text-purple-500" />
                 </div>
              </div>
 
@@ -271,7 +275,7 @@ function StatCard({ label, value, icon: Icon, trend, color }: any) {
         <div className={`size-12 rounded-2xl ${color} text-white grid place-items-center shadow-lg`}>
           <Icon className="size-6" />
         </div>
-        <div className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-lg">
+        <div className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-lg">
           {trend}
         </div>
       </div>

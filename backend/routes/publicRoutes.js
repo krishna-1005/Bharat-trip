@@ -3,6 +3,7 @@ const router = express.Router();
 const UsageLog = require("../models/UsageLog");
 const Trip = require("../models/Trip");
 const JobApplication = require("../models/JobApplication");
+const Announcement = require("../models/Announcement");
 const { db } = require("../firebaseAdmin");
 const { sendJobApplicationNotification } = require("../services/emailService");
 
@@ -205,27 +206,42 @@ router.get("/trips/:id", async (req, res) => {
   }
 });
 
-/* GET /api/public/featured-trips - Community favorites */
+/* ── ANNOUNCEMENTS ── */
+router.get("/announcements", async (req, res) => {
+  try {
+    const page = req.query.page || "all";
+    const filter = { isActive: true };
+    if (page !== "all") {
+      filter.$or = [{ targetPage: "all" }, { targetPage: page }];
+    }
+    const announcements = await Announcement.find(filter).sort({ createdAt: -1 });
+    res.json(announcements);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch announcements" });
+  }
+});
+
+/* GET /api/public/featured-trips - Community favorites and curated content */
 router.get("/featured-trips", async (req, res) => {
   try {
-    const trips = await Trip.find({ isPublic: true })
-      .sort({ likesCount: -1, views: -1 })
+    // 1. Get manually featured trips first
+    const featured = await Trip.find({ isFeatured: true, isPublic: true })
       .limit(6)
-      .lean()
-      .catch(() => []);
+      .lean();
     
-    // If not enough public trips, just get any recent ones for now
-    let finalTrips = trips;
-    if (trips.length < 3) {
-      const recent = await Trip.find({})
-        .sort({ createdAt: -1 })
-        .limit(6)
-        .lean()
-        .catch(() => []);
-      finalTrips = recent;
+    // 2. Supplement with popular trips if needed
+    let remaining = 6 - featured.length;
+    let popular = [];
+    if (remaining > 0) {
+      popular = await Trip.find({ isPublic: true, isFeatured: { $ne: true } })
+        .sort({ likesCount: -1, views: -1 })
+        .limit(remaining)
+        .lean();
     }
 
-    const enriched = finalTrips.map(t => ({
+    const allTrips = [...featured, ...popular];
+
+    const enriched = allTrips.map(t => ({
       id: t._id,
       title: t.title || `${t.destination} Odyssey`,
       destination: t.destination,
@@ -235,7 +251,9 @@ router.get("/featured-trips", async (req, res) => {
       image: t.image || `https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80`,
       itinerary: t.itinerary || [],
       views: t.views || 0,
-      likes: t.likes ? t.likes.length : 0
+      likes: t.likes ? t.likes.length : 0,
+      isFeatured: t.isFeatured || false,
+      featuredReason: t.featuredReason || ""
     }));
 
     res.json({ trips: enriched });

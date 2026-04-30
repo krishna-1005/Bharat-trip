@@ -125,6 +125,16 @@ const tripSchema = new mongoose.Schema({
     joinedAt: { type: Date, default: Date.now }
   }],
 
+  isFeatured: {
+    type: Boolean,
+    default: false
+  },
+
+  featuredReason: {
+    type: String,
+    default: ""
+  },
+
   /* ── REBOOKING ENGINE DATA ── */
   disruptionAlerts: [{
     type: { type: String }, // e.g., "flight_delay", "weather"
