@@ -11,7 +11,8 @@ const { admin, db } = require("../firebaseAdmin");
 
 const router = express.Router();
 
-// ... (existing verifyAdminEmail and other routes)
+// Middleware to verify admin status
+const verifyAdminEmail = adminOnly;
 
 /* ANNOUNCEMENTS MANAGEMENT */
 router.get("/announcements", protect, verifyAdminEmail, async (req, res) => {
