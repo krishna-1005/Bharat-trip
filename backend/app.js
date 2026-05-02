@@ -109,6 +109,20 @@ app.use("/api/group-chat", groupChatRoutes);
 
 /* ── 4. ERROR HANDLING ── */
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error(`[ERROR] ${new Date().toISOString()} ${req.method} ${req.url}:`, err);
+  
+  const status = err.status || 500;
+  const message = err.message || "Internal Server Error";
+  
+  res.status(status).json({
+    error: status === 500 ? "Internal Server Error" : "Error",
+    message: status === 500 ? "An unexpected error occurred on the server." : message,
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack })
+  });
+});
+
 // 404 Handler
 app.use((req, res) => {
   console.log(`[404] ${req.method} ${req.url}`);

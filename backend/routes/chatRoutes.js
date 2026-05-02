@@ -42,9 +42,14 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
 }
 \`\`\``;
 
+    // Normalize history to handle both {sender, text} and {role, content}
+    const normalizedHistory = (history || []).map(m => ({
+      text: m.text || m.content || "",
+      sender: m.sender || (m.role === "assistant" || m.role === "bot" ? "bot" : "user")
+    })).filter(m => m.text);
+
     // Filter and format history to ensure it's alternating and starts with USER
-    let formattedHistory = (history || [])
-      .filter(m => m.text && m.sender)
+    let formattedHistory = normalizedHistory
       .map(m => ({
         role: m.sender === "bot" ? "model" : "user",
         parts: [{ text: m.text }]
@@ -115,12 +120,18 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
     // SMART INTERACTIVE FALLBACK (No API needed)
     const msg = message.toLowerCase();
     
+    // Normalize history for fallback as well
+    const safeHistory = (history || []).map(m => ({
+      text: m.text || m.content || "",
+      sender: m.sender || (m.role === "assistant" || m.role === "bot" ? "bot" : "user")
+    })).filter(m => m.text);
+
     // 1. Check for City (Ignore the first intro message from history)
     let city = null;
     const cities = ["delhi", "mumbai", "jaipur", "goa", "bangalore", "bengaluru", "agra", "udaipur"];
     
     // Only check city in history IF it's not the very first intro message
-    const userHistory = (history || []).filter(h => h.sender === "user").map(h => h.text.toLowerCase()).join(" ");
+    const userHistory = safeHistory.filter(h => h.sender === "user").map(h => h.text.toLowerCase()).join(" ");
     
     const cityInMsg = msg.match(new RegExp(`\\b(${cities.join("|")})\\b`));
     const cityInHistory = userHistory.match(new RegExp(`\\b(${cities.join("|")})\\b`));
@@ -129,7 +140,7 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
     else if (cityInHistory) city = cityInHistory[0];
 
     // 2. Build consistent history text for subsequent checks
-    const historyText = (history || []).map(h => h.text.toLowerCase()).join(" ");
+    const historyText = safeHistory.map(h => h.text.toLowerCase()).join(" ");
 
     // 3. Check for Pace
     let pace = null;
@@ -191,8 +202,9 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
     }
 
     // Check if the user is currently answering the "days" question
-    const lastBotMsg = history && history.length > 0 ? history[history.length - 1].text.toLowerCase() : "";
+    const lastBotMsg = safeHistory.length > 0 ? safeHistory[safeHistory.length - 1].text.toLowerCase() : "";
     const isAnsweringDays = lastBotMsg.includes("how many days");
+
 
     if (!days || (isAnsweringDays && isNaN(parseInt(msg)))) {
       return res.json({
