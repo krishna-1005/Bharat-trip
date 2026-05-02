@@ -1,7 +1,12 @@
 {
   "name": "GoTripo-monorepo",
   "private": true,
+  "workspaces": [
+    "backend",
+    "frontend/bharat-trip"
+  ],
   "scripts": {
+    "start": "cd backend && npm start",
     "backend": "cd backend && npm run dev",
     "frontend": "cd frontend/bharat-trip && npm run dev",
     "install-all": "npm install && cd backend && npm install && cd ../frontend/bharat-trip && npm install"
