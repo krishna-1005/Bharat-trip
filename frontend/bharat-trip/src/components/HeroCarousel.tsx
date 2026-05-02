@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, MapPin, Sparkles } from "lucide-react";
 import ladakh from "@/assets/dest-ladakh.jpg";
 import varanasi from "@/assets/dest-varanasi.jpg";
 import kerala from "@/assets/dest-kerala.jpg";
@@ -116,6 +116,16 @@ export function HeroCarousel() {
             >
               Plan My Trip
             </Link>
+            <button
+              onClick={() => {
+                // Find the chatbot toggle button and click it
+                const btn = document.querySelector('button[aria-label="Toggle chatbot"]') as HTMLButtonElement;
+                if (btn) btn.click();
+              }}
+              className="inline-flex items-center gap-2 h-14 px-8 rounded-2xl backdrop-blur-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 font-bold transition-all text-emerald-400"
+            >
+              Ask AI Co-pilot <Sparkles className="size-5" />
+            </button>
           </div>
         </div>
 

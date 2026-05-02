@@ -34,6 +34,7 @@ import YatraHub from "./routes/yatra/index";
 import YatraDetail from "./routes/yatra/detail";
 import YatraWishlist from "./routes/yatra/wishlist";
 import YatraPlanner from "./routes/yatra/planner";
+import { Chatbot } from "./components/Chatbot";
 
 export default function App() {
   return (
@@ -82,6 +83,7 @@ export default function App() {
         <Route path="config" element={<AdminConfigPage />} />
       </Route>
     </Routes>
+    <Chatbot />
     </>
   );
 }

@@ -15,8 +15,8 @@ const router = express.Router();
 router.get("/ping", (req, res) => res.json({ status: "plan router ok" }));
 
 /* ── Vibe-Based Suggestions ── */
-router.get("/vibe-suggestions", async (req, res) => {
-  const { adventure, modern, social } = req.query;
+router.all("/vibe-suggestions", async (req, res) => {
+  const { adventure, modern, social } = req.method === "POST" ? req.body : req.query;
   
   try {
     const suggestions = await getVibeSuggestions({
@@ -27,7 +27,7 @@ router.get("/vibe-suggestions", async (req, res) => {
     
     res.json({ suggestions });
   } catch (err) {
-    console.error("Vibe suggestions error:", err);
+    console.error("Vibe suggestions route error:", err.message);
     res.status(500).json({ error: "Failed to get suggestions" });
   }
 });
