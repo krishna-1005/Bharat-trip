@@ -29,6 +29,7 @@ import AdminPollsPage from "./routes/admin/polls";
 import AdminNotificationsPage from "./routes/admin/notifications";
 import AdminConfigPage from "./routes/admin/config";
 import AdminJobApplicationsPage from "./routes/admin/job-applications";
+import AdminChatbotPage from "./routes/admin/chatbot";
 
 import YatraHub from "./routes/yatra/index";
 import YatraDetail from "./routes/yatra/detail";
@@ -80,6 +81,7 @@ export default function App() {
         <Route path="reviews" element={<AdminReviewsPage />} />
         <Route path="polls" element={<AdminPollsPage />} />
         <Route path="notifications" element={<AdminNotificationsPage />} />
+        <Route path="chatbot" element={<AdminChatbotPage />} />
         <Route path="config" element={<AdminConfigPage />} />
       </Route>
     </Routes>

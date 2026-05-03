@@ -65,6 +65,7 @@ router.post("/generate", planValidation, async (req, res) => {
   try {
     let userPreferences = {};
     let loggedUserId = null;
+    let loggedUserRole = "guest";
 
     // Auth handling
     const authHeader = req.headers.authorization;
@@ -75,6 +76,7 @@ router.post("/generate", planValidation, async (req, res) => {
         const userObj = await User.findOne({ email: decoded.email });
         if (userObj) {
           loggedUserId = userObj._id;
+          loggedUserRole = userObj.role || "user";
           userPreferences = userObj.preferences || {};
         }
       } catch (e) { 
@@ -84,6 +86,7 @@ router.post("/generate", planValidation, async (req, res) => {
             const userObj = await User.findById(decoded.id);
             if (userObj) {
               loggedUserId = userObj._id;
+              loggedUserRole = userObj.role || "user";
               userPreferences = userObj.preferences || {};
             }
           }
@@ -98,6 +101,7 @@ router.post("/generate", planValidation, async (req, res) => {
         action: "generate_plan",
         userId: loggedUserId,
         isGuest: !loggedUserId,
+        userRole: loggedUserRole,
         details: { city, cities, days, budget, interests, sourceCity },
         ipAddress: ip,
         userAgent: req.headers['user-agent']

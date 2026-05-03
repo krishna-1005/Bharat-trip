@@ -156,7 +156,14 @@ export function Chatbot() {
                         </div>
                         <p className="text-sm font-medium mb-4">I've created a custom itinerary for **{m.planData.city}**.</p>
                         <button 
-                          onClick={() => navigate(`/results?planId=${m.planData.id}`)}
+                          onClick={() => {
+                            if (!user) {
+                              toast.info("Please sign in to view your full itinerary");
+                              navigate(`/auth?redirect=/results?planId=${m.planData.id}`);
+                            } else {
+                              navigate(`/results?planId=${m.planData.id}`);
+                            }
+                          }}
                           className="w-full h-11 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest hover:bg-white/20 transition-all shadow-cta"
                         >
                           Open Itinerary <ChevronRight className="size-4" />

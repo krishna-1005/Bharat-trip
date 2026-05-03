@@ -27,6 +27,7 @@ const adminNav = [
   { to: "/admin/reviews", label: "Reviews", icon: MessageSquare },
   { to: "/admin/polls", label: "Polls", icon: BarChart3 },
   { to: "/admin/notifications", label: "Announcements", icon: Bell },
+  { to: "/admin/chatbot", label: "Chatbot AI", icon: MessageSquare },
   { to: "/admin/config", label: "System Config", icon: Settings },
 ];
 

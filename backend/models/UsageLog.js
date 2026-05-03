@@ -14,6 +14,11 @@ const usageLogSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  userRole: {
+    type: String,
+    enum: ["user", "admin", "guest"],
+    default: "guest"
+  },
   details: { 
     type: mongoose.Schema.Types.Mixed 
   },

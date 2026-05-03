@@ -6,8 +6,10 @@ const ProjectReview = require("../models/ProjectReview");
 const Poll = require("../models/Poll");
 const JobApplication = require("../models/JobApplication");
 const Announcement = require("../models/Announcement");
+const Notification = require("../models/Notification");
 const { protect, adminOnly } = require("../middleware/protect");
 const { admin, db } = require("../firebaseAdmin");
+const { sendUpdateEmail } = require("../services/emailService");
 
 const router = express.Router();
 
@@ -26,11 +28,32 @@ router.get("/announcements", protect, verifyAdminEmail, async (req, res) => {
 
 router.post("/announcements", protect, verifyAdminEmail, async (req, res) => {
   try {
+    const { sendEmail, ...rest } = req.body;
     const announcement = new Announcement({
-      ...req.body,
+      ...rest,
       createdBy: req.user._id
     });
     await announcement.save();
+
+    // 1. Create in-app notification for all users (global)
+    await Notification.create({
+      title: announcement.title,
+      message: announcement.content,
+      type: announcement.type === "promotion" ? "promo" : "info",
+      link: announcement.link,
+      userId: null // Global broadcast
+    });
+
+    // 2. Send email notification if requested
+    if (sendEmail) {
+      const users = await User.find({ "preferences.emailAlerts": true });
+      const emails = users.map(u => u.email).filter(e => e);
+      if (emails.length > 0) {
+        // Use the title as subject and content as body
+        sendUpdateEmail(emails, announcement.title, announcement.content);
+      }
+    }
+
     res.json(announcement);
   } catch (err) {
     res.status(500).json({ error: "Error creating announcement" });
@@ -137,6 +160,35 @@ router.post("/broadcast", protect, verifyAdminEmail, async (req, res) => {
 router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
+    
+    // TRUTH: Only count actual plan generations by REAL USERS (not admins)
+    const plansAgg = await UsageLog.aggregate([
+      { 
+        $match: { 
+          action: { $in: ["generate_plan", "chatbot_plan_generated"] } 
+        } 
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { uId: "$userId" },
+          pipeline: [
+            { $match: { $expr: { $eq: [{ $toString: "$_id" }, "$$uId"] } } },
+            { $project: { role: 1 } }
+          ],
+          as: "userInfo"
+        }
+      },
+      {
+        $match: {
+          "userInfo.role": { $ne: "admin" }
+        }
+      },
+      { $count: "count" }
+    ]);
+    
+    const totalPlansGenerated = plansAgg.length > 0 ? plansAgg[0].count : 0;
+    
     const totalUsageLogs = await UsageLog.countDocuments();
     const totalSavedTrips = await Trip.countDocuments();
     const totalReviews = await ProjectReview.countDocuments();
@@ -290,7 +342,7 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     res.json({
       summary: {
         totalRegisteredUsers: totalRegisteredCount,
-        totalPlansGenerated: totalUsageLogs,
+        totalPlansGenerated: totalPlansGenerated,
         totalTripsSavedByUsers: totalSavedTrips,
         totalReviews,
         totalPolls,
@@ -469,6 +521,75 @@ router.delete("/applications/:id", protect, verifyAdminEmail, async (req, res) =
     res.json({ message: "Application deleted" });
   } catch (err) {
     res.status(500).json({ error: "Error deleting application" });
+  }
+});
+
+/* CHATBOT ANALYTICS */
+router.get("/chatbot-stats", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const totalQueries = await UsageLog.countDocuments({ action: "chatbot_query" });
+    const totalPlans = await UsageLog.countDocuments({ action: "chatbot_plan_generated" });
+    
+    const modelUsage = await UsageLog.aggregate([
+      { $match: { action: "chatbot_query" } },
+      { $group: { _id: "$details.model", count: { $sum: 1 } } }
+    ]);
+
+    const dailyQueries = await UsageLog.aggregate([
+      { $match: { action: "chatbot_query" } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } },
+      { $limit: 30 }
+    ]);
+
+    const popularCities = await UsageLog.aggregate([
+      { $match: { action: "chatbot_plan_generated" } },
+      { $group: { _id: "$details.city", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // NEW: Peak Hours
+    const peakHours = await UsageLog.aggregate([
+      { $match: { action: "chatbot_query" } },
+      {
+        $group: {
+          _id: { $hour: "$createdAt" },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // NEW: Popular Interests
+    const popularInterests = await UsageLog.aggregate([
+      { $match: { action: "chatbot_plan_generated" } },
+      { $unwind: "$details.interests" },
+      { $group: { _id: "$details.interests", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    res.json({
+      summary: {
+        totalQueries,
+        totalPlansGenerated: totalPlans,
+        conversionRate: totalQueries > 0 ? ((totalPlans / totalQueries) * 100).toFixed(1) : 0
+      },
+      modelUsage,
+      dailyQueries,
+      popularCities,
+      peakHours,
+      popularInterests
+    });
+  } catch (err) {
+    console.error("Chatbot stats error:", err);
+    res.status(500).json({ error: "Error fetching chatbot stats" });
   }
 });
 

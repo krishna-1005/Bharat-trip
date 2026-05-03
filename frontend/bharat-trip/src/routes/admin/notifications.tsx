@@ -37,7 +37,8 @@ function AdminNotifications() {
     type: "info",
     link: "",
     targetPage: "all",
-    isActive: true
+    isActive: true,
+    sendEmail: false
   });
   const [showForm, setShowForm] = useState(false);
 
@@ -63,14 +64,15 @@ function AdminNotifications() {
     setLoading(true);
     try {
       await api.post("/admin/announcements", formData);
-      toast.success("Announcement created successfully!");
+      toast.success("Announcement created " + (formData.sendEmail ? "and emails sent!" : "successfully!"));
       setFormData({
         title: "",
         content: "",
         type: "info",
         link: "",
         targetPage: "all",
-        isActive: true
+        isActive: true,
+        sendEmail: false
       });
       setShowForm(false);
       fetchAnnouncements();
@@ -180,6 +182,19 @@ function AdminNotifications() {
                       placeholder="/explore"
                     />
                   </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                  <input 
+                    type="checkbox"
+                    id="sendEmail"
+                    checked={formData.sendEmail}
+                    onChange={(e) => setFormData({...formData, sendEmail: e.target.checked})}
+                    className="size-5 rounded-lg accent-primary"
+                  />
+                  <label htmlFor="sendEmail" className="flex items-center gap-2 text-sm font-bold cursor-pointer">
+                    <Mail className="size-4 text-primary" /> Send Email Notification to all users
+                  </label>
                 </div>
 
                 <button

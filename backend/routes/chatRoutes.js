@@ -5,6 +5,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { admin } = require("../firebaseAdmin");
 const Trip = require("../models/Trip");
 const User = require("../models/User");
+const UsageLog = require("../models/UsageLog");
 const jwt = require("jsonwebtoken");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: "v1beta" });
@@ -22,6 +23,7 @@ router.post("/", async (req, res) => {
   }
 
   let loggedUserId = null;
+  let loggedUserRole = "guest";
 
   try {
     let replyText = "";
@@ -34,13 +36,19 @@ router.post("/", async (req, res) => {
       try {
         const decoded = await admin.auth().verifyIdToken(token);
         const userObj = await User.findOne({ email: decoded.email });
-        if (userObj) loggedUserId = userObj._id;
+        if (userObj) {
+          loggedUserId = userObj._id;
+          loggedUserRole = userObj.role || "user";
+        }
       } catch (e) {
         try {
           if (process.env.JWT_SECRET) {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             const userObj = await User.findById(decoded.id);
-            if (userObj) loggedUserId = userObj._id;
+            if (userObj) {
+              loggedUserId = userObj._id;
+              loggedUserRole = userObj.role || "user";
+            }
           }
         } catch (jwtErr) {}
       }
@@ -103,6 +111,15 @@ MANDATORY: If you say "I've crafted a plan" or "Check it out below", you MUST in
       const result = await chat.sendMessage(systemInstruction + "\n\nUser: " + message);
       replyText = result.response.text();
 
+      // Log success for Gemini
+      await UsageLog.create({
+        action: "chatbot_query",
+        userId: loggedUserId,
+        isGuest: !loggedUserId,
+        userRole: loggedUserRole,
+        details: { model: "gemini", message: message.substring(0, 100), status: "success" }
+      });
+
     } catch (geminiError) {
       console.warn("Gemini Error, falling back to Groq:", geminiError.message);
       
@@ -119,6 +136,16 @@ MANDATORY: If you say "I've crafted a plan" or "Check it out below", you MUST in
             temperature: 0.7,
           });
           replyText = chatCompletion.choices[0]?.message?.content || "";
+
+          // Log success for Groq
+          await UsageLog.create({
+            action: "chatbot_query",
+            userId: loggedUserId,
+            isGuest: !loggedUserId,
+            userRole: loggedUserRole,
+            details: { model: "groq", message: message.substring(0, 100), status: "success" }
+          });
+
         } catch (groqError) {
           console.error("Groq Error:", groqError.message);
           throw new Error("All AI services failed"); // Trigger rule-based fallback
@@ -134,22 +161,13 @@ MANDATORY: If you say "I've crafted a plan" or "Check it out below", you MUST in
         const parsedData = JSON.parse(jsonMatch[1]);
         const plan = await generatePlan(parsedData);
         
-        // Save to DB
-        const savedTrip = await Trip.create({
+        // Log plan generation
+        await UsageLog.create({
+          action: "chatbot_plan_generated",
           userId: loggedUserId,
           isGuest: !loggedUserId,
-          title: `${parsedData.city} Trip`,
-          destination: parsedData.city,
-          days: plan.days,
-          itinerary: plan.itinerary,
-          totalTripCost: plan.totalTripCost,
-          totalBudget: plan.totalBudget,
-          summary: plan.summary,
-          travelerType: parsedData.travelerType || "solo",
-          pace: parsedData.pace || "moderate",
-          recommendedStay: plan.recommendedStay,
-          recommendedTransport: plan.recommendedTransport,
-          status: "upcoming"
+          userRole: loggedUserRole,
+          details: { city: parsedData.city, days: parsedData.days }
         });
 
         replyText = replyText.replace(/```json[\s\S]*?```/, "").trim();
@@ -179,7 +197,7 @@ MANDATORY: If you say "I've crafted a plan" or "Check it out below", you MUST in
 
     // 1. Check for City (Ignore the first intro message from history)
     let city = null;
-    const cities = ["delhi", "mumbai", "jaipur", "goa", "bangalore", "bengaluru", "agra", "udaipur"];
+    const cities = ["delhi", "mumbai", "jaipur", "goa", "bangalore", "bengaluru", "agra", "udaipur", "varanasi", "kochi", "kerala", "rishikesh", "amritsar", "hampi", "ladakh"];
     
     // Only check city in history IF it's not the very first intro message
     const userHistory = safeHistory.filter(h => h.sender === "user").map(h => h.text.toLowerCase()).join(" ");
@@ -227,12 +245,12 @@ MANDATORY: If you say "I've crafted a plan" or "Check it out below", you MUST in
       if (/\b(hi|hello|hey|greetings|namaste)\b/.test(msg)) {
         return res.json({ 
           type: "chat", 
-          reply: "Hello! I'm your GoTripo AI concierge. 🇮🇳 Which beautiful city in India are we planning to explore today? (Delhi, Mumbai, Jaipur, Goa, or Bengaluru?)" 
+          reply: "Hello! I'm your GoTripo AI concierge. 🇮🇳 Which beautiful city in India are we planning to explore today? (Delhi, Mumbai, Varanasi, Goa, or Bengaluru?)" 
         });
       }
       return res.json({ 
         type: "chat", 
-        reply: "I'm excited to help you plan! Which city are we exploring? (Delhi, Mumbai, Jaipur, Goa, or Bengaluru?)" 
+        reply: "I'm excited to help you plan! Which city are we exploring? (Delhi, Mumbai, Varanasi, Goa, or Bengaluru?)" 
       });
     }
 

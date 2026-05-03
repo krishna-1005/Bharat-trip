@@ -377,8 +377,16 @@ export default function Results() {
   const [open, setOpen] = useState<number | null>(1);
   const [activePlace, setActivePlace] = useState<any>(null);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    // If it's a dynamic plan, user must be logged in
+    if (planId && !authLoading && !user) {
+      toast.info("Please sign in to view this generated itinerary");
+      navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+      return;
+    }
+
     if (planId) {
       setLoading(true);
       api.get(`/trips/${planId}`)
