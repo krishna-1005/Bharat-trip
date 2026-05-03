@@ -124,7 +124,13 @@ async function fetchOSMPlaces(lat, lng, radiusKm = 10) {
     const response = await axios.post(
       "https://overpass-api.de/api/interpreter",
       query,
-      { headers: { "Content-Type": "text/plain" }, timeout: 40000 }
+      { 
+        headers: { 
+          "Content-Type": "text/plain",
+          "User-Agent": "GoTripoTravelApp/1.0 (https://gotripo.com; contact@gotripo.com)"
+        }, 
+        timeout: 40000 
+      }
     );
 
     if (!response.data || !response.data.elements) return [];

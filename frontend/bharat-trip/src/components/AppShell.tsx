@@ -4,7 +4,7 @@ import {
   LayoutGrid, Users, Bookmark, Settings, ChevronLeft, Menu, LogOut,
   ShieldCheck, Globe, MapPin
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "./AuthProvider";
 import { toast } from "sonner";
@@ -45,6 +45,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
 
+  useEffect(() => {
+    if (loc.pathname === "/results") {
+      setCollapsed(true);
+    }
+  }, [loc.pathname]);
+
   const userInitials = (user?.displayName as string | undefined)
     ?.split(" ")
     .map((s) => s[0])
@@ -70,7 +76,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           collapsed ? "w-[76px]" : "w-[260px]"
         }`}
       >
-        <div className="h-16 flex items-center justify-between px-5 border-b border-border">
+        <div className={`h-16 flex items-center justify-between ${collapsed ? "px-3" : "px-5"} border-b border-border`}>
           <Link to="/" className="flex items-center gap-2">
             <Logo iconOnly={collapsed} className={collapsed ? "scale-75" : "scale-90"} />
           </Link>

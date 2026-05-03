@@ -12,7 +12,7 @@ import {
   Maximize2,
   Minimize2
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import api from "@/lib/api";
 import { toast } from "sonner";
@@ -33,12 +33,19 @@ export function Chatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
   const greeting: Message = {
     role: "assistant",
     content: `Namaste${user?.displayName ? `, ${user.displayName.split(' ')[0]}` : ''}! I'm your GoTripo AI Co-pilot. Ready to explore the vibrant colors of India? Tell me where you want to go or what kind of vibe you're looking for! 🇮🇳✨`
   };
+
+  useEffect(() => {
+    if (location.pathname === "/results") {
+      setIsMinimized(true);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     if (messages.length === 0) {
@@ -48,7 +55,7 @@ export function Chatbot() {
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isTyping]);
 

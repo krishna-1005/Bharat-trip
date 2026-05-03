@@ -49,8 +49,9 @@ Instructions:
 1. Optimize the itinerary for a ${days}-day trip to ${city}.
 2. Use the provided "candidates" as the primary source of truth for location names and coordinates.
 3. If a candidate's name or metadata clearly indicates it's in a different city (e.g., has "Bengaluru" in the name but the destination is "Kerala"), EXCLUDE IT.
-4. Group nearby places together for each day to minimize travel time.
-5. Provide a concise summary of the trip.
+4. IMPORTANT: Include at least 3 distinct attractions/activities for each day (4 if the pace is "fast").
+5. Group nearby places together for each day to minimize travel time.
+6. Provide a concise summary of the trip.
 
 Return ONLY valid JSON in this structure:
 {
@@ -87,31 +88,44 @@ ${candidatesContext}
       response_format: { type: "json_object" }
     });
 
-    const data = JSON.parse(chatCompletion.choices[0].message.content);
+    const content = chatCompletion.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error("Empty response from Groq");
+    }
+
+    const data = JSON.parse(content);
 
     if (data && data.itinerary) {
       const finalizedItinerary = [];
-      Object.entries(data.itinerary).forEach(([dayNum, places]) => {
+      const itineraryEntries = Array.isArray(data.itinerary) 
+        ? data.itinerary.map((d, i) => [`Day ${i + 1}`, d.places || d])
+        : Object.entries(data.itinerary);
+
+      itineraryEntries.forEach(([dayNum, places]) => {
+        if (!Array.isArray(places)) return;
+        
         finalizedItinerary.push({
           day: dayNum.includes("Day") ? dayNum : `Day ${dayNum}`,
           places: places.map(p => ({
             ...p,
-            estimatedCost: p.avgCost || 0,
-            estimatedHours: p.timeHours || 2
+            estimatedCost: p.estimatedCost || p.avgCost || 0,
+            estimatedHours: p.estimatedHours || p.timeHours || 2
           }))
         });
       });
 
-      return {
-        summary: data.summary,
-        itinerary: finalizedItinerary
-      };
+      if (finalizedItinerary.length > 0) {
+        return {
+          summary: data.summary || `A ${days}-day trip to ${city}.`,
+          itinerary: finalizedItinerary
+        };
+      }
     }
     
     return getFallbackPlan();
 
   } catch (err) {
-    console.error("Groq Planning Error:", err.message);
+    console.warn("⚠️ AI Planner Refinement Error (falling back):", err.message);
     return getFallbackPlan();
   }
 }
@@ -133,8 +147,7 @@ async function getVibeSuggestions({ adventure, modern, social }) {
 
   try {
     const Groq = require("groq-sdk");
-    if (!process.env.GROQ_API_KEY) {
-      console.warn("GROQ_API_KEY missing, using fallback suggestions.");
+    if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY === 'your_groq_api_key_here') {
       return getLocalSuggestions({ adventure, modern, social }, fallbacks);
     }
 
@@ -161,14 +174,22 @@ Each object: { "name": "...", "region": "...", "icon": "one of [mountain, palmtr
       response_format: { type: "json_object" }
     });
 
-    const data = JSON.parse(chatCompletion.choices[0].message.content);
+    const content = chatCompletion.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error("Empty response from Groq");
+    }
+
+    const data = JSON.parse(content);
     const suggestions = data.suggestions || data.destinations || (Array.isArray(data) ? data : []);
     
-    if (suggestions.length > 0) return suggestions;
+    if (Array.isArray(suggestions) && suggestions.length > 0) {
+      return suggestions.slice(0, 3);
+    }
+    
     return getLocalSuggestions({ adventure, modern, social }, fallbacks);
 
   } catch (err) {
-    console.error("Vibe Suggestion Error:", err.message);
+    console.warn("⚠️ Vibe AI Error (falling back):", err.message);
     return getLocalSuggestions({ adventure, modern, social }, fallbacks);
   }
 }

@@ -478,7 +478,9 @@ async function generatePlan({
     }
   } else if (typeof budget === 'string') {
     budgetTier = budget.toLowerCase();
-    totalBudget = ({ low: 3000, medium: 7000, high: 20000 }[budgetTier] || 5000) * tMult;
+    // Daily budget per person base
+    const dailyBase = { low: 1500, medium: 3500, high: 8000 }[budgetTier] || 2500;
+    totalBudget = dailyBase * days * tMult;
   }
 
   const perDayBudget = totalBudget / days;

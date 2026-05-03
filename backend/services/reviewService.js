@@ -1,6 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: "v1" });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: "v1beta" });
 
 /**
  * Generates realistic reviews for a place using Gemini AI.
@@ -13,7 +13,7 @@ async function generateReviews(placeName, category, city = "India") {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1beta" });
     
     // Set a short timeout for the AI generation so it doesn't hang
     const result = await model.generateContent({

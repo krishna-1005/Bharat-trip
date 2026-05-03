@@ -2,8 +2,12 @@ const express = require("express");
 const router  = express.Router();
 const Groq    = require("groq-sdk");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { admin } = require("../firebaseAdmin");
+const Trip = require("../models/Trip");
+const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: "v1beta" });
 const generatePlan = require("../logic/planner");
 
 let groq = null;
@@ -17,9 +21,30 @@ router.post("/", async (req, res) => {
     return res.json({ type: "chat", reply: "Please type a message." });
   }
 
+  let loggedUserId = null;
+
   try {
     let replyText = "";
     let planData = null;
+
+    // Optional Auth handling for Chatbot
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      try {
+        const decoded = await admin.auth().verifyIdToken(token);
+        const userObj = await User.findOne({ email: decoded.email });
+        if (userObj) loggedUserId = userObj._id;
+      } catch (e) {
+        try {
+          if (process.env.JWT_SECRET) {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const userObj = await User.findById(decoded.id);
+            if (userObj) loggedUserId = userObj._id;
+          }
+        } catch (jwtErr) {}
+      }
+    }
 
     // System Instruction for the AI Agent
     const systemInstruction = `You are the GoTripo AI Agent, a world-class travel concierge for India.
@@ -31,14 +56,17 @@ CORE MISSION:
 4. **Iterative Planning**: Don't ask for everything at once. Focus on one detail at a time.
 
 JSON TRIGGER:
-Only when you have City, Days, and Budget, and the user is ready, output exactly one JSON block:
+Only when you have City, Days, and Budget, and the user is ready, output exactly one JSON block at the END of your message. 
+MANDATORY: If you say "I've crafted a plan" or "Check it out below", you MUST include this JSON block:
 \`\`\`json
 {
   "generatePlan": true,
   "city": "City Name",
   "days": 2,
   "budget": "low" | "medium" | "high",
-  "interests": ["Interest1", "Interest2"]
+  "interests": ["Interest1", "Interest2"],
+  "travelerType": "solo",
+  "pace": "relaxed" | "moderate" | "fast"
 }
 \`\`\``;
 
@@ -66,7 +94,7 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
         throw new Error("GEMINI_API_KEY missing or invalid");
       }
 
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1beta" });
       const chat = model.startChat({
         history: formattedHistory,
         generationConfig: { maxOutputTokens: 1000 }
@@ -87,7 +115,7 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
               ...formattedHistory.map(h => ({ role: h.role === "model" ? "assistant" : "user", content: h.parts[0].text })),
               { role: "user", content: message }
             ],
-            model: "llama3-70b-8192",
+            model: "llama-3.3-70b-versatile",
             temperature: 0.7,
           });
           replyText = chatCompletion.choices[0]?.message?.content || "";
@@ -103,10 +131,33 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
     const jsonMatch = replyText.match(/```json\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
       try {
-        planData = JSON.parse(jsonMatch[1]);
-        const plan = await generatePlan(planData);
+        const parsedData = JSON.parse(jsonMatch[1]);
+        const plan = await generatePlan(parsedData);
+        
+        // Save to DB
+        const savedTrip = await Trip.create({
+          userId: loggedUserId,
+          isGuest: !loggedUserId,
+          title: `${parsedData.city} Trip`,
+          destination: parsedData.city,
+          days: plan.days,
+          itinerary: plan.itinerary,
+          totalTripCost: plan.totalTripCost,
+          totalBudget: plan.totalBudget,
+          summary: plan.summary,
+          travelerType: parsedData.travelerType || "solo",
+          pace: parsedData.pace || "moderate",
+          recommendedStay: plan.recommendedStay,
+          recommendedTransport: plan.recommendedTransport,
+          status: "upcoming"
+        });
+
         replyText = replyText.replace(/```json[\s\S]*?```/, "").trim();
-        return res.json({ type: "trip", reply: replyText, plan });
+        return res.json({ 
+          type: "plan", 
+          reply: replyText, 
+          planData: { id: savedTrip._id, city: parsedData.city } 
+        });
       } catch (e) {
         console.error("JSON Parse Error:", e);
       }
@@ -223,20 +274,40 @@ Only when you have City, Days, and Budget, and the user is ready, output exactly
     // 8. If we have everything, generate a plan!
     try {
       const finalDays = days > 10 ? 10 : days; // Safety limit
-      const planData = {
+      const parsedData = {
         city: cityCap,
         days: finalDays,
         budget: budget,
         interests: interests,
         pace: pace
       };
-      const plan = await generatePlan(planData);
+      const plan = await generatePlan(parsedData);
+
+      // Save to DB
+      const savedTrip = await Trip.create({
+        userId: loggedUserId,
+        isGuest: !loggedUserId,
+        title: `${cityCap} Trip`,
+        destination: cityCap,
+        days: plan.days,
+        itinerary: plan.itinerary,
+        totalTripCost: plan.totalTripCost,
+        totalBudget: plan.totalBudget,
+        summary: plan.summary,
+        travelerType: "solo",
+        pace: pace,
+        recommendedStay: plan.recommendedStay,
+        recommendedTransport: plan.recommendedTransport,
+        status: "upcoming"
+      });
+
       return res.json({ 
-        type: "trip", 
-        reply: `Excellent! I've crafted a perfect **${finalDays}-day**, **${pace}**, **${budget === "high" ? "luxury" : "budget"}** itinerary for your **${cityCap}** adventure focusing on **${interests.join(", ")}**. Check it out below! 🗺️`, 
-        plan 
+        type: "plan", 
+        reply: `Excellent! [v2] I've crafted a perfect **${finalDays}-day**, **${pace}**, **${budget === "high" ? "luxury" : "budget"}** itinerary for your **${cityCap}** adventure focusing on **${interests.join(", ")}**. Check it out below! 🗺️`, 
+        planData: { id: savedTrip._id, city: cityCap } 
       });
     } catch (e) {
+      console.error("Fallback Error:", e);
       return res.json({ 
         type: "chat", 
         reply: `I'm having a little trouble generating the full map right now, but for **${cityCap}**, I highly recommend visiting the local landmarks! Enjoy your ${days} day stay!` 

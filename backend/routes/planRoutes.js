@@ -16,19 +16,24 @@ router.get("/ping", (req, res) => res.json({ status: "plan router ok" }));
 
 /* ── Vibe-Based Suggestions ── */
 router.all("/vibe-suggestions", async (req, res) => {
-  const { adventure, modern, social } = req.method === "POST" ? req.body : req.query;
+  const params = req.method === "POST" ? req.body : req.query;
   
+  // Robustly parse integers, defaulting to 50 if invalid
+  const adventure = parseInt(params.adventure);
+  const modern = parseInt(params.modern);
+  const social = parseInt(params.social);
+
   try {
     const suggestions = await getVibeSuggestions({
-      adventure: adventure !== undefined ? parseInt(adventure) : 50,
-      modern: modern !== undefined ? parseInt(modern) : 50,
-      social: social !== undefined ? parseInt(social) : 50
+      adventure: isNaN(adventure) ? 50 : adventure,
+      modern: isNaN(modern) ? 50 : modern,
+      social: isNaN(social) ? 50 : social
     });
     
     res.json({ suggestions });
   } catch (err) {
-    console.error("Vibe suggestions route error:", err.message);
-    res.status(500).json({ error: "Failed to get suggestions" });
+    console.error("❌ Vibe suggestions route error:", err);
+    res.status(500).json({ error: "Failed to get suggestions", details: err.message });
   }
 });
 
