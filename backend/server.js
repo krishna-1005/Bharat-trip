@@ -2,8 +2,23 @@ const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const app = require("./app");
+const http = require("http");
+const { Server } = require("socket.io");
+const collabHandlers = require("./socket/collabHandlers");
 
 const PORT = process.env.PORT || 5000;
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+app.set("io", io);
+
+// Initialize socket handlers
+collabHandlers(io);
 
 // Explicitly check for email credentials on startup
 const { sendWelcomeEmail } = require("./services/emailService");
@@ -14,6 +29,6 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
 }
 
 // Bind to 0.0.0.0 to ensure the service is reachable on Render/Cloud environments
-app.listen(PORT, "0.0.0.0", () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 GoTripo backend running on port ${PORT}`);
 });

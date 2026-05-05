@@ -19,6 +19,9 @@ import Careers from "./routes/careers";
 import TripDetails from "./routes/trip-details";
 import TripType from "./routes/trip-type";
 import Trips from "./routes/trips";
+import CollaborativeTrip from "./routes/collaborative-trip";
+import CollabRoom from "@/components/collabRoom/CollabRoom";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import PassportPage from "./routes/passport";
 import AdminDashboardPage from "./routes/admin/index";
 import AdminLoginPage from "./routes/admin/login";
@@ -36,8 +39,11 @@ import YatraDetail from "./routes/yatra/detail";
 import YatraWishlist from "./routes/yatra/wishlist";
 import YatraPlanner from "./routes/yatra/planner";
 import { Chatbot } from "./components/Chatbot";
+import { useTracking } from "./hooks/useTracking";
 
 export default function App() {
+  useTracking();
+  
   return (
     <>
       <ScrollToTop />
@@ -63,6 +69,8 @@ export default function App() {
       <Route path="/trip-details" element={<TripDetails />} />
       <Route path="/trip-type" element={<TripType />} />
       <Route path="/trips" element={<Trips />} />
+      <Route path="/collaborative-trip" element={<CollaborativeTrip />} />
+      <Route path="/trips/:tripId/collab" element={<ProtectedRoute><CollabRoom /></ProtectedRoute>} />
       <Route path="/passport" element={<PassportPage />} />
       
       {/* Yatra Module */}

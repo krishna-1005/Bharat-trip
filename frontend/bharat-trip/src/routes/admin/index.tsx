@@ -109,11 +109,11 @@ function AdminDashboard() {
             color="bg-blue-600" 
           />
           <StatCard 
-            label="Overall Retention" 
-            value={`${s.totalRetentionRate}%`} 
-            icon={RefreshCw} 
-            trend={`${s.returningUsersCount + s.returningGuestsCount} Returners`}
-            color="bg-emerald-500" 
+            label="Today's Traffic" 
+            value={s.todayUniqueVisitors} 
+            icon={Activity} 
+            trend="Real-time" 
+            color="bg-orange-500" 
           />
           <StatCard 
             label="Plans Generated" 

@@ -46,4 +46,56 @@ export const fetchDreamWeaverSuggestions = async (prompt: string) => {
   return res.data.suggestions;
 };
 
+// Budget API
+export const fetchBudget = async (tripId: string) => {
+  const res = await api.get(`/trips/${tripId}/budget`);
+  return res.data;
+};
+
+export const addExpense = async (tripId: string, expenseData: any) => {
+  const res = await api.post(`/trips/${tripId}/budget/expense`, expenseData);
+  return res.data;
+};
+
+export const deleteExpense = async (tripId: string, expenseId: string) => {
+  const res = await api.delete(`/trips/${tripId}/budget/expense/${expenseId}`);
+  return res.data;
+};
+
+export const fetchSettlements = async (tripId: string) => {
+  const res = await api.get(`/trips/${tripId}/budget/settle`);
+  return res.data;
+};
+
+// Destination Vote Board API
+export const fetchDestinations = async (tripId: string) => {
+  const res = await api.get(`/trips/${tripId}/destinations`);
+  return res.data;
+};
+
+export const addDestination = async (tripId: string, destData: any) => {
+  const res = await api.post(`/trips/${tripId}/destinations`, destData);
+  return res.data;
+};
+
+export const voteDestination = async (tripId: string, destId: string, voteType: 'up' | 'down') => {
+  const res = await api.post(`/trips/${tripId}/destinations/${destId}/vote`, { voteType });
+  return res.data;
+};
+
+export const lockDestination = async (tripId: string, destId: string) => {
+  const res = await api.put(`/trips/${tripId}/destinations/${destId}/lock`);
+  return res.data;
+};
+
+export const deleteDestination = async (tripId: string, destId: string) => {
+  const res = await api.delete(`/trips/${tripId}/destinations/${destId}`);
+  return res.data;
+};
+
+export const fetchAISuggestions = async (tripId: string, params: any) => {
+  const res = await api.post(`/trips/${tripId}/destinations/ai-suggest`, params);
+  return res.data;
+};
+
 export default api;

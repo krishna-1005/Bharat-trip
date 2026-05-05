@@ -1,26 +1,25 @@
 const mongoose = require("mongoose");
 
 const pollSchema = new mongoose.Schema({
-  pollId: { type: String, required: true, unique: true },
-  tripName: { type: String, required: true },
-  groupSize: { type: Number },
-  totalMembers: { type: Number, default: 1 },
+  tripId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Trip",
+    required: true,
+    index: true
+  },
+  question: { type: String, required: true },
   options: [{
-    name: { type: String, required: true }, // Usually the city name
-    votes: { type: Number, default: 0 },
-    city: { type: String },
-    tags: { type: [String], default: [] },
-    vibe: { type: String }
+    text: { type: String, required: true },
+    votes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
   }],
-  isClosed: { type: Boolean, default: false },
-  winner: { type: String, default: null },
-  createdBy: { type: String },
-  voters: [{
-    userId: { type: String }, // Firebase UID or temporary session ID
-    name: { type: String },
-    votedAt: { type: Date, default: Date.now }
-  }],
+  linkedEventId: { type: mongoose.Schema.Types.ObjectId }, // Reference to itinerary event
+  status: { 
+    type: String, 
+    enum: ["open", "closed"], 
+    default: "open" 
+  },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   createdAt: { type: Date, default: Date.now }
-});
+}, { timestamps: true });
 
-module.exports = mongoose.model("Poll", pollSchema);
+module.exports = mongoose.models.Poll || mongoose.model("Poll", pollSchema);

@@ -1,5 +1,10 @@
 const path = require("path");
 const fs = require("fs");
+const dns = require("dns");
+
+// Set DNS servers to Google's to help resolve MongoDB SRV records if local DNS fails
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
 const envPath = path.join(__dirname, ".env");
 if (fs.existsSync(envPath)) {
   require("dotenv").config({ path: envPath, override: true });
@@ -10,6 +15,10 @@ const helmet   = require("helmet");
 const mongoose = require("mongoose");
 
 const tripRoutes    = require("./routes/tripRoutes");
+const itineraryRoutes = require("./routes/itinerary");
+const expenseRoutes = require("./routes/expenses");
+const pollRoutesv2 = require("./routes/polls");
+const messageRoutes = require("./routes/messages");
 const planRoutes    = require("./routes/planRoutes");
 const chatRoutes    = require("./routes/chatRoutes");
 const authRoutes    = require("./routes/authRoutes");
@@ -23,6 +32,9 @@ const pollRoutes = require("./routes/pollRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 const webhookRoutes = require("./routes/webhookRoutes");
 const groupChatRoutes = require("./routes/groupChatRoutes");
+const budgetRoutes = require("./routes/budget");
+const destinationRoutes = require("./routes/destinations");
+const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
 const maintenanceMode = require("./middleware/maintenance");
@@ -98,7 +110,11 @@ app.use("/api/nearby", nearbyPlaces);
 app.use("/api/places", placeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/ai", aiRoutes);
+
+// Specific trip sub-routes first (handled via tripRoutes)
 app.use("/api/trips", tripRoutes);
+
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reviews", projectReviewRoutes);

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider } from "./components/AuthProvider";
+import { SocketProvider } from "@/context/SocketContext";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
 import App from "./App";
@@ -13,9 +14,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <App />
-          <Analytics />
-          <Toaster position="top-center" richColors />
+          <SocketProvider>
+            <App />
+            <Analytics />
+            <Toaster position="top-center" richColors />
+          </SocketProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

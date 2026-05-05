@@ -661,6 +661,7 @@ async function generatePlan({
     recommendedTransport,
     coordinates: coords,
     totalBudget,
+    budgetTier,
     totalTripCost: finalPricing.total,
     costBreakdown: finalPricing.breakdown,
     remainingBudget: Math.round(totalBudget - finalPricing.total),
@@ -680,7 +681,16 @@ async function getCityCoords(city) {
     "mumbai": { lat: 19.076, lng: 72.8777 },
     "agra": { lat: 27.1767, lng: 78.0081 },
     "delhi": { lat: 28.6139, lng: 77.2090 },
-    "new delhi": { lat: 28.6139, lng: 77.2090 }
+    "new delhi": { lat: 28.6139, lng: 77.2090 },
+    "jaipur": { lat: 26.9124, lng: 75.7873 },
+    "varanasi": { lat: 25.3176, lng: 82.9739 },
+    "goa": { lat: 15.2993, lng: 74.1240 },
+    "rishikesh": { lat: 30.0869, lng: 78.2676 },
+    "udaipur": { lat: 24.5854, lng: 73.7125 },
+    "kochi": { lat: 9.9312, lng: 76.2673 },
+    "amritsar": { lat: 31.6340, lng: 74.8723 },
+    "hampi": { lat: 15.3350, lng: 76.4600 },
+    "ladakh": { lat: 34.1526, lng: 77.5771 }
   };
 
   const cleanCity = city.trim().toLowerCase();

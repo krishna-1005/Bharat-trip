@@ -28,15 +28,20 @@ router.post("/send", async (req, res) => {
 
     const newMessage = new Message({
       tripId,
-      userId: req.user.firebaseUid || req.user._id,
+      userId: (req.user.firebaseUid || req.user._id).toString(),
       userName: req.user.name || "Traveller",
+      senderId: req.user._id,
       text
     });
 
     await newMessage.save();
     res.status(201).json(newMessage);
   } catch (error) {
-    res.status(500).json({ error: "Failed to send message" });
+    console.error("Group chat error:", error);
+    res.status(500).json({ 
+      error: "Failed to send message", 
+      details: process.env.NODE_ENV === "development" ? error.message : undefined
+    });
   }
 });
 

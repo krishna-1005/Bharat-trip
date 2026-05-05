@@ -1,0 +1,89 @@
+const express = require("express");
+const { protect } = require("../middleware/protect");
+const Groq = require("groq-sdk");
+
+console.log("🚀 [AI] Groq Itinerary Route Initialized");
+
+const router = express.Router();
+
+// Initialize Groq
+const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
+
+router.post("/itinerary", protect, async (req, res) => {
+  console.log("🤖 [AI] Itinerary Request Received for:", req.body.destination);
+  
+  try {
+    const { destination, dates, groupSize, lockedSuggestions, tripId } = req.body;
+
+    if (!groq) {
+      console.error("❌ [AI] GROQ_API_KEY is missing in .env");
+      return res.status(500).json({ error: "AI Service (Groq) not configured" });
+    }
+
+    const systemPrompt = `
+You are a world-class travel planner for GoTripo. Create a highly detailed, professional day-by-day itinerary for a trip to ${destination}.
+Trip Context:
+- Dates: ${dates}
+- Group Size: ${groupSize}
+- Locked/Voted Suggestions: ${JSON.stringify(lockedSuggestions || [])}
+
+STRICT INSTRUCTIONS:
+1. Incorporate ALL locked suggestions naturally into the itinerary.
+2. Provide a diverse range of activities (food, landmark, adventure, etc.).
+3. Return ONLY a valid JSON array of days.
+4. DO NOT include markdown formatting like \`\`\`json. Return pure JSON.
+
+JSON Structure:
+[
+  {
+    "day": 1,
+    "date": "YYYY-MM-DD",
+    "label": "Day Title",
+    "theme": "explore",
+    "activities": [
+      {
+        "id": "unique_string",
+        "time": "HH:MM AM/PM",
+        "title": "Activity Name",
+        "location": "Location Name",
+        "notes": "Brief helpful note",
+        "type": "activity",
+        "order": 0,
+        "isAiGenerated": true
+      }
+    ]
+  }
+]
+`;
+
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        { role: "system", content: "You are a professional travel planning assistant. Return JSON only." },
+        { role: "user", content: systemPrompt }
+      ],
+      model: "llama-3.3-70b-versatile",
+      response_format: { type: "json_object" }
+    });
+
+    const content = chatCompletion.choices?.[0]?.message?.content;
+    if (!content) throw new Error("Empty response from Groq");
+
+    const itinerary = JSON.parse(content);
+    const finalItinerary = Array.isArray(itinerary) ? itinerary : (itinerary.itinerary || itinerary.days || []);
+
+    console.log(`✅ [AI] Successfully generated ${finalItinerary.length} days for ${destination}`);
+
+    const io = req.app.get("io");
+    if (io) {
+      io.to(tripId || req.params.tripId).emit("itinerary:aiRegenerated", finalItinerary);
+      io.to(tripId || req.params.tripId).emit("itinerary:updated", finalItinerary);
+    }
+
+    res.json(finalItinerary);
+  } catch (error) {
+    console.error("❌ [AI] Groq Error:", error.message);
+    res.status(500).json({ error: "Failed to generate AI itinerary", details: error.message });
+  }
+});
+
+module.exports = router;

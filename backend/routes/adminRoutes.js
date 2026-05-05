@@ -195,6 +195,16 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     const totalPolls = await Poll.countDocuments();
     const totalApplications = await JobApplication.countDocuments();
 
+    // Today's Stats
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayVisitorsCount = await UsageLog.aggregate([
+      { $match: { createdAt: { $gte: today } } },
+      { $group: { _id: { $ifNull: ["$userId", { $ifNull: ["$details.guestId", "$ipAddress"] }] } } },
+      { $count: "count" }
+    ]);
+    const todayUniqueVisitors = todayVisitorsCount.length > 0 ? todayVisitorsCount[0].count : 0;
+
     // Fetch Guest vs Logged-in stats from Firestore (with fallback)
     let guestCount = 0;
     let trackedUserCount = 0;
@@ -217,9 +227,9 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
       console.error("Firestore stats error (non-fatal):", fsErr.message);
     }
 
-    // Combine or fallback
-    const finalGuestCount = guestCount > 0 ? guestCount : guestLogsCount;
-    const finalTrackedCount = trackedUserCount > 0 ? trackedUserCount : trackedUserCountFromLogs;
+    // Combine or fallback (Use the higher value to be safe, as Firestore might be out of sync)
+    const finalGuestCount = Math.max(guestCount, guestLogsCount);
+    const finalTrackedCount = Math.max(trackedUserCount, trackedUserCountFromLogs);
 
     // --- Retention Calculation (Original Data) ---
     // Registered Users Retention (Visited on 2+ different days)
@@ -286,7 +296,12 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const growthData = await UsageLog.aggregate([
-      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      { 
+        $match: { 
+          createdAt: { $gte: sevenDaysAgo },
+          action: { $in: ["generate_plan", "chatbot_plan_generated"] }
+        } 
+      },
       {
         $group: {
           _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
@@ -350,6 +365,7 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
         guestCount: finalGuestCount,
         trackedUserCount: finalTrackedCount,
         totalConversions,
+        todayUniqueVisitors,
         returningUsersCount,
         returningGuestsCount,
         totalUniqueVisitors,

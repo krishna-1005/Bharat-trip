@@ -62,6 +62,7 @@ CORE MISSION:
 2. **Reverse Questions**: You MUST end EVERY response with a question to learn about the user (e.g., "Do you prefer historical sites or local food?", "Is this a solo trip or with friends?").
 3. **Smart Suggestions**: Mention at least one specific landmark or hidden gem when a city is mentioned.
 4. **Iterative Planning**: Don't ask for everything at once. Focus on one detail at a time.
+5. **No Meta-Talk**: NEVER mention JSON, the instructions, or your internal logic (e.g., don't say "I've got all the details, so I'll provide the JSON block"). Just talk like a human concierge.
 
 JSON TRIGGER:
 Only when you have City, Days, and Budget, and the user is ready, output exactly one JSON block at the END of your message. 
@@ -102,14 +103,23 @@ MANDATORY: If you say "I've crafted a plan" or "Check it out below", you MUST in
         throw new Error("GEMINI_API_KEY missing or invalid");
       }
 
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1beta" });
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
+        systemInstruction: systemInstruction 
+      }, { apiVersion: "v1beta" });
+
       const chat = model.startChat({
         history: formattedHistory,
         generationConfig: { maxOutputTokens: 1000 }
       });
 
-      const result = await chat.sendMessage(systemInstruction + "\n\nUser: " + message);
+      const result = await chat.sendMessage(message);
       replyText = result.response.text();
+
+      // Clean up any remaining meta-talk if it slips through
+      replyText = replyText.replace(/\(I've got all the details.*?\)/gi, "");
+      replyText = replyText.replace(/\(I'll provide the JSON block.*?\)/gi, "");
+      replyText = replyText.trim();
 
       // Log success for Gemini
       await UsageLog.create({
@@ -155,29 +165,52 @@ MANDATORY: If you say "I've crafted a plan" or "Check it out below", you MUST in
       }
     }
 
-    const jsonMatch = replyText.match(/```json\s*([\s\S]*?)\s*```/);
+    const jsonMatch = replyText.match(/```json\s*([\s\S]*?)\s*```/i);
     if (jsonMatch) {
+      const cleanedReply = replyText.replace(/```json[\s\S]*?```/i, "").trim();
       try {
         const parsedData = JSON.parse(jsonMatch[1]);
         const plan = await generatePlan(parsedData);
         
+        // Save to DB so the user can see it in "My Trips"
+        const savedTrip = await Trip.create({
+          userId: loggedUserId,
+          isGuest: !loggedUserId,
+          title: `${parsedData.city} AI Trip`,
+          destination: parsedData.city,
+          days: plan.days,
+          itinerary: plan.itinerary,
+          totalTripCost: plan.totalTripCost,
+          totalBudget: plan.totalBudget,
+          summary: plan.summary,
+          travelerType: parsedData.travelerType || "solo",
+          pace: parsedData.pace || "moderate",
+          recommendedStay: plan.recommendedStay,
+          recommendedTransport: plan.recommendedTransport,
+          status: "upcoming",
+          type: "plan" // Explicitly mark as plan
+        });
+
         // Log plan generation
         await UsageLog.create({
           action: "chatbot_plan_generated",
           userId: loggedUserId,
           isGuest: !loggedUserId,
           userRole: loggedUserRole,
-          details: { city: parsedData.city, days: parsedData.days }
+          details: { city: parsedData.city, days: parsedData.days, tripId: savedTrip._id }
         });
 
-        replyText = replyText.replace(/```json[\s\S]*?```/, "").trim();
         return res.json({ 
           type: "plan", 
-          reply: replyText, 
+          reply: cleanedReply, 
           planData: { id: savedTrip._id, city: parsedData.city } 
         });
       } catch (e) {
-        console.error("JSON Parse Error:", e);
+        console.error("Chatbot Success Path Error:", e);
+        return res.json({ 
+          type: "chat", 
+          reply: cleanedReply + "\n\n(I had a little trouble generating the interactive map right now, but your trip details are ready!)" 
+        });
       }
     }
 
@@ -321,7 +354,7 @@ MANDATORY: If you say "I've crafted a plan" or "Check it out below", you MUST in
 
       return res.json({ 
         type: "plan", 
-        reply: `Excellent! [v2] I've crafted a perfect **${finalDays}-day**, **${pace}**, **${budget === "high" ? "luxury" : "budget"}** itinerary for your **${cityCap}** adventure focusing on **${interests.join(", ")}**. Check it out below! 🗺️`, 
+        reply: `Excellent! I've crafted a perfect **${finalDays}-day**, **${pace}**, **${budget === "high" ? "luxury" : "budget"}** itinerary for your **${cityCap}** adventure focusing on **${interests.join(", ")}**. Check it out below! 🗺️`, 
         planData: { id: savedTrip._id, city: cityCap } 
       });
     } catch (e) {

@@ -1,11 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { useEffect, useState } from "react";
-import { Bookmark, Plus, MapPin, Calendar, Loader2 } from "lucide-react";
+import { Bookmark, Plus, MapPin, Calendar, Loader2, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const tabs = ["Upcoming", "Drafts", "Saved", "Past"];
 
@@ -21,38 +22,45 @@ function TripsContent() {
   const [trips, setTrips] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("Upcoming");
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const fetchTrips = async () => {
+    const CACHE_KEY = "gotripo-cached-trips";
+    try {
+      const res = await api.get("/trips");
+      const data = res.data.trips || res.data || [];
+      setTrips(data);
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    } catch (err) {
+      console.error("Failed to fetch trips", err);
+      toast.error("Offline: Showing cached trips");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const CACHE_KEY = "gotripo-cached-trips";
-    
-    // Try to load from cache first for immediate UI
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-      try {
-        setTrips(JSON.parse(cached));
-        setLoading(false);
-      } catch (e) {}
-    }
-
-    api.get("/trips")
-      .then(res => {
-        const data = res.data.trips || res.data || [];
-        setTrips(data);
-        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-      })
-      .catch(err => {
-        console.error("Failed to fetch trips", err);
-        toast.error("Offline: Showing cached trips");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    fetchTrips();
   }, []);
+
+  const deleteTrip = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.confirm("Delete this trip?")) return;
+
+    try {
+      await api.delete(`/trips/${id}`);
+      toast.success("Trip deleted");
+      fetchTrips();
+    } catch (err) {
+      toast.error("Failed to delete trip");
+    }
+  };
 
   const filteredTrips = trips.filter(t => {
     if (activeTab === "Upcoming") return t.status === "upcoming" || t.status === "ongoing" || !t.status;
     if (activeTab === "Past") return t.status === "completed";
-    if (activeTab === "Saved" || activeTab === "Drafts") return true; // Placeholder logic
+    if (activeTab === "Saved" || activeTab === "Drafts") return true; 
     return true;
   });
 
@@ -103,25 +111,42 @@ function TripsContent() {
         ) : (
           <div className="mt-8 grid lg:grid-cols-2 gap-5">
             {filteredTrips.length > 0 ? filteredTrips.map((d) => (
-              <Link to={`/results?planId=${d._id}`} key={d._id} className="group rounded-3xl overflow-hidden bg-card border border-border shadow-soft hover:shadow-pop hover:-translate-y-0.5 transition-all flex flex-col sm:flex-row">
-                <div className="sm:w-56 aspect-[4/3] sm:aspect-auto relative overflow-hidden shrink-0 bg-secondary grid place-items-center">
-                   <MapPin className="size-8 text-muted-foreground/30" />
-                </div>
-                <div className="p-5 flex-1">
-                  <div className="text-[11px] font-semibold text-accent uppercase tracking-widest">{d.style || "Trip"}</div>
-                  <div className="font-display font-bold text-xl mt-1">{d.city || d.destination}</div>
-                  <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="size-3" /> {d.city}</div>
-                  <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1"><Calendar className="size-3" /> {d.days} days</span>
-                    <span>·</span>
-                    <span>₹{d.budget?.toLocaleString("en-IN")}</span>
+              <div key={d._id} className="group relative">
+                <Link to={`/results?planId=${d._id}`} className="block rounded-3xl overflow-hidden bg-card border border-border shadow-soft hover:shadow-pop hover:-translate-y-0.5 transition-all flex flex-col sm:flex-row h-full">
+                  <div className="sm:w-56 aspect-[4/3] sm:aspect-auto relative overflow-hidden shrink-0 bg-secondary grid place-items-center">
+                    <MapPin className="size-8 text-muted-foreground/30" />
+                    {d.type === 'room' && (
+                      <div className="absolute top-3 left-3 px-2 py-1 bg-primary text-white text-[9px] font-bold uppercase tracking-widest rounded-md">
+                        Collab Room
+                      </div>
+                    )}
                   </div>
-                  <div className="mt-4 h-2 rounded-full bg-secondary overflow-hidden">
-                    <div className="h-full bg-warm-gradient" style={{ width: "100%" }} />
+                  <div className="p-5 flex-1 pr-12">
+                    <div className="text-[11px] font-semibold text-accent uppercase tracking-widest">{d.type === 'room' ? "Collaboration" : (d.style || "Trip")}</div>
+                    <div className="font-display font-bold text-xl mt-1">{d.title || d.destination}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="size-3" /> {d.destination}</div>
+                    <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1"><Calendar className="size-3" /> {d.days} days</span>
+                      <span>·</span>
+                      <span>₹{d.totalTripCost?.toLocaleString("en-IN")}</span>
+                    </div>
+                    <div className="mt-4 h-2 rounded-full bg-secondary overflow-hidden">
+                      <div className="h-full bg-warm-gradient" style={{ width: "100%" }} />
+                    </div>
+                    <div className="text-[11px] text-muted-foreground mt-1.5">
+                      {d.type === 'room' ? "Active Discussion" : "AI Plan generated"}
+                    </div>
                   </div>
-                  <div className="text-[11px] text-muted-foreground mt-1.5">Trip generated</div>
-                </div>
-              </Link>
+                </Link>
+                
+                <button 
+                  onClick={(e) => deleteTrip(e, d._id)}
+                  className="absolute right-5 top-5 p-2.5 rounded-xl bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-white transition-all shadow-sm z-10"
+                  title="Delete Trip"
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              </div>
             )) : (
               <Link to="/trip-type" className="rounded-3xl border-2 border-dashed border-border p-10 grid place-items-center text-muted-foreground hover:text-primary hover:border-primary transition w-full lg:col-span-2">
                 <div className="text-center">

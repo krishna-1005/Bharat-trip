@@ -55,6 +55,56 @@ import { PDFViewerModal } from "@/components/PDFViewerModal";
 
 /* ── 1. SIDEBAR COMPONENTS ── */
 
+function SavingsInsights({ insights }: { insights: any }) {
+  if (!insights) return null;
+
+  return (
+    <div className="rounded-3xl border border-emerald-500/30 bg-emerald-500/5 p-6 shadow-soft relative overflow-hidden group backdrop-blur-md">
+      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity text-emerald-500">
+        <Wallet className="size-24" />
+      </div>
+
+      <div className="flex items-center gap-2 font-display font-bold text-lg text-emerald-600 dark:text-emerald-400 mb-4 relative z-10">
+        <Sparkles className="size-5" /> Cost Intelligence
+      </div>
+
+      <div className="space-y-4 relative z-10">
+        {insights.potentialHotelSavings > 0 && (
+          <div className="p-4 rounded-2xl bg-white/50 dark:bg-white/5 border border-emerald-500/20">
+            <div className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 mb-1">Accommodation Hack</div>
+            <p className="text-xs font-bold">Save up to ₹{insights.potentialHotelSavings.toLocaleString()}</p>
+            <p className="text-[10px] text-muted-foreground mt-1">By switching to highly-rated budget alternatives found by our engine.</p>
+          </div>
+        )}
+
+        {insights.cheaperDates?.length > 0 && (
+          <div className="p-4 rounded-2xl bg-white/50 dark:bg-white/5 border border-emerald-500/20">
+            <div className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 mb-1">Flex-Date Savings</div>
+            {insights.cheaperDates.map((d: any, i: number) => (
+              <div key={i} className="flex justify-between items-center mt-2 first:mt-0">
+                <span className="text-[10px] font-bold">{new Date(d.newStartDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+                <span className="text-[10px] font-black text-emerald-600">-{d.estimatedSavingsPercent}% cheaper</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {insights.transportInsight && (
+          <div className="p-4 rounded-2xl bg-white/50 dark:bg-white/5 border border-emerald-500/20">
+            <div className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 mb-1">Transport Tip</div>
+            <p className="text-[10px] font-bold">{insights.transportInsight}</p>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-6 pt-4 border-t border-emerald-500/20 flex items-center justify-between relative z-10">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600/60">Savings Score</span>
+        <span className="text-xl font-display font-black text-emerald-600">{insights.score}</span>
+      </div>
+    </div>
+  );
+}
+
 function AutoScoutAgent({ city }: { city: string }) {
   return (
     <div className="rounded-3xl border border-border bg-card dark:bg-[#0B1221] p-6 shadow-soft relative overflow-hidden group">
@@ -417,6 +467,31 @@ export default function Results() {
   const destinationName = plan?.destination || plan?.city || "Delhi";
   const costLabel = plan?.totalTripCost || plan?.totalBudget || 38400;
 
+  const handleShare = async () => {
+    const shareData = {
+      title: plan?.title || `${destinationName} AI Plan | GoTripo`,
+      text: `Check out this amazing AI-generated trip to ${destinationName} on GoTripo! 🇮🇳✨`,
+      url: window.location.href,
+    };
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error('Share failed:', err);
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard! 📋");
+      } catch (err) {
+        toast.error("Failed to copy link");
+      }
+    }
+  };
+
   return (
     <AppShell>
       <div className="min-h-screen bg-background dark:bg-[#020817] text-foreground transition-colors duration-300">
@@ -442,7 +517,7 @@ export default function Results() {
                <button onClick={() => setIsPdfModalOpen(true)} className="h-11 px-6 rounded-2xl bg-primary text-primary-foreground text-sm font-bold flex items-center gap-2 shadow-cta hover:opacity-90 transition">
                   <Download className="size-4" /> Export PDF
                </button>
-               <button className="size-11 rounded-2xl bg-emerald-500 text-white grid place-items-center shadow-soft hover:opacity-90 transition">
+               <button onClick={handleShare} className="size-11 rounded-2xl bg-emerald-500 text-white grid place-items-center shadow-soft hover:opacity-90 transition">
                   <Share2 className="size-4" />
                </button>
             </div>
@@ -500,7 +575,15 @@ export default function Results() {
                <div className="rounded-[2.5rem] border border-border bg-card dark:bg-[#0B1221] overflow-hidden shadow-pop h-[400px]">
                   <MapPreview itinerary={itinerary} activePlace={activePlace} onMarkerClick={setActivePlace} />
                </div>
-               <StayRecommendations lat={28.6139} lng={77.209} city={destinationName} budgetTier="medium" />
+               <StayRecommendations 
+                  lat={plan?.itinerary?.[0]?.places?.[0]?.lat} 
+                  lng={plan?.itinerary?.[0]?.places?.[0]?.lng} 
+                  city={destinationName} 
+                  budgetTier={plan?.budgetTier || "medium"} 
+                  recommendedStay={plan?.recommendedStay}
+                  travelerType={plan?.travelerType}
+               />
+               <SavingsInsights insights={plan?.savingsInsights} />
                <AutoScoutAgent city={destinationName} />
                <AgenticValidationStack city={destinationName} />
                <PlanIntegrityReport city={destinationName} />

@@ -56,11 +56,10 @@ export function Polls({ tripId }: { tripId?: string }) {
 
   const fetchPolls = async () => {
     try {
-      // For now, we fetch a sample or all polls if tripId isn't specific
-      // In a real app, we'd filter by tripId
-      // Since backend doesn't have list by tripId yet, we'll try to get one or use sample logic
-      const res = await api.get("/polls/list").catch(() => ({ data: [] })); 
-      // If we don't have list endpoint, we might need to handle single poll or mock
+      // Fetch polls filtered by tripId
+      const res = await api.get("/polls/list", { 
+        params: { tripId } 
+      }).catch(() => ({ data: [] })); 
       setPolls(res.data);
     } catch (err) {
       console.error("Failed to fetch polls", err);
@@ -71,8 +70,6 @@ export function Polls({ tripId }: { tripId?: string }) {
 
   useEffect(() => {
     fetchPolls();
-    const interval = setInterval(fetchPolls, 5000); // Polling every 5s
-    return () => clearInterval(interval);
   }, [tripId]);
 
   if (loading && polls.length === 0) {
@@ -253,7 +250,7 @@ function PollCard({ poll, onVote }: { poll: Poll; onVote: () => void }) {
   );
 }
 
-function CreatePollDialog({ onCreated, trigger }: { onCreated: () => void; trigger?: React.ReactNode }) {
+function CreatePollDialog({ tripId, onCreated, trigger }: { tripId?: string; onCreated: () => void; trigger?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tripName, setTripName] = useState("");
@@ -272,6 +269,7 @@ function CreatePollDialog({ onCreated, trigger }: { onCreated: () => void; trigg
         tripName,
         totalMembers: parseInt(totalMembers),
         options,
+        tripId,
         userId: auth.currentUser?.uid
       });
       toast.success("Poll created successfully!");

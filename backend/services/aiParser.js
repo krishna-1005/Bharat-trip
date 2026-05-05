@@ -1,30 +1,26 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const Groq = require("groq-sdk");
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: "v1beta" });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 async function parsePrompt(prompt) {
-
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1beta" });
-
   const systemPrompt = `
 Extract travel details from the user request.
-
-Return JSON ONLY like this:
+Return JSON ONLY:
 {
   "days": number,
   "budget": "low | medium | high",
   "interests": ["food","temple","nature","nightlife"]
 }
-
-User prompt:
-${prompt}
+User prompt: ${prompt}
 `;
 
-  const result = await model.generateContent(systemPrompt);
+  const chatCompletion = await groq.chat.completions.create({
+    messages: [{ role: "user", content: systemPrompt }],
+    model: "llama-3.3-70b-versatile",
+    response_format: { type: "json_object" }
+  });
 
-  const text = result.response.text();
-
-  return JSON.parse(text);
+  return JSON.parse(chatCompletion.choices[0].message.content);
 }
 
 module.exports = parsePrompt;

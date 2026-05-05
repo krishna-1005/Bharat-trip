@@ -8,6 +8,7 @@ const User         = require("../models/User");
 const jwt          = require("jsonwebtoken");
 const { planValidation } = require("../middleware/validator");
 const { getVibeSuggestions, getDreamWeaverSuggestions } = require("../services/aiPlanner");
+const { getSavingsInsights } = require("../services/costService");
 
 const router = express.Router();
 
@@ -73,13 +74,29 @@ router.post("/generate", planValidation, async (req, res) => {
       const token = authHeader.split(" ")[1];
       try {
         const decoded = await admin.auth().verifyIdToken(token);
-        const userObj = await User.findOne({ email: decoded.email });
-        if (userObj) {
-          loggedUserId = userObj._id;
-          loggedUserRole = userObj.role || "user";
-          userPreferences = userObj.preferences || {};
+        let userObj = await User.findOne({ 
+          $or: [
+            { email: decoded.email },
+            { firebaseUid: decoded.uid }
+          ]
+        });
+
+        if (!userObj) {
+          console.log(`👤 Syncing new Firebase user to MongoDB: ${decoded.email}`);
+          userObj = await User.create({
+            name: decoded.name || decoded.email.split('@')[0],
+            email: decoded.email,
+            firebaseUid: decoded.uid,
+            role: "user"
+          });
         }
+
+        loggedUserId = userObj._id;
+        loggedUserRole = userObj.role || "user";
+        userPreferences = userObj.preferences || {};
       } catch (e) { 
+        console.error("Auth verification failed:", e.message);
+        // Fallback to legacy JWT if present
         try {
           if (process.env.JWT_SECRET) {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -172,25 +189,64 @@ router.post("/generate", planValidation, async (req, res) => {
 
     const destinationTitle = isMultiCity && Array.isArray(cities) ? cities.join(" → ") : finalPlan.city;
 
-    // Save to DB
-    const savedTrip = await Trip.create({
-      userId: loggedUserId,
-      isGuest: !loggedUserId,
+    // ALWAYS SAVE TO DB SO RESULTS PAGE CAN FETCH BY ID (even for guests)
+    let savedTrip;
+    try {
+      const tripData = {
+        userId: loggedUserId || null,
+        createdBy: loggedUserId || null,
+        isGuest: !loggedUserId,
+        title: `${destinationTitle} ${isMultiCity ? 'Journey' : 'Plan'}`,
+        destination: destinationTitle,
+        days: finalPlan.days,
+        itinerary: finalPlan.itinerary,
+        totalTripCost: finalPlan.totalTripCost,
+        totalBudget: finalPlan.totalBudget,
+        budgetTier: finalPlan.budgetTier,
+        summary: finalPlan.summary,
+        travelerType: travelerType || "solo",
+        pace: pace || "moderate",
+        type: "plan",
+        recommendedStay: finalPlan.recommendedStay,
+        recommendedTransport: finalPlan.recommendedTransport,
+        image: finalPlan.image || ""
+      };
+      
+      savedTrip = await Trip.create(tripData);
+      console.log(`✅ Plan saved to DB: ${savedTrip._id} (Guest: ${!loggedUserId})`);
+    } catch (saveErr) {
+      console.error("❌ Failed to save plan to DB:", saveErr.message);
+      if (saveErr.errors) {
+        Object.keys(saveErr.errors).forEach(key => {
+          console.error(`  - Validation Error [${key}]:`, saveErr.errors[key].message);
+        });
+      }
+    }
+
+    const responsePlan = {
+      ...(savedTrip ? savedTrip.toObject() : finalPlan),
       title: `${destinationTitle} ${isMultiCity ? 'Journey' : 'Plan'}`,
       destination: destinationTitle,
-      days: finalPlan.days,
-      itinerary: finalPlan.itinerary,
-      totalTripCost: finalPlan.totalTripCost,
-      totalBudget: finalPlan.totalBudget,
-      summary: finalPlan.summary,
       travelerType: travelerType || "solo",
       pace: pace || "moderate",
-      recommendedStay: finalPlan.recommendedStay,
-      recommendedTransport: finalPlan.recommendedTransport,
-      status: "upcoming"
-    });
+      type: "plan"
+    };
 
-    res.json({ plan: savedTrip });
+    // Safety fallback: Ensure we ALWAYS have an ID to prevent frontend "undefined"
+    if (!responsePlan._id && !responsePlan.id) {
+       console.warn("⚠️ Warning: Plan returned without ID. Using temporary ID.");
+       responsePlan._id = "plan_" + Date.now();
+    }
+
+    // ADD SAVINGS INSIGHTS
+    try {
+      const insights = getSavingsInsights(responsePlan, req.body.startDate);
+      responsePlan.savingsInsights = insights;
+    } catch (insightErr) {
+      console.error("❌ Failed to generate savings insights:", insightErr);
+    }
+
+    res.json({ plan: responsePlan });
 
   } catch (err) {
     console.error("Plan generation error:", err);

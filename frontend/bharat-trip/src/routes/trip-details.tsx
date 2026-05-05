@@ -10,6 +10,7 @@ import {
 import { useMemo, useState } from "react";
 import { MapPreview } from "@/components/MapPreview";
 import { getNextThreeMonths } from "@/lib/utils";
+import { toast } from "sonner";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   plane: Plane,
@@ -42,6 +43,31 @@ function TripDetailsContent() {
   const itinerary = useMemo(() => {
     return destinationItineraries[d.id] || destinationItineraries.jaipur;
   }, [d.id]);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: `${d.name} Escape | GoTripo`,
+      text: `Planning a trip to ${d.name}! Check this out on GoTripo. 🇮🇳✨`,
+      url: window.location.href,
+    };
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error('Share failed:', err);
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard! 📋");
+      } catch (err) {
+        toast.error("Failed to copy link");
+      }
+    }
+  };
 
   return (
     <AppShell>
@@ -100,7 +126,7 @@ function TripDetailsContent() {
               <Link to={`/results?sampleId=${d.id}`} className="h-12 px-6 rounded-2xl bg-warm-gradient text-white text-sm font-bold inline-flex items-center gap-2 shadow-cta hover:scale-[1.02] active:scale-[0.98] transition-all">
                 <Edit3 className="size-4" /> Edit Itinerary
               </Link>
-              <button className="h-12 px-6 rounded-2xl bg-secondary hover:bg-secondary/80 text-sm font-bold inline-flex items-center gap-2 transition-all">
+              <button onClick={handleShare} className="h-12 px-6 rounded-2xl bg-secondary hover:bg-secondary/80 text-sm font-bold inline-flex items-center gap-2 transition-all">
                 <Share2 className="size-4" /> Share
               </button>
               <button className="h-12 px-6 rounded-2xl bg-secondary hover:bg-secondary/80 text-sm font-bold inline-flex items-center gap-2 transition-all">

@@ -105,27 +105,27 @@ export function Chatbot() {
   }
 
   return (
-    <div className={`fixed z-[100] w-[380px] max-w-[calc(100vw-32px)] bg-[#0B1221] border border-white/10 rounded-[2rem] shadow-pop overflow-hidden transition-all flex flex-col 
+    <div className={`fixed z-[100] w-[380px] max-w-[calc(100vw-32px)] bg-card border border-border rounded-[2rem] shadow-pop overflow-hidden transition-all flex flex-col 
       bottom-6 md:right-6 right-1/2 translate-x-1/2 md:translate-x-0
       ${isMinimized ? 'h-20' : 'h-[600px] max-h-[calc(100vh-120px)]'}`}>
       {/* Header */}
-      <div className="p-5 flex items-center justify-between border-b border-white/10 bg-white/5 backdrop-blur-xl">
+      <div className="p-5 flex items-center justify-between border-b border-border bg-secondary/50 backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-xl bg-warm-gradient grid place-items-center shadow-soft">
             <Sparkles className="size-5 text-white" />
           </div>
           <div>
-            <div className="font-display font-bold text-white leading-none">AI Co-pilot</div>
+            <div className="font-display font-bold text-foreground leading-none">AI Co-pilot</div>
             <div className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mt-1 flex items-center gap-1.5">
                <div className="size-1.5 rounded-full bg-emerald-500 animate-pulse" /> ONLINE
             </div>
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={() => setIsMinimized(!isMinimized)} className="size-8 rounded-lg hover:bg-white/5 grid place-items-center text-white/40 hover:text-white transition">
+          <button onClick={() => setIsMinimized(!isMinimized)} className="size-8 rounded-lg hover:bg-secondary grid place-items-center text-muted-foreground hover:text-foreground transition">
             {isMinimized ? <Maximize2 className="size-4" /> : <Minimize2 className="size-4" />}
           </button>
-          <button onClick={() => setIsOpen(false)} className="size-8 rounded-lg hover:bg-white/5 grid place-items-center text-white/40 hover:text-white transition">
+          <button onClick={() => setIsOpen(false)} className="size-8 rounded-lg hover:bg-secondary grid place-items-center text-muted-foreground hover:text-foreground transition">
             <X className="size-4" />
           </button>
         </div>
@@ -134,15 +134,15 @@ export function Chatbot() {
       {!isMinimized && (
         <>
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar bg-white/[0.02]">
+          <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar bg-background/50">
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start animate-in slide-in-from-bottom-2 duration-300"}`}>
                 <div className={`flex gap-3 max-w-[85%] ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                  <div className={`size-8 rounded-xl shrink-0 grid place-items-center ${m.role === "user" ? "bg-white/10 text-white" : "bg-[#020817] border border-white/10 text-primary"}`}>
+                  <div className={`size-8 rounded-xl shrink-0 grid place-items-center ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-secondary border border-border text-primary"}`}>
                     {m.role === "user" ? <User className="size-4" /> : <Bot className="size-4" />}
                   </div>
                   <div className="space-y-3">
-                    <div className={`p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${m.role === "user" ? "bg-primary text-white font-medium rounded-tr-none" : "bg-card border border-white/5 text-white/90 rounded-tl-none"}`}>
+                    <div className={`p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${m.role === "user" ? "bg-primary text-primary-foreground font-medium rounded-tr-none" : "bg-secondary border border-border text-foreground rounded-tl-none"}`}>
                       {m.content}
                     </div>
 
@@ -176,7 +176,7 @@ export function Chatbot() {
             ))}
             {isTyping && (
               <div className="flex justify-start animate-pulse">
-                <div className="bg-card border border-white/5 p-3 rounded-2xl flex gap-1">
+                <div className="bg-secondary border border-border p-3 rounded-2xl flex gap-1">
                    <div className="size-1.5 rounded-full bg-primary/40 animate-bounce" />
                    <div className="size-1.5 rounded-full bg-primary/40 animate-bounce delay-75" />
                    <div className="size-1.5 rounded-full bg-primary/40 animate-bounce delay-150" />
@@ -187,7 +187,7 @@ export function Chatbot() {
           </div>
 
           {/* Input */}
-          <div className="p-5 border-t border-white/10 bg-white/5">
+          <div className="p-5 border-t border-border bg-secondary/20">
             <div className="relative flex items-center gap-2">
               <input
                 type="text"
@@ -195,17 +195,17 @@ export function Chatbot() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Ask me anything..."
-                className="w-full h-12 pl-5 pr-14 rounded-2xl bg-black/40 border border-white/10 text-white text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all placeholder:text-white/20"
+                className="w-full h-12 pl-5 pr-14 rounded-2xl bg-background border border-border text-foreground text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all placeholder:text-muted-foreground/50"
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || loading}
-                className="absolute right-1.5 size-9 rounded-xl bg-primary text-white grid place-items-center hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all shadow-cta"
+                className="absolute right-1.5 size-9 rounded-xl bg-primary text-primary-foreground grid place-items-center hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all shadow-cta"
               >
                 {loading ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
               </button>
             </div>
-            <p className="text-[9px] text-white/20 text-center mt-3 uppercase tracking-widest font-bold">
+            <p className="text-[9px] text-muted-foreground/60 text-center mt-3 uppercase tracking-widest font-bold">
               Powered by GoTripo Intelligence
             </p>
           </div>

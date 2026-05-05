@@ -10,7 +10,7 @@ const { protect } = require("../middleware/protect");
 router.post("/create", protect, async (req, res) => {
   console.time(`Poll Creation: ${req.body.tripName}`);
   try {
-    const { tripName, options, groupSize, totalMembers } = req.body;
+    const { tripName, options, groupSize, totalMembers, tripId } = req.body;
     if (!tripName || !options || options.length < 2) {
       return res.status(400).json({ error: "Trip name and at least 2 options are required." });
     }
@@ -18,6 +18,7 @@ router.post("/create", protect, async (req, res) => {
     const pollId = uuidv4().substring(0, 8);
     const newPoll = new Poll({
       pollId,
+      tripId,
       tripName,
       groupSize: groupSize === "" ? undefined : groupSize,
       totalMembers: parseInt(totalMembers) || 1,
@@ -43,10 +44,18 @@ router.post("/create", protect, async (req, res) => {
   }
 });
 
-// Get all polls (Public)
+// Get all polls or filter by tripId (Public)
 router.get("/list", async (req, res) => {
   try {
-    const polls = await Poll.find().sort({ createdAt: -1 });
+    const query = {};
+    if (req.query.tripId) {
+      query.tripId = req.query.tripId;
+    } else {
+      // If no tripId, only return "global" polls or polls with no tripId
+      // For room isolation, we might want to return nothing if tripId is null/undefined
+      query.tripId = { $exists: false }; 
+    }
+    const polls = await Poll.find(query).sort({ createdAt: -1 });
     res.json(polls);
   } catch (error) {
     res.status(500).json({ error: error.message || "Server error fetching polls." });

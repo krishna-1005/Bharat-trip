@@ -1,12 +1,40 @@
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
 import { Polls } from "@/components/Polls";
-import { Send, Plus, Loader2 } from "lucide-react";
+import { Checklist } from "@/components/Checklist";
+import BudgetTracker from "@/components/collabRoom/BudgetTracker";
+import DestinationBoard from "@/components/collabRoom/DestinationBoard";
+import ItineraryBuilder from "@/components/collabRoom/ItineraryBuilder";
+import { 
+  Send, 
+  Plus, 
+  Loader2, 
+  Users, 
+  MessageSquare, 
+  ChevronRight, 
+  Globe, 
+  MapPin,
+  Trash2,
+  Calendar,
+  Building,
+  LayoutDashboard
+} from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import api from "@/lib/api";
 import { auth } from "@/firebase";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter,
+  DialogDescription
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const COLORS = [
   "bg-warm-gradient",
@@ -26,6 +54,15 @@ interface Message {
   userId: string;
 }
 
+interface TripRoom {
+  _id: string;
+  title: string;
+  destination: string;
+  image?: string;
+  members: any[];
+  userId: string; // Owner ID
+}
+
 export default function Collaborate() {
   return (
     <ProtectedRoute>
@@ -36,37 +73,87 @@ export default function Collaborate() {
 
 function Collab() {
   const [searchParams] = useSearchParams();
-  const tripId = searchParams.get("tripId") || "default-trip";
-  const [trip, setTrip] = useState<any>(null);
+  const navigate = useNavigate();
+  const tripId = searchParams.get("tripId");
+  
+  const [rooms, setRooms] = useState<TripRoom[]>([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
+  const [currentTrip, setCurrentTrip] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newRoomData, setNewRoomData] = useState({ title: "", destination: "", days: "3" });
+  const [creating, setCreating] = useState(false);
+  
   const scrollRef = useRef<HTMLDivElement>(null);
   const user = auth.currentUser;
 
-  const joinTrip = async () => {
-    if (!user || !tripId || tripId === "default-trip") return;
+  const fetchRooms = async () => {
     try {
-      await api.post(`/trips/${tripId}/join`, {
-        userId: user.uid,
-        userName: user.displayName || "Traveller"
-      });
-      fetchTrip(); // Refresh trip to see new members
+      const res = await api.get("/trips", { params: { type: "room" } });
+      // Ensure we only show rooms even if the API returns more
+      const onlyRooms = res.data.filter((r: any) => r.type === "room");
+      setRooms(onlyRooms);
     } catch (err) {
-      console.error("Failed to join trip", err);
+      console.error("Failed to fetch rooms", err);
+    } finally {
+      setLoadingRooms(false);
+    }
+  };
+
+  const createRoom = async () => {
+    if (!newRoomData.title || !newRoomData.destination) {
+      toast.error("Please fill in the room title and destination");
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const res = await api.post("/trips", {
+        ...newRoomData,
+        days: parseInt(newRoomData.days),
+        type: "room",
+        itinerary: [] 
+      });
+      toast.success("Collaboration Room created!");
+      setShowCreateModal(false);
+      setNewRoomData({ title: "", destination: "", days: "3" });
+      fetchRooms();
+      navigate(`/collaborate?tripId=${res.data._id}`);
+    } catch (err) {
+      toast.error("Failed to create room");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const deleteRoom = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this room? This will delete the trip and all its chats/polls.")) return;
+    
+    try {
+      await api.delete(`/trips/${id}`);
+      toast.success("Room deleted");
+      if (tripId === id) navigate("/collaborate");
+      fetchRooms();
+    } catch (err) {
+      toast.error("Failed to delete room. Only the owner can delete it.");
     }
   };
 
   const fetchTrip = async () => {
+    if (!tripId) return;
     try {
       const res = await api.get(`/trips/${tripId}`);
-      setTrip(res.data);
+      setCurrentTrip(res.data);
     } catch (err) {
       console.error("Failed to fetch trip", err);
     }
   };
 
   const fetchMessages = async () => {
+    if (!tripId) return;
     try {
       const res = await api.get(`/group-chat/${tripId}`);
       setMessages(res.data);
@@ -75,18 +162,30 @@ function Collab() {
     }
   };
 
-  useEffect(() => {
-    fetchTrip();
-    fetchMessages();
-    const interval = setInterval(fetchMessages, 3000);
-    return () => clearInterval(interval);
-  }, [tripId]);
+  const joinTrip = async () => {
+    if (!user || !tripId) return;
+    try {
+      await api.post(`/trips/${tripId}/join`);
+      fetchTrip();
+    } catch (err) {
+      console.error("Failed to join trip", err);
+    }
+  };
 
   useEffect(() => {
-    if (user && tripId) {
+    fetchRooms();
+  }, []);
+
+  useEffect(() => {
+    if (tripId) {
+      fetchTrip();
+      fetchMessages();
       joinTrip();
+    } else {
+      setCurrentTrip(null);
+      setMessages([]);
     }
-  }, [user, tripId]);
+  }, [tripId]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -96,20 +195,19 @@ function Collab() {
 
   const handleSend = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!newMessage.trim() || !user || sending) return;
+    if (!newMessage.trim() || !user || sending || !tripId) return;
 
     setSending(true);
     try {
       const res = await api.post("/group-chat/send", {
         tripId,
-        userId: user.uid,
-        userName: user.displayName || "Traveller",
         text: newMessage
       });
       setMessages([...messages, res.data]);
       setNewMessage("");
-    } catch (err) {
-      toast.error("Failed to send message");
+    } catch (err: any) {
+      toast.error("Failed to send message. Please try again.");
+      console.error("Send error:", err.response?.data || err);
     } finally {
       setSending(false);
     }
@@ -117,110 +215,346 @@ function Collab() {
 
   return (
     <AppShell>
-      <div className="px-4 lg:px-10 py-8 max-w-7xl mx-auto">
-        <div className="flex flex-wrap gap-4 items-center justify-between">
-          <div>
-            <h1 className="font-display font-bold text-3xl md:text-4xl tracking-tight">
-              {trip?.title || "March Group Trip"}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {trip?.destination ? `Exploring ${trip.destination}` : "5 travellers deciding together"} · live
-            </p>
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] overflow-hidden">
+        {/* Rooms Sidebar */}
+        <div className="w-full lg:w-80 border-r border-border bg-card flex flex-col shrink-0">
+          <div className="p-6 border-b border-border flex items-center justify-between">
+            <h2 className="font-display font-bold text-xl flex items-center gap-2">
+              <Users className="size-5 text-primary" /> Collab Rooms
+            </h2>
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="p-2 hover:bg-secondary rounded-lg transition-colors text-primary"
+              title="Create New Room"
+            >
+              <Plus className="size-5" />
+            </button>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex -space-x-2">
-              {trip?.members?.map((member: any, i: number) => (
-                <div 
-                  key={member.userId} 
-                  className={`size-10 rounded-full ${COLORS[i % COLORS.length]} text-white grid place-items-center font-bold text-sm border-2 border-background`} 
-                  title={member.userName}
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-2">
+            {loadingRooms ? (
+              [1, 2, 3].map(i => (
+                <div key={i} className="h-16 rounded-2xl bg-secondary/50 animate-pulse" />
+              ))
+            ) : rooms.length === 0 ? (
+              <div className="text-center py-10 px-4">
+                <LayoutDashboard className="size-10 text-muted-foreground mx-auto mb-3 opacity-20" />
+                <p className="text-sm text-muted-foreground font-medium">No rooms yet</p>
+                <button 
+                  onClick={() => setShowCreateModal(true)}
+                  className="text-xs text-primary font-bold mt-2 hover:underline"
                 >
-                  {member.userName[0]}
+                  Create your first room
+                </button>
+              </div>
+            ) : (
+              rooms.map((room) => (
+                <div key={room._id} className="group relative">
+                  <button
+                    onClick={() => navigate(`/collaborate?tripId=${room._id}`)}
+                    className={cn(
+                      "w-full flex items-center gap-3 p-3 rounded-2xl transition-all",
+                      tripId === room._id 
+                        ? "bg-primary text-white shadow-cta" 
+                        : "hover:bg-secondary border border-transparent"
+                    )}
+                  >
+                    <div className={cn(
+                      "size-10 rounded-xl grid place-items-center font-bold text-xs shrink-0 shadow-sm",
+                      tripId === room._id ? "bg-white/20" : "bg-warm-gradient text-white"
+                    )}>
+                      {room.title?.[0] || "?"}
+                    </div>
+                    <div className="flex-1 text-left overflow-hidden">
+                      <div className="font-bold text-sm truncate">{room.title}</div>
+                      <div className={cn(
+                        "text-[10px] uppercase tracking-wider font-semibold truncate opacity-70",
+                        tripId === room._id ? "text-white" : "text-muted-foreground"
+                      )}>
+                        {room.destination}
+                      </div>
+                    </div>
+                    <ChevronRight className={cn(
+                      "size-4 opacity-0 group-hover:opacity-100 transition-all",
+                      tripId === room._id && "opacity-100"
+                    )} />
+                  </button>
+                  
+                  <button 
+                    onClick={(e) => deleteRoom(e, room._id)}
+                    className="absolute right-8 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-white transition-all z-10"
+                    title="Delete Room"
+                  >
+                    <Trash2 className="size-3" />
+                  </button>
                 </div>
-              ))}
-              <button 
-                onClick={() => {
-                  const url = window.location.href;
-                  navigator.clipboard.writeText(url);
-                  toast.success("Collaboration link copied! Share it with your crew.");
-                }}
-                className="size-10 rounded-full bg-warm-gradient text-white grid place-items-center border-2 border-background hover:scale-110 shadow-sm transition-all group relative ml-2"
-                title="Invite Crew"
-              >
-                <Plus className="size-5 transition-transform" />
-                <span className="absolute -bottom-10 right-0 bg-popover text-popover-foreground text-[10px] px-2 py-1 rounded shadow-md border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none font-bold">
-                  Invite Crew
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 grid lg:grid-cols-[1fr_380px] gap-8">
-          {/* Polls Section */}
-          <div className="space-y-8">
-            <Polls tripId={tripId} />
+              ))
+            )}
           </div>
 
-          {/* Chat */}
-          <div className="rounded-3xl bg-card border border-border shadow-soft flex flex-col h-[600px] sticky top-6">
-            <div className="p-5 border-b border-border bg-secondary/20">
-              <div className="font-display font-bold text-lg">Crew chat</div>
-              <div className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                <span className="size-2 rounded-full bg-success animate-pulse"></span>
-                {messages.length > 0 ? `${new Set(messages.map(m => m.userId)).size} active members` : "5 online now"}
+          <div className="p-4 border-t border-border bg-secondary/10">
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-card border border-border shadow-sm">
+              <div className="size-8 rounded-full bg-success/20 grid place-items-center">
+                <Globe className="size-4 text-success" />
+              </div>
+              <div className="flex-1">
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Global Status</div>
+                <div className="text-xs font-bold">{rooms.length} Active Crews</div>
               </div>
             </div>
-            
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4 scroll-smooth">
-              {messages.length === 0 && (
-                <div className="text-center py-10 opacity-50 space-y-2">
-                  <p className="text-sm">No messages yet.</p>
-                  <p className="text-xs italic">"Let's poll it. GoTripo will pull together both itineraries either way."</p>
-                </div>
-              )}
-              {messages.map((m, i) => {
-                const isMe = m.userId === user?.uid;
-                return (
-                  <div key={i} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
-                    <div className={`size-8 rounded-full ${isMe ? 'bg-warm-gradient' : 'bg-primary-soft text-primary'} grid place-items-center text-xs font-bold shrink-0`}>
-                      {m.userName[0]}
-                    </div>
-                    <div className={`flex-1 ${isMe ? 'text-right' : ''}`}>
-                      <div className="text-xs text-muted-foreground">
-                        <b className="text-foreground">{isMe ? 'You' : m.userName}</b> · {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                      <div className={`mt-1 rounded-2xl px-4 py-2.5 text-sm w-fit shadow-sm inline-block ${
-                        isMe 
-                          ? 'bg-primary text-white rounded-tr-sm' 
-                          : 'bg-secondary text-foreground rounded-tl-sm'
-                      }`}>
-                        {m.text}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <form onSubmit={handleSend} className="p-4 border-t border-border flex items-center gap-2">
-              <input 
-                value={newMessage}
-                onChange={e => setNewMessage(e.target.value)}
-                placeholder="Message the crew…" 
-                className="flex-1 h-12 px-4 rounded-xl bg-secondary border border-transparent focus:bg-surface focus:border-ring outline-none text-sm transition-all" 
-              />
-              <button 
-                type="submit"
-                disabled={sending || !newMessage.trim()}
-                className="size-12 rounded-xl bg-warm-gradient text-white grid place-items-center shadow-cta hover:opacity-90 transition-opacity disabled:opacity-50"
-              >
-                {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-              </button>
-            </form>
           </div>
         </div>
+
+        {/* Room Content */}
+        <div className="flex-1 bg-secondary/10 overflow-hidden flex flex-col">
+          {!tripId ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-10 text-center space-y-6">
+              <div className="size-24 rounded-3xl bg-card border border-border shadow-soft grid place-items-center">
+                <MessageSquare className="size-10 text-primary" />
+              </div>
+              <div>
+                <h1 className="font-display font-bold text-3xl tracking-tight">Ready to Collaborate?</h1>
+                <p className="text-muted-foreground mt-2 max-w-md mx-auto">
+                  Rooms are intentional spaces for your crew. Create a room to start discussing itineraries, voting on destinations, and managing your crew's checklist.
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3">
+                <button 
+                  onClick={() => setShowCreateModal(true)}
+                  className="h-12 px-8 rounded-xl bg-warm-gradient text-white font-bold shadow-cta hover:opacity-90 transition-opacity"
+                >
+                  Create New Room
+                </button>
+                <button 
+                  onClick={() => navigate("/dashboard")}
+                  className="h-12 px-8 rounded-xl bg-card border border-border font-bold hover:bg-secondary transition-colors"
+                >
+                  Back to Dashboard
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* Room Header */}
+              <div className="h-20 border-b border-border bg-card px-6 lg:px-10 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-4">
+                  <div className="size-10 rounded-xl bg-warm-gradient text-white grid place-items-center font-bold">
+                    {currentTrip?.title?.[0] || "?"}
+                  </div>
+                  <div>
+                    <h1 className="font-display font-bold text-xl truncate max-w-[200px] md:max-w-md">
+                      {currentTrip?.title || "Loading..."}
+                    </h1>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+                      <MapPin className="size-3" /> {currentTrip?.destination} · {currentTrip?.members?.length || 1} members
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                   <div className="flex -space-x-2 hidden sm:flex">
+                    {currentTrip?.members?.slice(0, 3).map((member: any, i: number) => {
+                      const mName = member.userId?.name || member.userName || "Traveller";
+                      const mId = member.userId?._id || member.userId;
+                      return (
+                        <div 
+                          key={mId} 
+                          className={`size-8 rounded-full ${COLORS[i % COLORS.length]} text-white grid place-items-center font-bold text-[10px] border-2 border-background`} 
+                          title={mName}
+                        >
+                          {mName[0].toUpperCase()}
+                        </div>
+                      );
+                    })}
+                    {currentTrip?.members?.length > 3 && (
+                      <div className="size-8 rounded-full bg-secondary border-2 border-background grid place-items-center font-bold text-[10px] text-muted-foreground">
+                        +{currentTrip.members.length - 3}
+                      </div>
+                    )}
+                  </div>
+                  <button 
+                    onClick={async () => {
+                      const shareData = {
+                        title: `Join my trip to ${currentTrip?.destination}! | GoTripo`,
+                        text: `Hey! Join my collaboration room for our trip to ${currentTrip?.destination} on GoTripo! 🇮🇳✈️`,
+                        url: window.location.href,
+                      };
+
+                      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                        try {
+                          await navigator.share(shareData);
+                        } catch (err) {
+                          if ((err as Error).name !== 'AbortError') {
+                            console.error('Share failed:', err);
+                          }
+                        }
+                      } else {
+                        try {
+                          await navigator.clipboard.writeText(window.location.href);
+                          toast.success("Room link copied! Invite your crew. 📋");
+                        } catch (err) {
+                          toast.error("Failed to copy link");
+                        }
+                      }
+                    }}
+                    className="h-10 px-4 rounded-xl bg-primary-soft text-primary font-bold text-xs flex items-center gap-2 hover:bg-primary hover:text-white transition-all"
+                  >
+                    <Plus className="size-4" /> Invite
+                  </button>
+                </div>
+              </div>
+
+              {/* Room Body */}
+              <div className="flex-1 overflow-y-auto p-4 lg:p-8">
+                <div className="max-w-7xl mx-auto grid lg:grid-cols-[1fr_380px] gap-8">
+                  {/* Left Column: Discussion Features */}
+                  <div className="space-y-8">
+                  {currentTrip && (
+                    <DestinationBoard 
+                      tripId={tripId} 
+                      isOwner={currentTrip.userId === user?.uid} 
+                    />
+                  )}
+                  {currentTrip && <ItineraryBuilder trip={currentTrip} />}
+                  <Checklist tripId={tripId} />
+                  <Polls tripId={tripId} />
+                  {currentTrip && <BudgetTracker tripId={tripId} members={currentTrip.members} />}
+                  </div>
+                  {/* Right Column: Chat */}
+                  <div className="rounded-3xl bg-card border border-border shadow-soft flex flex-col h-[600px] sticky top-6">
+                    <div className="p-5 border-b border-border bg-secondary/20">
+                      <div className="font-display font-bold text-lg">Crew chat</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                        <span className="size-2 rounded-full bg-success animate-pulse"></span>
+                        {messages.length > 0 ? `${new Set(messages.map(m => m.userId)).size} active members` : "Online now"}
+                      </div>
+                    </div>
+                    
+                    <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4 scroll-smooth">
+                      {messages.length === 0 && (
+                        <div className="text-center py-10 opacity-50 space-y-2">
+                          <p className="text-sm">No messages yet.</p>
+                          <p className="text-xs italic">"Drop a message to start the brainstorm!"</p>
+                        </div>
+                      )}
+                      {messages.map((m, i) => {
+                        const isMe = m.userId === user?.uid;
+                        return (
+                          <div key={i} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
+                            <div className={`size-8 rounded-full ${isMe ? 'bg-warm-gradient' : 'bg-primary-soft text-primary'} grid place-items-center text-xs font-bold shrink-0`}>
+                              {m.userName?.[0] || "?"}
+                            </div>
+                            <div className={`flex-1 ${isMe ? 'text-right' : ''}`}>
+                              <div className="text-xs text-muted-foreground">
+                                <b className="text-foreground">{isMe ? 'You' : m.userName}</b> · {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                              <div className={`mt-1 rounded-2xl px-4 py-2.5 text-sm w-fit shadow-sm inline-block ${
+                                isMe 
+                                  ? 'bg-primary text-white rounded-tr-sm' 
+                                  : 'bg-secondary text-foreground rounded-tl-sm'
+                              }`}>
+                                {m.text}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <form onSubmit={handleSend} className="p-4 border-t border-border flex items-center gap-2">
+                      <input 
+                        value={newMessage}
+                        onChange={e => setNewMessage(e.target.value)}
+                        placeholder="Message the crew…" 
+                        className="flex-1 h-12 px-4 rounded-xl bg-secondary border border-transparent focus:bg-surface focus:border-ring outline-none text-sm transition-all" 
+                      />
+                      <button 
+                        type="submit"
+                        disabled={sending || !newMessage.trim()}
+                        className="size-12 rounded-xl bg-warm-gradient text-white grid place-items-center shadow-cta hover:opacity-90 transition-opacity disabled:opacity-50"
+                      >
+                        {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* CREATE ROOM MODAL */}
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="sm:max-w-[500px] rounded-[32px] p-8">
+          <DialogHeader>
+            <DialogTitle className="font-display font-bold text-3xl tracking-tight">Create Collab Room</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Start an intentional space for your crew to discuss and decide.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Room Title</label>
+              <div className="relative">
+                <Building className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input 
+                  placeholder="e.g. Summer Goa Crew"
+                  className="pl-11 h-14 rounded-2xl bg-secondary/50 border-transparent focus:bg-background"
+                  value={newRoomData.title}
+                  onChange={(e) => setNewRoomData({...newRoomData, title: e.target.value})}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Destination</label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input 
+                  placeholder="e.g. Goa, India"
+                  className="pl-11 h-14 rounded-2xl bg-secondary/50 border-transparent focus:bg-background"
+                  value={newRoomData.destination}
+                  onChange={(e) => setNewRoomData({...newRoomData, destination: e.target.value})}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Estimated Days</label>
+              <div className="relative">
+                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input 
+                  type="number"
+                  placeholder="3"
+                  className="pl-11 h-14 rounded-2xl bg-secondary/50 border-transparent focus:bg-background"
+                  value={newRoomData.days}
+                  onChange={(e) => setNewRoomData({...newRoomData, days: e.target.value})}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-3 sm:gap-0">
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowCreateModal(false)}
+              className="h-14 px-8 rounded-2xl font-bold"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={createRoom}
+              disabled={creating}
+              className="h-14 px-10 rounded-2xl bg-warm-gradient text-white font-bold shadow-cta"
+            >
+              {creating ? <Loader2 className="size-5 animate-spin mr-2" /> : <Plus className="size-5 mr-2" />}
+              Create Room
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }

@@ -7,6 +7,8 @@ const { generateReviews } = require("../services/reviewService");
 /* ── Load local datasets ── */
 let allPlaces = [];
 let accommodationPool = [];
+const cityCoordsMap = {};
+
 try {
   const curated = require("../data/bengaluruPlaces.json");
   const bulk = require("../data/bangalorePlaces.json");
@@ -16,9 +18,10 @@ const indiaPlaces = require("../data/indiaPlaces.json");
     accommodationPool = require("../data/accommodations.json");
   } catch (e) {}
 
-  const cityCoordsMap = {};
   indiaPlaces.forEach(c => {
-    cityCoordsMap[c.city.toLowerCase()] = c.coordinates;
+    if (c.city && c.coordinates) {
+      cityCoordsMap[c.city.toLowerCase()] = c.coordinates;
+    }
   });
 
   const normalizedCurated = curated.flat().filter(p => p && p.name).map(p => ({
@@ -37,11 +40,11 @@ const indiaPlaces = require("../data/indiaPlaces.json");
     source: "bulk"
   }));
 
-  const normalizedIndia = indiaPlaces.flatMap(cityData => 
-    cityData.places.map(p => ({
+  const normalizedIndia = (indiaPlaces || []).flatMap(cityData => 
+    (cityData.places || []).map(p => ({
       name: p.name,
-      lat: Number(p.lat),
-      lng: Number(p.lng),
+      lat: p.lat ? Number(p.lat) : 0,
+      lng: p.lng ? Number(p.lng) : 0,
       category: p.category || "Other",
       source: "india_places",
       city: cityData.city
@@ -49,7 +52,9 @@ const indiaPlaces = require("../data/indiaPlaces.json");
   );
 
   allPlaces = [...normalizedCurated, ...normalizedBulk, ...normalizedIndia];
-} catch (e) {}
+} catch (e) {
+  console.error("❌ Error initializing local datasets in nearbyPlaces:", e.message);
+}
 
 function distance(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -73,6 +78,11 @@ const REGION_TO_CITY = {
 router.post("/", async (req, res) => {
   try {
     let { lat, lng, city, radius = 10, category, travelerType } = req.body;
+    
+    // Ensure numeric types for coordinates and radius
+    lat = lat ? parseFloat(lat) : null;
+    lng = lng ? parseFloat(lng) : null;
+    radius = parseFloat(radius);
 
     // If city name is provided, geocode it first
     if (city && (!lat || !lng)) {

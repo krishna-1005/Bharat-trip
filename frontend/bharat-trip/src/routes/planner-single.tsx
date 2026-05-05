@@ -18,6 +18,50 @@ import {
 import api, { generatePlan } from "@/lib/api";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
+import { motion, AnimatePresence } from "framer-motion";
+
+function ProactiveCostIntel({ startDate, days }: { startDate: string, days: number }) {
+  const [suggestion, setSuggestion] = useState<any>(null);
+
+  useEffect(() => {
+    // Basic mid-week logic for proactive UI
+    const date = new Date(startDate);
+    const day = date.getDay();
+    
+    // If starting on a weekend (Fri, Sat, Sun), suggest a mid-week start
+    if (day === 0 || day === 5 || day === 6) {
+      const midWeek = new Date(date);
+      midWeek.setDate(date.getDate() + (3 - day + 7) % 7); // Move to next Wednesday
+      setSuggestion({
+        date: midWeek.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+        savings: "15-20%",
+        reason: "Mid-week flights and hotels are significantly cheaper."
+      });
+    } else {
+      setSuggestion(null);
+    }
+  }, [startDate, days]);
+
+  if (!suggestion) return null;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mt-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3"
+    >
+      <div className="size-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0">
+        <Sparkles className="size-4" />
+      </div>
+      <div>
+        <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Savings Alert</div>
+        <p className="text-[11px] leading-relaxed">
+          Starting your trip on <span className="font-bold underline">{suggestion.date}</span> could save you up to <span className="font-bold">{suggestion.savings}</span>. {suggestion.reason}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
 
 const styles = [
   { id: "solo", label: "Solo", icon: User },
@@ -260,6 +304,8 @@ function PlannerSingleContent() {
                 <span>₹10k</span><span>₹80k</span><span>₹1.5L</span>
               </div>
             </Field>
+
+            <ProactiveCostIntel startDate={startDate} days={days} />
 
             <div>
               <div className="text-sm font-medium mb-3">Dietary preference</div>

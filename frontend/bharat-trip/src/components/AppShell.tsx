@@ -38,7 +38,7 @@ const mobileNav = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const loc = useLocation();
@@ -46,7 +46,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, signOut } = useAuth();
 
   useEffect(() => {
-    if (loc.pathname === "/results") {
+    // Show text (expand) only for explore pages, collapse by default for others
+    if (loc.pathname.startsWith("/explore")) {
+      setCollapsed(false);
+    } else {
       setCollapsed(true);
     }
   }, [loc.pathname]);
