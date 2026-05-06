@@ -84,7 +84,7 @@ export function Checklist({ tripId }: { tripId: string }) {
 
   if (loading && items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-3">
+      <div className="flex flex-col items-center justify-center p-6 md:p-8 space-y-3">
         <Loader2 className="size-6 animate-spin text-primary" />
         <p className="text-xs text-muted-foreground font-display uppercase tracking-widest">Loading checklist...</p>
       </div>
@@ -92,14 +92,14 @@ export function Checklist({ tripId }: { tripId: string }) {
   }
 
   return (
-    <div className="rounded-3xl bg-card border border-border p-6 shadow-soft">
+    <div className="rounded-3xl bg-card border border-border p-4 md:p-6 shadow-soft">
       <div className="flex items-center gap-3 mb-6">
-        <div className="size-10 rounded-xl bg-primary-soft text-primary grid place-items-center">
+        <div className="size-9 md:size-10 rounded-xl bg-primary-soft text-primary grid place-items-center shrink-0">
           <ListTodo className="size-5" />
         </div>
         <div>
-          <h2 className="font-display font-bold text-xl">Crew Checklist</h2>
-          <p className="text-xs text-muted-foreground">Coordinate who's bringing what</p>
+          <h2 className="font-display font-bold text-lg md:text-xl">Crew Checklist</h2>
+          <p className="text-[10px] md:text-xs text-muted-foreground">Coordinate who's bringing what</p>
         </div>
       </div>
 
@@ -108,7 +108,7 @@ export function Checklist({ tripId }: { tripId: string }) {
           placeholder="Add something to the list..."
           value={newItemText}
           onChange={(e) => setNewItemText(e.target.value)}
-          className="rounded-xl bg-secondary/50 border-transparent focus:bg-background"
+          className="rounded-xl bg-secondary/50 border-transparent focus:bg-background text-sm"
         />
         <Button 
           disabled={adding || !newItemText.trim()}
@@ -133,25 +133,25 @@ export function Checklist({ tripId }: { tripId: string }) {
                 item.isCompleted ? "bg-secondary/20 border-transparent" : "bg-card border-border hover:border-primary/30"
               )}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 overflow-hidden">
                 <button 
                   onClick={() => toggleItem(item._id)}
                   className={cn(
-                    "transition-transform active:scale-90",
+                    "transition-transform active:scale-90 shrink-0",
                     item.isCompleted ? "text-success" : "text-muted-foreground hover:text-primary"
                   )}
                 >
-                  {item.isCompleted ? <CheckCircle2 className="size-6" /> : <Circle className="size-6" />}
+                  {item.isCompleted ? <CheckCircle2 className="size-5 md:size-6" /> : <Circle className="size-5 md:size-6" />}
                 </button>
-                <div className="flex flex-col">
+                <div className="flex flex-col overflow-hidden">
                   <span className={cn(
-                    "text-sm font-medium transition-all",
+                    "text-xs md:text-sm font-medium transition-all truncate",
                     item.isCompleted && "line-through text-muted-foreground"
                   )}>
                     {item.text}
                   </span>
                   {item.assignedTo && (
-                    <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
+                    <span className="text-[9px] md:text-[10px] font-bold text-accent uppercase tracking-wider">
                       Done by {item.assignedTo.userName}
                     </span>
                   )}
@@ -160,7 +160,7 @@ export function Checklist({ tripId }: { tripId: string }) {
               
               <button 
                 onClick={() => deleteItem(item._id)}
-                className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-destructive transition-all"
+                className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-destructive transition-all shrink-0"
               >
                 <Trash2 className="size-4" />
               </button>

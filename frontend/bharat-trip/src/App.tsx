@@ -54,7 +54,6 @@ export default function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/explore" element={<Navigate to="/explore-india" replace />} />
       <Route path="/explore-india" element={<Explore isInternational={false} />} />
-      <Route path="/explore-international" element={<Explore isInternational={true} />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />

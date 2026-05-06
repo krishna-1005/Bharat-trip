@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { fetchBudget, deleteExpense } from '@/lib/api';
 import { useAuth } from '@/components/AuthProvider';
 import { useSocket } from '@/context/SocketContext';
+import { cn } from '@/lib/utils';
 import AddBudgetExpenseModal from './modals/AddBudgetExpenseModal';
 
 const COLORS = {
@@ -105,19 +106,19 @@ const BudgetTracker = ({ tripId, members }: { tripId: string, members: any[] }) 
   if (loading) return <div className="p-8 text-center text-gray-500">Loading budget...</div>;
 
   return (
-    <div className="rounded-3xl bg-card border border-border p-6 shadow-soft relative overflow-visible">
+    <div className="rounded-3xl bg-card border border-border p-4 md:p-6 shadow-soft relative overflow-hidden mb-8">
       <div className="flex items-center gap-3 mb-6">
-        <div className="size-10 rounded-xl bg-primary-soft text-primary grid place-items-center">
+        <div className="size-9 md:size-10 rounded-xl bg-primary-soft text-primary grid place-items-center shrink-0">
           <IndianRupee className="size-5" />
         </div>
         <div>
-          <h2 className="font-display font-bold text-xl">Group Budget</h2>
-          <p className="text-xs text-muted-foreground">Track expenses and settle balances</p>
+          <h2 className="font-display font-bold text-lg md:text-xl">Group Budget</h2>
+          <p className="text-[10px] md:text-xs text-muted-foreground">Track expenses and settle balances</p>
         </div>
       </div>
 
       {/* Metric Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <MetricCard 
           icon={<IndianRupee size={16} />} 
           label="Total cost" 
@@ -127,67 +128,61 @@ const BudgetTracker = ({ tripId, members }: { tripId: string, members: any[] }) 
           icon={<TrendingUp size={16} />} 
           label="Your share" 
           value={`₹${userOwed.toLocaleString()}`} 
-          color={COLORS.purple}
+          color="text-purple-500"
         />
         <MetricCard 
           icon={<CreditCard size={16} />} 
           label="Balance" 
           value={`${userBalance >= 0 ? '+' : ''}₹${Math.abs(userBalance).toLocaleString()}`} 
-          color={userBalance >= 0 ? COLORS.green : COLORS.coral}
+          color={userBalance >= 0 ? "text-success" : "text-destructive"}
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', lgGridTemplateColumns: '2fr 1fr', gap: '32px' }}>
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Expense List */}
-          <div>
-            <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }} className="flex items-center gap-2">
-              Expenses <span className="text-[10px] bg-secondary px-2 py-0.5 rounded-full">{expenses.length}</span>
-            </h3>
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: '12px',
-            }}>
-              {expenses.length === 0 ? (
-                <div style={{ padding: '32px', textAlign: 'center', color: COLORS.textMuted, border: `1px dashed ${COLORS.border}`, borderRadius: '12px' }}>
-                  No expenses yet.
-                </div>
-              ) : (
-                expenses.map((expense) => (
-                  <ExpenseItem 
-                    key={expense.id} 
-                    expense={expense} 
-                    onDelete={() => handleDelete(expense.id)}
-                    currentUserId={userId}
-                  />
-                ))
-              )}
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
+        {/* Expense List */}
+        <div>
+          <h3 className="text-base font-bold mb-4 flex items-center gap-2">
+            Expenses <span className="text-[10px] bg-secondary px-2 py-0.5 rounded-full">{expenses.length}</span>
+          </h3>
+          <div className="flex flex-col gap-3">
+            {expenses.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground border border-dashed border-border rounded-xl">
+                No expenses yet.
+              </div>
+            ) : (
+              expenses.map((expense) => (
+                <ExpenseItem 
+                  key={expense.id} 
+                  expense={expense} 
+                  onDelete={() => handleDelete(expense.id)}
+                  currentUserId={userId}
+                />
+              ))
+            )}
           </div>
+        </div>
 
-          {/* Settle Up Panel */}
-          <div>
-            <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }}>Settle Up</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {settlements.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: COLORS.textMuted, backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: `1px solid ${COLORS.border}` }}>
-                  All settled! 🏖️
-                </div>
-              ) : (
-                settlements.map((s, idx) => (
-                  <SettlementCard key={idx} settlement={s} />
-                ))
-              )}
-            </div>
+        {/* Settle Up Panel */}
+        <div>
+          <h3 className="text-base font-bold mb-4">Settle Up</h3>
+          <div className="flex flex-col gap-3">
+            {settlements.length === 0 ? (
+              <div className="p-6 text-center text-muted-foreground bg-secondary/5 rounded-xl border border-border">
+                All settled! 🏖️
+              </div>
+            ) : (
+              settlements.map((s, idx) => (
+                <SettlementCard key={idx} settlement={s} />
+              ))
+            )}
           </div>
         </div>
       </div>
 
-      {/* Floating Action Button - Positioned relative to this card for hub view */}
+      {/* Floating Action Button */}
       <button
         onClick={() => setShowModal(true)}
-        className="absolute top-6 right-6 size-10 rounded-xl bg-primary text-white shadow-cta grid place-items-center hover:scale-105 active:scale-95 transition-all"
+        className="absolute top-4 md:top-6 right-4 md:right-6 size-10 rounded-xl bg-primary text-white shadow-cta grid place-items-center hover:scale-105 active:scale-95 transition-all"
         title="Add Expense"
       >
         <Plus size={20} />
@@ -208,83 +203,51 @@ const BudgetTracker = ({ tripId, members }: { tripId: string, members: any[] }) 
   );
 };
 
-const MetricCard = ({ icon, label, value, color = COLORS.text }: any) => (
-  <div style={{ 
-    backgroundColor: 'rgba(255,255,255,0.02)', 
-    border: `1px solid ${COLORS.border}`, 
-    borderRadius: '16px', 
-    padding: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px'
-  }}>
-    <div style={{ color: COLORS.textMuted, display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.05em' }}>
+const MetricCard = ({ icon, label, value, color = "text-foreground" }: any) => (
+  <div className="bg-secondary/10 border border-border rounded-2xl p-4 flex flex-col gap-1">
+    <div className="text-muted-foreground flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider">
       {icon} {label}
     </div>
-    <div style={{ fontSize: '20px', fontWeight: 'bold', color }}>{value}</div>
+    <div className={cn("text-xl font-bold", color)}>{value}</div>
   </div>
 );
 
 const ExpenseItem = ({ expense, onDelete, currentUserId }: any) => {
   const CategoryIcon = CATEGORY_MAP[expense.category]?.icon || MoreHorizontal;
-  const categoryColor = CATEGORY_MAP[expense.category]?.color || COLORS.textMuted;
+  const categoryColor = CATEGORY_MAP[expense.category]?.color || "#888";
 
   return (
-    <div style={{ 
-      backgroundColor: COLORS.card, 
-      border: `1px solid ${COLORS.border}`, 
-      borderRadius: '12px', 
-      padding: '16px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '16px'
-    }}>
-      <div style={{ 
-        width: '44px', 
-        height: '44px', 
-        borderRadius: '10px', 
-        backgroundColor: `${categoryColor}20`, 
-        color: categoryColor,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <CategoryIcon size={22} />
+    <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
+      <div 
+        className="size-10 rounded-lg flex items-center justify-center shrink-0"
+        style={{ backgroundColor: `${categoryColor}20`, color: categoryColor }}
+      >
+        <CategoryIcon size={20} />
       </div>
       
-      <div style={{ flex: 1 }}>
-        <h4 style={{ fontWeight: '600', fontSize: '15px' }}>{expense.title}</h4>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-          <div style={{ 
-            width: '20px', 
-            height: '20px', 
-            borderRadius: '50%', 
-            backgroundColor: COLORS.purple, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            fontSize: '10px',
-            fontWeight: 'bold'
-          }}>
+      <div className="flex-1 overflow-hidden">
+        <h4 className="font-bold text-sm truncate">{expense.title}</h4>
+        <div className="flex items-center gap-2 mt-1">
+          <div className="size-5 rounded-full bg-purple-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
             {expense.paidBy.name[0]}
           </div>
-          <span style={{ fontSize: '12px', color: COLORS.textMuted }}>
+          <span className="text-[10px] text-muted-foreground truncate">
             Paid by {expense.paidBy.name} • {expense.splitBetween.length} people
           </span>
         </div>
       </div>
 
-      <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className="text-right flex items-center gap-4 shrink-0">
         <div>
-          <div style={{ fontWeight: 'bold', fontSize: '16px' }}>₹{expense.amount.toLocaleString()}</div>
-          <div style={{ fontSize: '11px', color: COLORS.textMuted }}>{new Date(expense.createdAt).toLocaleDateString()}</div>
+          <div className="font-bold text-sm md:text-base">₹{expense.amount.toLocaleString()}</div>
+          <div className="text-[10px] text-muted-foreground">{new Date(expense.createdAt).toLocaleDateString()}</div>
         </div>
         {expense.paidBy.userId === currentUserId && (
           <button 
             onClick={onDelete}
-            style={{ color: COLORS.coral, background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}
+            className="text-destructive hover:bg-destructive/10 p-2 rounded-lg transition-colors"
           >
-            <Trash2 size={18} />
+            <Trash2 size={16} />
           </button>
         )}
       </div>
@@ -293,35 +256,15 @@ const ExpenseItem = ({ expense, onDelete, currentUserId }: any) => {
 };
 
 const SettlementCard = ({ settlement }: any) => (
-  <div style={{ 
-    backgroundColor: COLORS.card, 
-    border: `1px solid ${COLORS.border}`, 
-    borderRadius: '12px', 
-    padding: '16px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  }}>
-    <div style={{ fontSize: '14px' }}>
-      <span style={{ fontWeight: 'bold' }}>{settlement.from}</span>
-      <span style={{ color: COLORS.textMuted, margin: '0 8px' }}>owes</span>
-      <span style={{ fontWeight: 'bold' }}>{settlement.to}</span>
+  <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
+    <div className="text-xs">
+      <span className="font-bold">{settlement.from}</span>
+      <span className="text-muted-foreground mx-2">owes</span>
+      <span className="font-bold">{settlement.to}</span>
     </div>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-      <div style={{ color: COLORS.coral, fontWeight: 'bold' }}>₹{settlement.amount.toLocaleString()}</div>
-      <button style={{ 
-        backgroundColor: 'rgba(29, 158, 117, 0.1)', 
-        color: COLORS.green, 
-        border: 'none', 
-        padding: '6px 12px', 
-        borderRadius: '6px', 
-        fontSize: '12px', 
-        fontWeight: 'bold',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px'
-      }}>
+    <div className="flex items-center justify-between">
+      <div className="text-destructive font-bold text-sm md:text-base">₹{settlement.amount.toLocaleString()}</div>
+      <button className="bg-success/10 text-success px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1.5 hover:bg-success hover:text-white transition-all">
         <CheckCircle2 size={14} /> Paid
       </button>
     </div>

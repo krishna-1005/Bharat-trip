@@ -75,34 +75,34 @@ export function Polls({ tripId }: { tripId?: string }) {
 
   if (loading && polls.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 space-y-4">
+      <div className="flex flex-col items-center justify-center p-8 md:p-12 space-y-4">
         <Loader2 className="size-8 animate-spin text-primary" />
-        <p className="text-muted-foreground animate-pulse font-display">Syncing with your crew...</p>
+        <p className="text-muted-foreground animate-pulse font-display text-sm md:text-base">Syncing with your crew...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="font-display font-bold text-2xl">Active Polls</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 className="font-display font-bold text-xl md:text-2xl">Active Polls</h2>
         <CreatePollDialog onCreated={fetchPolls} />
       </div>
 
       {polls.length === 0 ? (
-        <div className="rounded-3xl border-2 border-dashed border-border p-12 text-center space-y-6 bg-secondary/10">
-          <div className="size-20 rounded-full bg-secondary grid place-items-center mx-auto shadow-inner">
-            <Users className="size-10 text-muted-foreground" />
+        <div className="rounded-3xl border-2 border-dashed border-border p-6 md:p-12 text-center space-y-6 bg-secondary/10">
+          <div className="size-16 md:size-20 rounded-full bg-secondary grid place-items-center mx-auto shadow-inner">
+            <Users className="size-8 md:size-10 text-muted-foreground" />
           </div>
           <div>
-            <h3 className="font-display font-bold text-2xl tracking-tight">Your crew hasn't started any polls yet</h3>
-            <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">Start a poll to decide your next destination or share this page with friends to get them involved!</p>
+            <h3 className="font-display font-bold text-xl md:text-2xl tracking-tight">Your crew hasn't started any polls yet</h3>
+            <p className="text-xs md:text-sm text-muted-foreground mt-2 max-w-xs mx-auto">Start a poll to decide your next destination or share this page with friends to get them involved!</p>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <CreatePollDialog tripId={tripId} onCreated={fetchPolls} trigger={<Button className="rounded-xl bg-warm-gradient text-white shadow-cta h-11 px-8">Start First Poll</Button>} />
+            <CreatePollDialog tripId={tripId} onCreated={fetchPolls} trigger={<Button className="w-full sm:w-auto rounded-xl bg-warm-gradient text-white shadow-cta h-11 px-8">Start First Poll</Button>} />
             <Button 
               variant="outline" 
-              className="rounded-xl h-11 px-8"
+              className="w-full sm:w-auto rounded-xl h-11 px-8"
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
                 toast.success("Collaboration link copied! Send it to your crew.");
@@ -155,20 +155,20 @@ function PollCard({ poll, onVote }: { poll: Poll; onVote: () => void }) {
 
   return (
     <div className={cn(
-      "rounded-3xl bg-card border border-border p-6 shadow-soft transition-all duration-500",
+      "rounded-3xl bg-card border border-border p-4 md:p-6 shadow-soft transition-all duration-500",
       poll.isClosed ? "ring-2 ring-accent/20 bg-accent/5" : "hover:border-primary/30"
     )}>
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div className={cn(
-            "size-12 rounded-2xl grid place-items-center shadow-cta",
+            "size-10 md:size-12 rounded-2xl grid place-items-center shadow-cta shrink-0",
             poll.isClosed ? "bg-accent text-white" : "bg-warm-gradient text-white"
           )}>
-            {poll.isClosed ? <Trophy className="size-6" /> : <MapPin className="size-6" />}
+            {poll.isClosed ? <Trophy className="size-5 md:size-6" /> : <MapPin className="size-5 md:size-6" />}
           </div>
           <div>
-            <h3 className="font-display font-bold text-xl">{poll.tripName}</h3>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 font-semibold uppercase tracking-wider">
+            <h3 className="font-display font-bold text-lg md:text-xl line-clamp-1">{poll.tripName}</h3>
+            <div className="flex items-center gap-3 text-[10px] md:text-xs text-muted-foreground mt-1 font-semibold uppercase tracking-wider">
               <span className="flex items-center gap-1"><Users className="size-3" /> {totalVotes}/{poll.totalMembers} VOTES</span>
               {poll.isClosed && <span className="text-accent flex items-center gap-1"><Check className="size-3" /> FINALIZED</span>}
             </div>

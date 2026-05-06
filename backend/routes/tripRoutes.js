@@ -168,7 +168,7 @@ router.post("/:tripId/destinations", protect, async (req, res) => {
     await trip.save();
 
     const io = req.app.get("io");
-    if (io) io.to(req.params.tripId).emit("destination:added", newDestination);
+    if (io) io.to(req.params.tripId).emit("destination:added", trip.destinations);
 
     res.status(201).json(newDestination);
   } catch (error) {
@@ -217,7 +217,7 @@ router.post("/:tripId/destinations/:id/vote", protect, async (req, res) => {
 
     await trip.save();
     const io = req.app.get("io");
-    if (io) io.to(req.params.tripId).emit("destination:voted", { id: req.params.id });
+    if (io) io.to(req.params.tripId).emit("destination:voted", trip.destinations);
 
     res.json(dest);
   } catch (error) {
@@ -245,7 +245,7 @@ router.put("/:tripId/destinations/:id/lock", protect, async (req, res) => {
     
     await trip.save();
     const io = req.app.get("io");
-    if (io) io.to(req.params.tripId).emit("destination:locked", dest);
+    if (io) io.to(req.params.tripId).emit("destination:locked", trip.destinations);
 
     res.json(dest);
   } catch (error) {
@@ -262,10 +262,18 @@ router.delete("/:tripId/destinations/:id", protect, async (req, res) => {
     const destIdx = trip.destinations.findIndex(d => d.id === req.params.id);
     if (destIdx === -1) return res.status(404).json({ error: "Destination not found" });
 
+    const dest = trip.destinations[destIdx];
+    const isOwner = trip.userId.toString() === req.user._id.toString();
+    const isSuggester = dest.suggestedBy.userId === req.user._id.toString();
+
+    if (!isOwner && !isSuggester) {
+      return res.status(403).json({ error: "Unauthorized: only the owner or suggester can remove this" });
+    }
+
     trip.destinations.splice(destIdx, 1);
     await trip.save();
     const io = req.app.get("io");
-    if (io) io.to(req.params.tripId).emit("destination:deleted", req.params.id);
+    if (io) io.to(req.params.tripId).emit("destination:deleted", trip.destinations);
 
     res.json({ message: "Deleted" });
   } catch (error) {

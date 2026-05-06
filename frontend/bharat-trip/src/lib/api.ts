@@ -51,6 +51,11 @@ export const fetchDreamWeaverSuggestions = async (prompt: string) => {
   return res.data.suggestions;
 };
 
+export const fetchMe = async () => {
+  const res = await api.get("/auth/me");
+  return res.data;
+};
+
 // Budget API
 export const fetchBudget = async (tripId: string) => {
   const res = await api.get(`/trips/${tripId}/budget`);

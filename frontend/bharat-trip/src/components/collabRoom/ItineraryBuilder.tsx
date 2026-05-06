@@ -116,48 +116,48 @@ const ItineraryBuilder = ({ trip }: { trip: any }) => {
   };
 
   if (loading) return (
-    <div className="rounded-3xl bg-card border border-border p-8 shadow-soft flex items-center justify-center min-h-[200px]">
+    <div className="rounded-3xl bg-card border border-border p-6 md:p-8 shadow-soft flex items-center justify-center min-h-[200px]">
       <Loader2 className="animate-spin text-primary" size={32} />
     </div>
   );
 
   return (
-    <div className="rounded-3xl bg-card border border-border p-8 shadow-soft space-y-8">
+    <div className="rounded-3xl bg-card border border-border p-4 md:p-6 lg:p-8 shadow-soft space-y-6 md:space-y-8 overflow-hidden">
       {/* HEADER */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-xl bg-purple-500/10 text-purple-500 grid place-items-center">
+          <div className="size-9 md:size-10 rounded-xl bg-purple-500/10 text-purple-500 grid place-items-center shrink-0">
             <Calendar className="size-5" />
           </div>
           <div>
-            <h2 className="font-display font-bold text-xl">Trip Itinerary</h2>
-            <p className="text-xs text-muted-foreground">{itinerary.length} days planned</p>
+            <h2 className="font-display font-bold text-lg md:text-xl">Trip Itinerary</h2>
+            <p className="text-[10px] md:text-xs text-muted-foreground">{itinerary.length} days planned</p>
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-2 md:gap-3 w-full sm:w-auto">
           <button 
             onClick={handleAiGenerate}
             disabled={aiGenerating}
-            className="h-10 px-4 rounded-xl bg-purple-500 text-white text-xs font-bold flex items-center gap-2 shadow-cta hover:opacity-90 transition-all disabled:opacity-50"
+            className="flex-1 sm:flex-none h-9 md:h-10 px-3 md:px-4 rounded-xl bg-purple-500 text-white text-[10px] md:text-xs font-bold flex items-center justify-center gap-2 shadow-cta hover:opacity-90 transition-all disabled:opacity-50"
           >
-            {aiGenerating ? <Loader2 className="animate-spin size-4" /> : <Sparkles className="size-4" />}
+            {aiGenerating ? <Loader2 className="animate-spin size-3.5 md:size-4" /> : <Sparkles className="size-3.5 md:size-4" />}
             AI Generate
           </button>
           <button 
             onClick={handleAddDay}
-            className="h-10 px-4 rounded-xl bg-secondary/50 border border-border text-xs font-bold flex items-center gap-2 hover:bg-secondary transition-all"
+            className="flex-1 sm:flex-none h-9 md:h-10 px-3 md:px-4 rounded-xl bg-secondary/50 border border-border text-[10px] md:text-xs font-bold flex items-center justify-center gap-2 hover:bg-secondary transition-all"
           >
-            <Plus className="size-4" /> Add Day
+            <Plus className="size-3.5 md:size-4" /> Add Day
           </button>
         </div>
       </div>
 
       {/* TIMELINE */}
-      <div className="flex flex-col gap-8 relative">
+      <div className="flex flex-col gap-6 md:gap-8 relative">
         {/* Connecting line */}
         {itinerary.length > 0 && (
-          <div className="absolute left-[21px] top-4 bottom-4 w-0.5 bg-border z-0" />
+          <div className="absolute left-[17px] md:left-[21px] top-4 bottom-4 w-0.5 bg-border z-0" />
         )}
 
         {itinerary.length === 0 && !aiGenerating && (

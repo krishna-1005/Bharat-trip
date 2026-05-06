@@ -4,16 +4,18 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 async function suggestDestinations({ groupSize, budget, travelStyle, vibeTags }) {
   const systemPrompt = `
-Suggest 3 perfect destinations for a group:
+Suggest 3 perfect destinations IN INDIA for a group:
 - Group Size: ${groupSize}
 - Budget Tier: ${budget}
 - Travel Style: ${travelStyle}
 - Vibes: ${vibeTags.join(", ")}
 
+STRICT RULE: ONLY suggest destinations within India.
+
 Return JSON ONLY as an array of 3 objects:
 [{
   "name": "City",
-  "country": "Country",
+  "country": "India",
   "description": "2 lines",
   "imageUrl": "https://source.unsplash.com/featured/?city",
   "tags": ["Tag1", "Tag2"],

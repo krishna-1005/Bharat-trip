@@ -7,6 +7,7 @@ import BudgetTracker from "@/components/collabRoom/BudgetTracker";
 import DestinationBoard from "@/components/collabRoom/DestinationBoard";
 import ItineraryBuilder from "@/components/collabRoom/ItineraryBuilder";
 import { useSocket } from "@/context/SocketContext";
+import { useAuth } from "@/components/AuthProvider";
 import { 
   Send, 
   Plus, 
@@ -19,7 +20,10 @@ import {
   Trash2,
   Calendar,
   Building,
-  LayoutDashboard
+  LayoutDashboard,
+  Menu,
+  X,
+  ArrowLeft
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import api from "@/lib/api";
@@ -79,6 +83,8 @@ function Collab() {
   const tripId = searchParams.get("tripId");
   const socket = useSocket();
   
+  const { mongoUser } = useAuth();
+  
   const [rooms, setRooms] = useState<TripRoom[]>([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [currentTrip, setCurrentTrip] = useState<any>(null);
@@ -88,6 +94,8 @@ function Collab() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newRoomData, setNewRoomData] = useState({ title: "", destination: "", days: "3" });
   const [creating, setCreating] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [activeTab, setActiveTab] = useState<'board' | 'chat'>('board');
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const user = auth.currentUser;
@@ -254,20 +262,25 @@ function Collab() {
 
   return (
     <AppShell>
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] overflow-hidden">
-        {/* Rooms Sidebar */}
-        <div className="w-full lg:w-80 border-r border-border bg-card flex flex-col shrink-0">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] overflow-hidden relative">
+        {/* Rooms Sidebar - Responsive WhatsApp style */}
+        <div className={cn(
+          "w-full lg:w-80 border-r border-border bg-card flex flex-col shrink-0 transition-transform duration-300 lg:translate-x-0",
+          tripId ? "hidden lg:flex" : "flex w-full"
+        )}>
           <div className="p-6 border-b border-border flex items-center justify-between">
             <h2 className="font-display font-bold text-xl flex items-center gap-2">
               <Users className="size-5 text-primary" /> Collab Rooms
             </h2>
-            <button 
-              onClick={() => setShowCreateModal(true)}
-              className="p-2 hover:bg-secondary rounded-lg transition-colors text-primary"
-              title="Create New Room"
-            >
-              <Plus className="size-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setShowCreateModal(true)}
+                className="p-2 hover:bg-secondary rounded-lg transition-colors text-primary"
+                title="Create New Room"
+              >
+                <Plus className="size-5" />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -321,7 +334,7 @@ function Collab() {
                   
                   <button 
                     onClick={(e) => deleteRoom(e, room._id)}
-                    className="absolute right-8 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-white transition-all z-10"
+                    className="absolute right-8 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 hover:bg-destructive hover:text-white transition-all z-10"
                     title="Delete Room"
                   >
                     <Trash2 className="size-3" />
@@ -345,19 +358,22 @@ function Collab() {
         </div>
 
         {/* Room Content */}
-        <div className="flex-1 bg-secondary/10 overflow-hidden flex flex-col">
+        <div className={cn(
+          "flex-1 bg-secondary/10 overflow-hidden flex flex-col",
+          !tripId && "hidden lg:flex"
+        )}>
           {!tripId ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-10 text-center space-y-6">
-              <div className="size-24 rounded-3xl bg-card border border-border shadow-soft grid place-items-center">
-                <MessageSquare className="size-10 text-primary" />
+            <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-10 text-center space-y-6">
+              <div className="size-20 lg:size-24 rounded-3xl bg-card border border-border shadow-soft grid place-items-center">
+                <MessageSquare className="size-8 lg:size-10 text-primary" />
               </div>
               <div>
-                <h1 className="font-display font-bold text-3xl tracking-tight">Ready to Collaborate?</h1>
-                <p className="text-muted-foreground mt-2 max-w-md mx-auto">
+                <h1 className="font-display font-bold text-2xl lg:text-3xl tracking-tight">Ready to Collaborate?</h1>
+                <p className="text-muted-foreground mt-2 max-w-md mx-auto text-sm lg:text-base">
                   Rooms are intentional spaces for your crew. Create a room to start discussing itineraries, voting on destinations, and managing your crew's checklist.
                 </p>
               </div>
-              <div className="flex flex-wrap justify-center gap-3">
+              <div className="flex flex-col sm:flex-row justify-center gap-3 w-full max-w-xs sm:max-w-none">
                 <button 
                   onClick={() => setShowCreateModal(true)}
                   className="h-12 px-8 rounded-xl bg-warm-gradient text-white font-bold shadow-cta hover:opacity-90 transition-opacity"
@@ -375,23 +391,29 @@ function Collab() {
           ) : (
             <div className="flex-1 flex flex-col overflow-hidden">
               {/* Room Header */}
-              <div className="h-20 border-b border-border bg-card px-6 lg:px-10 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-4">
-                  <div className="size-10 rounded-xl bg-warm-gradient text-white grid place-items-center font-bold">
+              <div className="h-20 border-b border-border bg-card px-4 lg:px-10 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3 lg:gap-4 overflow-hidden">
+                  <button 
+                    onClick={() => navigate("/collaborate")}
+                    className="lg:hidden p-2 rounded-lg hover:bg-secondary shrink-0 text-primary"
+                  >
+                    <ArrowLeft className="size-5" />
+                  </button>
+                  <div className="size-9 lg:size-10 rounded-xl bg-warm-gradient text-white grid place-items-center font-bold shrink-0">
                     {currentTrip?.title?.[0] || "?"}
                   </div>
-                  <div>
-                    <h1 className="font-display font-bold text-xl truncate max-w-[200px] md:max-w-md">
+                  <div className="overflow-hidden">
+                    <h1 className="font-display font-bold text-base lg:text-xl truncate">
                       {currentTrip?.title || "Loading..."}
                     </h1>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+                    <div className="flex items-center gap-2 text-[10px] lg:text-xs text-muted-foreground font-medium truncate">
                       <MapPin className="size-3" /> {currentTrip?.destination} · {currentTrip?.members?.length || 1} members
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                   <div className="flex -space-x-2 hidden sm:flex">
+                <div className="flex items-center gap-2 lg:gap-3">
+                   <div className="flex -space-x-2 hidden md:flex">
                     {currentTrip?.members?.slice(0, 3).map((member: any, i: number) => {
                       const mName = member.userId?.name || member.userName || "Traveller";
                       const mId = member.userId?._id || member.userId;
@@ -436,22 +458,47 @@ function Collab() {
                         }
                       }
                     }}
-                    className="h-10 px-4 rounded-xl bg-primary-soft text-primary font-bold text-xs flex items-center gap-2 hover:bg-primary hover:text-white transition-all"
+                    className="h-9 lg:h-10 px-3 lg:px-4 rounded-xl bg-primary-soft text-primary font-bold text-[10px] lg:text-xs flex items-center gap-2 hover:bg-primary hover:text-white transition-all shrink-0"
                   >
-                    <Plus className="size-4" /> Invite
+                    <Plus className="size-3 lg:size-4" /> <span className="hidden sm:inline">Invite</span>
                   </button>
                 </div>
               </div>
 
+              {/* Mobile Tab Toggle */}
+              <div className="lg:hidden flex border-b border-border bg-card p-1">
+                <button 
+                  onClick={() => setActiveTab('board')}
+                  className={cn(
+                    "flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2",
+                    activeTab === 'board' ? "bg-primary text-white shadow-sm" : "text-muted-foreground"
+                  )}
+                >
+                  <LayoutDashboard className="size-3.5" /> Board & Plan
+                </button>
+                <button 
+                  onClick={() => setActiveTab('chat')}
+                  className={cn(
+                    "flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2",
+                    activeTab === 'chat' ? "bg-primary text-white shadow-sm" : "text-muted-foreground"
+                  )}
+                >
+                  <MessageSquare className="size-3.5" /> Crew Chat
+                </button>
+              </div>
+
               {/* Room Body */}
-              <div className="flex-1 overflow-y-auto p-4 lg:p-8">
-                <div className="max-w-7xl mx-auto grid lg:grid-cols-[1fr_380px] gap-8">
+              <div className="flex-1 overflow-hidden">
+                <div className="h-full max-w-7xl mx-auto grid lg:grid-cols-[1fr_380px] gap-8 p-4 lg:p-8 overflow-y-auto lg:overflow-hidden">
                   {/* Left Column: Discussion Features */}
-                  <div className="space-y-8">
+                  <div className={cn(
+                    "space-y-8 pb-10 lg:pb-0 lg:overflow-y-auto pr-0 lg:pr-2 scrollbar-hide",
+                    activeTab === 'board' ? "block" : "hidden lg:block"
+                  )}>
                   {currentTrip && (
                     <DestinationBoard 
                       tripId={tripId} 
-                      isOwner={currentTrip.userId === user?.uid} 
+                      isOwner={currentTrip.userId === mongoUser?._id} 
                     />
                   )}
                   {currentTrip && <ItineraryBuilder trip={currentTrip} />}
@@ -459,17 +506,21 @@ function Collab() {
                   <Polls tripId={tripId} />
                   {currentTrip && <BudgetTracker tripId={tripId} members={currentTrip.members} />}
                   </div>
+
                   {/* Right Column: Chat */}
-                  <div className="rounded-3xl bg-card border border-border shadow-soft flex flex-col h-[600px] sticky top-6">
-                    <div className="p-5 border-b border-border bg-secondary/20">
-                      <div className="font-display font-bold text-lg">Crew chat</div>
-                      <div className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                  <div className={cn(
+                    "rounded-3xl bg-card border border-border shadow-soft flex flex-col h-[500px] lg:h-full sticky top-6 lg:relative lg:top-0 transition-all",
+                    activeTab === 'chat' ? "flex h-[calc(100vh-210px)]" : "hidden lg:flex"
+                  )}>
+                    <div className="p-4 lg:p-5 border-b border-border bg-secondary/20 shrink-0">
+                      <div className="font-display font-bold text-base lg:text-lg">Crew chat</div>
+                      <div className="text-[10px] lg:text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
                         <span className="size-2 rounded-full bg-success animate-pulse"></span>
                         {messages.length > 0 ? `${new Set(messages.map(m => m.userId)).size} active members` : "Online now"}
                       </div>
                     </div>
                     
-                    <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4 scroll-smooth">
+                    <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 lg:p-5 space-y-4 scroll-smooth">
                       {messages.length === 0 && (
                         <div className="text-center py-10 opacity-50 space-y-2">
                           <p className="text-sm">No messages yet.</p>
@@ -479,15 +530,15 @@ function Collab() {
                       {messages.map((m, i) => {
                         const isMe = m.userId === user?.uid;
                         return (
-                          <div key={i} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
-                            <div className={`size-8 rounded-full ${isMe ? 'bg-warm-gradient' : 'bg-primary-soft text-primary'} grid place-items-center text-xs font-bold shrink-0`}>
+                          <div key={i} className={`flex gap-2 lg:gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
+                            <div className={`size-7 lg:size-8 rounded-full ${isMe ? 'bg-warm-gradient' : 'bg-primary-soft text-primary'} grid place-items-center text-[10px] lg:text-xs font-bold shrink-0`}>
                               {m.userName?.[0] || "?"}
                             </div>
                             <div className={`flex-1 ${isMe ? 'text-right' : ''}`}>
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-[10px] lg:text-xs text-muted-foreground">
                                 <b className="text-foreground">{isMe ? 'You' : m.userName}</b> · {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </div>
-                              <div className={`mt-1 rounded-2xl px-4 py-2.5 text-sm w-fit shadow-sm inline-block ${
+                              <div className={`mt-1 rounded-2xl px-3 lg:px-4 py-2 lg:py-2.5 text-xs lg:text-sm w-fit shadow-sm inline-block ${
                                 isMe 
                                   ? 'bg-primary text-white rounded-tr-sm' 
                                   : 'bg-secondary text-foreground rounded-tl-sm'
@@ -500,17 +551,17 @@ function Collab() {
                       })}
                     </div>
 
-                    <form onSubmit={handleSend} className="p-4 border-t border-border flex items-center gap-2">
+                    <form onSubmit={handleSend} className="p-3 lg:p-4 border-t border-border flex items-center gap-2 shrink-0">
                       <input 
                         value={newMessage}
                         onChange={e => setNewMessage(e.target.value)}
                         placeholder="Message the crew…" 
-                        className="flex-1 h-12 px-4 rounded-xl bg-secondary border border-transparent focus:bg-surface focus:border-ring outline-none text-sm transition-all" 
+                        className="flex-1 h-10 lg:h-12 px-4 rounded-xl bg-secondary border border-transparent focus:bg-surface focus:border-ring outline-none text-xs lg:text-sm transition-all" 
                       />
                       <button 
                         type="submit"
                         disabled={sending || !newMessage.trim()}
-                        className="size-12 rounded-xl bg-warm-gradient text-white grid place-items-center shadow-cta hover:opacity-90 transition-opacity disabled:opacity-50"
+                        className="size-10 lg:size-12 rounded-xl bg-warm-gradient text-white grid place-items-center shadow-cta hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
                       >
                         {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
                       </button>

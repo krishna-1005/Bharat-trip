@@ -7,7 +7,7 @@ const AddDestinationModal = ({ tripId, onClose, onSuccess }: any) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    country: '',
+    country: 'India',
     description: '',
     imageUrl: '',
     tags: ''
@@ -24,6 +24,7 @@ const AddDestinationModal = ({ tripId, onClose, onSuccess }: any) => {
     try {
       const destData = {
         ...formData,
+        imageUrl: formData.imageUrl || `https://source.unsplash.com/featured/?${encodeURIComponent(formData.name)}`,
         tags: formData.tags.split(',').map(t => t.trim()).filter(t => t)
       };
       await addDestination(tripId, destData);
@@ -91,6 +92,19 @@ const AddDestinationModal = ({ tripId, onClose, onSuccess }: any) => {
               onChange={(e) => setFormData({...formData, description: e.target.value})}
               className="w-full h-24 p-5 rounded-2xl bg-secondary/50 border-transparent focus:bg-background focus:border-primary/50 outline-none text-sm font-bold transition-all resize-none"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Image URL (optional)</label>
+            <div className="relative">
+              <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <input 
+                placeholder="https://images.unsplash.com/..."
+                value={formData.imageUrl}
+                onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                className="w-full h-14 pl-11 pr-5 rounded-2xl bg-secondary/50 border-transparent focus:bg-background focus:border-primary/50 outline-none text-sm font-bold transition-all"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
