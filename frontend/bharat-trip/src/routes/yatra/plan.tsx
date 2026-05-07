@@ -15,21 +15,57 @@ export default function YatraPlannerPage() {
   // Initialize state from localStorage if available
   const [itinerary, setItinerary] = useState<any>(() => {
     const saved = localStorage.getItem("yatra_itinerary");
-    return saved ? JSON.parse(saved) : null;
+    const nameParam = searchParams.get("name");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // If a specific name is requested in URL, and it doesn't match the saved itinerary, ignore it
+      if (nameParam && parsed.yatraName !== nameParam) {
+        return null;
+      }
+      return parsed;
+    }
+    return null;
   });
 
   const [formData, setFormData] = useState(() => {
     const saved = localStorage.getItem("yatra_plan_formData");
-    if (saved) return JSON.parse(saved);
+    const nameParam = searchParams.get("name");
+    
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (nameParam) {
+        parsed.yatraName = nameParam;
+      }
+      return parsed;
+    }
     
     return {
-      yatraName: searchParams.get("name") || "",
+      yatraName: nameParam || "",
       startingCity: "",
       travelDates: "",
       numberOfPeople: "2",
       budget: "comfort"
     };
   });
+
+  // Force scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
+  // Sync yatraName and clear itinerary if nameParam changes to something else
+  useEffect(() => {
+    const nameParam = searchParams.get("name");
+    if (nameParam) {
+      if (nameParam !== formData.yatraName) {
+        setFormData(prev => ({ ...prev, yatraName: nameParam }));
+      }
+      // If the URL has a name and it doesn't match the currently showing itinerary, clear the itinerary
+      if (itinerary && itinerary.yatraName !== nameParam) {
+        setItinerary(null);
+      }
+    }
+  }, [searchParams, formData.yatraName, itinerary]);
 
   // Persist state to localStorage
   useEffect(() => {
@@ -245,7 +281,7 @@ export default function YatraPlannerPage() {
                                 <option key={y._id} value={y.name} className="text-black">{y.name}</option>
                               ))
                             )}
-                            <option value="Char Dham" className="text-black">Char Dham (Yamunotri, Gangotri, Kedarnath, Badrinath)</option>
+                            <option value="Char Dham Yatra" className="text-black">Char Dham Yatra (Yamunotri, Gangotri, Kedarnath, Badrinath)</option>
                             <option value="Kashi Vishwanath" className="text-black">Kashi Vishwanath (Varanasi)</option>
                             <option value="Vaishno Devi" className="text-black">Vaishno Devi (Katra)</option>
                             <option value="Amarnath Yatra" className="text-black">Amarnath Yatra (Kashmir)</option>

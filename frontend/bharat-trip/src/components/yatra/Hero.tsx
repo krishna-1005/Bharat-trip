@@ -108,9 +108,9 @@ export function Hero({ searchState, setSearchState }: HeroProps) {
                   onChange={(e) => setSearchState({ ...searchState, yatra: e.target.value })}
                   className="w-full bg-white/10 border border-white/20 rounded-[2rem] py-4 pl-14 pr-6 text-white font-bold focus:outline-none focus:ring-2 focus:ring-[#FF6B00] appearance-none cursor-pointer transition-all"
                 >
-                  <option className="text-black">Char Dham</option>
+                  <option className="text-black">Char Dham Yatra</option>
                   <option className="text-black">Kashi Vishwanath</option>
-                  <option className="text-black">Vaishno Devi Darshan</option>
+                  <option className="text-black">Vaishno Devi</option>
                   <option className="text-black">Jagannath Puri</option>
                 </select>
               </div>

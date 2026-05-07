@@ -45,7 +45,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const handleSearch = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && searchQuery.trim()) {
-      navigate(`/explore-india?q=${encodeURIComponent(searchQuery.trim())}`);
+      if (loc.pathname.startsWith("/yatra")) {
+        // Stay in Yatra context if already there
+        navigate(`/yatra`);
+      } else {
+        navigate(`/explore-india?q=${encodeURIComponent(searchQuery.trim())}`);
+      }
       setSearchQuery("");
     }
   };
@@ -75,6 +80,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   const isAdmin = user && ADMIN_EMAILS.includes(user.email?.toLowerCase() || "");
+  const isYatraPage = loc.pathname.startsWith("/yatra");
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -190,7 +196,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="relative w-full">
               <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
-                placeholder="Search destinations, trips, ideas..."
+                placeholder={isYatraPage ? "Search sacred yatras..." : "Search destinations, trips, ideas..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearch}
@@ -202,11 +208,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex-1" />
 
           <Link
-            to="/trip-type"
+            to={isYatraPage ? "/yatra/plan" : "/trip-type"}
             className="hidden sm:inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-warm-gradient text-white text-sm font-semibold shadow-cta hover:opacity-95 transition"
           >
             <Plus className="size-4" />
-            New Trip
+            {isYatraPage ? "New Yatra" : "New Trip"}
           </Link>
           <ThemeToggle />
           <NotificationBell />
