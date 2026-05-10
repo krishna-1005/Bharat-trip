@@ -20,6 +20,7 @@ import TripDetails from "./routes/trip-details";
 import TripType from "./routes/trip-type";
 import Trips from "./routes/trips";
 import CollaborativeTrip from "./routes/collaborative-trip";
+import JoinTrip from "./routes/join-trip";
 import CollabRoom from "@/components/collabRoom/CollabRoom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import PassportPage from "./routes/passport";
@@ -37,14 +38,22 @@ import AdminChatbotPage from "./routes/admin/chatbot";
 import YatraHub from "./routes/yatra/index";
 import YatraDetail from "./routes/yatra/details";
 import YatraPlanner from "./routes/yatra/plan";
+import YatraKit from "./routes/yatra/kit";
+import YatraShop from "./routes/yatra/shop";
+import CartPage from "./routes/cart";
+import CheckoutPage from "./routes/checkout";
+import OrdersPage from "./routes/orders/index";
+import OrderDetailPage from "./routes/orders/detail";
+
 import { Chatbot } from "./components/Chatbot";
 import { useTracking } from "./hooks/useTracking";
+import { CartProvider } from "./context/CartContext";
 
 export default function App() {
   useTracking();
   
   return (
-    <>
+    <CartProvider>
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -69,12 +78,21 @@ export default function App() {
       <Route path="/trips" element={<Trips />} />
       <Route path="/collaborative-trip" element={<CollaborativeTrip />} />
       <Route path="/trips/:tripId/collab" element={<ProtectedRoute><CollabRoom /></ProtectedRoute>} />
+      <Route path="/join/:tripId/:token" element={<JoinTrip />} />
       <Route path="/passport" element={<PassportPage />} />
       
       {/* Yatra Module */}
       <Route path="/yatra" element={<YatraHub />} />
       <Route path="/yatra/:id" element={<YatraDetail />} />
       <Route path="/yatra/plan" element={<YatraPlanner />} />
+      <Route path="/yatra/shop" element={<YatraShop />} />
+      <Route path="/yatra/:id/kit" element={<ProtectedRoute><YatraKit /></ProtectedRoute>} />
+      
+      {/* Commerce Routes */}
+      <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
+      <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+      <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+      <Route path="/orders/:orderId" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
       
       {/* Admin Routes */}
       <Route path="/admin">
@@ -91,6 +109,6 @@ export default function App() {
       </Route>
     </Routes>
     <Chatbot />
-    </>
+    </CartProvider>
   );
 }

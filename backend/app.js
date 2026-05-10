@@ -36,6 +36,10 @@ const budgetRoutes = require("./routes/budget");
 const destinationRoutes = require("./routes/destinations");
 const aiRoutes = require("./routes/aiRoutes");
 const yatraRoutes = require("./routes/yatraRoutes");
+const yatraKitRoutes = require("./routes/yatraKit");
+const cartRoutes = require("./routes/cart");
+const orderRoutes = require("./routes/orders");
+const availabilityRoutes = require("./routes/availabilityRoutes");
 
 const app = express();
 const maintenanceMode = require("./middleware/maintenance");
@@ -44,7 +48,16 @@ const { globalLimiter } = require("./middleware/rateLimiter");
 /* ── 1. GLOBAL MIDDLEWARE ── */
 
 // Security Headers
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "script-src": ["'self'", "'unsafe-inline'", "https://www.clarity.ms", "https://c.bing.com"],
+      "connect-src": ["'self'", "https://*.clarity.ms", "https://c.bing.com"],
+      "img-src": ["'self'", "data:", "https://www.clarity.ms", "https://c.bing.com"],
+    },
+  },
+}));
 
 // CORS - Must be before routes to handle preflight
 app.use(
@@ -113,9 +126,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/yatra", yatraRoutes);
+app.use("/api/yatra-kit", yatraKitRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
 
 // Specific trip sub-routes first (handled via tripRoutes)
 app.use("/api/trips", tripRoutes);
+app.use("/api/trips", availabilityRoutes);
 
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);

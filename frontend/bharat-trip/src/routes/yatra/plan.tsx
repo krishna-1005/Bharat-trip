@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import api from "@/lib/api";
 import { AppShell } from "@/components/AppShell";
-import { Sparkles, Loader2, Calendar, MapPin, Users, Wallet, CheckCircle2, Utensils, Home, ArrowLeft, Send, Compass, Info, ChevronRight, ArrowRight, Landmark, Stars, Bell, Flame, Clock, Plane } from "lucide-react";
+import { Sparkles, Loader2, Calendar, MapPin, Users, Wallet, CheckCircle2, Utensils, Home, ArrowLeft, Send, Compass, Info, ChevronRight, ArrowRight, Landmark, Stars, Bell, Flame, Clock, Plane, ShoppingBag, Package, ShieldCheck, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
@@ -47,6 +47,63 @@ export default function YatraPlannerPage() {
       budget: "comfort"
     };
   });
+
+  const [transportMode, setTransportMode] = useState<"train" | "flight" | "bus" | "">("");
+  const [totalBudget, setTotalBudget] = useState(15000);
+  const [selectedYatra, setSelectedYatra] = useState<any>(null);
+
+  // Helper to get distance-adjusted costs
+  const getAdjustedCosts = (yatra: any, mode: string) => {
+    if (!yatra || !yatra.transportCosts || !yatra.transportCosts[mode]) {
+      // Improved Fallback with variety
+      const fallbacks: any = {
+        train: { minCost: 1200, maxCost: 2200, duration: "14 hrs" },
+        flight: { minCost: 4500, maxCost: 7500, duration: "2 hrs" },
+        bus: { minCost: 800, maxCost: 1400, duration: "16 hrs" }
+      };
+      return fallbacks[mode];
+    }
+
+    const base = yatra.transportCosts[mode];
+    const city = formData.startingCity.toLowerCase();
+    const loc = yatra.location.toLowerCase();
+    
+    let multiplier = 1.0;
+
+    // Simulate distance from major hubs
+    if (city.includes("mumbai") || city.includes("bengaluru") || city.includes("chennai") || city.includes("pune")) {
+      if (loc.includes("uttarakhand") || loc.includes("kashmir") || loc.includes("himachal")) multiplier = 1.8;
+      if (loc.includes("uttar pradesh")) multiplier = 1.5;
+    } else if (city.includes("delhi") || city.includes("gurgaon") || city.includes("noida")) {
+      if (loc.includes("uttarakhand")) multiplier = 0.7; // Very close
+      if (loc.includes("jammu")) multiplier = 0.9;
+      if (loc.includes("andhra") || loc.includes("karnataka")) multiplier = 2.0;
+    } else if (city.includes("kolkata") || city.includes("patna")) {
+      if (loc.includes("uttar pradesh")) multiplier = 0.8;
+      if (loc.includes("maharashtra") || loc.includes("karnataka")) multiplier = 1.6;
+    }
+
+    return {
+      minCost: Math.round(base.minCost * multiplier),
+      maxCost: Math.round(base.maxCost * multiplier),
+      duration: multiplier > 1.5 ? "~" + (parseInt(base.duration) + 8) + " hrs" : base.duration
+    };
+  };
+
+  // Fetch selected Yatra details when yatraName changes
+  useEffect(() => {
+    if (formData.yatraName && yatras.length > 0) {
+      const yatra = yatras.find(y => y.name === formData.yatraName);
+      setSelectedYatra(yatra || null);
+      
+      // Default total budget calculation if yatra and transport selected
+      if (yatra && transportMode) {
+        const costs = getAdjustedCosts(yatra, transportMode);
+        const baseBudget = (costs.minCost * parseInt(formData.numberOfPeople)) + 5000;
+        setTotalBudget(baseBudget);
+      }
+    }
+  }, [formData.yatraName, yatras, transportMode, formData.numberOfPeople, formData.startingCity]);
 
   // Force scroll to top on mount
   useEffect(() => {
@@ -144,10 +201,19 @@ export default function YatraPlannerPage() {
       return;
     }
 
+    if (!transportMode) {
+      toast.error("Please select a mode of transport");
+      return;
+    }
+
     setGenerating(true);
     setItinerary(null);
     try {
-      const res = await api.post("/yatra/generate-itinerary", formData);
+      const res = await api.post("/yatra/generate-itinerary", {
+        ...formData,
+        transportMode,
+        totalBudget
+      });
       setItinerary(res.data);
       toast.success("Divine itinerary manifested!");
     } catch (err: any) {
@@ -358,6 +424,140 @@ export default function YatraPlannerPage() {
                           </select>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      {/* Transport Selector */}
+                      <div className="md:col-span-3 space-y-6">
+                        <label className="text-xs font-black text-[#1A1A1A] dark:text-white uppercase tracking-[0.3em] ml-2 flex items-center gap-2">
+                          <div className="size-1.5 bg-[#FF6B00] rounded-full" /> Mode of Transport
+                        </label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {[
+                            { id: "train", name: "Train", tag: "Most Popular", comfort: "Moderate" },
+                            { id: "flight", name: "Flight", tag: "Fastest", comfort: "Premium" },
+                            { id: "bus", name: "Bus", tag: "Budget Friendly", comfort: "Basic" },
+                          ].map((t) => {
+                            const isSelected = transportMode === t.id;
+                            const costs = getAdjustedCosts(selectedYatra, t.id);
+                            
+                            return (
+                              <motion.div
+                                key={t.id}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => setTransportMode(t.id as any)}
+                                className={`cursor-pointer rounded-3xl p-8 border-2 transition-all relative overflow-hidden flex flex-col items-center text-center gap-4 ${
+                                  isSelected 
+                                    ? "bg-[#1A1A1A] border-[#FF6B00] shadow-[0_0_30px_rgba(255,107,0,0.3)] ring-4 ring-[#FF6B00]/20" 
+                                    : "bg-[#1A1A1A] border-white/5 opacity-60 hover:opacity-100"
+                                }`}
+                              >
+                                {isSelected && (
+                                  <motion.div 
+                                    layoutId="active-transport"
+                                    className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/10 to-transparent pointer-events-none" 
+                                  />
+                                )}
+                                <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-[#FF6B00] text-white text-[8px] font-black uppercase tracking-widest">
+                                  {t.tag}
+                                </div>
+                                <div className="space-y-1">
+                                  <h4 className="text-xl font-black text-white">{t.name}</h4>
+                                  <p className="text-[#F5A623] font-bold text-sm">₹{costs.minCost.toLocaleString()} - ₹{costs.maxCost.toLocaleString()} <span className="text-[10px] opacity-70">/ person</span></p>
+                                </div>
+                                <div className="flex flex-col gap-2 w-full mt-2">
+                                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-white/40">
+                                    <span>Duration</span>
+                                    <span className="text-white">{costs.duration}</span>
+                                  </div>
+                                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-white/40">
+                                    <span>Comfort</span>
+                                    <span className="text-[#FF6B00]">{t.comfort}</span>
+                                  </div>
+                                </div>
+                                <button className={`mt-4 w-full py-3 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all ${
+                                  isSelected ? "bg-[#FF6B00] text-white" : "bg-white/10 text-white"
+                                }`}>
+                                  {isSelected ? "Selected" : "Select"}
+                                </button>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Budget Estimator */}
+                      {transportMode && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="md:col-span-3 space-y-6 mt-6"
+                        >
+                          <label className="text-xs font-black text-[#1A1A1A] dark:text-white uppercase tracking-[0.3em] ml-2 flex items-center gap-2">
+                            <div className="size-1.5 bg-[#FF6B00] rounded-full" /> Budget Summary
+                          </label>
+                          <div className="bg-[#1A1A1A] rounded-[2.5rem] p-8 md:p-12 border-2 border-white/5 shadow-2xl">
+                            <div className="grid md:grid-cols-2 gap-12 items-center">
+                              <div className="space-y-6">
+                                <div className="flex justify-between items-center text-white/60 font-bold text-sm">
+                                  <span className="flex items-center gap-3"><Plane className="size-4" /> Transport Cost</span>
+                                  <span className="text-white">₹{(getAdjustedCosts(selectedYatra, transportMode).minCost * parseInt(formData.numberOfPeople)).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-white/60 font-bold text-sm">
+                                  <span className="flex items-center gap-3"><Home className="size-4" /> Estimated Stay</span>
+                                  <span className="text-white">₹{formData.budget === 'luxury' ? 8000 : formData.budget === 'comfort' ? 4000 : 1500}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-white/60 font-bold text-sm">
+                                  <span className="flex items-center gap-3"><Utensils className="size-4" /> Food & Prasad</span>
+                                  <span className="text-white">₹{1000 * parseInt(formData.numberOfPeople)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-white/60 font-bold text-sm">
+                                  <span className="flex items-center gap-3"><Stars className="size-4" /> Darshan & Activities</span>
+                                  <span className="text-white">₹{500 * parseInt(formData.numberOfPeople)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-white/60 font-bold text-sm">
+                                  <span className="flex items-center gap-3"><Info className="size-4" /> Miscellaneous</span>
+                                  <span className="text-white">₹500</span>
+                                </div>
+                                <div className="h-px bg-white/10 my-6" />
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xl font-black text-white font-['Cinzel']">Total Budget</span>
+                                  <span className="text-3xl font-black text-[#FF6B00]">₹{totalBudget.toLocaleString()}</span>
+                                </div>
+                              </div>
+
+                              <div className="space-y-8 bg-white/5 p-8 rounded-3xl border border-white/5">
+                                <div className="space-y-4">
+                                  <div className="flex justify-between text-xs font-black uppercase tracking-widest text-white/60">
+                                    <span>Adjust Your Budget</span>
+                                    <span className="text-[#FFD700]">₹{totalBudget.toLocaleString()}</span>
+                                  </div>
+                                  <input 
+                                    type="range"
+                                    min="5000"
+                                    max="100000"
+                                    step="1000"
+                                    value={totalBudget}
+                                    onChange={(e) => setTotalBudget(parseInt(e.target.value))}
+                                    className="w-full accent-[#FF6B00]"
+                                  />
+                                </div>
+
+                                {totalBudget < (getAdjustedCosts(selectedYatra, transportMode).minCost * parseInt(formData.numberOfPeople) + 3000) ? (
+                                  <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold flex items-center gap-3">
+                                    <Info className="size-4 shrink-0" /> ⚠️ Recommended minimum is ₹{(getAdjustedCosts(selectedYatra, transportMode).minCost * parseInt(formData.numberOfPeople) + 3000).toLocaleString()}
+                                  </div>
+                                ) : (
+                                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-bold flex items-center gap-3">
+                                    <CheckCircle2 className="size-4 shrink-0" /> ✅ Your budget looks good!
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
                     </div>
 
                     <button 
@@ -602,6 +802,68 @@ export default function YatraPlannerPage() {
                         </motion.div>
                       ))}
                     </div>
+
+                    {/* Packing List & Preparation - Addressing User Request */}
+                    {itinerary.packingList && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white dark:bg-[#1A1A1A] rounded-[4rem] p-12 md:p-16 shadow-2xl border-2 border-[#FF6B00]/20 overflow-hidden relative"
+                      >
+                         <div className="absolute top-0 right-0 p-12 opacity-5">
+                            <Package className="size-48 text-[#FF6B00]" />
+                         </div>
+                         
+                         <div className="relative z-10">
+                            <div className="flex items-center gap-5 mb-10">
+                              <div className="size-14 rounded-2xl bg-[#FF6B00]/10 flex items-center justify-center text-[#FF6B00]">
+                                 <ShoppingBag className="size-8" />
+                              </div>
+                              <div>
+                                <h3 className="text-2xl font-black font-['Cinzel'] text-[#1A1A1A] dark:text-white tracking-tight">Sacred Checklist</h3>
+                                <p className="text-xs font-bold text-[#FF6B00] uppercase tracking-[0.3em]">Essential Items for {itinerary.yatraName}</p>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                               {itinerary.packingList.map((item: any, idx: number) => (
+                                 <div key={idx} className="flex flex-col gap-4 p-6 rounded-3xl bg-gray-50 dark:bg-white/5 border border-transparent hover:border-[#FF6B00]/30 transition-all group">
+                                    <div className="flex gap-4">
+                                       <div className="size-10 rounded-xl bg-white dark:bg-[#2A2A2A] shadow-sm flex items-center justify-center text-[#FF6B00] shrink-0 group-hover:scale-110 transition-transform">
+                                          <CheckCircle2 className="size-5" />
+                                       </div>
+                                       <div>
+                                          <div className="font-black text-lg text-[#1A1A1A] dark:text-white leading-tight mb-1">{item.item}</div>
+                                          <div className="text-sm font-medium text-[#1A1A1A]/50 dark:text-white/40 leading-relaxed italic">"{item.reason}"</div>
+                                       </div>
+                                    </div>
+                                    <div className="mt-auto pt-4 flex justify-end">
+                                       <Link 
+                                         to={`/yatra/shop?q=${encodeURIComponent(item.item)}`}
+                                         className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#FF6B00] hover:text-[#FFD700] transition-colors bg-[#FF6B00]/5 px-3 py-1.5 rounded-lg border border-[#FF6B00]/10"
+                                       >
+                                          <ShoppingCart className="size-3" /> Shop Item
+                                       </Link>
+                                    </div>
+                                 </div>
+                               ))}
+                            </div>
+
+                            <div className="mt-16 p-10 rounded-[3rem] bg-gradient-to-r from-[#FF6B00] to-[#E32636] flex flex-col md:flex-row items-center justify-between gap-8 shadow-[0_20px_50px_rgba(255,107,0,0.3)] border-t-4 border-white/20">
+                               <div className="text-center md:text-left">
+                                  <h4 className="text-2xl font-black text-white mb-2 font-['Cinzel']">Missing Essentials?</h4>
+                                  <p className="text-white/80 font-medium max-w-lg">Order your custom Divine Kit {selectedYatra ? `for ${selectedYatra.name}` : ""} including puja items, sacred cloths, and travel necessities.</p>
+                               </div>
+                               <Link 
+                                 to={selectedYatra ? `/yatra/${selectedYatra._id}/kit` : "/yatra"}
+                                 className="px-10 py-5 bg-white text-[#FF6B00] rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-xl flex items-center gap-3 active:scale-95 group/btn"
+                               >
+                                  {selectedYatra ? "Order Divine Kit" : "Browse Divine Kits"} <ShoppingBag className="size-5 group-hover/btn:scale-110 transition-transform" />
+                               </Link>
+                            </div>
+                         </div>
+                      </motion.div>
+                    )}
 
                     <div className="flex justify-center pt-10">
                        <button className="px-16 py-8 bg-gradient-to-r from-[#1A1A1A] to-[#0A0A0A] text-white rounded-[2.5rem] font-black text-xl shadow-2xl hover:shadow-[#FF6B00]/40 transition-all duration-500 flex items-center gap-6 active:scale-95 border-2 border-[#FFD700]/30 font-['Cinzel'] group">

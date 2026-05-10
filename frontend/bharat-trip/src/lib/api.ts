@@ -108,4 +108,25 @@ export const fetchAISuggestions = async (tripId: string, params: any) => {
   return res.data;
 };
 
+// Availability API
+export const fetchAvailability = async (tripId: string) => {
+  const res = await api.get(`/trips/${tripId}/availability`);
+  return res.data;
+};
+
+export const addAvailabilityOptions = async (tripId: string, options: any[]) => {
+  const res = await api.post(`/trips/${tripId}/availability/options`, { options });
+  return res.data;
+};
+
+export const voteAvailability = async (tripId: string, voteData: { dateOptionId: string, available: string, name?: string, userId?: string }) => {
+  const res = await api.post(`/trips/${tripId}/availability/vote`, voteData);
+  return res.data;
+};
+
+export const lockAvailabilityDates = async (tripId: string, dates: { startDate: Date, endDate: Date }) => {
+  const res = await api.put(`/trips/${tripId}/availability/lock`, dates);
+  return res.data;
+};
+
 export default api;

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "@/lib/api";
 import { AppShell } from "@/components/AppShell";
-import { MapPin, Clock, Calendar, CheckCircle2, ArrowRight, Loader2, Share2, Heart, Info, Map } from "lucide-react";
+import { MapPin, Clock, Calendar, CheckCircle2, ArrowRight, Loader2, Share2, Heart, Info, Map, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function YatraDetailPage() {
@@ -190,6 +190,13 @@ export default function YatraDetailPage() {
                   className="w-full h-16 rounded-xl bg-primary text-white font-bold text-lg flex items-center justify-center gap-3 hover:bg-primary/90 transition-all shadow-lg active:scale-[0.98]"
                 >
                   Configure My Journey <ArrowRight className="size-5 text-accent" />
+                </Link>
+
+                <Link 
+                  to={`/yatra/${yatra._id}/kit`}
+                  className="w-full h-16 rounded-xl bg-white border-2 border-primary text-primary font-bold text-lg flex items-center justify-center gap-3 hover:bg-slate-50 transition-all shadow-md mt-4 active:scale-[0.98]"
+                >
+                  Order Divine Kit <ShoppingBag className="size-5" />
                 </Link>
                 
                 <p className="text-[10px] text-center text-muted-foreground mt-6 font-bold uppercase tracking-widest opacity-60">

@@ -6,6 +6,8 @@ import { useAuth } from '@/components/AuthProvider';
 import ItineraryBuilder from '@/components/collabRoom/ItineraryBuilder';
 import BudgetTracker from '@/components/collabRoom/BudgetTracker';
 import PollsPanel from '@/components/collabRoom/PollsPanel';
+import ExpensePanel from '@/components/collabRoom/ExpensePanel';
+import AvailabilityMatcher from '@/components/collabRoom/AvailabilityMatcher';
 import CollabSidebar from '@/components/collabRoom/CollabSidebar';
 import { Checklist } from '@/components/Checklist';
 import { Loader2, Plus, Users } from 'lucide-react';
@@ -235,7 +237,7 @@ const CollabRoom = () => {
       {/* SUB-HEADER TABS */}
       <div style={{ padding: '0 32px', borderBottom: `1px solid ${COLORS.border}`, backgroundColor: COLORS.pageBg, flexShrink: 0 }}>
         <div style={{ display: 'flex', gap: '32px' }}>
-          {['itinerary', 'expenses', 'polls', 'checklist', 'chat'].map(tab => (
+          {['itinerary', 'availability', 'expenses', 'polls', 'checklist', 'chat'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -268,6 +270,13 @@ const CollabRoom = () => {
                 <ExpensePanel key={`expense-preview-${trip._id}`} trip={trip} isPreview={true} />
               </div>
             </>
+          ) : activeTab === 'availability' ? (
+            <AvailabilityMatcher 
+              tripId={trip._id} 
+              isOrganizer={trip.createdBy === userId || trip.members?.some((m: any) => (m.userId?._id || m.userId) === userId && m.role === 'organizer')}
+              currentUser={user ? { uid: user.uid, displayName: user.displayName || 'Traveller', photoURL: user.photoURL || undefined } : null}
+              members={trip.members}
+            />
           ) : activeTab === 'expenses' ? (
             <BudgetTracker key={`budget-${trip._id}`} tripId={trip._id} members={trip.members} />
           ) : activeTab === 'polls' ? (            <PollsPanel key={`polls-${trip._id}`} trip={trip} />

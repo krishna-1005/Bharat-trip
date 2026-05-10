@@ -252,7 +252,38 @@ const tripSchema = new mongoose.Schema({
       default: 'suggested'
     },
     createdAt: { type: Date, default: Date.now }
-  }]
+  }],
+  availabilityPoll: {
+    status: {
+      type: String,
+      enum: ['open', 'closed'],
+      default: 'open'
+    },
+    dateOptions: [{
+      id: { type: String, required: true },
+      startDate: { type: Date, required: true },
+      endDate: { type: Date, required: true },
+      duration: Number,
+      votes: [{
+        userId: String, // Can be null for guest votes
+        name: String,
+        available: {
+          type: String,
+          enum: ['yes', 'maybe', 'no'],
+          default: 'maybe'
+        }
+      }]
+    }],
+    finalDates: {
+      startDate: Date,
+      endDate: Date
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    },
+    createdAt: { type: Date, default: Date.now }
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Trip", tripSchema);

@@ -8,7 +8,12 @@ const yatraSchema = new mongoose.Schema({
   bestTimeToVisit: { type: String, required: true },
   highlights: [{ type: String }],
   imageUrl: { type: String, required: true },
-  category: { type: String, default: "pilgrimage" } // pilgrimage, spiritual
+  category: { type: String, default: "pilgrimage" }, // pilgrimage, spiritual
+  transportCosts: {
+    train: { minCost: Number, maxCost: Number, duration: String },
+    flight: { minCost: Number, maxCost: Number, duration: String },
+    bus: { minCost: Number, maxCost: Number, duration: String }
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Yatra", yatraSchema);

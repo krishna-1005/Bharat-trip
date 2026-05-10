@@ -2,11 +2,12 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Compass, Sparkles, Map, User, Search, Bell, Plus,
   LayoutGrid, Users, Bookmark, Settings, ChevronLeft, Menu, LogOut,
-  ShieldCheck, Globe, MapPin
+  ShieldCheck, Globe, MapPin, ShoppingCart, Package
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useAuth } from "./AuthProvider";
+import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { NotificationBell } from "./NotificationBell";
 import { Logo } from "./Logo";
@@ -20,6 +21,7 @@ const nav = [
   { to: "/explore-india", label: "Explore India", icon: Compass },
   { to: "/trip-type", label: "AI Plan", icon: Sparkles },
   { to: "/yatra", label: "Yatra", icon: MapPin },
+  { to: "/orders", label: "My Orders", icon: Package },
   { to: "/trips", label: "My Trips", icon: Map },
   { to: "/collaborate", label: "Group", icon: Users },
   { to: "/profile", label: "Profile", icon: User },
@@ -30,7 +32,7 @@ const mobileNav = [
   { to: "/dashboard", label: "Home", icon: Home },
   { to: "/explore-india", label: "India", icon: Compass },
   { to: "/yatra", label: "Yatra", icon: MapPin },
-  { to: "/trips", label: "Trips", icon: Bookmark },
+  { to: "/orders", label: "Orders", icon: Package },
   { to: "/profile", label: "Profile", icon: User },
 ];
 
@@ -42,6 +44,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const loc = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { cart } = useCart();
+
+  const cartItemCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
   const handleSearch = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && searchQuery.trim()) {
@@ -216,6 +221,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
           <ThemeToggle />
           <NotificationBell />
+          <Link to="/cart" className="relative size-10 rounded-xl bg-secondary border border-transparent hover:border-border grid place-items-center transition group">
+            <ShoppingCart className="size-5 text-muted-foreground group-hover:text-foreground transition" />
+            {cartItemCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 size-5 bg-[#FF6B00] text-white text-[10px] font-bold rounded-full grid place-items-center shadow-lg animate-in zoom-in">
+                {cartItemCount}
+              </span>
+            )}
+          </Link>
           <div className="relative">
             <button
               onClick={() => setMenuOpen((o) => !o)}

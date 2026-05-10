@@ -29,7 +29,7 @@ router.get("/:id", async (req, res) => {
 // 3. POST /api/yatra/generate-itinerary
 router.post("/generate-itinerary", async (req, res) => {
   try {
-    const { yatraName, startingCity, travelDates, numberOfPeople, budget } = req.body;
+    const { yatraName, startingCity, travelDates, numberOfPeople, budget, transportMode, totalBudget } = req.body;
 
     if (!yatraName || !startingCity || !travelDates) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -43,14 +43,18 @@ router.post("/generate-itinerary", async (req, res) => {
       - Travel Dates: ${travelDates}
       - Number of People: ${numberOfPeople}
       - Budget Preference: ${budget}
+      - Transport Mode: ${transportMode} 
+      - Total Budget: ₹${totalBudget} for ${numberOfPeople} people
 
       STRICT INSTRUCTIONS:
       1. Provide a logical flow for the pilgrimage.
       2. Include spiritual significance for each major stop.
       3. Suggest accommodation types based on the budget: ${budget}.
       4. Include local food recommendations.
-      5. Return ONLY a valid JSON object.
-      6. DO NOT include markdown code blocks like \`\`\`json. Return pure JSON.
+      5. Include transport booking tips for ${transportMode} from ${startingCity} to ${yatraName}.
+      6. Suggest stays and food within the remaining budget after transport.
+      7. Return ONLY a valid JSON object.
+      8. DO NOT include markdown code blocks like \`\`\`json. Return pure JSON.
 
       JSON Structure:
       {
@@ -65,6 +69,10 @@ router.post("/generate-itinerary", async (req, res) => {
             "accommodation": "...",
             "food": "..."
           }
+        ],
+        "packingList": [
+          { "item": "...", "reason": "..." },
+          { "item": "...", "reason": "..." }
         ]
       }
     `;

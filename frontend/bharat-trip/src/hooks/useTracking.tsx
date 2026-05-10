@@ -38,6 +38,12 @@ export const useTracking = () => {
       try {
         // Use /public/track which is unauthenticated but allows userId/guestId
         await api.post('/public/track', trackData);
+
+        // 4. Identify in Microsoft Clarity
+        if (typeof (window as any).clarity === 'function') {
+          (window as any).clarity('identify', user?.uid || guestId);
+          (window as any).clarity('set', 'userType', user ? 'user' : 'guest');
+        }
       } catch (err) {
         // Silent fail to not disturb user experience
         console.debug('Analytics ping skipped');
