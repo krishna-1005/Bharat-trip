@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
+import { LocationAutocomplete } from "@/components/LocationAutocomplete";
 
 export default function PlannerMulti() {
   return (
@@ -133,12 +134,11 @@ function PlannerMultiContent() {
             </div>
             
             <div className="flex gap-2 max-w-md">
-              <input 
+              <LocationAutocomplete 
                 value={newStop}
-                onChange={(e) => setNewStop(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddStop()}
+                onChange={setNewStop}
                 placeholder="Add another city..."
-                className="flex-1 h-11 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm"
+                className="flex-1 h-11 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm transition-all"
               />
               <button 
                 onClick={handleAddStop}

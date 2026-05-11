@@ -128,18 +128,16 @@ router.post("/generate", planValidation, async (req, res) => {
     let finalPlan;
 
     if (isMultiCity && Array.isArray(cities) && cities.length > 0) {
-      // SMART MULTI-CITY LOGIC
+      // SMART MULTI-CITY LOGIC: PARALLEL GENERATION
       const daysPerCity = Math.floor(days / cities.length);
-      const allItineraries = [];
-      let totalTripCost = 0;
-      let dayCounter = 1;
-
-      for (let i = 0; i < cities.length; i++) {
+      
+      // 1. Launch all city plan generations concurrently
+      const cityPlanPromises = cities.map((cityName, i) => {
         const currentCityDays = (i === cities.length - 1) ? (days - (daysPerCity * (cities.length - 1))) : daysPerCity;
-        if (currentCityDays <= 0) continue;
+        if (currentCityDays <= 0) return Promise.resolve(null);
 
-        const cityPlan = await generatePlan({
-          city: cities[i],
+        return generatePlan({
+          city: cityName,
           days: currentCityDays,
           budget: budget / cities.length,
           interests: interests || [],
@@ -148,6 +146,18 @@ router.post("/generate", planValidation, async (req, res) => {
           userPreferences,
           language: req.body.language || "English"
         });
+      });
+
+      const cityPlans = await Promise.all(cityPlanPromises);
+
+      // 2. Stitch them together in order
+      const allItineraries = [];
+      let totalTripCost = 0;
+      let dayCounter = 1;
+
+      for (let i = 0; i < cities.length; i++) {
+        const cityPlan = cityPlans[i];
+        if (!cityPlan) continue;
 
         // Remap days to be continuous and add city labels
         cityPlan.itinerary.forEach(d => {
@@ -209,7 +219,12 @@ router.post("/generate", planValidation, async (req, res) => {
         type: "plan",
         recommendedStay: finalPlan.recommendedStay,
         recommendedTransport: finalPlan.recommendedTransport,
-        image: finalPlan.image || ""
+        image: finalPlan.image || "",
+        members: loggedUserId ? [{
+          userId: loggedUserId,
+          role: "organizer",
+          rsvp: "confirmed"
+        }] : []
       };
       
       savedTrip = await Trip.create(tripData);
@@ -219,7 +234,10 @@ router.post("/generate", planValidation, async (req, res) => {
       if (saveErr.errors) {
         Object.keys(saveErr.errors).forEach(key => {
           console.error(`  - Validation Error [${key}]:`, saveErr.errors[key].message);
+          console.error(`    - Value:`, saveErr.errors[key].value);
         });
+      } else {
+        console.error(saveErr);
       }
     }
 

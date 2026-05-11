@@ -51,6 +51,12 @@ export const fetchDreamWeaverSuggestions = async (prompt: string) => {
   return res.data.suggestions;
 };
 
+export const searchPlaces = async (query: string) => {
+  if (!query || query.length < 3) return [];
+  const res = await api.get(`/places/search?q=${encodeURIComponent(query)}`);
+  return res.data;
+};
+
 export const fetchMe = async () => {
   const res = await api.get("/auth/me");
   return res.data;

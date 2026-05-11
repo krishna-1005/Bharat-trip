@@ -35,7 +35,25 @@ const reviewValidation = [
 ];
 
 const planValidation = [
-  body("city").trim().notEmpty().withMessage("City is required").isLength({ max: 50 }).escape(),
+  (req, res, next) => {
+    const { isMultiCity, city, cities } = req.body;
+    if (isMultiCity) {
+      if (!cities || !Array.isArray(cities) || cities.length === 0) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ field: "cities", message: "Cities array is required for multi-city plans" }]
+        });
+      }
+    } else {
+      if (!city || typeof city !== 'string' || city.trim() === '') {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: [{ field: "city", message: "City is required" }]
+        });
+      }
+    }
+    next();
+  },
   body("sourceCity").optional().trim().isString().isLength({ max: 50 }).escape(),
   body("days").isInt({ min: 1, max: 30 }).withMessage("Days must be between 1 and 30"),
   body("budget")

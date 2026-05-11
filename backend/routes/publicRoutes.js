@@ -180,10 +180,10 @@ router.get("/trips", async (req, res) => {
       .sort(sortOption)
       .limit(20);
 
-    res.json({ trips });
+    res.json({ trips: trips || [] });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch public trips" });
+    console.error("Public trips fetch error:", err);
+    res.json({ trips: [] }); // Safe fallback
   }
 });
 
@@ -202,7 +202,7 @@ router.get("/trips/:id", async (req, res) => {
     res.json({ trip });
   } catch (err) {
     console.error("Fetch trip error:", err);
-    res.status(500).json({ error: "Server error" });
+    res.status(404).json({ error: "Trip not found or database error" });
   }
 });
 
@@ -215,9 +215,10 @@ router.get("/announcements", async (req, res) => {
       filter.$or = [{ targetPage: "all" }, { targetPage: page }];
     }
     const announcements = await Announcement.find(filter).sort({ createdAt: -1 });
-    res.json(announcements);
+    res.json(announcements || []);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch announcements" });
+    console.error("Announcements fetch error:", err);
+    res.json([]); // Return empty array instead of 500
   }
 });
 

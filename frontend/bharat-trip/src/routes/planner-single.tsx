@@ -18,7 +18,7 @@ import {
 import api, { generatePlan } from "@/lib/api";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
-import { motion, AnimatePresence } from "framer-motion";
+import { LocationAutocomplete } from "@/components/LocationAutocomplete";
 
 function ProactiveCostIntel({ startDate, days }: { startDate: string, days: number }) {
   const [suggestion, setSuggestion] = useState<any>(null);
@@ -252,19 +252,19 @@ function PlannerSingleContent() {
           <div className="rounded-3xl bg-card border border-border p-7 shadow-soft space-y-7">
             <div className="grid md:grid-cols-2 gap-4">
               <Field label="Current Location" icon={<MapPin className="size-4" />}>
-                <input
+                <LocationAutocomplete
                   value={sourceCity}
-                  onChange={(e) => setSourceCity(e.target.value)}
+                  onChange={setSourceCity}
                   placeholder="Your city (e.g. Patna)"
-                  className="w-full h-12 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm"
+                  className="w-full h-12 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm transition-all"
                 />
               </Field>
               <Field label="Destination" icon={<MapPin className="size-4" />}>
-                <input
+                <LocationAutocomplete
                   value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
+                  onChange={setDestination}
                   placeholder="Where to? (e.g. Banaras)"
-                  className="w-full h-12 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm"
+                  className="w-full h-12 px-4 rounded-xl border border-border bg-surface focus:border-ring outline-none text-sm transition-all"
                 />
               </Field>
             </div>
