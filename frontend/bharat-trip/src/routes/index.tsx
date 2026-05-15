@@ -2,13 +2,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MarketingNav } from "@/components/MarketingNav";
 import { HeroCarousel } from "@/components/HeroCarousel";
-import { VideoSection } from "@/components/VideoSection";
+import { TrustSection } from "@/components/TrustSection";
 import { ReviewSection } from "@/components/ReviewSection";
 import { Footer } from "@/components/Footer";
 import { FadeUp, StaggerGroup, StaggerItem, HoverLift, dur, ease } from "@/components/motion/primitives";
 import {
   Sparkles, Users, Wallet, Star, ArrowRight, Plane, X, MapPin, Clock, Calendar, CheckCircle2, Bookmark, Loader2,
-  Mountain, Palmtree, Landmark, Building, Wind, Building2, Castle, Sun, Music, Trees, Coffee, Waves, CloudSun
+  Mountain, Palmtree, Landmark, Building, Wind, Building2, Castle, Sun, Music, Trees, Coffee, Waves, CloudSun,
+  ShieldCheck, Lock, Eye, Server
 } from "lucide-react";
 import React, { useEffect, useState, useCallback } from "react";
 import heroImg from "@/assets/hero-jaipur.jpg";
@@ -504,6 +505,28 @@ function Landing() {
       {/* HERO CAROUSEL */}
       <HeroCarousel />
 
+      {/* SECURITY BANNER */}
+      <div className="w-full bg-slate-50 dark:bg-white/[0.02] border-y border-border dark:border-white/5 py-4">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <ShieldCheck className="size-5 text-accent" />
+            <span className="text-xs font-bold uppercase tracking-widest">Safe Data Secured</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <Lock className="size-5 text-accent" />
+            <span className="text-xs font-bold uppercase tracking-widest">AES-256 Encryption</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <Eye className="size-5 text-accent" />
+            <span className="text-xs font-bold uppercase tracking-widest">Zero Data Selling</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <Server className="size-5 text-accent" />
+            <span className="text-xs font-bold uppercase tracking-widest">ISO 27001 Certified</span>
+          </div>
+        </div>
+      </div>
+
       {/* FEATURES */}
       <section id="features" className="max-w-7xl mx-auto px-6 lg:px-10 py-24">
         <div className="max-w-2xl">
@@ -529,8 +552,8 @@ function Landing() {
         </div>
       </section>
 
-      {/* VIDEO SECTION */}
-      <VideoSection />
+      {/* TRUST SECTION */}
+      <TrustSection />
 
       {/* VIBE SEARCH */}
       <MoodSearch />
@@ -655,9 +678,12 @@ function Landing() {
                     >
                       Plan this trip <ArrowRight className="size-5" />
                     </Link>
-                    <button className="flex-1 h-16 rounded-2xl bg-secondary text-foreground font-bold hover:bg-border transition-all flex items-center justify-center gap-2">
+                    <Link 
+                      to="/explore"
+                      className="flex-1 h-16 rounded-2xl bg-secondary text-foreground font-bold hover:bg-border transition-all flex items-center justify-center gap-2"
+                    >
                        Learn More
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>

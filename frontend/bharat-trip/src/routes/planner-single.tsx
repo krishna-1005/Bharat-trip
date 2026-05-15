@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppShell } from "@/components/AppShell";
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { motion } from "framer-motion";
 import { 
   MapPin, 
@@ -434,7 +434,7 @@ function PlannerSingleContent() {
   );
 }
 
-function Field({ label, icon, children }: { label: string; icon?: React.ReactNode; children: React.ReactNode }) {
+function Field({ label, icon, children }: { label: string; icon?: ReactNode; children: ReactNode }) {
   return (
     <div>
       <div className="flex items-center gap-2 text-sm font-medium mb-2">
