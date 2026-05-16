@@ -19,6 +19,7 @@ const nav = [
   { to: "/dashboard", label: "Home", icon: Home },
   { to: "/passport", label: "Passport", icon: ShieldCheck },
   { to: "/explore-india", label: "Explore India", icon: Compass },
+  { to: "/yatra/shop", label: "Shop", icon: ShoppingCart },
   { to: "/trip-type", label: "AI Plan", icon: Sparkles },
   { to: "/yatra", label: "Yatra", icon: MapPin },
   { to: "/orders", label: "My Orders", icon: Package },
@@ -31,6 +32,7 @@ const nav = [
 const mobileNav = [
   { to: "/dashboard", label: "Home", icon: Home },
   { to: "/explore-india", label: "India", icon: Compass },
+  { to: "/yatra/shop", label: "Shop", icon: ShoppingCart },
   { to: "/yatra", label: "Yatra", icon: MapPin },
   { to: "/orders", label: "Orders", icon: Package },
   { to: "/profile", label: "Profile", icon: User },
@@ -87,17 +89,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isAdmin = user && ADMIN_EMAILS.includes(user.email?.toLowerCase() || "");
   const isYatraPage = loc.pathname.startsWith("/yatra");
 
-  // Filter nav based on auth
-  const filteredNav = nav.filter(n => {
-    const authRequired = ["/dashboard", "/profile", "/settings", "/orders", "/trips", "/collaborate", "/passport"].includes(n.to);
-    return !authRequired || user;
-  });
-
-  const filteredMobileNav = mobileNav.filter(n => {
-    const authRequired = ["/dashboard", "/profile", "/orders"].includes(n.to);
-    return !authRequired || user;
-  });
-
   return (
     <div className="min-h-screen flex bg-background">
       {/* Sidebar (desktop) */}
@@ -120,7 +111,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav className="flex-1 px-3 py-5 space-y-1">
-          {filteredNav.map((n) => {
+          {nav.map((n) => {
             const active = loc.pathname.startsWith(n.to);
             return (
               <Link
@@ -305,7 +296,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile bottom nav */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface/95 backdrop-blur-xl border-t border-border">
         <ul className="grid grid-cols-6 h-16">
-          {filteredMobileNav.slice(0, 2).map((n) => {
+          {mobileNav.slice(0, 2).map((n) => {
             const active = loc.pathname.startsWith(n.to);
             return (
               <li key={n.to}>
@@ -325,7 +316,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <ThemeToggle className="scale-[0.65] sm:scale-75 !bg-transparent !border-none" />
             <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground -mt-2">Theme</span>
           </li>
-          {filteredMobileNav.slice(2).map((n) => {
+          {mobileNav.slice(2).map((n) => {
             const active = loc.pathname.startsWith(n.to);
             return (
               <li key={n.to}>
@@ -353,7 +344,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Logo className="scale-90 origin-left" />
             </Link>
             <nav className="space-y-1">
-              {filteredNav.map((n) => (
+              {nav.map((n) => (
                 <Link
                   key={n.to}
                   to={n.to}

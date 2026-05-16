@@ -37,8 +37,8 @@ export default function CartPage() {
               <ChevronLeft className="size-6" />
             </button>
             <div>
-              <h1 className="text-3xl font-black font-['Cinzel'] tracking-tight">Your <span className="text-[#FF6B00]">Sacred Cart</span></h1>
-              <p className="text-white/40 text-sm italic">Items curated for your spiritual journey</p>
+              <h1 className="text-3xl font-black font-['Cinzel'] tracking-tight">Your <span className="text-[#FF6B00]">Trip Cart</span></h1>
+              <p className="text-white/40 text-sm italic">Essentials curated for your next adventure</p>
             </div>
           </div>
 
@@ -53,13 +53,13 @@ export default function CartPage() {
               </div>
               <h3 className="text-2xl font-black mb-4">Your cart is empty</h3>
               <p className="text-white/40 mb-10 max-w-md mx-auto">
-                Prepare for your yatra by adding essential puja items, clothing, and medicines.
+                Prepare for your journey by adding essential travel kits, gear, and accessories.
               </p>
               <Link 
-                to="/yatra"
+                to="/yatra/shop"
                 className="inline-flex items-center gap-3 px-10 py-4 bg-[#FF6B00] text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-[#E32636] transition-all shadow-[0_10px_30px_rgba(255,107,0,0.3)]"
               >
-                Browse Yatras <ArrowRight className="size-5" />
+                Explore Shop <ArrowRight className="size-5" />
               </Link>
             </motion.div>
           ) : (
@@ -120,7 +120,7 @@ export default function CartPage() {
                 </AnimatePresence>
 
                 <div className="pt-6">
-                  <Link to="/yatra" className="text-[#FF6B00] font-black text-sm uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all">
+                  <Link to="/dashboard" className="text-[#FF6B00] font-black text-sm uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all">
                     <ChevronLeft className="size-4" /> Continue Planning
                   </Link>
                 </div>
@@ -176,7 +176,7 @@ export default function CartPage() {
                     </div>
                     <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center gap-3">
                       <Truck className="size-5 text-blue-500" />
-                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-tight">Divine Delivery</span>
+                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-tight">Priority Delivery</span>
                     </div>
                   </div>
                 </div>
