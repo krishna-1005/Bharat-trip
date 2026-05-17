@@ -690,7 +690,30 @@ async function getCityCoords(city) {
     "kochi": { lat: 9.9312, lng: 76.2673 },
     "amritsar": { lat: 31.6340, lng: 74.8723 },
     "hampi": { lat: 15.3350, lng: 76.4600 },
-    "ladakh": { lat: 34.1526, lng: 77.5771 }
+    "ladakh": { lat: 34.1526, lng: 77.5771 },
+    "leh": { lat: 34.1526, lng: 77.5771 },
+    "tirupati": { lat: 13.6288, lng: 79.4192 },
+    "tirupati balaji": { lat: 13.6288, lng: 79.4192 },
+    "shirdi": { lat: 19.7648, lng: 74.4762 },
+    "pune": { lat: 18.5204, lng: 73.8567 },
+    "hyderabad": { lat: 17.3850, lng: 78.4867 },
+    "chennai": { lat: 13.0827, lng: 80.2707 },
+    "kolkata": { lat: 22.5726, lng: 88.3639 },
+    "patna": { lat: 25.5941, lng: 85.1376 },
+    "shimla": { lat: 31.1048, lng: 77.1734 },
+    "manali": { lat: 32.2396, lng: 77.1887 },
+    "srinagar": { lat: 34.0837, lng: 74.7973 },
+    "pondicherry": { lat: 11.9416, lng: 79.8083 },
+    "mysore": { lat: 12.2958, lng: 76.6394 },
+    "mysuru": { lat: 12.2958, lng: 76.6394 },
+    "madurai": { lat: 9.9252, lng: 78.1198 },
+    "rameshwaram": { lat: 9.2876, lng: 79.3129 },
+    "puri": { lat: 19.8135, lng: 85.8312 },
+    "dwarka": { lat: 22.2442, lng: 68.9685 },
+    "somnath": { lat: 20.8880, lng: 70.4012 },
+    "kedarnath": { lat: 30.7352, lng: 79.0669 },
+    "badrinath": { lat: 30.7433, lng: 79.4938 },
+    "haridwar": { lat: 29.9457, lng: 78.1642 }
   };
 
   const cleanCity = city.trim().toLowerCase();
@@ -704,7 +727,16 @@ async function getCityCoords(city) {
     "uttarakhand": "Rishikesh",
     "karnataka": "Bengaluru",
     "tamil nadu": "Chennai",
-    "maharashtra": "Mumbai"
+    "maharashtra": "Mumbai",
+    "andhra pradesh": "Tirupati",
+    "telangana": "Hyderabad",
+    "west bengal": "Kolkata",
+    "gujarat": "Ahmedabad",
+    "bihar": "Patna",
+    "punjab": "Amritsar",
+    "jammu": "Srinagar",
+    "kashmir": "Srinagar",
+    "ladakh region": "Leh"
   };
 
   const lookupCity = REGION_TO_CITY[cleanCity] || cleanCity;

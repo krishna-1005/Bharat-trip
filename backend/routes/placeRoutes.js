@@ -30,72 +30,96 @@ function getRating(name) {
 /* ── Search Places using Nominatim ── */
 router.get("/search", async (req, res) => {
   const { q } = req.query;
-  if (!q) return res.status(400).json({ error: "Query required" });
+  if (!q || q.length < 2) return res.status(400).json({ error: "Query required" });
 
   const query = q.toLowerCase().trim();
 
+  // 1. FAST LOCAL SEARCH (Prioritize local data to avoid rate limits)
   try {
-    const response = await axios.get(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=5`,
-      { 
-        headers: { "User-Agent": "GoTripo-Travel-App/2.0 (contact@gotripo.com)" },
-        timeout: 5000 
-      }
-    );
-
-    if (response.data && response.data.length > 0) {
-      const places = response.data.map(p => ({
-        id: p.place_id,
-        name: p.display_name.split(',')[0],
-        fullName: p.display_name,
-        lat: Number(p.lat),
-        lng: Number(p.lon),
-        category: p.type || "Place",
-        rating: getRating(p.display_name),
-        address: p.address
+    const indiaPlaces = require("../data/indiaPlaces.json");
+    const localMatches = indiaPlaces
+      .filter(c => c.city.toLowerCase().includes(query))
+      .map(c => ({
+        id: `local-${c.city.toLowerCase()}`,
+        name: c.city,
+        fullName: `${c.city}, India`,
+        lat: c.coordinates.lat,
+        lng: c.coordinates.lng,
+        category: "City",
+        rating: "4.8",
+        address: { city: c.city, country: "India" }
       }));
-      return res.json(places);
-    }
-    
-    // Fallback if Nominatim returns nothing but didn't error
-    throw new Error("No results from Nominatim");
 
-  } catch (err) {
-    console.warn("⚠️ Nominatim Search failed, using local fallback:", err.message);
-    
+    // If we have strong local matches, we can still try OSM in background or just return local
+    // For a smooth UI, if we have local matches, return them immediately
+    if (localMatches.length >= 3) {
+      return res.json(localMatches);
+    }
+
+    // 2. EXTERNAL SEARCH (OSM)
     try {
-      const indiaPlaces = require("../data/indiaPlaces.json");
-      const localMatches = indiaPlaces
-        .filter(c => c.city.toLowerCase().includes(query))
-        .map(c => ({
-          id: `local-${c.city.toLowerCase()}`,
-          name: c.city,
-          fullName: `${c.city}, India`,
-          lat: c.coordinates.lat,
-          lng: c.coordinates.lng,
-          category: "City",
-          rating: "4.8",
-          address: { city: c.city, country: "India" }
+      const response = await axios.get(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=5`,
+        { 
+          headers: { "User-Agent": "GoTripo-Travel-App/2.0 (contact@gotripo.com)" },
+          timeout: 3000 // Shorter timeout for faster UI feel
+        }
+      );
+
+      if (response.data && response.data.length > 0) {
+        const osmPlaces = response.data.map(p => ({
+          id: p.place_id,
+          name: p.display_name.split(',')[0],
+          fullName: p.display_name,
+          lat: Number(p.lat),
+          lng: Number(p.lon),
+          category: p.type || "Place",
+          rating: getRating(p.display_name),
+          address: p.address
         }));
 
-      if (localMatches.length > 0) {
-        return res.json(localMatches);
+        // Merge local and OSM, avoiding duplicates
+        const combined = [...localMatches];
+        osmPlaces.forEach(op => {
+          if (!combined.some(lp => lp.name.toLowerCase() === op.name.toLowerCase())) {
+            combined.push(op);
+          }
+        });
+        
+        return res.json(combined.slice(0, 5));
       }
-
-      // If still no results and it was an actual error
-      if (err.response) {
-        console.error("Nominatim Response Error:", err.response.status, err.response.data);
-      }
-      
-      res.status(err.response?.status || 500).json({ 
-        error: "Search failed", 
-        message: err.message,
-        details: "Nominatim service unavailable and no local match found."
-      });
-    } catch (fallbackErr) {
-      console.error("Fallback search error:", fallbackErr.message);
-      res.status(500).json({ error: "Search failed completely" });
+    } catch (osmErr) {
+      console.warn("⚠️ OSM Search failed (likely rate limit):", osmErr.message);
+      // If OSM fails, return whatever local matches we found (even if empty, but prefer local)
+      if (localMatches.length > 0) return res.json(localMatches);
+      throw osmErr; // Proceed to ultimate fallback
     }
+
+    res.json(localMatches);
+
+  } catch (err) {
+    console.error("Search failure:", err.message);
+    
+    // 3. ULTIMATE FALLBACK: Hardcoded major cities if everything else fails
+    const fallbacks = [
+      { name: "Delhi", lat: 28.6139, lng: 77.2090 },
+      { name: "Mumbai", lat: 19.076, lng: 72.8777 },
+      { name: "Bengaluru", lat: 12.9716, lng: 77.5946 },
+      { name: "Jaipur", lat: 26.9124, lng: 75.7873 },
+      { name: "Goa", lat: 15.2993, lng: 74.1240 },
+      { name: "Tirupati", lat: 13.6288, lng: 79.4192 }
+    ].filter(c => c.name.toLowerCase().includes(query))
+     .map(c => ({
+        id: `fb-${c.name.toLowerCase()}`,
+        name: c.name,
+        fullName: `${c.name}, India`,
+        lat: c.lat,
+        lng: c.lng,
+        category: "City",
+        rating: "4.7"
+     }));
+
+    res.json(fallbacks);
   }
 });
 
