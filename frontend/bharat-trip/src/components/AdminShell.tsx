@@ -42,6 +42,7 @@ const aiNav = [
   { to: "/admin/ai/frontend-agent", label: "Frontend Agent", icon: Code2 },
   { to: "/admin/ai/backend-agent", label: "Backend Agent", icon: Server },
   { to: "/admin/ai/marketing-agent", label: "Marketing Agent", icon: Megaphone },
+  { to: "/admin/ai/content-engine", label: "AI Content Engine", icon: Cpu },
   { to: "/admin/ai/testing-agent", label: "Testing Agent", icon: TestTube },
   { to: "/admin/ai/prompt-library", label: "Prompt Library", icon: Library },
 ];

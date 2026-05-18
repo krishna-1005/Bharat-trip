@@ -40,6 +40,7 @@ import AdminBackendAgentPage from "./routes/admin/ai/backend-agent";
 import AdminMarketingAgentPage from "./routes/admin/ai/marketing-agent";
 import AdminTestingAgentPage from "./routes/admin/ai/testing-agent";
 import AdminPromptLibraryPage from "./routes/admin/ai/prompt-library";
+import AdminAiContentEnginePage from "./routes/admin/ai/content-engine";
 
 import YatraHub from "./routes/yatra/index";
 import YatraDetail from "./routes/yatra/details";
@@ -119,6 +120,7 @@ export default function App() {
           <Route path="marketing-agent" element={<AdminMarketingAgentPage />} />
           <Route path="testing-agent" element={<AdminTestingAgentPage />} />
           <Route path="prompt-library" element={<AdminPromptLibraryPage />} />
+          <Route path="content-engine" element={<AdminAiContentEnginePage />} />
         </Route>
       </Route>
     </Routes>
