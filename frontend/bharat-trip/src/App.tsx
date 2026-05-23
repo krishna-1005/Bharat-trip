@@ -56,12 +56,14 @@ import OrderDetailPage from "./routes/orders/detail";
 import { Chatbot } from "./components/Chatbot";
 import { useTracking } from "./hooks/useTracking";
 import { CartProvider } from "./context/CartContext";
+import { AutoSEO } from "./seo";
 
 export default function App() {
   useTracking();
   
   return (
     <CartProvider>
+      <AutoSEO />
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />

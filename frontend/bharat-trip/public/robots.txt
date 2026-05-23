@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and protected routes
+Disallow: /admin
+Disallow: /admin/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /orders
+Disallow: /settings
+Disallow: /profile
+Disallow: /dashboard
+Disallow: /passport
+
+Sitemap: https://gotripo.tech/sitemap.xml
