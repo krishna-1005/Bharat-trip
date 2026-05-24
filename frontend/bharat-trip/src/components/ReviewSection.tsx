@@ -75,12 +75,12 @@ export function ReviewSection() {
   };
 
   return (
-    <section className="relative max-w-7xl mx-auto px-6 lg:px-10 py-32 border-t border-border/50 overflow-hidden">
+    <section className="relative max-w-7xl mx-auto px-6 lg:px-10 py-16 sm:py-32 border-t border-border/50 overflow-hidden">
       {/* Abstract Background Elements */}
       <div className="absolute top-0 left-1/4 size-[500px] bg-accent/5 blur-[120px] rounded-full -z-10" />
       <div className="absolute bottom-0 right-1/4 size-[500px] bg-primary/5 blur-[120px] rounded-full -z-10" />
 
-      <div className="grid lg:grid-cols-12 gap-16 lg:gap-24">
+      <div className="grid lg:grid-cols-12 gap-10 lg:gap-24">
         {/* Left Column: Reviews List */}
         <div className="lg:col-span-7">
           <div className="space-y-2 mb-12">
@@ -108,7 +108,7 @@ export function ReviewSection() {
                         layout
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="relative p-8 rounded-[40px] bg-card/40 backdrop-blur-md border border-border/50 shadow-soft group hover:shadow-card hover:bg-card/60 hover:border-accent/30 transition-all duration-500 overflow-hidden"
+                        className="relative p-6 sm:p-8 rounded-3xl sm:rounded-[40px] bg-card/40 backdrop-blur-md border border-border/50 shadow-soft group hover:shadow-card hover:bg-card/60 hover:border-accent/30 transition-all duration-500 overflow-hidden"
                       >
                         {/* Quote mark as subtle watermark */}
                         <Quote className="absolute -bottom-6 -right-6 size-32 text-accent/5 -z-0 group-hover:text-accent/10 group-hover:rotate-12 transition-all duration-700" />
@@ -167,7 +167,7 @@ export function ReviewSection() {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="p-10 md:p-12 rounded-[48px] border border-border shadow-pop bg-card relative overflow-hidden"
+              className="p-6 sm:p-10 md:p-12 rounded-3xl sm:rounded-[48px] border border-border shadow-pop bg-card relative overflow-hidden"
             >
               {/* Decorative Glow */}
               <div className="absolute -top-24 -right-24 size-64 bg-accent/10 blur-[80px] rounded-full" />
@@ -212,7 +212,7 @@ export function ReviewSection() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Your alias..."
-                      className="h-14 rounded-2xl border-border/50 bg-secondary/30 backdrop-blur-sm focus:ring-accent focus:border-accent text-lg px-6"
+                      className="h-12 sm:h-14 rounded-2xl border-border/50 bg-secondary/30 backdrop-blur-sm focus:ring-accent focus:border-accent text-base sm:text-lg px-4 sm:px-6"
                       required
                     />
                   </div>
@@ -223,7 +223,7 @@ export function ReviewSection() {
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                       placeholder="Write your story..."
-                      className="min-h-[140px] rounded-3xl border-border/50 bg-secondary/30 backdrop-blur-sm resize-none focus:ring-accent focus:border-accent text-lg p-6 leading-relaxed"
+                      className="min-h-[120px] sm:min-h-[140px] rounded-3xl border-border/50 bg-secondary/30 backdrop-blur-sm resize-none focus:ring-accent focus:border-accent text-base sm:text-lg p-4 sm:p-6 leading-relaxed"
                       required
                     />
                   </div>
@@ -231,7 +231,7 @@ export function ReviewSection() {
                   <Button
                     type="submit"
                     disabled={submitting}
-                    className="w-full h-16 rounded-2xl bg-primary text-primary-foreground font-bold text-lg hover:scale-[1.02] transition-all shadow-lg active:scale-[0.98] group"
+                    className="w-full h-12 sm:h-16 rounded-2xl bg-primary text-primary-foreground font-bold text-base sm:text-lg hover:scale-[1.02] transition-all shadow-lg active:scale-[0.98] group"
                   >
                     {submitting ? (
                       <Loader2 className="size-6 animate-spin" />

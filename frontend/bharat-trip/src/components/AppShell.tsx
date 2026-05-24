@@ -221,7 +221,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {isYatraPage ? "New Yatra" : "New Trip"}
           </Link>
           <div className="flex items-center gap-1 sm:gap-2">
-            <ThemeToggle className="scale-90 sm:scale-100" />
+            <ThemeToggle className="hidden sm:inline-flex scale-90 sm:scale-100" />
             <NotificationBell />
             <Link to="/cart" className="relative size-9 sm:size-10 rounded-xl bg-secondary border border-transparent hover:border-border grid place-items-center transition group">
               <ShoppingCart className="size-4 sm:size-5 text-muted-foreground group-hover:text-foreground transition" />

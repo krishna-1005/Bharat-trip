@@ -71,7 +71,7 @@ export function AutoSEO() {
   // Uses the normalized path as canonical to prevent duplicates.
   return (
     <SEO
-      title="GoTripo – Group Trip Planning & Travel Expense Split App"
+      title="GoTripo"
       description="Plan group trips with friends, split expenses, manage itineraries, and collaborate easily with GoTripo."
       canonicalPath={normalizedPath}
       noindex={false}

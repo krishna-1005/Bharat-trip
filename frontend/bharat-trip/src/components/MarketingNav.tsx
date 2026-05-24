@@ -64,10 +64,10 @@ export function MarketingNav() {
         </div>
 
         <div className="flex items-center gap-3 md:hidden">
-          <ThemeToggle className="!bg-secondary/50 dark:!bg-white/10 !border-border dark:!border-white/20 text-foreground dark:text-white hover:!bg-secondary dark:hover:!bg-white/20 scale-90" />
+          <ThemeToggle className="!bg-white/10 !border-white/10 text-white hover:!bg-white/20 scale-90" />
           <button
             onClick={() => setOpen(!open)}
-            className="text-foreground dark:text-white"
+            className="text-white hover:text-[#10b981] transition-colors p-1"
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>

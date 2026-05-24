@@ -42,7 +42,7 @@ export function NotificationBell() {
       if (Notification.permission === "granted") {
         const n = new Notification(`GoTripo: ${data.senderName}`, {
           body: data.text,
-          icon: "/favicon.svg"
+          icon: "/favicon.png"
         });
         n.onclick = () => {
           window.focus();

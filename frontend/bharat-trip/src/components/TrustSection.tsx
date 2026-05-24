@@ -133,7 +133,7 @@ function SpotlightCard({ point }: { point: typeof trustPoints[0] }) {
   return (
     <div 
       onMouseMove={handleMouseMove}
-      className="group relative h-full p-8 rounded-[32px] bg-white/5 border border-white/10 hover:border-accent/30 transition-colors duration-500 overflow-hidden"
+      className="group relative h-full p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] bg-white/5 border border-white/10 hover:border-accent/30 transition-colors duration-500 overflow-hidden"
     >
       {/* Spotlight Effect */}
       <motion.div
@@ -179,7 +179,7 @@ export function TrustSection() {
   }, []);
 
   return (
-    <section id="trust-section" className="relative w-full py-32 bg-slate-950 overflow-hidden">
+    <section id="trust-section" className="relative w-full py-16 sm:py-32 bg-slate-950 overflow-hidden">
       {/* Truths Modal */}
       <AnimatePresence>
         {showTruths && (
@@ -351,7 +351,7 @@ export function TrustSection() {
           </FadeUp>
         </div>
 
-        <StaggerGroup className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-24">
+        <StaggerGroup className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 mb-12 sm:mb-24">
           {trustPoints.map((point, i) => (
             <StaggerItem key={i}>
               <SpotlightCard point={point} />
@@ -360,7 +360,7 @@ export function TrustSection() {
         </StaggerGroup>
 
         <FadeUp delay={0.5}>
-          <div className="relative rounded-[40px] bg-white/5 border border-white/10 p-10 md:p-16 overflow-hidden">
+          <div className="relative rounded-3xl sm:rounded-[40px] bg-white/5 border border-white/10 p-6 sm:p-10 md:p-16 overflow-hidden">
             {/* Dark Section Background Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] bg-accent/5 blur-[120px] pointer-events-none" />
             
