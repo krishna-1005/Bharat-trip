@@ -332,13 +332,13 @@ function MoodSearch() {
   }, [vibe, updateSuggestions]);
 
   return (
-    <section className="relative py-20 sm:py-32 lg:py-40 overflow-hidden bg-white dark:bg-[#050505]">
+    <section className="relative py-40 overflow-hidden bg-white dark:bg-[#050505]">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-24 items-start">
+        <div className="grid lg:grid-cols-12 gap-16 lg:gap-24 items-start">
           
           {/* LEFT: ELEGANT CONTROLS */}
           <div className="lg:col-span-5 lg:sticky lg:top-32">
-            <div className="space-y-2 mb-8">
+            <div className="space-y-2 mb-12">
                <div className="text-[10px] font-black uppercase tracking-[0.4em] text-accent">Personalized Discovery</div>
                <h2 className="font-display font-medium text-4xl sm:text-5xl md:text-7xl tracking-tighter text-foreground leading-[0.85]">
                  Tune your <br />
@@ -346,11 +346,11 @@ function MoodSearch() {
                </h2>
             </div>
  
-            <p className="text-muted-foreground text-base sm:text-lg mb-8 leading-relaxed max-w-sm">
+            <p className="text-muted-foreground text-lg mb-16 leading-relaxed max-w-sm">
               Travel is an extension of your mood. Slide to find the destination that resonates with your current state of mind.
             </p>
  
-            <div className="space-y-8 sm:space-y-12">
+            <div className="space-y-16">
               <MoodSlider 
                 label={["Peace", "Adventure"]} 
                 value={vibe.adventure} 
@@ -372,7 +372,7 @@ function MoodSearch() {
               key={persona.name}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="mt-8 sm:mt-16 p-6 sm:p-8 rounded-3xl bg-secondary/30 border border-border/50 flex items-center gap-6"
+              className="mt-20 p-8 rounded-[32px] bg-secondary/30 border border-border/50 flex items-center gap-6"
             >
                <div className="size-14 rounded-2xl bg-white dark:bg-black shadow-lg flex items-center justify-center">
                   <VibeIcon name={persona.icon} className="size-7 text-accent" />
@@ -409,7 +409,7 @@ function MoodSearch() {
                     >
                       <div className="grid md:grid-cols-2 gap-8 items-center">
                          {/* Image Frame */}
-                         <div className="relative aspect-[4/3] sm:aspect-[4/5] rounded-3xl sm:rounded-[40px] overflow-hidden shadow-2xl bg-secondary">
+                         <div className="relative aspect-[4/5] rounded-[40px] overflow-hidden shadow-2xl bg-secondary">
                             <img 
                               src={getDestinationImage(item.name)} 
                               alt={item.name} 
@@ -656,8 +656,8 @@ function Landing() {
       </div>
 
       {/* FEATURES */}
-      <section id="features" className="max-w-7xl mx-auto px-6 lg:px-10 py-16 sm:py-32">
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+      <section id="features" className="max-w-7xl mx-auto px-6 lg:px-10 py-32">
+        <div className="grid lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-5">
             <div className="inline-flex items-center gap-3 px-3 py-1 rounded-full bg-accent/5 border border-accent/10 mb-6">
               <span className="size-2 rounded-full bg-accent animate-pulse" />
@@ -692,7 +692,7 @@ function Landing() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="group relative p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-border bg-card hover:border-accent/30 hover:shadow-pop transition-all duration-500 overflow-hidden"
+                className="group relative p-8 rounded-[32px] border border-border bg-card hover:border-accent/30 hover:shadow-pop transition-all duration-500 overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                   <f.icon className="size-24" />
@@ -762,7 +762,7 @@ function Landing() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-5xl bg-card rounded-3xl sm:rounded-[40px] shadow-2xl border border-border overflow-y-auto max-h-[90vh] lg:overflow-hidden"
+              className="relative w-full max-w-5xl bg-card rounded-[40px] shadow-2xl border border-border overflow-y-auto max-h-[90vh] lg:overflow-hidden"
             >
               <button 
                 onClick={() => setSelectedDest(null)}
@@ -791,7 +791,7 @@ function Landing() {
                 </div>
  
                 {/* Content Section */}
-                <div className="lg:col-span-7 p-6 sm:p-8 md:p-14 flex flex-col justify-between bg-card relative">
+                <div className="lg:col-span-7 p-8 md:p-14 flex flex-col justify-between bg-card relative">
                   <div>
                     <div className="flex items-center justify-between gap-4 mb-2">
                       <div className="text-[10px] font-bold text-accent uppercase tracking-[0.2em]">Destinations India</div>

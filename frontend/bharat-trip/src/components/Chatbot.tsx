@@ -96,10 +96,14 @@ export function Chatbot() {
       <button
         onClick={() => setIsOpen(true)}
         aria-label="Toggle chatbot"
-        className="fixed bottom-8 right-8 z-[100] size-16 rounded-full bg-[#10b981] text-white shadow-[0_15px_30px_-10px_rgba(16,185,129,0.5)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all group"
+        className={`fixed z-[100] size-14 sm:size-16 rounded-full bg-[#10b981] text-white shadow-[0_15px_30px_-10px_rgba(16,185,129,0.5)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all group ${
+          location.pathname === "/" 
+            ? "bottom-4 right-4 sm:bottom-8 sm:right-8" 
+            : "bottom-20 right-4 sm:bottom-8 sm:right-8"
+        }`}
       >
-        <div className="absolute top-1 right-1 size-4 bg-[#10b981] rounded-full border-[3px] border-white animate-pulse" />
-        <MessageSquare className="size-7 group-hover:rotate-12 transition-transform" />
+        <div className="absolute top-1 right-1 size-3.5 sm:size-4 bg-[#10b981] rounded-full border-[3px] border-white animate-pulse" />
+        <MessageSquare className="size-6 sm:size-7 group-hover:rotate-12 transition-transform" />
       </button>
     );
   }
