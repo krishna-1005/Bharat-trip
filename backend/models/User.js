@@ -46,6 +46,12 @@ const userSchema = new mongoose.Schema(
     default: "user"
   },
 
+  subscriptionTier: {
+    type: String,
+    enum: ["free", "pro", "elite"],
+    default: "free"
+  },
+
   /* NOTIFICATION SETTINGS */
   preferences: {
     emailAlerts: { type: Boolean, default: true },

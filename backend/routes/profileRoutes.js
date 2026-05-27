@@ -62,14 +62,15 @@ router.get("/", async (req, res) => {
   }
 });
 
-/* PUT /api/profile  — update name or bio */
+/* PUT /api/profile  — update name or bio or subscriptionTier */
 router.put("/", async (req, res) => {
   try {
-    const { name, bio, preferences } = req.body;
+    const { name, bio, preferences, subscriptionTier } = req.body;
     const updates = {};
     if (name) updates.name = name;
     if (bio)  updates.bio  = bio;
     if (preferences) updates.preferences = preferences;
+    if (subscriptionTier) updates.subscriptionTier = subscriptionTier;
 
     const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true });
     res.json({ message: "Profile updated.", user });

@@ -81,7 +81,7 @@ const hiddenGems: Destination[] = [
 
 export function DiscoveryRows() {
   return (
-    <div className="space-y-24 py-24 bg-white dark:bg-[#020617]">
+    <div className="space-y-24 py-24 bg-white dark:bg-background">
       <DiscoverySection 
         title="Trending This Month" 
         subtitle="The most sought-after experiences right now"
@@ -97,7 +97,7 @@ export function DiscoveryRows() {
       />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="relative rounded-[40px] overflow-hidden bg-[#020617] p-12 md:p-20 text-center">
+        <div className="relative rounded-[40px] overflow-hidden bg-slate-950 dark:bg-card p-12 md:p-20 text-center">
           <div className="absolute inset-0 bg-gradient-to-br from-[#10b981]/10 via-transparent to-transparent opacity-50" />
           <div className="relative z-10 max-w-2xl mx-auto">
             <h3 className="font-display font-medium text-4xl md:text-5xl text-white mb-6">
@@ -128,11 +128,11 @@ function DiscoverySection({ title, subtitle, icon, items }: { title: string, sub
             {icon}
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#10b981]">{title}</span>
           </div>
-          <h2 className="font-display font-medium text-4xl tracking-tight text-[#020617] dark:text-white">
+          <h2 className="font-display font-medium text-4xl tracking-tight text-slate-900 dark:text-white">
             {subtitle}
           </h2>
         </div>
-        <button className="hidden md:flex items-center gap-2 text-sm font-bold text-[#020617]/50 dark:text-white/40 hover:text-[#10b981] transition-colors">
+        <button className="hidden md:flex items-center gap-2 text-sm font-bold text-slate-900/50 dark:text-white/40 hover:text-[#10b981] transition-colors">
           View All <ArrowRight className="size-4" />
         </button>
       </div>
@@ -175,7 +175,7 @@ function DiscoveryCard({ item, index }: { item: Destination, index: number }) {
             <MapPin className="size-3.5" />
             <span className="text-[10px] font-black uppercase tracking-widest">{item.vibe}</span>
           </div>
-          <h3 className="font-display font-bold text-2xl tracking-tight text-[#020617] dark:text-white group-hover:text-[#10b981] transition-colors">
+          <h3 className="font-display font-bold text-2xl tracking-tight text-slate-900 dark:text-white group-hover:text-[#10b981] transition-colors">
             {item.name}
           </h3>
         </div>
@@ -190,14 +190,14 @@ function DiscoveryCard({ item, index }: { item: Destination, index: number }) {
               <Wallet className="size-3" />
               <span className="text-[9px] font-black uppercase tracking-widest">Budget</span>
             </div>
-            <div className="text-xs font-bold text-[#020617] dark:text-white/80">{item.budget}</div>
+            <div className="text-xs font-bold text-slate-900 dark:text-white/80">{item.budget}</div>
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-slate-400 dark:text-white/30">
               <Calendar className="size-3" />
               <span className="text-[9px] font-black uppercase tracking-widest">Season</span>
             </div>
-            <div className="text-xs font-bold text-[#020617] dark:text-white/80">{item.season}</div>
+            <div className="text-xs font-bold text-slate-900 dark:text-white/80">{item.season}</div>
           </div>
         </div>
       </div>

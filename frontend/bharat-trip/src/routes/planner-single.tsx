@@ -20,6 +20,7 @@ import api, { generatePlan } from "@/lib/api";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
 import { LocationAutocomplete } from "@/components/LocationAutocomplete";
+import { trackEvent } from "@/lib/analytics";
 
 function ProactiveCostIntel({ startDate, days }: { startDate: string, days: number }) {
   const [suggestion, setSuggestion] = useState<any>(null);
@@ -160,6 +161,7 @@ function PlannerSingleContent() {
         try {
           const plan = await generatePlan(data);
           const planId = plan._id || plan.id;
+          trackEvent("generate_itinerary", "engagement", `single_city: ${data.city}`);
           navigate(`/results?planId=${planId}`);
         } catch (err: any) {
           toast.error(err.message || "Failed to generate plan");
@@ -234,6 +236,7 @@ function PlannerSingleContent() {
     try {
       const plan = await generatePlan(planData);
       const planId = plan._id || plan.id;
+      trackEvent("generate_itinerary", "engagement", `single_city: ${destination}`);
       navigate(`/results?planId=${planId}`);
     } catch (err: any) {
       toast.error(err.message || "Failed to generate plan");

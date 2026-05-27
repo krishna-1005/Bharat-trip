@@ -342,7 +342,7 @@ function MoodSearch() {
                <div className="text-[10px] font-black uppercase tracking-[0.4em] text-accent">Personalized Discovery</div>
                <h2 className="font-display font-medium text-4xl sm:text-5xl md:text-7xl tracking-tighter text-foreground leading-[0.85]">
                  Tune your <br />
-                 <span className="italic font-serif text-muted-foreground/40">journey.</span>
+                 <span className="italic font-serif text-slate-500 dark:text-slate-400">journey.</span>
                </h2>
             </div>
  
@@ -459,7 +459,7 @@ function MoodSearch() {
             
             {!isLoading && recommended.length > 0 && (
               <div className="pt-10 flex justify-center lg:justify-start">
-                 <button className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40 hover:text-accent transition-colors">
+                 <button className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-600 dark:text-slate-400 hover:text-accent transition-colors">
                    View more suggestions
                  </button>
               </div>
@@ -478,11 +478,11 @@ function MoodSlider({ label, value, onChange }: { label: [string, string], value
       <div className="flex justify-between items-center mb-6 px-1">
         <span className={cn(
           "text-[10px] font-black uppercase tracking-[0.3em] transition-all",
-          value < 40 ? "text-accent scale-110" : "text-muted-foreground/40"
+          value < 40 ? "text-accent scale-110" : "text-slate-700 dark:text-slate-300"
         )}>{label[0]}</span>
         <span className={cn(
           "text-[10px] font-black uppercase tracking-[0.3em] transition-all",
-          value > 60 ? "text-accent scale-110" : "text-muted-foreground/40"
+          value > 60 ? "text-accent scale-110" : "text-slate-700 dark:text-slate-300"
         )}>{label[1]}</span>
       </div>
       
@@ -665,7 +665,7 @@ function Landing() {
             </div>
             <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-6xl tracking-tighter text-balance mb-6">
               The travel agent that <br />
-              <span className="italic text-muted-foreground/40">fits in your pocket.</span>
+              <span className="italic text-slate-500 dark:text-slate-400">fits in your pocket.</span>
             </h2>
             <p className="text-muted-foreground text-lg md:text-xl leading-relaxed text-balance mb-10">
               We've replaced the stress of planning with the joy of discovery. Experience three quiet superpowers that make every trip feel handcrafted.

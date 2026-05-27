@@ -35,7 +35,7 @@ export function Hero({ searchState, setSearchState }: HeroProps) {
           alt="Ganga Aarti"
           className="w-full h-full object-cover scale-105 animate-kenburns opacity-60"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-[#0B0B0B]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-[#FFFDF7] dark:to-[#0B0B0B] transition-colors duration-500" />
       </div>
 
       {/* Rotating Mandala Background Motif */}
@@ -118,14 +118,14 @@ export function Hero({ searchState, setSearchState }: HeroProps) {
           transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
           className="max-w-5xl mx-auto"
         >
-          <div className="bg-white/5 backdrop-blur-2xl border border-white/10 p-6 md:p-8 rounded-[3rem] md:rounded-[4rem] shadow-[0_30px_100px_rgba(255,107,0,0.15)] flex flex-col md:flex-row items-center gap-6">
+          <div className="bg-white/80 dark:bg-white/5 backdrop-blur-2xl border border-slate-200 dark:border-white/10 p-6 md:p-8 rounded-[3rem] md:rounded-[4rem] shadow-[0_30px_100px_rgba(255,107,0,0.15)] flex flex-col md:flex-row items-center gap-6">
             <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="relative group">
                 <Landmark className="absolute left-6 top-1/2 -translate-y-1/2 size-5 text-[#FF6B00] group-hover:scale-110 transition-transform" />
                 <select 
                   value={searchState.yatra}
                   onChange={(e) => setSearchState({ ...searchState, yatra: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4.5 pl-14 pr-6 text-white font-bold focus:outline-none focus:border-[#FF6B00] appearance-none cursor-pointer transition-all shadow-inner text-sm"
+                  className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl py-4.5 pl-14 pr-6 text-slate-800 dark:text-white font-bold focus:outline-none focus:border-[#FF6B00] appearance-none cursor-pointer transition-all shadow-inner text-sm"
                 >
                   <option className="text-black">Kashi (Varanasi) Darshan</option>
                   <option className="text-black">Char Dham Yatra</option>
@@ -142,7 +142,7 @@ export function Hero({ searchState, setSearchState }: HeroProps) {
                   placeholder="Starting City"
                   value={searchState.startingCity}
                   onChange={(e) => setSearchState({ ...searchState, startingCity: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4.5 pl-14 pr-6 text-white placeholder:text-gray-400 font-bold focus:outline-none focus:border-[#FF6B00] transition-all text-sm"
+                  className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl py-4.5 pl-14 pr-6 text-slate-800 dark:text-white placeholder:text-slate-500 dark:placeholder:text-gray-400 font-bold focus:outline-none focus:border-[#FF6B00] transition-all text-sm"
                 />
               </div>
               <div className="relative group">
@@ -151,7 +151,7 @@ export function Hero({ searchState, setSearchState }: HeroProps) {
                   type="date"
                   value={searchState.date}
                   onChange={(e) => setSearchState({ ...searchState, date: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4.5 pl-14 pr-6 text-white font-bold focus:outline-none focus:border-[#FF6B00] [color-scheme:dark] transition-all cursor-pointer text-sm"
+                  className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl py-4.5 pl-14 pr-6 text-slate-800 dark:text-white font-bold focus:outline-none focus:border-[#FF6B00] [color-scheme:light] dark:[color-scheme:dark] transition-all cursor-pointer text-sm"
                 />
               </div>
             </div>

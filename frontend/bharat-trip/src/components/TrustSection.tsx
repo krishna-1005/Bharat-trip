@@ -133,7 +133,7 @@ function SpotlightCard({ point }: { point: typeof trustPoints[0] }) {
   return (
     <div 
       onMouseMove={handleMouseMove}
-      className="group relative h-full p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] bg-white/5 border border-white/10 hover:border-accent/30 transition-colors duration-500 overflow-hidden"
+      className="group relative h-full p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-accent/30 transition-colors duration-500 overflow-hidden shadow-soft dark:shadow-none"
     >
       {/* Spotlight Effect */}
       <motion.div
@@ -151,8 +151,8 @@ function SpotlightCard({ point }: { point: typeof trustPoints[0] }) {
       </div>
       
       <div className="relative z-10">
-        <h3 className="font-display font-bold text-xl text-white mb-3">{point.title}</h3>
-        <p className="text-slate-400 leading-relaxed text-sm md:text-base mb-6">
+        <h3 className="font-display font-bold text-xl text-slate-900 dark:text-white mb-3">{point.title}</h3>
+        <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm md:text-base mb-6">
           {point.desc}
         </p>
         
@@ -179,7 +179,7 @@ export function TrustSection() {
   }, []);
 
   return (
-    <section id="trust-section" className="relative w-full py-16 sm:py-32 bg-slate-950 overflow-hidden">
+    <section id="trust-section" className="relative w-full py-16 sm:py-32 bg-slate-50 dark:bg-background overflow-hidden">
       {/* Truths Modal */}
       <AnimatePresence>
         {showTruths && (
@@ -189,20 +189,20 @@ export function TrustSection() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowTruths(false)}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl"
+              className="absolute inset-0 bg-slate-950/50 dark:bg-slate-950/80 backdrop-blur-xl"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-slate-900 border border-white/10 rounded-[40px] p-8 md:p-12 overflow-hidden shadow-2xl"
+              className="relative w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-[40px] p-8 md:p-12 overflow-hidden shadow-2xl"
             >
               <div className="absolute top-0 right-0 p-6">
                 <button 
                   onClick={() => setShowTruths(false)}
-                  className="size-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                  className="size-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-slate-900 dark:text-white"
                 >
-                  <X className="size-5 text-white" />
+                  <X className="size-5" />
                 </button>
               </div>
 
@@ -210,18 +210,18 @@ export function TrustSection() {
                 <ShieldCheck className="size-3" /> The Hard Truths
               </div>
               
-              <h3 className="font-display font-bold text-3xl md:text-4xl text-white mb-8">
+              <h3 className="font-display font-bold text-3xl md:text-4xl text-slate-900 dark:text-white mb-8">
                 How we protect <span className="text-accent">your journey</span>
               </h3>
 
               <div className="grid sm:grid-cols-2 gap-8">
                 {hardTruths.map((truth, i) => (
                   <div key={i} className="space-y-3">
-                    <div className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-accent">
+                    <div className="size-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-accent">
                       <truth.icon className="size-5" />
                     </div>
-                    <div className="font-bold text-white">{truth.title}</div>
-                    <p className="text-sm text-slate-400 leading-relaxed">
+                    <div className="font-bold text-slate-900 dark:text-white">{truth.title}</div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                       {truth.desc}
                     </p>
                   </div>
@@ -234,7 +234,7 @@ export function TrustSection() {
                 </div>
                 <button 
                   onClick={() => setShowTruths(false)}
-                  className="w-full sm:w-auto px-8 py-3 rounded-xl bg-white text-slate-950 font-bold text-sm"
+                  className="w-full sm:w-auto px-8 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold text-sm"
                 >
                   I Trust GoTripo
                 </button>
@@ -247,7 +247,7 @@ export function TrustSection() {
       {/* Live Trust Meter Floating Widget */}
       <div className="absolute top-10 right-10 z-50 hidden xl:block">
         <FadeUp delay={1}>
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center gap-4 group hover:border-accent/50 transition-colors">
+          <div className="p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-md flex items-center gap-4 group hover:border-accent/50 transition-colors shadow-lg dark:shadow-none">
             <div className="relative size-10 flex items-center justify-center">
               <svg className="size-full -rotate-90">
                 <circle 
@@ -273,7 +273,7 @@ export function TrustSection() {
             </div>
             <div>
               <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Live Trust Index</div>
-              <div className="text-sm font-display font-bold text-white tabular-nums">{trustScore}%</div>
+              <div className="text-sm font-display font-bold text-slate-900 dark:text-white tabular-nums">{trustScore}%</div>
             </div>
           </div>
         </FadeUp>
@@ -322,7 +322,7 @@ export function TrustSection() {
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-20 relative">
           <FadeUp>
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-accent text-[10px] font-bold uppercase tracking-[0.2em] mb-6">
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-accent text-[10px] font-bold uppercase tracking-[0.2em] mb-6">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
@@ -331,7 +331,7 @@ export function TrustSection() {
             </div>
           </FadeUp>
           <FadeUp delay={0.1}>
-            <h2 className="font-display font-bold text-4xl md:text-7xl text-white tracking-tight mb-6">
+            <h2 className="font-display font-bold text-4xl md:text-7xl text-slate-900 dark:text-white tracking-tight mb-6">
               Travel with <span className="text-accent relative inline-block">
                 Absolute Confidence
                 <motion.span 
@@ -344,8 +344,8 @@ export function TrustSection() {
             </h2>
           </FadeUp>
           <FadeUp delay={0.2}>
-            <p className="max-w-2xl mx-auto text-slate-400 text-lg md:text-xl leading-relaxed">
-              We combine <span className="text-white font-medium">advanced AI</span> with <span className="text-white font-medium">deep local expertise</span> to ensure your Indian adventure is 
+            <p className="max-w-2xl mx-auto text-slate-600 dark:text-slate-400 text-lg md:text-xl leading-relaxed">
+              We combine <span className="text-slate-900 dark:text-white font-semibold">advanced AI</span> with <span className="text-slate-900 dark:text-white font-semibold">deep local expertise</span> to ensure your Indian adventure is 
               seamless, safe, and unforgettable.
             </p>
           </FadeUp>
@@ -360,7 +360,7 @@ export function TrustSection() {
         </StaggerGroup>
 
         <FadeUp delay={0.5}>
-          <div className="relative rounded-3xl sm:rounded-[40px] bg-white/5 border border-white/10 p-6 sm:p-10 md:p-16 overflow-hidden">
+          <div className="relative rounded-3xl sm:rounded-[40px] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-6 sm:p-10 md:p-16 overflow-hidden shadow-soft dark:shadow-none">
             {/* Dark Section Background Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] bg-accent/5 blur-[120px] pointer-events-none" />
             
@@ -370,10 +370,10 @@ export function TrustSection() {
                   <div className="flex justify-center">
                     <stat.icon className="size-6 text-accent/80 group-hover:scale-125 group-hover:text-accent transition-all duration-300" />
                   </div>
-                  <div className="text-3xl md:text-5xl font-display font-bold text-white tracking-tighter">
+                  <div className="text-3xl md:text-5xl font-display font-bold text-slate-900 dark:text-white tracking-tighter">
                     <AnimatedNumber value={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
                   </div>
-                  <div className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-slate-500 group-hover:text-slate-400 transition-colors">
+                  <div className="text-xs md:text-sm font-bold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 group-hover:text-slate-400 transition-colors">
                     {stat.label}
                   </div>
                 </div>

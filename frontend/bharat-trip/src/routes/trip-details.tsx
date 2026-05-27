@@ -12,6 +12,7 @@ import { MapPreview } from "@/components/MapPreview";
 import { getNextThreeMonths } from "@/lib/utils";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   plane: Plane,
@@ -277,6 +278,7 @@ function TripDetailsContent() {
                                         href={`https://www.google.com/maps/search/?api=1&query=${it.lat},${it.lng}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        onClick={() => trackEvent("click_view_maps", "outbound_redirect", it.place)}
                                         className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground bg-secondary border border-border px-2 py-0.5 rounded-md hover:bg-secondary-hover hover:text-foreground transition-colors"
                                       >
                                         <ExternalLink className="size-2.5" /> Maps
@@ -410,7 +412,10 @@ function TripDetailsContent() {
                       </div>
                     ))}
                   </div>
-                  <button className="w-full mt-6 py-3 rounded-xl bg-secondary font-semibold text-sm text-muted-foreground hover:bg-secondary-hover hover:text-foreground transition-colors border border-border cursor-pointer">
+                  <button
+                    onClick={() => trackEvent("click_compare_hotels", "outbound_redirect", d.name)}
+                    className="w-full mt-6 py-3 rounded-xl bg-secondary font-semibold text-sm text-muted-foreground hover:bg-secondary-hover hover:text-foreground transition-colors border border-border cursor-pointer"
+                  >
                     Compare All Hotels
                   </button>
                 </div>

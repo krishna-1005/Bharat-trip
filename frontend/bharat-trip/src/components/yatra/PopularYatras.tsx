@@ -79,7 +79,7 @@ function YatraCard({ yatra, index, onPlan }: { yatra: any; index: number; onPlan
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.1, duration: 0.6 }}
-      className="group relative bg-[#121212] rounded-[3rem] overflow-hidden border border-white/5 hover:border-[#FF6B00]/30 shadow-2xl transition-all duration-500"
+      className="group relative bg-white dark:bg-[#121212] rounded-[3rem] overflow-hidden border border-slate-200 dark:border-white/5 hover:border-[#FF6B00]/30 shadow-xl dark:shadow-2xl transition-all duration-500"
     >
       <div className="relative h-[380px] overflow-hidden">
         <img
@@ -87,8 +87,8 @@ function YatraCard({ yatra, index, onPlan }: { yatra: any; index: number; onPlan
           alt={yatra.name}
           className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#121212]/90 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#121212] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/95 dark:from-[#121212]/90 via-slate-100/10 dark:via-black/20 to-transparent" />
         
         <div className="absolute top-6 left-6">
           <div className="bg-[#FF6B00] text-white text-[9px] font-black uppercase tracking-[0.2em] px-4 py-2.5 rounded-xl shadow-lg border border-white/10">
@@ -96,7 +96,7 @@ function YatraCard({ yatra, index, onPlan }: { yatra: any; index: number; onPlan
           </div>
         </div>
 
-        <div className="absolute bottom-6 left-8 right-8 text-white">
+        <div className="absolute bottom-6 left-8 right-8 text-slate-800 dark:text-white">
           <div className="flex items-center gap-2 text-[10px] font-black text-[#FFD700] uppercase tracking-widest mb-2">
             <MapPin className="size-3.5" /> {yatra.location}
           </div>
@@ -118,10 +118,10 @@ function YatraCard({ yatra, index, onPlan }: { yatra: any; index: number; onPlan
         </div>
       </div>
 
-      <div className="p-8 bg-[#121212]">
+      <div className="p-8 bg-white dark:bg-[#121212]">
         <button 
           onClick={onPlan}
-          className="w-full py-4.5 bg-white/5 border border-white/10 hover:bg-gradient-to-r hover:from-[#FF6B00] hover:to-[#E32636] hover:border-transparent text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95 cursor-pointer"
+          className="w-full py-4.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-gradient-to-r hover:from-[#FF6B00] hover:to-[#E32636] hover:border-transparent text-slate-800 dark:text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-md dark:shadow-xl flex items-center justify-center gap-3 active:scale-95 cursor-pointer"
         >
           Plan This Yatra <ArrowRight className="size-5" />
         </button>

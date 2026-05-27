@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
 import { LocationAutocomplete } from "@/components/LocationAutocomplete";
 import { calculateDistance } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 export default function PlannerMulti() {
   return (
@@ -57,6 +58,8 @@ function PlannerMultiContent() {
           const res = await api.post("/plan/generate", data);
           const plan = res.data.plan;
           const planId = plan._id || plan.id;
+          const citiesJoined = (data.cities || []).join(", ");
+          trackEvent("generate_itinerary", "engagement", `multi_city: ${citiesJoined}`);
           navigate(`/results?planId=${planId}`);
         } catch (err: any) {
           toast.error(err.message || "Failed to generate multi-city plan");
@@ -118,6 +121,8 @@ function PlannerMultiContent() {
       
       const plan = res.data.plan;
       const planId = plan._id || plan.id;
+      const citiesJoined = cityNames.join(", ");
+      trackEvent("generate_itinerary", "engagement", `multi_city: ${citiesJoined}`);
       navigate(`/results?planId=${planId}`);
     } catch (err: any) {
       toast.error(err.message || "Failed to generate multi-city plan");

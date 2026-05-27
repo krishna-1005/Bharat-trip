@@ -68,7 +68,7 @@ export function HeroCarousel() {
   const active = slides[index];
 
   return (
-    <section className="relative h-screen w-full overflow-hidden text-white bg-[#020617] group">
+    <section className="relative h-screen w-full overflow-hidden text-white bg-background group">
       {/* Images — overlapping crossfade */}
       <div className="absolute inset-0 z-10 pointer-events-none">
         <AnimatePresence initial={false}>
