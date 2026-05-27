@@ -45,6 +45,7 @@ function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [broadcasting, setBroadcasting] = useState(false);
+  const [testingEmail, setTestingEmail] = useState(false);
 
   useEffect(() => {
     api.get("/admin/stats")
@@ -64,6 +65,26 @@ function AdminDashboard() {
       toast.error(err.response?.data?.error || "Broadcast failed");
     } finally {
       setBroadcasting(false);
+    }
+  };
+
+  const handleTestEmail = async () => {
+    setTestingEmail(true);
+    try {
+      const res = await api.post("/admin/test-email");
+      toast.success(res.data.message);
+    } catch (err: any) {
+      const errorData = err.response?.data;
+      toast.error(
+        <div className="space-y-1">
+          <p className="font-bold">{errorData?.error || "Test failed"}</p>
+          <p className="text-[10px] opacity-80">{errorData?.details || "Unknown error"}</p>
+          <p className="text-[10px] font-bold text-accent">{errorData?.hint}</p>
+        </div>,
+        { duration: 10000 }
+      );
+    } finally {
+      setTestingEmail(false);
     }
   };
 
@@ -117,14 +138,24 @@ function AdminDashboard() {
             <h1 className="text-3xl font-display font-bold tracking-tight">System Overview</h1>
             <p className="text-muted-foreground mt-1">Real-time performance and user engagement metrics.</p>
           </div>
-          <button 
-            onClick={handleBroadcastDigest}
-            disabled={broadcasting}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 transition-all disabled:opacity-70"
-          >
-            {broadcasting ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />}
-            {broadcasting ? "Broadcasting..." : "Broadcast Weekly Digest"}
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button 
+              onClick={handleTestEmail}
+              disabled={testingEmail}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-secondary hover:bg-border text-foreground font-bold text-sm transition-all disabled:opacity-70"
+            >
+              {testingEmail ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />}
+              {testingEmail ? "Testing..." : "Test Email Config"}
+            </button>
+            <button 
+              onClick={handleBroadcastDigest}
+              disabled={broadcasting}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 transition-all disabled:opacity-70"
+            >
+              {broadcasting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+              {broadcasting ? "Broadcasting..." : "Broadcast Weekly Digest"}
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}

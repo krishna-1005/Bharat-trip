@@ -9,12 +9,69 @@ const Announcement = require("../models/Announcement");
 const Notification = require("../models/Notification");
 const { protect, adminOnly } = require("../middleware/protect");
 const { admin, db } = require("../firebaseAdmin");
-const { sendUpdateEmail, sendWeeklyTravelDigest } = require("../services/emailService");
+const { 
+  sendUpdateEmail, 
+  sendWeeklyTravelDigest, 
+  sendInterestingFactEmail,
+  sendTestEmail 
+} = require("../services/emailService");
 
 const router = express.Router();
 
 // Middleware to verify admin status
 const verifyAdminEmail = adminOnly;
+
+/* BROADCAST DISCOVERY MOMENT */
+router.post("/broadcast-discovery", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const { fact, destination } = req.body;
+    if (!fact) return res.status(400).json({ error: "Fact content is required." });
+
+    const users = await User.find({ 
+      $or: [
+        { "preferences.emailAlerts": true },
+        { "preferences.emailAlerts": { $exists: false } }
+      ]
+    });
+
+    console.log(`📧 Starting Discovery Moment broadcast to ${users.length} users...`);
+    
+    const broadcastPromises = users.map(user => 
+      sendInterestingFactEmail(user.email, user.name, fact, destination).catch(err => 
+        console.error(`❌ Failed to send discovery to ${user.email}:`, err.message)
+      )
+    );
+
+    await Promise.all(broadcastPromises);
+
+    res.json({ 
+      message: "Discovery Moment broadcast initiated successfully!", 
+      count: users.length 
+    });
+  } catch (err) {
+    console.error("Discovery broadcast error:", err);
+    res.status(500).json({ error: "Failed to broadcast Discovery Moment" });
+  }
+});
+
+/* TEST EMAIL CONNECTION */
+router.post("/test-email", protect, verifyAdminEmail, async (req, res) => {
+  try {
+    const info = await sendTestEmail(req.user.email);
+    res.json({ 
+      message: "Test email sent successfully! Check your inbox.", 
+      info 
+    });
+  } catch (err) {
+    console.error("Test email route error:", err);
+    res.status(500).json({ 
+      error: "Email delivery failed", 
+      details: err.message,
+      code: err.code,
+      hint: "Check if EMAIL_PASS is an App Password and EMAIL_USER is correct."
+    });
+  }
+});
 
 /* BROADCAST WEEKLY DIGEST */
 router.post("/broadcast-digest", protect, verifyAdminEmail, async (req, res) => {
@@ -88,7 +145,8 @@ router.post("/announcements", protect, verifyAdminEmail, async (req, res) => {
       const emails = users.map(u => u.email).filter(e => e);
       if (emails.length > 0) {
         console.log(`📧 Sending announcement to ${emails.length} users...`);
-        sendUpdateEmail(emails, announcement.title, announcement.content);
+        // CRITICAL FIX: Await the email send so serverless functions don't terminate early
+        await sendUpdateEmail(emails, announcement.title, announcement.content);
       } else {
         console.warn("⚠️ No eligible users found for email broadcast.");
       }

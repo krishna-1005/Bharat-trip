@@ -34,9 +34,9 @@ const protect = async (req, res, next) => {
             photo: decoded.picture || ""
           });
 
-          // Send welcome email (background)
+          // Send welcome email
           console.log(`📧 Triggering welcome email for new user: ${email}`);
-          sendWelcomeEmail(user.email, user.name).catch(e => console.error("Social welcome email error:", e.message));
+          await sendWelcomeEmail(user.email, user.name);
         }
       } else {
         console.warn("Firebase Admin not initialized. Skipping Firebase token verification.");

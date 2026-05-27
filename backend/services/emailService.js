@@ -9,14 +9,15 @@ const nodemailer = require("nodemailer");
 */
 
 let transporter = null;
+let isVerified = false;
 
-const getTransporter = () => {
+const getTransporter = async () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.warn("❌ EMAIL_USER or EMAIL_PASS missing in environment variables.");
     return null;
   }
 
-  if (transporter) return transporter;
+  if (transporter && isVerified) return transporter;
 
   // Primary configuration: Gmail Service
   const config = {
@@ -25,96 +26,108 @@ const getTransporter = () => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    // Adding some robust defaults
     pool: true,
     maxConnections: 5,
-    maxMessages: 100,
-    rateDelta: 1000,
-    rateLimit: 5
   };
 
   transporter = nodemailer.createTransport(config);
 
-  // Verify connection configuration
-  transporter.verify((error, success) => {
-    if (error) {
-      console.error("❌ Email Transporter Verification Failed (Gmail Service):", error.message);
-      
-      // Fallback: Direct SMTP host configuration
-      console.log("🔄 Attempting Fallback: Direct SMTP (smtp.gmail.com:465)...");
-      transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-        tls: {
-          rejectUnauthorized: false
-        }
-      });
-
-      transporter.verify((fallbackError) => {
-        if (fallbackError) {
-          console.error("❌ Fallback SMTP also failed:", fallbackError.message);
-          console.error("💡 HINT: Check if 'Less Secure Apps' is enabled OR use an 'App Password'.");
-          transporter = null;
-        } else {
-          console.log("✅ Fallback SMTP is ready!");
-        }
-      });
-    } else {
-      console.log("✅ Email Transporter (Gmail Service) is ready");
-    }
-  });
+  try {
+    await transporter.verify();
+    console.log("✅ Email transporter verified and ready to send.");
+    isVerified = true;
+  } catch (error) {
+    console.error("❌ Email transporter verification failed:", error.message);
+    isVerified = false;
+    // We still return it, but next call will try to re-verify or it will fail on send
+  }
 
   return transporter;
 };
 
 /**
- * Send a broadcast update to multiple users
+ * Send a test email to verify credentials
  */
-async function sendUpdateEmail(emails, subject, content) {
-  const currentTransporter = getTransporter();
-  if (!currentTransporter) return;
+async function sendTestEmail(targetEmail) {
+  const currentTransporter = await getTransporter();
+  if (!currentTransporter) {
+    throw new Error("Transporter not initialized. Check EMAIL_USER/PASS.");
+  }
 
   const mailOptions = {
-    from: `"GoTripo Announcements" <${process.env.EMAIL_USER}>`,
-    bcc: emails.join(", "),
-    subject: `🌍 GoTripo Update: ${subject}`,
+    from: `"GoTripo Debug" <${process.env.EMAIL_USER}>`,
+    to: targetEmail,
+    subject: "GoTripo Email Test 🧪",
     html: `
-      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; color: #1e293b;">
-        <div style="background-color: #f59e0b; padding: 40px 20px; text-align: center; background-image: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Announcement</h1>
-        </div>
-        
-        <div style="padding: 40px 30px;">
-          <h2 style="font-size: 22px; color: #0f172a; margin-top: 0; line-height: 1.3;">${subject}</h2>
-          <div style="font-size: 16px; line-height: 1.7; color: #475569; margin-top: 20px;">
-            ${content}
-          </div>
-          
-          <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 1px solid #f1f5f9;">
-            <a href="${process.env.FRONTEND_URL || 'https://gotripo.tech'}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 15px; display: inline-block;">
-              Visit GoTripo
-            </a>
-          </div>
-        </div>
-        
-        <div style="background-color: #f8fafc; padding: 25px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #f1f5f9;">
-          <p style="margin: 0;">You received this because you enabled Email Alerts in your GoTripo settings.</p>
-          <p style="margin: 8px 0 0;">&copy; 2026 GoTripo India. Exploring the Extraordinary.</p>
-        </div>
+      <div style="font-family: sans-serif; padding: 20px;">
+        <h2>Email Test Successful!</h2>
+        <p>If you are reading this, your GoTripo email configuration is working perfectly.</p>
+        <p><strong>Configured User:</strong> ${process.env.EMAIL_USER}</p>
+        <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
       </div>
     `,
   };
 
   try {
-    await currentTransporter.sendMail(mailOptions);
-    console.log(`✅ Update email sent successfully to ${emails.length} users.`);
+    const info = await currentTransporter.sendMail(mailOptions);
+    console.log("✅ Test email sent:", info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ Failed to send update email:", error.message);
+    console.error("❌ Test email failed:", error.message);
+    throw error;
+  }
+}
+
+/**
+ * Send a broadcast update to multiple users
+ */
+async function sendUpdateEmail(emails, subject, content) {
+  console.log(`📧 Attempting to send update email to ${emails.length} recipients...`);
+  const currentTransporter = await getTransporter();
+  if (!currentTransporter) return;
+
+  // Gmail has limits on BCC recipients (usually ~100 per mail). 
+  // For larger lists, we should batch them.
+  const batchSize = 50;
+  for (let i = 0; i < emails.length; i += batchSize) {
+    const batch = emails.slice(i, i + batchSize);
+    const mailOptions = {
+      from: `"GoTripo Announcements" <${process.env.EMAIL_USER}>`,
+      bcc: batch.join(", "),
+      subject: `🌍 GoTripo Update: ${subject}`,
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; color: #1e293b;">
+          <div style="background-color: #f59e0b; padding: 40px 20px; text-align: center; background-image: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Announcement</h1>
+          </div>
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="font-size: 22px; color: #0f172a; margin-top: 0; line-height: 1.3;">${subject}</h2>
+            <div style="font-size: 16px; line-height: 1.7; color: #475569; margin-top: 20px;">
+              ${content}
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 1px solid #f1f5f9;">
+              <a href="${process.env.FRONTEND_URL || 'https://gotripo.tech'}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 15px; display: inline-block;">
+                Visit GoTripo
+              </a>
+            </div>
+          </div>
+          
+          <div style="background-color: #f8fafc; padding: 25px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #f1f5f9;">
+            <p style="margin: 0;">You received this because you enabled Email Alerts in your GoTripo settings.</p>
+            <p style="margin: 8px 0 0;">&copy; 2026 GoTripo India. Exploring the Extraordinary.</p>
+          </div>
+        </div>
+      `,
+    };
+
+    try {
+      await currentTransporter.sendMail(mailOptions);
+      console.log(`✅ Update email batch sent successfully (${i + batch.length}/${emails.length}).`);
+    } catch (error) {
+      console.error(`❌ Failed to send update email batch starting at ${i}:`, error.message);
+    }
   }
 }
 
@@ -124,7 +137,7 @@ async function sendUpdateEmail(emails, subject, content) {
 async function sendWelcomeEmail(email, name) {
   console.log(`📧 Attempting to send welcome email to: ${email}`);
   
-  const currentTransporter = getTransporter();
+  const currentTransporter = await getTransporter();
   if (!currentTransporter) {
     console.warn(`⚠️ Skipping welcome email for ${email}: Transporter not initialized. Check EMAIL_USER/PASS.`);
     return;
@@ -181,7 +194,7 @@ async function sendWelcomeEmail(email, name) {
     await currentTransporter.sendMail(mailOptions);
     console.log(`✅ Welcome email sent to ${email}`);
   } catch (error) {
-    console.error("❌ Failed to send welcome email:", error.message);
+    console.error(`❌ Failed to send welcome email to ${email}:`, error.message);
   }
 }
 
@@ -189,7 +202,8 @@ async function sendWelcomeEmail(email, name) {
  * Send a login notification email
  */
 async function sendLoginNotificationEmail(email, name) {
-  const currentTransporter = getTransporter();
+  console.log(`📧 Attempting to send login notification to: ${email}`);
+  const currentTransporter = await getTransporter();
   if (!currentTransporter) return;
 
   const firstName = name ? name.split(" ")[0] : "Traveler";
@@ -246,7 +260,7 @@ async function sendLoginNotificationEmail(email, name) {
     await currentTransporter.sendMail(mailOptions);
     console.log(`✅ Login notification email sent to ${email}`);
   } catch (error) {
-    console.error("❌ Failed to send login notification email:", error.message);
+    console.error(`❌ Failed to send login notification email to ${email}:`, error.message);
   }
 }
 
@@ -255,7 +269,7 @@ async function sendLoginNotificationEmail(email, name) {
  * Send notification to admin when a new job application is submitted
  */
 async function sendJobApplicationNotification(application) {
-  const currentTransporter = getTransporter();
+  const currentTransporter = await getTransporter();
   const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
   
   if (!currentTransporter || !adminEmail) return;
@@ -295,7 +309,8 @@ async function sendJobApplicationNotification(application) {
  * Send Weekly Travel Digest (Interesting updates)
  */
 async function sendWeeklyTravelDigest(email, name) {
-  const currentTransporter = getTransporter();
+  console.log(`📧 Attempting to send Weekly Digest to: ${email}`);
+  const currentTransporter = await getTransporter();
   if (!currentTransporter) return;
 
   const firstName = name ? name.split(" ")[0] : "Traveler";
@@ -356,7 +371,66 @@ async function sendWeeklyTravelDigest(email, name) {
     await currentTransporter.sendMail(mailOptions);
     console.log(`✅ Weekly Digest sent to ${email}`);
   } catch (error) {
-    console.error("❌ Failed to send Weekly Digest:", error.message);
+    console.error(`❌ Failed to send Weekly Digest to ${email}:`, error.message);
+  }
+}
+
+/**
+ * Send an interesting travel fact/tip to a user
+ */
+async function sendInterestingFactEmail(email, name, fact, destination) {
+  console.log(`📧 Attempting to send interesting fact to: ${email}`);
+  const currentTransporter = await getTransporter();
+  if (!currentTransporter) return;
+
+  const firstName = name ? name.split(" ")[0] : "Traveler";
+  
+  const mailOptions = {
+    from: `"GoTripo Discovery" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `Did you know? A little travel magic for you, ${firstName} ✨`,
+    html: `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; color: #1e293b;">
+        <div style="background-color: #8b5cf6; padding: 40px 20px; text-align: center; background-image: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);">
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Discovery Moment</h1>
+        </div>
+        
+        <div style="padding: 30px;">
+          <h2 style="font-size: 20px; color: #0f172a; margin-top: 0;">Hi ${firstName},</h2>
+          <p style="font-size: 16px; color: #475569; line-height: 1.6;">
+            We thought you might enjoy this little piece of travel inspiration today.
+          </p>
+          
+          <div style="margin: 30px 0; padding: 25px; background-color: #f5f3ff; border-radius: 12px; border-left: 4px solid #8b5cf6;">
+            <p style="margin: 0; font-size: 18px; color: #1e1b4b; font-style: italic; line-height: 1.5;">
+              "${fact}"
+            </p>
+            ${destination ? `<p style="margin: 15px 0 0; font-size: 14px; color: #6d28d9; font-weight: 700;">📍 Featured Destination: ${destination}</p>` : ''}
+          </div>
+          
+          <p style="font-size: 14px; color: #64748b;">
+            Travel isn't just about the destination, it's about the stories we find along the way. Where will your next story begin?
+          </p>
+          
+          <div style="text-align: center; margin-top: 30px;">
+            <a href="${process.env.FRONTEND_URL || 'https://gotripo.tech'}/explore" style="background-color: #8b5cf6; color: #ffffff; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">
+              Explore More with GoTripo
+            </a>
+          </div>
+        </div>
+        
+        <div style="background-color: #f8fafc; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #f1f5f9;">
+          <p>&copy; 2026 GoTripo Discoveries. Exploring the Extraordinary.</p>
+        </div>
+      </div>
+    `,
+  };
+
+  try {
+    await currentTransporter.sendMail(mailOptions);
+    console.log(`✅ Interesting fact email sent to ${email}`);
+  } catch (error) {
+    console.error(`❌ Failed to send interesting fact email to ${email}:`, error.message);
   }
 }
 
@@ -365,5 +439,7 @@ module.exports = {
   sendWelcomeEmail, 
   sendLoginNotificationEmail,
   sendJobApplicationNotification,
-  sendWeeklyTravelDigest
+  sendWeeklyTravelDigest,
+  sendInterestingFactEmail,
+  sendTestEmail
 };

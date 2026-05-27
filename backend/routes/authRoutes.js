@@ -81,9 +81,9 @@ router.post("/signup", authLimiter, signupValidation, async (req, res) => {
 
     const token = signToken(user._id);
 
-    // Send welcome email (background)
+    // Send welcome email
     console.log(`📧 Triggering welcome email for new signup: ${user.email}`);
-    sendWelcomeEmail(user.email, user.name).catch(e => console.error("Welcome email error:", e.message));
+    await sendWelcomeEmail(user.email, user.name);
 
     res.status(201).json({
       message: "Account created.",
@@ -120,9 +120,9 @@ router.post("/login", authLimiter, loginValidation, async (req, res) => {
 
     const token = signToken(user._id);
 
-    // Send login notification email (background)
+    // Send login notification email
     console.log(`📧 Triggering login alert for: ${user.email}`);
-    sendLoginNotificationEmail(user.email, user.name).catch(e => console.error("Login email error:", e.message));
+    await sendLoginNotificationEmail(user.email, user.name);
 
     // Log the login (background)
     UsageLog.create({

@@ -91,8 +91,9 @@ router.post("/generate", planValidation, async (req, res) => {
             role: "user"
           });
 
-          // Send welcome email (background)
-          sendWelcomeEmail(userObj.email, userObj.name).catch(e => console.error("Plan sync welcome email error:", e.message));
+          // Send welcome email
+          console.log(`📧 Triggering welcome email for new user during plan sync: ${userObj.email}`);
+          await sendWelcomeEmail(userObj.email, userObj.name);
         }
 
         loggedUserId = userObj._id;

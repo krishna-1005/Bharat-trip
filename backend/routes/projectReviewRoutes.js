@@ -43,8 +43,9 @@ router.post("/", reviewValidation, async (req, res) => {
         photo: decoded.picture || ""
       });
 
-      // Send welcome email (background)
-      sendWelcomeEmail(user.email, user.name).catch(e => console.error("Review sync welcome email error:", e.message));
+      // Send welcome email
+      console.log(`📧 Triggering welcome email for new user during review sync: ${user.email}`);
+      await sendWelcomeEmail(user.email, user.name);
     }
 
     const newReview = new ProjectReview({
