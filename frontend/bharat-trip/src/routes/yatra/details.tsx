@@ -41,7 +41,7 @@ export default function YatraDetailPage() {
         </div>
         <h1 className="text-3xl font-display font-bold mb-2">Yatra not found</h1>
         <p className="text-muted-foreground mb-8">The journey you're looking for doesn't exist or has been moved.</p>
-        <Link to="/yatra" className="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:opacity-90 transition-all">
+        <Link to="/yatra" className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all">
           Back to Explorations
         </Link>
       </div>
@@ -187,7 +187,7 @@ export default function YatraDetailPage() {
 
                 <Link 
                   to={`/yatra/plan?name=${encodeURIComponent(yatra.name)}`}
-                  className="w-full h-16 rounded-xl bg-primary text-white font-bold text-lg flex items-center justify-center gap-3 hover:bg-primary/90 transition-all shadow-lg active:scale-[0.98]"
+                  className="w-full h-16 rounded-xl bg-primary text-primary-foreground font-bold text-lg flex items-center justify-center gap-3 hover:bg-primary/90 transition-all shadow-lg active:scale-[0.98]"
                 >
                   Configure My Journey <ArrowRight className="size-5 text-accent" />
                 </Link>

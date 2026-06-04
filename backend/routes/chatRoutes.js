@@ -186,6 +186,7 @@ MANDATORY: If you say "I've crafted a plan" or "Check it out below", you MUST in
           travelerType: parsedData.travelerType || "solo",
           pace: parsedData.pace || "moderate",
           recommendedStay: plan.recommendedStay,
+          recommendedStays: plan.recommendedStays,
           recommendedTransport: plan.recommendedTransport,
           status: "upcoming",
           type: "plan" // Explicitly mark as plan
@@ -348,6 +349,7 @@ MANDATORY: If you say "I've crafted a plan" or "Check it out below", you MUST in
         travelerType: "solo",
         pace: pace,
         recommendedStay: plan.recommendedStay,
+        recommendedStays: plan.recommendedStays,
         recommendedTransport: plan.recommendedTransport,
         status: "upcoming"
       });

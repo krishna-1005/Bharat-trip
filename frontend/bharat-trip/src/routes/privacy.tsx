@@ -60,7 +60,7 @@ export default function Privacy() {
             <p className="text-muted-foreground mb-6">
               If you have any questions or concerns regarding our privacy practices, please don't hesitate to reach out to our privacy team.
             </p>
-            <button className="px-6 py-3 rounded-xl bg-primary text-white font-bold hover:opacity-90 transition">
+            <button className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition">
               Contact Privacy Team
             </button>
           </section>

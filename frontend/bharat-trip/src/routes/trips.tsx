@@ -116,7 +116,7 @@ function TripsContent() {
                   <div className="sm:w-56 aspect-[4/3] sm:aspect-auto relative overflow-hidden shrink-0 bg-secondary grid place-items-center">
                     <MapPin className="size-8 text-muted-foreground/30" />
                     {d.type === 'room' && (
-                      <div className="absolute top-3 left-3 px-2 py-1 bg-primary text-white text-[9px] font-bold uppercase tracking-widest rounded-md">
+                      <div className="absolute top-3 left-3 px-2 py-1 bg-primary text-primary-foreground text-[9px] font-bold uppercase tracking-widest rounded-md">
                         Collab Room
                       </div>
                     )}

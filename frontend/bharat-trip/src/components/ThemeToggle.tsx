@@ -11,18 +11,22 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       onClick={toggleTheme}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className={`relative size-10 grid place-items-center rounded-xl border border-border bg-surface hover:bg-secondary transition-colors duration-300 ${className}`}
+      className={`relative size-10 flex items-center justify-center rounded-xl border border-border bg-surface hover:bg-secondary transition-colors duration-300 ${className}`}
     >
-      <Sun
-        className={`size-4 absolute transition-all duration-300 ${
-          isDark ? "opacity-0 scale-50 rotate-90" : "opacity-100 scale-100 rotate-0"
-        }`}
-      />
-      <Moon
-        className={`size-4 absolute transition-all duration-300 ${
-          isDark ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-90"
-        }`}
-      />
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <Sun
+          className={`size-4 transition-all duration-300 ${
+            isDark ? "opacity-0 scale-50 rotate-90" : "opacity-100 scale-100 rotate-0"
+          }`}
+        />
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <Moon
+          className={`size-4 transition-all duration-300 ${
+            isDark ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-90"
+          }`}
+        />
+      </div>
     </button>
   );
 }

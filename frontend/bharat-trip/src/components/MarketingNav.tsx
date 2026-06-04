@@ -23,7 +23,6 @@ export function MarketingNav() {
           <a href="#voices" className="hover:text-white transition-colors">Stories</a>
           <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
           <Link to="/explore-india" className="hover:text-white transition-colors">Explore</Link>
-          <Link to="/community" className="text-[#10b981] hover:text-[#10b981]/80 transition-colors">Community</Link>
           <Link to="/yatra" className="hover:text-white transition-colors">Yatra</Link>
         </nav>
 

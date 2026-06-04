@@ -113,7 +113,7 @@ function PlannerSingleContent() {
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [fetchingPreview, setFetchingPreview] = useState(false);
 
-  const allInterests = ["Photography", "Food trail", "Nature", "Heritage", "Adventure", "Spiritual", "Shopping", "Nightlife"];
+  const allInterests = ["Photography", "Food trail", "Nature", "Heritage", "Ancient Places", "Adventure", "Spiritual", "Shopping", "Nightlife"];
 
   const toggleInterest = (interest: string) => {
     setSelectedInterests(prev => 

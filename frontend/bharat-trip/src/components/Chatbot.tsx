@@ -35,6 +35,126 @@ export function Chatbot() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  
+  // Draggable Chatbot Button States & Event Handlers
+  const [isMovable, setIsMovable] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const dragStartOffset = useRef({ x: 0, y: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const clickTimeout = useRef<NodeJS.Timeout | null>(null);
+  const lastPressTime = useRef<number>(0);
+  const hasDragged = useRef<boolean>(false);
+
+  const toggleMovable = () => {
+    setIsMovable(prev => {
+      const next = !prev;
+      if (next) {
+        toast.success("Draggable Mode Activated!", {
+          description: "Drag the button anywhere on your screen. Double-click again to lock position."
+        });
+      } else {
+        toast.success("Button position locked!");
+      }
+      return next;
+    });
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    // We only care about primary click
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+
+    const now = Date.now();
+    const timeDiff = now - lastPressTime.current;
+
+    // Detect double click (within 400ms)
+    if (timeDiff < 400) {
+      if (clickTimeout.current) {
+        clearTimeout(clickTimeout.current);
+        clickTimeout.current = null;
+      }
+      toggleMovable();
+      lastPressTime.current = 0; // reset
+      setIsDragging(false);
+      e.preventDefault();
+      return;
+    }
+
+    lastPressTime.current = now;
+    hasDragged.current = false;
+
+    if (isMovable) {
+      setIsDragging(true);
+      const rect = e.currentTarget.getBoundingClientRect();
+      dragStartOffset.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+      
+      e.currentTarget.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!isDragging || !isMovable) return;
+
+    hasDragged.current = true;
+    const rect = e.currentTarget.getBoundingClientRect();
+    
+    const x = e.clientX - dragStartOffset.current.x;
+    const y = e.clientY - dragStartOffset.current.y;
+    
+    const maxX = window.innerWidth - rect.width;
+    const maxY = window.innerHeight - rect.height;
+    
+    setPosition({
+      x: Math.max(10, Math.min(maxX - 10, x)),
+      y: Math.max(10, Math.min(maxY - 10, y))
+    });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (isDragging) {
+      setIsDragging(false);
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+    }
+
+    if (hasDragged.current) {
+      hasDragged.current = false;
+      return;
+    }
+
+    if (!isMovable && lastPressTime.current !== 0) {
+      if (clickTimeout.current) {
+        clearTimeout(clickTimeout.current);
+      }
+
+      clickTimeout.current = setTimeout(() => {
+        setIsOpen(true);
+        clickTimeout.current = null;
+      }, 350);
+    }
+  };
+
+  const handlePointerCancel = (e: React.PointerEvent<HTMLButtonElement>) => {
+    setIsDragging(false);
+    hasDragged.current = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+  };
+
+  useEffect(() => {
+    return () => {
+      if (clickTimeout.current) {
+        clearTimeout(clickTimeout.current);
+      }
+    };
+  }, []);
+
 
   const greeting: Message = {
     role: "assistant",
@@ -92,25 +212,74 @@ export function Chatbot() {
   };
 
   if (!isOpen) {
+    const buttonStyle: React.CSSProperties = position ? {
+      position: "fixed",
+      left: `${position.x}px`,
+      top: `${position.y}px`,
+      bottom: "auto",
+      right: "auto",
+      touchAction: "none"
+    } : {
+      touchAction: "none"
+    };
+
     return (
       <button
-        onClick={() => setIsOpen(true)}
+        ref={buttonRef}
+        type="button"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+        style={buttonStyle}
         aria-label="Toggle chatbot"
-        className={`fixed z-[100] size-14 sm:size-16 rounded-full bg-[#10b981] text-white shadow-[0_15px_30px_-10px_rgba(16,185,129,0.5)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all group ${
-          location.pathname === "/" 
-            ? "bottom-4 right-4 sm:bottom-8 sm:right-8" 
-            : "bottom-20 right-4 sm:bottom-8 sm:right-8"
+        className={`fixed z-[100] size-14 sm:size-16 rounded-full bg-[#10b981] text-white shadow-[0_15px_30px_-10px_rgba(16,185,129,0.5)] flex items-center justify-center hover:scale-110 active:scale-95 group ${
+          isMovable ? "ring-4 ring-emerald-400 animate-pulse cursor-move" : "transition-all"
+        } ${
+          isDragging ? "!transition-none" : ""
+        } ${
+          !position
+            ? location.pathname === "/" 
+              ? "bottom-4 right-4 sm:bottom-8 sm:right-8" 
+              : "bottom-20 right-4 sm:bottom-8 sm:right-8"
+            : ""
         }`}
       >
+        {isMovable && (
+          <div className="absolute -top-10 bg-emerald-600 text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md shadow-md animate-bounce whitespace-nowrap">
+            Move Mode
+          </div>
+        )}
         <div className="absolute top-1 right-1 size-3.5 sm:size-4 bg-[#10b981] rounded-full border-[3px] border-white animate-pulse" />
         <MessageSquare className="size-6 sm:size-7 group-hover:rotate-12 transition-transform" />
       </button>
     );
   }
 
+  const windowWidth = 380;
+  const windowHeight = isMinimized ? 80 : 600;
+  let windowStyle: React.CSSProperties = {};
+  if (position) {
+    let left = position.x - windowWidth + 56;
+    let top = position.y - windowHeight + 56;
+    left = Math.max(16, Math.min(window.innerWidth - windowWidth - 16, left));
+    top = Math.max(16, Math.min(window.innerHeight - windowHeight - 16, top));
+    windowStyle = {
+      position: "fixed",
+      left: `${left}px`,
+      top: `${top}px`,
+      bottom: "auto",
+      right: "auto",
+      transform: "none",
+      width: `${windowWidth}px`
+    };
+  }
+
   return (
-    <div className={`fixed z-[100] w-[380px] max-w-[calc(100vw-32px)] bg-card border border-border rounded-[2rem] shadow-pop overflow-hidden transition-all flex flex-col 
-      bottom-6 md:right-6 right-1/2 translate-x-1/2 md:translate-x-0
+    <div 
+      style={windowStyle}
+      className={`fixed z-[100] w-[380px] max-w-[calc(100vw-32px)] bg-card border border-border rounded-[2rem] shadow-pop overflow-hidden transition-all flex flex-col 
+      ${!position ? "bottom-6 md:right-6 right-1/2 translate-x-1/2 md:translate-x-0" : ""}
       ${isMinimized ? 'h-20' : 'h-[600px] max-h-[calc(100vh-120px)]'}`}>
       {/* Header */}
       <div className="p-5 flex items-center justify-between border-b border-border bg-secondary/50 backdrop-blur-xl">

@@ -171,10 +171,15 @@ router.post("/generate", planValidation, async (req, res) => {
       const allItineraries = [];
       let totalTripCost = 0;
       let dayCounter = 1;
+      const recommendedStays = {};
 
       for (let i = 0; i < cities.length; i++) {
         const cityPlan = cityPlans[i];
         if (!cityPlan) continue;
+
+        if (cityPlan.recommendedStay) {
+          recommendedStays[cities[i].toLowerCase()] = cityPlan.recommendedStay;
+        }
 
         // Remap days to be continuous and add city labels
         cityPlan.itinerary.forEach(d => {
@@ -198,7 +203,8 @@ router.post("/generate", planValidation, async (req, res) => {
         itinerary: allItineraries,
         totalTripCost,
         totalBudget: budget,
-        summary: `A multi-city adventure through ${cities.join(", ")}.`
+        summary: `A multi-city adventure through ${cities.join(", ")}.`,
+        recommendedStays
       };
     } else {
       // SINGLE CITY LOGIC
@@ -237,6 +243,7 @@ router.post("/generate", planValidation, async (req, res) => {
         pace: pace || "moderate",
         type: "plan",
         recommendedStay: finalPlan.recommendedStay,
+        recommendedStays: finalPlan.recommendedStays,
         recommendedTransport: finalPlan.recommendedTransport,
         image: finalPlan.image || "",
         members: loggedUserId ? [{

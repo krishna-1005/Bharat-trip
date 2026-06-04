@@ -230,9 +230,33 @@ function generateFallbacks(city, coords, count, budgetTier = "medium") {
 /* ── STAY RECOMMENDATION ── */
 function getRecommendedStay(city, travelerType, budgetTier) {
   const cleanCity = city.trim().toLowerCase();
-  const cityData = accommodationPool.find(c => c.city.toLowerCase() === cleanCity);
+  let cityData = accommodationPool.find(c => c.city.toLowerCase() === cleanCity);
   
-  if (!cityData) return null;
+  if (!cityData) {
+    // Dynamically generate accommodations for this city
+    const capCity = city.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    
+    // Base prices for low/medium/high budget
+    const hostelCost = budgetTier === "low" ? 600 : (budgetTier === "medium" ? 950 : 1500);
+    const airbnbCost = budgetTier === "low" ? 1800 : (budgetTier === "medium" ? 3200 : 5500);
+    const hotelCost = budgetTier === "low" ? 1200 : (budgetTier === "medium" ? 2800 : 7500);
+
+    cityData = {
+      city: capCity,
+      hostels: [
+        { name: `Zostel ${capCity}`, avgCost: hostelCost, rating: 4.6, tags: ["Social", "Rooftop Cafe", "Backpackers", "Free WiFi"], lat: 0, lng: 0 },
+        { name: `The Hosteller ${capCity}`, avgCost: Math.round(hostelCost * 0.9), rating: 4.4, tags: ["Clean", "Work-friendly", "Friendly Staff"], lat: 0, lng: 0 }
+      ],
+      airbnbs: [
+        { name: `${capCity} Homestay with Kitchen`, avgCost: airbnbCost, rating: 4.8, tags: ["Family Friendly", "Kitchen", "Quiet", "Local Vibe"], lat: 0, lng: 0 },
+        { name: `${capCity} Heritage Villa`, avgCost: Math.round(airbnbCost * 1.2), rating: 4.7, tags: ["Spacious", "Garden", "Large Groups"], lat: 0, lng: 0 }
+      ],
+      hotels: [
+        { name: `The ${capCity} Grand Residency`, avgCost: hotelCost, rating: 4.5, tags: ["Comfortable", "Central Location", "Breakfast Included"], lat: 0, lng: 0 },
+        { name: `${capCity} Boutique Resort`, avgCost: Math.round(hotelCost * 1.3), rating: 4.7, tags: ["Premium Stay", "Swimming Pool", "Excellent Service"], lat: 0, lng: 0 }
+      ]
+    };
+  }
 
   let selection = [];
   let stayType = "Hotel";
@@ -244,18 +268,21 @@ function getRecommendedStay(city, travelerType, budgetTier) {
     selection = cityData.airbnbs || [];
     stayType = "Airbnb (with Kitchen)";
   } else {
-    // Default to a mix or high-rated hostels/airbnbs as "Boutique stays" if no hotels in pool
-    selection = [...(cityData.hostels || []), ...(cityData.airbnbs || [])];
+    selection = cityData.hotels || [...(cityData.hostels || []), ...(cityData.airbnbs || [])];
+    stayType = budgetTier === "high" ? "Luxury Resort" : "Hotel";
   }
 
-  if (selection.length === 0) return null;
+  if (selection.length === 0) {
+    selection = [...(cityData.hostels || []), ...(cityData.airbnbs || []), ...(cityData.hotels || [])];
+    stayType = "Accommodation";
+  }
 
   // Filter by budget if possible
   let filtered = selection;
   if (budgetTier === "low") {
-    filtered = selection.filter(s => s.avgCost < 1000);
+    filtered = selection.filter(s => s.avgCost < (stayType === "Hostel" ? 1200 : 2000));
   } else if (budgetTier === "medium") {
-    filtered = selection.filter(s => s.avgCost < 3000);
+    filtered = selection.filter(s => s.avgCost < (stayType === "Hostel" ? 2000 : 5000));
   }
   
   const finalSelection = filtered.length > 0 ? filtered : selection;
@@ -525,10 +552,26 @@ async function generatePlan({
     const nameLower = (p.name || "").toLowerCase();
     const tags = (p.tags || []).map(t => String(t).toLowerCase());
 
-    // HARD RELEVANCE FILTERS (Final Change 3)
+    // HARD RELEVANCE FILTERS
     const dietary = (userPreferences.dietary || "").toLowerCase();
     if (dietary === "veg" || interests.includes("Veg Only")) {
-      if (metadata.food && !metadata.veg) return { score: -1000, whyRecommended: [] };
+      const isFood = metadata.food || category === "food" || tags.includes("restaurant") || tags.includes("cafe") || tags.includes("food_court");
+      
+      if (isFood) {
+        // Check if explicitly non-veg by name
+        const NON_VEG_NAMES = ["chicken", "mutton", "fish", "biryani house", "kebab", "tandoori chicken",
+          "mughlai", "seafood", "grill house", "steak", "bbq", "barbeque", "meat", "non-veg", "non veg"];
+        const isExplicitlyNonVeg = NON_VEG_NAMES.some(kw => nameLower.includes(kw));
+        
+        if (isExplicitlyNonVeg) {
+          return { score: -1000, whyRecommended: [] }; // Hard filter: definitely non-veg
+        }
+        
+        // If it's a food place but NOT confirmed veg, penalize it (prefer known veg spots)
+        if (!metadata.veg) {
+          score -= 15; // Soft penalty: unknown veg status, deprioritize
+        }
+      }
     }
 
     const style = (travelerType || "").toLowerCase();
@@ -547,7 +590,16 @@ async function generatePlan({
       const cleanI = interest.toLowerCase().replace(" trail", "").trim();
       const match = metadata[cleanI] || category.includes(cleanI) || tags.includes(cleanI) || nameLower.includes(cleanI);
       
-      if (match) {
+      // "Ancient Places" maps to heritage + historic tags
+      const isAncientInterest = cleanI === "ancient places" || cleanI === "ancient";
+      const hasAncientMatch = isAncientInterest && (
+        metadata["heritage"] || tags.includes("historic") || tags.includes("ancient") || tags.includes("ruins") ||
+        nameLower.includes("fort") || nameLower.includes("ruins") || nameLower.includes("palace") ||
+        nameLower.includes("ancient") || nameLower.includes("tomb") || nameLower.includes("archaeological") ||
+        nameLower.includes("monument") || nameLower.includes("heritage")
+      );
+      
+      if (match || hasAncientMatch) {
         if (cleanI === "photography") {
           score += 30;
           whyRecommended.push("Top spot for photography");
@@ -563,12 +615,22 @@ async function generatePlan({
         } else if (cleanI === "spiritual") {
           score += 15;
           whyRecommended.push("Peaceful spiritual site");
-        } else if (cleanI === "heritage") {
-          score += 20;
+        } else if (cleanI === "heritage" || isAncientInterest) {
+          score += 25; // Boosted from 20
           whyRecommended.push("Rich heritage & history");
         } else if (cleanI === "adventure") {
-          score += 20;
-          whyRecommended.push("Exciting adventure spot");
+          // Only boost if it's a REAL adventure spot, not a playground
+          if (tags.includes("theme_park") || tags.includes("adventure_park") || tags.includes("water_park") ||
+              nameLower.includes("trek") || nameLower.includes("rafting") || nameLower.includes("safari") ||
+              nameLower.includes("cave") || nameLower.includes("zipline") || nameLower.includes("camp") ||
+              nameLower.includes("climb") || nameLower.includes("hike") || nameLower.includes("adventure") ||
+              metadata["adventure"]) {
+            score += 25;
+            whyRecommended.push("Exciting adventure spot");
+          } else {
+            // Generic Adventure category match gets lower boost
+            score += 10;
+          }
         } else if (cleanI === "shopping") {
           score += 15;
           whyRecommended.push("Popular shopping destination");
@@ -653,6 +715,16 @@ async function generatePlan({
     if (dist < 8) score += 3;
     else if (dist < 15) score += 1;
 
+    // Quality penalty: generic Spiritual places (small churches etc.) without heritage significance
+    // get penalized when user wants Adventure or Heritage experiences, not generic worship spots
+    if (category === "spiritual" && !metadata["heritage"] && !tags.includes("historic") && !tags.includes("ancient")) {
+      const wantsAdventure = interestSet.has("adventure");
+      const wantsHeritage = interestSet.has("heritage") || interestSet.has("ancient places") || interestSet.has("ancient");
+      if (wantsAdventure && !wantsHeritage) {
+        score -= 15; // Heavy penalty — user wants adventure, not random churches
+      }
+    }
+
     // DB feedback loop
     if ((userPreferences.likedPlaces || []).includes(p.name)) {
       score += 30;
@@ -667,6 +739,8 @@ async function generatePlan({
       whyRecommended: [...new Set(whyRecommended)]
     };
   };
+
+  
 
   const scoredPool = cityPool
     .map((p, idx) => {
@@ -882,6 +956,7 @@ async function generatePlan({
     days: parseInt(days),
     itinerary: finalItinerary,
     recommendedStay,
+    recommendedStays: { [city.toLowerCase()]: recommendedStay },
     recommendedTransport,
     coordinates: coords,
     totalBudget,

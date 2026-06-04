@@ -19,6 +19,7 @@ function classifyPlace(place, budgetTier = 'medium') {
     flags: {
       photography: false,
       food: false,
+      veg: false,
       nightlife: false,
       shopping: false,
       nature: false,
@@ -27,8 +28,24 @@ function classifyPlace(place, budgetTier = 'medium') {
       spiritual: false,
       luxury: false,
       backpacking: false,
+      "solo-friendly": false,
+      family: false,
+      romantic: false,
     }
   };
+
+  // Veg detection keywords (common in Indian restaurant names)
+  const VEG_KEYWORDS = [
+    "pure veg", "pureveg", "veg ", "vegetarian", "shakahari", "sattvic", "saatvik",
+    "jain", "vaishnav", "udupi", "dosa", "idli", "thali", "bhavan", "sagar",
+    "annapurna", "govinda", "gokul", "saravana", "mathur", "chettinad veg"
+  ];
+
+  const NON_VEG_KEYWORDS = [
+    "chicken", "mutton", "fish", "biryani house", "kebab", "tandoori", "mughlai",
+    "seafood", "grill house", "steak", "bbq", "barbeque", "meat", "non-veg",
+    "non veg"
+  ];
 
   // 1. SPIRITUAL
   if (
@@ -42,6 +59,7 @@ function classifyPlace(place, budgetTier = 'medium') {
     metadata.description = "A peaceful spiritual site known for its serene atmosphere and cultural significance.";
     metadata.bestTimeOfDay = "morning";
     metadata.flags.spiritual = true;
+    metadata.flags.family = true;
   }
 
   // 2. FOOD
@@ -64,6 +82,20 @@ function classifyPlace(place, budgetTier = 'medium') {
     metadata.description = "A popular local food destination known for its authentic flavors and welcoming atmosphere.";
     metadata.bestTimeOfDay = (name.includes("breakfast")) ? "morning" : (name.includes("lunch")) ? "afternoon" : "evening";
     metadata.flags.food = true;
+
+    // Veg detection: Check name, tags, and cuisine info
+    const isVegByName = VEG_KEYWORDS.some(kw => name.includes(kw));
+    const isVegByTag = tags.some(t => 
+      t === "vegetarian" || t === "veg" || t === "pure_veg" || t === "pure veg" ||
+      t.includes("diet:vegetarian") || t.includes("cuisine:vegetarian") ||
+      t === "diet:vegetarian=yes" || t === "diet:vegetarian=only"
+    );
+    const isNonVegByName = NON_VEG_KEYWORDS.some(kw => name.includes(kw));
+
+    if ((isVegByName || isVegByTag) && !isNonVegByName) {
+      metadata.flags.veg = true;
+      metadata.description = "A popular pure vegetarian food destination known for its authentic flavors and wholesome dishes.";
+    }
   }
 
   // 3. NIGHTLIFE
@@ -82,6 +114,7 @@ function classifyPlace(place, budgetTier = 'medium') {
     metadata.description = "A lively evening destination offering great music, drinks, and a vibrant social scene.";
     metadata.bestTimeOfDay = "night";
     metadata.flags.nightlife = true;
+    metadata.flags["solo-friendly"] = true;
   }
 
   // 4. NATURE
@@ -97,6 +130,10 @@ function classifyPlace(place, budgetTier = 'medium') {
     metadata.description = "A scenic natural location perfect for relaxing walks, fresh air, and beautiful views.";
     metadata.bestTimeOfDay = "morning";
     metadata.flags.nature = true;
+    metadata.flags.photography = true;
+    metadata.flags.family = true;
+    metadata.flags.romantic = true;
+    metadata.flags["solo-friendly"] = true;
   }
 
   // 5. HERITAGE
@@ -112,6 +149,8 @@ function classifyPlace(place, budgetTier = 'medium') {
     metadata.description = "A significant historic landmark showcasing rich architecture and fascinating cultural heritage.";
     metadata.bestTimeOfDay = "morning";
     metadata.flags.heritage = true;
+    metadata.flags.photography = true;
+    metadata.flags.family = true;
   }
 
   // 6. SHOPPING
@@ -142,6 +181,8 @@ function classifyPlace(place, budgetTier = 'medium') {
     metadata.description = "An exciting adventure destination offering thrilling activities and memorable outdoor experiences.";
     metadata.bestTimeOfDay = "morning";
     metadata.flags.adventure = true;
+    metadata.flags["solo-friendly"] = true;
+    metadata.flags.backpacking = true;
   }
 
   // 8. SIGHTSEEING (Fallback)
@@ -151,6 +192,7 @@ function classifyPlace(place, budgetTier = 'medium') {
     metadata.estimatedCost = 100;
     metadata.description = "A must-visit local spot offering unique character and great photo opportunities.";
     metadata.flags.photography = true;
+    metadata.flags.family = true;
   }
 
   // Special checks for photography and luxury
@@ -160,6 +202,17 @@ function classifyPlace(place, budgetTier = 'medium') {
   
   if (cost >= 800 || budgetTier === "high" || tags.includes("luxury")) {
     metadata.flags.luxury = true;
+  }
+
+  // Budget-friendly detection
+  if (cost < 200 || metadata.estimatedCost < 200 || tags.some(t => t === "free" || t === "no_fee")) {
+    metadata.flags["budget-friendly"] = true;
+    metadata.flags.backpacking = true;
+  }
+
+  // CRITICAL: Spread flags to top level so scoring engine can access metadata.food, metadata.veg etc.
+  for (const [key, value] of Object.entries(metadata.flags)) {
+    metadata[key] = value;
   }
 
   return metadata;

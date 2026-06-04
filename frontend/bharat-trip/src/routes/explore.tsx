@@ -120,56 +120,7 @@ export default function Explore({ isInternational = false }: { isInternational?:
     <AppShell>
       <div className="px-4 lg:px-10 py-8 max-w-7xl mx-auto">
         
-        {/* Featured Section (Community Spotlight) */}
-        {featuredTrips.length > 0 && !query && cat === "All" && (
-          <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <Sparkles className="size-5 text-accent animate-pulse" />
-                <h2 className="font-display font-bold text-2xl">Community Spotlight</h2>
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-accent/10 text-accent px-2 py-0.5 rounded-full border border-accent/20 ml-2">Curated</span>
-              </div>
-              <Link to="/trips" className="text-xs font-bold text-muted-foreground hover:text-accent transition-colors">View All Community Trips</Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredTrips.map((trip) => (
-                <Link
-                  key={trip.id}
-                  to={`/trip-details?id=${trip.id}`}
-                  className="group relative rounded-[32px] overflow-hidden bg-card border border-border shadow-pop hover:-translate-y-1 transition-all duration-500"
-                >
-                  <div className="aspect-[16/10] relative overflow-hidden bg-secondary">
-                    <img src={trip.image} alt={trip.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    <div className="absolute top-4 left-4">
-                      <div className="flex items-center gap-1.5 bg-accent text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
-                        <Award className="size-3" /> Featured Trip
-                      </div>
-                    </div>
-                    <div className="absolute bottom-4 left-4 right-4 text-white">
-                      <div className="font-display font-bold text-xl line-clamp-1">{trip.title}</div>
-                      <div className="flex items-center gap-4 mt-2">
-                        <div className="flex items-center gap-1 opacity-80 text-xs font-medium">
-                          <MapPin className="size-3" /> {trip.destination}
-                        </div>
-                        <div className="flex items-center gap-1 opacity-80 text-xs font-medium">
-                          <Star className="size-3 fill-accent text-accent" /> {trip.likes} likes
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {trip.featuredReason && (
-                    <div className="p-4 bg-accent/5 border-t border-accent/10">
-                      <p className="text-[11px] text-accent font-medium italic line-clamp-1">
-                        "{trip.featuredReason}"
-                      </p>
-                    </div>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         <h1 className="font-display font-bold text-3xl md:text-4xl tracking-tight">
           {isInternational ? "Explore the World" : "Explore India"}

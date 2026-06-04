@@ -352,24 +352,80 @@ function KnowBeforeYouGo({ city, weather }: { city: string; weather?: any }) {
 /* ─────────────────────────────────────
    SIDEBAR: STAY RECOMMENDATIONS
    ───────────────────────────────────── */
-function StayRecommendations({ city }: { city: string }) {
+function StayRecommendations({ city, recommendedStay }: { city: string; recommendedStay?: any }) {
   const isHillStation = ["coorg", "munnar", "wayanad", "ooty", "shimla", "manali", "ladakh", "leh"].includes(city.toLowerCase());
   
   const options = isHillStation ? [
     { type: "Budget", range: "₹1,200 – ₹2,200 / night", note: "Homestays & cottages" },
-    { type: "Mid-range", range: "₹3,500 – ₹6,000 / night", note: "Resorts & villas", recommended: true },
+    { type: "Mid-range", range: "₹3,500 – ₹6,000 / night", note: "Resorts & villas", recommended: !recommendedStay },
     { type: "Premium", range: "₹9,000+ / night", note: "Luxury heritage resorts" },
   ] : [
     { type: "Budget", range: "₹800 – ₹1,500 / night", note: "Guesthouses & hostels" },
-    { type: "Mid-range", range: "₹2,500 – ₹4,500 / night", note: "Boutique hotels", recommended: true },
+    { type: "Mid-range", range: "₹2,500 – ₹4,500 / night", note: "Boutique hotels", recommended: !recommendedStay },
     { type: "Premium", range: "₹6,000+ / night", note: "Heritage properties & resorts" },
   ];
   return (
     <div className="rounded-2xl border border-border bg-card overflow-hidden">
-      <div className="px-5 py-4 border-b border-border flex items-center gap-2 bg-secondary/50">
-        <Hotel className="size-4 text-muted-foreground" />
-        <h3 className="text-sm font-bold text-foreground">Accommodation Options</h3>
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-secondary/50">
+        <div className="flex items-center gap-2">
+          <Hotel className="size-4 text-muted-foreground" />
+          <h3 className="text-sm font-bold text-foreground">Where to Stay</h3>
+        </div>
+        {recommendedStay && (
+          <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/60 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <Sparkles className="size-2.5" /> AI Pick
+          </span>
+        )}
       </div>
+
+      {/* AI Recommended Stay — shown when backend returns a specific match */}
+      {recommendedStay && (
+        <div className="p-5 bg-gradient-to-br from-indigo-50/80 via-purple-50/40 to-transparent dark:from-indigo-950/50 dark:via-purple-950/20 dark:to-transparent border-b border-border">
+          <div className="flex items-start gap-3">
+            <div className="size-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-600/20">
+              <Hotel className="size-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
+                  {recommendedStay.stayType || "Recommended Stay"}
+                </span>
+              </div>
+              <h4 className="text-sm font-bold text-foreground leading-snug">{recommendedStay.name}</h4>
+              
+              {/* Rating + Price */}
+              <div className="flex items-center gap-3 mt-2">
+                {recommendedStay.rating && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800/40 px-2 py-0.5 rounded-md">
+                    <Star className="size-2.5 fill-amber-500" /> {recommendedStay.rating}
+                  </span>
+                )}
+                {recommendedStay.avgCost && (
+                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800/40 px-2 py-0.5 rounded-md">
+                    ₹{recommendedStay.avgCost.toLocaleString()} / night
+                  </span>
+                )}
+              </div>
+
+              {/* Tags */}
+              {recommendedStay.tags && recommendedStay.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2.5">
+                  {recommendedStay.tags.map((tag: string, i: number) => (
+                    <span
+                      key={i}
+                      className="text-[9px] font-semibold text-muted-foreground bg-secondary border border-border px-2 py-0.5 rounded-md"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Generic tier options */}
       <div className="divide-y divide-border">
         {options.map((opt, i) => (
           <div key={i} className={cn("px-5 py-4 flex items-center justify-between group", opt.recommended && "bg-indigo-50/50 dark:bg-indigo-950/30")}>
@@ -1158,7 +1214,13 @@ export default function Results() {
                     togglePackingItem={togglePackingItem}
                     addToCart={addToCart}
                   />
-                  <StayRecommendations city={selectedCityTab || destinationName} />
+                  <StayRecommendations
+                    city={selectedCityTab || destinationName}
+                    recommendedStay={
+                      (plan?.recommendedStays && plan.recommendedStays[(selectedCityTab || destinationName).trim().toLowerCase()]) ||
+                      plan?.recommendedStay
+                    }
+                  />
                   <ValidationPanel city={selectedCityTab || destinationName} />
                 </div>
               </aside>

@@ -197,7 +197,7 @@ export function NotificationBell() {
                                />
                                <button 
                                  onClick={() => handleReply(n)}
-                                 className="size-8 rounded-lg bg-primary text-white grid place-items-center hover:scale-105 active:scale-95 transition shadow-sm"
+                                 className="size-8 rounded-lg bg-primary text-primary-foreground grid place-items-center hover:scale-105 active:scale-95 transition shadow-sm"
                                >
                                  <Send size={14} />
                                </button>

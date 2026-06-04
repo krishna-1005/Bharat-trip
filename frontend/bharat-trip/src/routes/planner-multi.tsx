@@ -92,7 +92,7 @@ function PlannerMultiContent() {
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [fetchingPreview, setFetchingPreview] = useState(false);
 
-  const allInterests = ["Sightseeing", "Nature", "Heritage", "Adventure", "Spiritual", "Shopping", "Nightlife", "Food trail"];
+  const allInterests = ["Sightseeing", "Nature", "Heritage", "Ancient Places", "Adventure", "Spiritual", "Shopping", "Nightlife", "Food trail"];
 
   const toggleInterest = (interest: string) => {
     setSelectedInterests(prev => 

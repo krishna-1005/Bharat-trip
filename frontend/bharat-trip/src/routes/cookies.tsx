@@ -63,7 +63,7 @@ export default function Cookies() {
               You can adjust your cookie settings at any time. Your preferences will be saved for your next visit.
             </p>
             <div className="flex flex-wrap gap-4">
-              <button className="px-6 py-3 rounded-xl bg-primary text-white font-bold hover:opacity-90 transition">
+              <button className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:opacity-90 transition">
                 Accept All Cookies
               </button>
               <button className="px-6 py-3 rounded-xl bg-secondary text-foreground font-bold hover:bg-secondary/80 transition">

@@ -121,6 +121,10 @@ const tripSchema = new mongoose.Schema({
     lng: Number,
     stayType: String
   },
+  recommendedStays: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
   recommendedTransport: {
     mode: String,
     reason: String,

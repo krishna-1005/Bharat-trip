@@ -9,7 +9,11 @@ function mapCategory(tags = {}) {
   if (tags.tourism === "hotel" || tags.tourism === "hostel" || tags.tourism === "guest_house" || tags.tourism === "motel" || tags.tourism === "apartment") return "Stay";
 
   // SPIRITUAL (Maps to Culture for trip themes)
-  if (tags.amenity === "place_of_worship" || tags.religion) return "Culture";
+  // Only classify as Culture if the worship place has historic/heritage significance or is a major site
+  if (tags.amenity === "place_of_worship" || tags.religion) {
+    if (tags.historic || tags.heritage || tags.tourism || tags.building === "cathedral" || tags.building === "basilica") return "Culture";
+    return "Spiritual";
+  }
   
   // NIGHTLIFE
   if (tags.amenity === "pub" || tags.amenity === "bar" || tags.amenity === "nightclub") return "Nightlife";
@@ -30,7 +34,9 @@ function mapCategory(tags = {}) {
   if (tags.shop || tags.amenity === "market" || tags.tourism === "marketplace") return "Shopping";
 
   // ADVENTURE / ENTERTAINMENT
-  if (tags.leisure === "theme_park" || tags.leisure === "water_park" || tags.leisure === "stadium" || tags.leisure === "cinema" || tags.leisure === "adventure_park" || tags.leisure === "playground") return "Adventure";
+  if (tags.leisure === "theme_park" || tags.leisure === "water_park" || tags.leisure === "adventure_park") return "Adventure";
+  if (tags.leisure === "stadium" || tags.leisure === "cinema") return "Entertainment";
+  if (tags.leisure === "playground") return "Other"; // Playgrounds are NOT adventure spots
 
   // ATTRACTION FALLBACK
   if (tags.tourism === "attraction" || tags.tourism === "viewpoint") return "Culture";
@@ -58,7 +64,10 @@ const JUNK_PATTERNS = [
   /\d{4,}/,
   /^[a-z]{1,3}$/i,
   /gate\s+\d+/i,
-  /pillar\s+\d+/i
+  /pillar\s+\d+/i,
+  /^children'?s?\s+play/i,
+  /^play\s*ground$/i,
+  /^parking/i
 ];
 
 function sanitizeName(name) {
@@ -142,25 +151,38 @@ async function fetchOSMPlaces(lat, lng, radiusKm = 10) {
         const pLat = p.lat || p.center?.lat;
         const pLng = p.lon || p.center?.lon;
         const sName = sanitizeName(p.tags.name);
+        const category = mapCategory(p.tags);
         
         // Generate realistic enrichment for OSM data
         const rating = (4.0 + Math.random() * 0.8).toFixed(1);
         const reviews = Math.floor(100 + Math.random() * 4900);
         
+        // Build richer tag set for better scoring downstream
+        const tagSet = [p.tags.tourism, p.tags.amenity, p.tags.historic, p.tags.leisure].filter(Boolean);
+        if (p.tags.heritage) tagSet.push("heritage");
+        if (p.tags.historic) tagSet.push("ancient");
+        // Pass cuisine and diet info for veg detection
+        if (p.tags.cuisine) tagSet.push(`cuisine:${p.tags.cuisine}`);
+        if (p.tags["diet:vegetarian"]) tagSet.push(`diet:vegetarian=${p.tags["diet:vegetarian"]}`);
+        if (p.tags["diet:vegan"]) tagSet.push(`diet:vegan=${p.tags["diet:vegan"]}`);
+        // Also add cuisine as a plain tag if it contains "vegetarian"
+        if (p.tags.cuisine && p.tags.cuisine.toLowerCase().includes("vegetarian")) tagSet.push("vegetarian");
+        if (p.tags["diet:vegetarian"] === "yes" || p.tags["diet:vegetarian"] === "only") tagSet.push("vegetarian");
+        
         return {
           name: sName,
           lat: Number(pLat),
           lng: Number(pLng),
-          category: mapCategory(p.tags),
+          category,
           timeHours: 2, // Default
           avgCost: p.tags.amenity === "restaurant" ? 500 : 100, // Heuristic
-          tags: [p.tags.tourism, p.tags.amenity, p.tags.historic].filter(Boolean),
+          tags: tagSet,
           rating: Number(rating),
           reviews: reviews,
           source: "osm"
         };
       })
-      .filter(p => p.lat && p.lng && p.name);
+      .filter(p => p.lat && p.lng && p.name && p.category !== "Other");
 
     console.log(`✅ OSM: Fetched and normalized ${places.length} places for coordinates [${lat}, ${lng}]`);
     return places;

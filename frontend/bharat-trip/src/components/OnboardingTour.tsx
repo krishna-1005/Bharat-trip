@@ -187,7 +187,7 @@ export default function OnboardingTour({ onClose }: OnboardingTourProps) {
             )}
             <button
               onClick={handleNext}
-              className="h-8 px-4 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1 hover:scale-105 transition-all shadow-cta"
+              className="h-8 px-4 rounded-xl bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-wider flex items-center gap-1 hover:scale-105 transition-all shadow-cta"
             >
               {currentStep === TOUR_STEPS.length - 1 ? "Finish" : "Next"} <ChevronRight size={12} />
             </button>

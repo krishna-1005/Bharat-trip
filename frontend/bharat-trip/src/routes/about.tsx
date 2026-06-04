@@ -173,7 +173,7 @@ export default function About() {
                       <img src={`https://i.pravatar.cc/150?u=${i+10}`} alt="" />
                    </div>
                  ))}
-                 <div className="size-8 rounded-full border-2 border-background bg-primary text-white text-[10px] font-bold flex items-center justify-center">+70</div>
+                 <div className="size-8 rounded-full border-2 border-background bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">+70</div>
               </div>
             </div>
           </div>

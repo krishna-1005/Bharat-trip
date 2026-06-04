@@ -47,7 +47,6 @@ export function Footer() {
               <li><Link to="/collaborate" className="text-slate-500 hover:text-accent transition">Group Collaboration</Link></li>
               <li><Link to="/yatra/shop" className="text-slate-500 hover:text-accent transition">Yatra Kit Shop</Link></li>
               <li><Link to="/explore-india" className="text-slate-500 hover:text-accent transition">Destination Explore</Link></li>
-              <li><Link to="/community" className="text-slate-500 hover:text-accent transition">Travel Community</Link></li>
               <li><Link to="/passport" className="text-slate-500 hover:text-accent transition">Digital Passport</Link></li>
             </ul>
           </div>

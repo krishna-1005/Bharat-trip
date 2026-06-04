@@ -139,7 +139,7 @@ function JobCard({ job }: { job: typeof jobs[0] }) {
           </div>
         </div>
         <div className={`size-12 rounded-2xl flex items-center justify-center transition-all ${
-          isOpen ? "bg-primary text-white rotate-180" : "bg-secondary text-foreground group-hover:bg-primary/10 group-hover:text-primary"
+          isOpen ? "bg-primary text-primary-foreground rotate-180" : "bg-secondary text-foreground group-hover:bg-primary/10 group-hover:text-primary"
         }`}>
           <ChevronDown className="size-6" />
         </div>
@@ -259,7 +259,7 @@ function JobCard({ job }: { job: typeof jobs[0] }) {
                       </div>
                       <button 
                         type="submit"
-                        className="w-full h-14 mt-4 rounded-2xl bg-primary text-white font-bold flex items-center justify-center gap-2 hover:opacity-90 transition"
+                        className="w-full h-14 mt-4 rounded-2xl bg-primary text-primary-foreground font-bold flex items-center justify-center gap-2 hover:opacity-90 transition"
                       >
                         <Send className="size-4" /> Submit Application
                       </button>
