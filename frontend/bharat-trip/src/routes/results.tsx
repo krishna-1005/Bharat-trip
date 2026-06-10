@@ -41,6 +41,8 @@ import {
   Trees,
   Milestone,
   Palette,
+  Car,
+  ExternalLink,
 } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
@@ -673,6 +675,14 @@ function getPackingItemsForDestination(destinationName: string): PackingItem[] {
    MAIN COMPONENT
    ───────────────────────────────────── */
 export default function Results() {
+  return (
+    <ProtectedRoute>
+      <ResultsContent />
+    </ProtectedRoute>
+  );
+}
+
+function ResultsContent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const planId = searchParams.get("planId");
@@ -862,7 +872,6 @@ export default function Results() {
   ];
 
   return (
-    <ProtectedRoute>
       <AppShell>
         <div className="min-h-screen bg-background text-foreground pb-20">
 
@@ -932,6 +941,40 @@ export default function Results() {
 
           {/* ─── SUMMARY STRIP ───────────────────────── */}
           <TripSummaryStrip plan={plan} />
+
+          {/* ─── CITY-LEVEL BOOKING ACTION BAR ────────── */}
+          <div className="border-b border-border bg-gradient-to-r from-indigo-500/[0.04] via-transparent to-purple-500/[0.04]">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex items-center gap-2 mr-auto min-w-0">
+                <div className="size-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                  <Sparkles className="size-4 text-indigo-500" />
+                </div>
+                <p className="text-xs font-semibold text-muted-foreground truncate">Quick Actions for <span className="text-foreground">{destinationName}</span></p>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <a
+                  href={`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destinationName)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-9 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-550 text-white text-xs font-bold flex items-center gap-2 transition-all shadow-sm shadow-indigo-600/20 cursor-pointer whitespace-nowrap"
+                >
+                  <Hotel className="size-3.5" />
+                  Find Accommodations in {destinationName}
+                  <ExternalLink className="size-3 opacity-60" />
+                </a>
+                <a
+                  href={`https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[nickname]=${encodeURIComponent(destinationName)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-9 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-bold flex items-center gap-2 transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                >
+                  <Car className="size-3.5" />
+                  Book Rides in {destinationName}
+                  <ExternalLink className="size-3 opacity-60" />
+                </a>
+              </div>
+            </div>
+          </div>
 
           {/* ─── MAIN GRID ───────────────────────────── */}
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10">
@@ -1088,9 +1131,11 @@ export default function Results() {
                                     </div>
                                   )}
 
-                                  <p className="text-[11px] text-indigo-650 dark:text-indigo-400 opacity-60 group-hover:opacity-100 mt-2.5 flex items-center gap-1 transition-colors font-semibold">
+                                  <p className="text-[11px] text-indigo-650 dark:text-indigo-400 opacity-60 group-hover:opacity-100 mt-2.5 flex items-center gap-1 transition-colors font-semibold font-sans">
                                     View full details <ArrowUpRight className="size-3" />
                                   </p>
+
+
                                 </div>
                               </div>
 
@@ -1263,6 +1308,5 @@ export default function Results() {
           </AnimatePresence>
         </div>
       </AppShell>
-    </ProtectedRoute>
   );
 }

@@ -5,6 +5,57 @@ const User = require("../models/User");
 const UsageLog = require("../models/UsageLog");
 const { sendWelcomeEmail } = require("../services/emailService");
 
+const verifyTokenHelper = async (token) => {
+  if (!token) return null;
+  const cleanToken = token.startsWith("Bearer ") ? token.substring(7) : token;
+
+  let user = null;
+  let firebaseErr = null;
+
+  try {
+    if (initialized) {
+      const decoded = await admin.auth().verifyIdToken(cleanToken);
+      const email = decoded.email;
+
+      user = await User.findOne({ email });
+
+      if (!user) {
+        console.log(`👤 Syncing new Firebase user to MongoDB: ${email}`);
+        user = await User.create({
+          firebaseUid: decoded.uid,
+          email: email,
+          name: decoded.name || "User",
+          photo: decoded.picture || ""
+        });
+
+        // Send welcome email in background
+        sendWelcomeEmail(user.email, user.name).catch(err => 
+          console.error(`❌ Failed to send welcome email to ${user.email}:`, err.message)
+        );
+      }
+      return user;
+    } else {
+      throw new Error("Firebase Admin not initialized");
+    }
+  } catch (err) {
+    firebaseErr = err;
+  }
+
+  // 2. Try Custom JWT Token
+  try {
+    const secret = process.env.JWT_SECRET || (process.env.NODE_ENV !== "production" && "GoTripo_temporary_secret_key_12345");
+    if (!secret) {
+      throw new Error("JWT_SECRET is not defined in environment variables");
+    }
+    const decoded = jwt.verify(cleanToken, secret);
+    user = await User.findById(decoded.id);
+    return user;
+  } catch (jwtErr) {
+    console.warn(`[AUTH] Verification failed. Firebase: ${firebaseErr?.message || "N/A"} | JWT: ${jwtErr.message}`);
+    return null;
+  }
+};
+
 const protect = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -14,52 +65,10 @@ const protect = async (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-
-    let user = null;
-
-    try {
-      // 1. Try Firebase Token First (If initialized)
-      if (initialized) {
-        const decoded = await admin.auth().verifyIdToken(token);
-        const email = decoded.email;
-
-        user = await User.findOne({ email });
-
-        if (!user) {
-          console.log(`👤 Syncing new Firebase user to MongoDB: ${email}`);
-          user = await User.create({
-            firebaseUid: decoded.uid,
-            email: email,
-            name: decoded.name || "User",
-            photo: decoded.picture || ""
-          });
-
-          // Send welcome email
-          console.log(`📧 Triggering welcome email for new user: ${email}`);
-          await sendWelcomeEmail(user.email, user.name);
-        }
-      } else {
-        console.warn("Firebase Admin not initialized. Skipping Firebase token verification.");
-        throw new Error("Firebase Admin not initialized");
-      }
-    } catch (firebaseErr) {
-      // 2. Try Custom JWT Token
-      try {
-        if (!process.env.JWT_SECRET) {
-          throw new Error("JWT_SECRET is not defined in environment variables");
-        }
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        user = await User.findById(decoded.id);
-      } catch (jwtErr) {
-        // Log both errors for debugging, but be concise
-        console.warn(`Auth failed. Firebase: ${firebaseErr.message} | JWT: ${jwtErr.message}`);
-        console.debug("Token that failed:", token.substring(0, 10) + "...");
-        return res.status(401).json({ error: "Invalid or expired token" });
-      }
-    }
+    const user = await verifyTokenHelper(token);
 
     if (!user) {
-      return res.status(401).json({ error: "User not found" });
+      return res.status(401).json({ error: "Invalid or expired token" });
     }
 
     req.user = user;
@@ -92,4 +101,4 @@ const adminOnly = (req, res, next) => {
   }
 };
 
-module.exports = { protect, adminOnly };
+module.exports = { protect, adminOnly, verifyTokenHelper };

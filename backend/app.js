@@ -60,9 +60,31 @@ app.use(helmet({
 }));
 
 // CORS - Must be before routes to handle preflight
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(",") 
+  : ["http://localhost:5173", "http://localhost:3000", "https://bharat-trip.vercel.app", "https://gotripo.vercel.app"];
+
 app.use(
   cors({
-    origin: true, 
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, postman)
+      if (!origin) return callback(null, true);
+      
+      const isAllowed = allowedOrigins.some(domain => {
+        if (domain === "*") return true;
+        if (domain === origin) return true;
+        const cleanDomain = domain.replace(/^https?:\/\//, "");
+        const cleanOrigin = origin.replace(/^https?:\/\//, "");
+        if (cleanOrigin === cleanDomain || cleanOrigin.endsWith("." + cleanDomain)) return true;
+        return false;
+      });
+
+      if (isAllowed) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
@@ -79,21 +101,27 @@ app.use((req, res, next) => {
   next();
 });
 
-// Input Sanitization
+// Input & NoSQL Injection Sanitization
 app.use((req, res, next) => {
-  if (req.body) {
-    const sanitize = (obj) => {
-      for (let key in obj) {
-        if (typeof obj[key] === "string") {
-          if (key.toLowerCase().includes("password")) continue;
-          obj[key] = obj[key].trim();
-        } else if (typeof obj[key] === "object" && obj[key] !== null) {
-          sanitize(obj[key]);
-        }
+  const sanitize = (obj) => {
+    if (!obj || typeof obj !== "object") return;
+    for (let key in obj) {
+      if (key.startsWith("$") || key.includes(".")) {
+        console.warn(`[SECURITY] Stripped potentially malicious key/operator: "${key}"`);
+        delete obj[key];
+      } else if (typeof obj[key] === "object" && obj[key] !== null) {
+        sanitize(obj[key]);
+      } else if (typeof obj[key] === "string") {
+        if (key.toLowerCase().includes("password")) continue;
+        obj[key] = obj[key].trim();
       }
-    };
-    sanitize(req.body);
-  }
+    }
+  };
+  
+  if (req.body) sanitize(req.body);
+  if (req.query) sanitize(req.query);
+  if (req.params) sanitize(req.params);
+  
   next();
 });
 

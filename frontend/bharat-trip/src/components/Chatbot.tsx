@@ -90,36 +90,13 @@ export function Chatbot() {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top
       };
-      
-      e.currentTarget.setPointerCapture(e.pointerId);
       e.preventDefault();
     }
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isDragging || !isMovable) return;
-
-    hasDragged.current = true;
-    const rect = e.currentTarget.getBoundingClientRect();
-    
-    const x = e.clientX - dragStartOffset.current.x;
-    const y = e.clientY - dragStartOffset.current.y;
-    
-    const maxX = window.innerWidth - rect.width;
-    const maxY = window.innerHeight - rect.height;
-    
-    setPosition({
-      x: Math.max(10, Math.min(maxX - 10, x)),
-      y: Math.max(10, Math.min(maxY - 10, y))
-    });
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (isDragging) {
       setIsDragging(false);
-      try {
-        e.currentTarget.releasePointerCapture(e.pointerId);
-      } catch (err) {}
     }
 
     if (hasDragged.current) {
@@ -142,9 +119,6 @@ export function Chatbot() {
   const handlePointerCancel = (e: React.PointerEvent<HTMLButtonElement>) => {
     setIsDragging(false);
     hasDragged.current = false;
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch (err) {}
   };
 
   useEffect(() => {
@@ -154,6 +128,42 @@ export function Chatbot() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!buttonRef.current) return;
+      hasDragged.current = true;
+      
+      const rect = buttonRef.current.getBoundingClientRect();
+      const x = e.clientX - dragStartOffset.current.x;
+      const y = e.clientY - dragStartOffset.current.y;
+      
+      const maxX = window.innerWidth - rect.width;
+      const maxY = window.innerHeight - rect.height;
+      
+      setPosition({
+        x: Math.max(10, Math.min(maxX - 10, x)),
+        y: Math.max(10, Math.min(maxY - 10, y))
+      });
+    };
+
+    const handlePointerUpWindow = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUpWindow);
+    window.addEventListener("pointercancel", handlePointerUpWindow);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUpWindow);
+      window.removeEventListener("pointercancel", handlePointerUpWindow);
+    };
+  }, [isDragging]);
+
 
 
   const greeting: Message = {
@@ -228,7 +238,6 @@ export function Chatbot() {
         ref={buttonRef}
         type="button"
         onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
         style={buttonStyle}

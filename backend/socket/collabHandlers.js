@@ -2,34 +2,88 @@ const Message = require("../models/Message");
 const User = require("../models/User");
 const Notification = require("../models/Notification");
 const Trip = require("../models/Trip");
+const { verifyTokenHelper } = require("../middleware/protect");
 
 // Store online presence as a Map: tripId -> Set of userIds
 const onlineUsers = new Map();
 
 module.exports = (io) => {
-  io.on("connection", (socket) => {
-    console.log(`[SOCKET] User connected: ${socket.id}`);
+  // 1. Authenticate Socket Connection on Handshake
+  io.use(async (socket, next) => {
+    try {
+      const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization;
+      if (!token) {
+        return next(new Error("Authentication error: No token provided"));
+      }
 
+      const user = await verifyTokenHelper(token);
+      if (!user) {
+        return next(new Error("Authentication error: Invalid or expired token"));
+      }
+
+      socket.user = user;
+      next();
+    } catch (err) {
+      console.error("[SOCKET AUTH ERROR]", err.message);
+      next(new Error("Authentication error: " + err.message));
+    }
+  });
+
+  io.on("connection", (socket) => {
+    console.log(`[SOCKET] Authenticated user connected: ${socket.user.email} (${socket.id})`);
+
+    // 2. Authorize joining room and prevent identity spoofing
     socket.on("join:room", async ({ tripId, userId }) => {
       if (!tripId || !userId) return;
 
-      socket.join(tripId);
-      socket.tripId = tripId;
-      socket.userId = userId;
+      const cleanUserId = userId.toString();
+      const authUserId = socket.user._id.toString();
+      const authFirebaseUid = socket.user.firebaseUid;
 
-      if (!onlineUsers.has(tripId)) {
-        onlineUsers.set(tripId, new Set());
+      // Identity validation
+      if (authUserId !== cleanUserId && authFirebaseUid !== cleanUserId) {
+        console.warn(`[SECURITY WARNING] User ${authUserId} attempted to masquerade as ${cleanUserId}`);
+        return;
       }
-      onlineUsers.get(tripId).add(userId);
 
-      // Broadcast online status
-      io.to(tripId).emit("user:online", { userId });
-      
-      console.log(`[SOCKET] User ${userId} joined trip room ${tripId}`);
+      try {
+        // Membership validation
+        const trip = await Trip.findById(tripId);
+        if (!trip) {
+          console.warn(`[SOCKET] Join room failed: Trip ${tripId} not found`);
+          return;
+        }
+
+        const isMember = trip.userId.toString() === authUserId || 
+                         trip.members.some(m => m.userId && m.userId.toString() === authUserId);
+
+        if (!isMember) {
+          console.warn(`[SECURITY WARNING] Unauthorized socket room join attempt. User: ${authUserId}, Trip: ${tripId}`);
+          return;
+        }
+
+        // Successfully authorized
+        socket.join(tripId);
+        socket.tripId = tripId;
+        socket.userId = userId;
+
+        if (!onlineUsers.has(tripId)) {
+          onlineUsers.set(tripId, new Set());
+        }
+        onlineUsers.get(tripId).add(userId);
+
+        // Broadcast online status
+        io.to(tripId).emit("user:online", { userId });
+        
+        console.log(`[SOCKET] User ${userId} joined trip room ${tripId}`);
+      } catch (err) {
+        console.error("[SOCKET] Room join authorization error:", err.message);
+      }
     });
 
     socket.on("leave:room", ({ tripId, userId }) => {
       if (!tripId || !userId) return;
+      if (socket.tripId !== tripId) return;
 
       socket.leave(tripId);
       if (onlineUsers.has(tripId)) {
@@ -39,7 +93,13 @@ module.exports = (io) => {
       console.log(`[SOCKET] User ${userId} left trip room ${tripId}`);
     });
 
+    // 3. Secure actions by validating they match the socket's authorized tripId
     socket.on("message:send", async ({ tripId, senderId, text, userName, initials, color }) => {
+      if (socket.tripId !== tripId) {
+        console.warn(`[SECURITY WARNING] Blocked message send: Socket tripId ${socket.tripId} does not match target ${tripId}`);
+        return;
+      }
+
       try {
         const payload = {
           userId: senderId,
@@ -83,10 +143,7 @@ module.exports = (io) => {
 
           await Notification.insertMany(notifications);
           
-          // Optionally emit to those users if they are connected to other rooms or general socket
           offlineMembers.forEach(m => {
-            // We'd need a way to find the user's general socket ID if they are elsewhere on the site
-            // For now, they'll see it when the NotificationBell polls or via Browser Notifications if we add a global event
             io.emit(`user:notification:${m.userId._id}`, {
               type: 'chat',
               tripId,
@@ -101,39 +158,47 @@ module.exports = (io) => {
     });
 
     socket.on("suggestion:added", ({ tripId, suggestion }) => {
+      if (socket.tripId !== tripId) return;
       io.to(tripId).emit("suggestion:receive", suggestion);
     });
 
     socket.on("suggestion:voted", ({ tripId, suggestionId, suggestion }) => {
+      if (socket.tripId !== tripId) return;
       io.to(tripId).emit("suggestion:updated", { suggestionId, suggestion });
     });
 
     socket.on("itinerary:updated", ({ tripId, itinerary }) => {
+      if (socket.tripId !== tripId) return;
       io.to(tripId).emit("itinerary:receive", itinerary);
     });
 
     socket.on("itinerary:activityAdded", ({ tripId, dayIndex, activity }) => {
+      if (socket.tripId !== tripId) return;
       io.to(tripId).emit("itinerary:activityAdded", { dayIndex, activity });
     });
 
     socket.on("itinerary:activityMoved", ({ tripId, dayIndex, activities }) => {
+      if (socket.tripId !== tripId) return;
       io.to(tripId).emit("itinerary:activityMoved", { dayIndex, activities });
     });
 
     socket.on("itinerary:activityDeleted", ({ tripId, dayIndex, activityId }) => {
+      if (socket.tripId !== tripId) return;
       io.to(tripId).emit("itinerary:activityDeleted", { dayIndex, activityId });
     });
 
     socket.on("itinerary:aiRegenerated", ({ tripId, itinerary }) => {
+      if (socket.tripId !== tripId) return;
       io.to(tripId).emit("itinerary:aiRegenerated", itinerary);
     });
 
     socket.on("member:typing", ({ tripId, userName, isTyping }) => {
+      if (socket.tripId !== tripId) return;
       socket.to(tripId).emit("member:typing", { userName, isTyping });
     });
 
     socket.on("poll:vote", ({ tripId, poll }) => {
-      // Broadcast updated poll data to the room
+      if (socket.tripId !== tripId) return;
       io.to(tripId).emit("poll:updated", poll);
     });
 

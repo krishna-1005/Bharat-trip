@@ -425,6 +425,52 @@ const ActivityItem = ({ activity, dayIndex, tripId, onDelete }: { activity: any,
                  {activity.desc || activity.description || activity.notes || activity.reason}
                </p>
              )}
+
+              {/* Action Buttons for Stays and Transit */}
+              {(() => {
+                const item = {
+                  placeName: activity.title || "",
+                  cityName: activity.location || ""
+                };
+
+                const type = (activity.type || "").toLowerCase();
+                const category = (activity.category || "").toLowerCase();
+
+                const STAY_TYPES = ["hotel", "stay", "accommodation", "resort"];
+                const TRANSIT_TYPES = ["transit", "transport", "cab", "route", "travel"];
+
+                const isStay = STAY_TYPES.includes(type) || STAY_TYPES.includes(category);
+                const isTransit = TRANSIT_TYPES.includes(type) || TRANSIT_TYPES.includes(category);
+
+                if (!isStay && !isTransit) return null;
+               
+               return (
+                 <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/25">
+                   {isStay && (
+                     <a
+                       href={`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(item.placeName + ' ' + (item.cityName || ''))}`}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       onClick={(e) => e.stopPropagation()}
+                       className="px-2.5 py-1.5 rounded-lg bg-secondary/80 border border-border hover:bg-secondary text-[10px] font-bold text-foreground flex items-center gap-1.5 transition-all cursor-pointer"
+                     >
+                       Book Stay via Booking.com
+                     </a>
+                   )}
+                   {isTransit && (
+                     <a
+                       href={`https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[nickname]=${encodeURIComponent(item.placeName)}`}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       onClick={(e) => e.stopPropagation()}
+                       className="px-2.5 py-1.5 rounded-lg bg-[#000000] border border-zinc-800 hover:bg-zinc-900 text-[10px] font-bold text-white flex items-center gap-1.5 transition-all cursor-pointer"
+                     >
+                       Call Ride via Uber
+                     </a>
+                   )}
+                 </div>
+               );
+             })()}
           </div>
         )}
       </div>

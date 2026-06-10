@@ -11,11 +11,14 @@ const { sendWelcomeEmail, sendLoginNotificationEmail } = require("../services/em
 const router = express.Router();
 
 const signToken = (id) => {
-  // Fallback to a hardcoded key if environment variable is missing
-  const secret = process.env.JWT_SECRET || "GoTripo_temporary_secret_key_12345";
-  
-  if (!process.env.JWT_SECRET) {
-    console.warn("WARNING: JWT_SECRET is missing from environment variables. Using temporary fallback.");
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("CRITICAL CONFIGURATION ERROR: JWT_SECRET environment variable is missing in production!");
+    } else {
+      console.warn("WARNING: JWT_SECRET is missing from environment variables. Using temporary fallback for development.");
+      return jwt.sign({ id }, "GoTripo_temporary_secret_key_12345", { expiresIn: "7d" });
+    }
   }
   
   return jwt.sign({ id }, secret, { expiresIn: "7d" });
