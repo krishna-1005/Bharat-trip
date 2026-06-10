@@ -16,7 +16,8 @@ import {
   RefreshCw,
   Globe,
   Mail,
-  Send
+  Send,
+  Star
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
@@ -251,42 +252,221 @@ function AdminDashboard() {
                </div>
             </div>
 
-            {/* Recent Activity Table */}
-            <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-sm">
+            {/* Product Insights Panel */}
+            <div className="space-y-6">
+
+              {/* Top Trending Destinations */}
+              <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-sm">
                 <div className="p-6 border-b border-border flex items-center justify-between">
-                   <div className="font-display font-bold text-lg">Live Activity Feed</div>
-                   <Activity className="size-4 text-primary" />
+                  <div className="font-display font-bold text-lg">Trending Destinations</div>
+                  <Map className="size-4 text-primary" />
                 </div>
-                <div className="overflow-x-auto">
-                   <table className="w-full text-left text-sm">
-                      <thead className="bg-secondary/50 text-muted-foreground font-bold uppercase tracking-wider text-[10px]">
-                         <tr>
-                            <th className="px-6 py-4">User / IP</th>
-                            <th className="px-6 py-4">Action</th>
-                            <th className="px-6 py-4">Timestamp</th>
-                            <th className="px-6 py-4">Status</th>
-                         </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                         {stats?.recentActivityLogs?.map((log: any, i: number) => (
-                           <tr key={i} className="hover:bg-secondary/20 transition">
-                              <td className="px-6 py-4 font-medium">
-                                {log.userId?.email || log.ipAddress || "Unknown"}
-                              </td>
-                              <td className="px-6 py-4">
-                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-bold">
-                                  {log.action?.replace(/_/g, " ")}
+                <div className="p-6 space-y-3">
+                  {(() => {
+                    const destinations = stats?.productInsights?.topDestinations || [];
+                    const maxCount = destinations.length > 0 ? destinations[0].count : 1;
+                    if (destinations.length === 0) {
+                      return <p className="text-sm text-muted-foreground text-center py-6">No destination data yet</p>;
+                    }
+                    return destinations.map((d: any, i: number) => {
+                      const pct = Math.round((d.count / maxCount) * 100);
+                      const medals = ["🥇", "🥈", "🥉"];
+                      return (
+                        <div key={d._id} className="group">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center gap-2.5">
+                              <span className="text-sm w-6 text-center font-bold">
+                                {i < 3 ? medals[i] : <span className="text-muted-foreground text-xs">#{i + 1}</span>}
+                              </span>
+                              <span className="text-sm font-semibold group-hover:text-primary transition-colors">{d._id}</span>
+                            </div>
+                            <span className="text-xs font-bold text-muted-foreground tabular-nums">{d.count} plans</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-secondary overflow-hidden ml-8">
+                            <div
+                              className="h-full bg-gradient-to-r from-primary/80 to-primary rounded-full transition-all duration-700"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
+              {/* Feature Engagement Breakdown */}
+              <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-sm">
+                <div className="p-6 border-b border-border flex items-center justify-between">
+                  <div>
+                    <h3 className="font-display font-bold text-lg">Feature Engagement Breakdown</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Which features and actions are most utilized by users</p>
+                  </div>
+                  <Activity className="size-5 text-indigo-500" />
+                </div>
+                <div className="p-6 space-y-4">
+                  {(() => {
+                    const actions = stats?.productInsights?.topActions || [];
+                    const totalCount = actions.reduce((sum: number, a: any) => sum + a.count, 0) || 1;
+                    if (actions.length === 0) {
+                      return <p className="text-sm text-muted-foreground text-center py-6">No action log data yet</p>;
+                    }
+
+                    const actionMap: Record<string, { label: string; icon: any; color: string; desc: string }> = {
+                      generate_plan: { label: "AI Plan Generator", icon: Sparkles, color: "from-purple-500 to-indigo-500", desc: "Users generating personalized itineraries" },
+                      chatbot_plan_generated: { label: "Chatbot Plan Creation", icon: Sparkles, color: "from-blue-500 to-indigo-500", desc: "Itineraries generated via conversational chat" },
+                      chatbot_query: { label: "Chatbot Interactions", icon: MessageSquare, color: "from-teal-500 to-cyan-500", desc: "User chats with the travel assistant" },
+                      login: { label: "User Authentications", icon: UserCheck, color: "from-emerald-500 to-green-500", desc: "Successful user sign-ins" },
+                      site_access: { label: "Platform Visits", icon: MousePointer2, color: "from-amber-500 to-orange-500", desc: "General visits and page navigations" },
+                    };
+
+                    return actions.map((act: any) => {
+                      const mapping = actionMap[act._id] || {
+                        label: act._id.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+                        icon: Activity,
+                        color: "from-slate-500 to-slate-600",
+                        desc: "Other logged system action"
+                      };
+                      const Icon = mapping.icon;
+                      const pct = Math.round((act.count / totalCount) * 100);
+
+                      return (
+                        <div key={act._id} className="group flex flex-col space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center gap-2">
+                              <div className="p-1.5 rounded-lg bg-secondary/80">
+                                <Icon className="size-3.5 text-foreground/80" />
+                              </div>
+                              <div className="text-left">
+                                <span className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                                  {mapping.label}
                                 </span>
-                              </td>
-                              <td className="px-6 py-4 text-muted-foreground">
-                                {new Date(log.createdAt).toLocaleTimeString()}
-                              </td>
-                              <td className="px-6 py-4 text-emerald-500 font-bold">OK</td>
-                           </tr>
-                         ))}
-                      </tbody>
-                   </table>
+                                <p className="text-[10px] text-muted-foreground/80 leading-none mt-0.5">{mapping.desc}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <span className="font-bold tabular-nums text-foreground">{act.count.toLocaleString()}</span>
+                              <span className="text-xs text-muted-foreground ml-1.5 font-medium">({pct}%)</span>
+                            </div>
+                          </div>
+                          <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                            <div
+                              className={`h-full bg-gradient-to-r ${mapping.color} rounded-full transition-all duration-700`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
+              </div>
+
+              {/* Peak Hours + Recent Reviews side by side row */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Peak Usage Hours */}
+                <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-sm">
+                  <div className="p-5 border-b border-border">
+                    <div className="font-display font-bold text-sm">Peak Usage Hours</div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">When your users are most active</p>
+                  </div>
+                  <div className="p-5">
+                    <div className="grid grid-cols-6 gap-1">
+                      {(() => {
+                        const hours = stats?.productInsights?.peakHours || [];
+                        const maxH = Math.max(...hours.map((h: any) => h.count), 1);
+                        // Fill 24 hours
+                        return Array.from({ length: 24 }, (_, i) => {
+                          const entry = hours.find((h: any) => h._id === i);
+                          const count = entry?.count || 0;
+                          const intensity = count / maxH;
+                          const bg = intensity > 0.75 ? "bg-emerald-500" 
+                                   : intensity > 0.5 ? "bg-emerald-400" 
+                                   : intensity > 0.25 ? "bg-emerald-300 dark:bg-emerald-700" 
+                                   : intensity > 0 ? "bg-emerald-200 dark:bg-emerald-800" 
+                                   : "bg-secondary";
+                          return (
+                            <div key={i} className="flex flex-col items-center gap-1" title={`${i}:00 — ${count} events`}>
+                              <div className={`w-full aspect-square rounded-lg ${bg} transition-colors hover:ring-2 hover:ring-primary/30 cursor-default`} />
+                              {(i % 6 === 0) && <span className="text-[8px] text-muted-foreground font-bold">{i}h</span>}
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-4 justify-center">
+                      <span className="text-[9px] text-muted-foreground font-bold">Low</span>
+                      {["bg-secondary", "bg-emerald-200 dark:bg-emerald-800", "bg-emerald-300 dark:bg-emerald-700", "bg-emerald-400", "bg-emerald-500"].map((c, i) => (
+                        <div key={i} className={`size-3 rounded ${c}`} />
+                      ))}
+                      <span className="text-[9px] text-muted-foreground font-bold">High</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Reviews */}
+                <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-sm">
+                  <div className="p-5 border-b border-border">
+                    <div className="font-display font-bold text-sm">Recent Reviews</div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">User sentiment & feedback</p>
+                  </div>
+                  <div className="p-4 space-y-3 max-h-[320px] overflow-y-auto scrollbar-thin">
+                    {stats?.recentReviews?.length > 0 ? stats.recentReviews.map((r: any, i: number) => (
+                      <div key={i} className="p-3 rounded-2xl bg-secondary/30 border border-border/50 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold truncate max-w-[120px]">{r.userName || "Anonymous"}</span>
+                          <div className="flex items-center gap-0.5">
+                            {Array.from({ length: 5 }, (_, j) => (
+                              <Star
+                                key={j}
+                                className={`size-3 ${j < r.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{r.comment}</p>
+                        <span className="text-[9px] text-muted-foreground/60 font-medium">{new Date(r.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    )) : (
+                      <p className="text-sm text-muted-foreground text-center py-6">No reviews yet</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Popular Interests Tags */}
+              {stats?.productInsights?.topInterests?.length > 0 && (
+                <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-sm">
+                  <div className="p-5 border-b border-border flex items-center justify-between">
+                    <div>
+                      <div className="font-display font-bold text-sm">Popular Interests</div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">What travelers care about most</p>
+                    </div>
+                    <Sparkles className="size-4 text-accent" />
+                  </div>
+                  <div className="p-5 flex flex-wrap gap-2">
+                    {stats.productInsights.topInterests.map((interest: any, i: number) => {
+                      const colors = [
+                        "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800/60",
+                        "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800/60",
+                        "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/60",
+                        "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60",
+                        "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-200 dark:border-sky-800/60",
+                        "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/60",
+                      ];
+                      return (
+                        <span
+                          key={interest._id}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${colors[i % colors.length]}`}
+                        >
+                          {interest._id}
+                          <span className="text-[9px] opacity-70 font-mono">{interest.count}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -452,6 +452,51 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(5);
 
+    // ── Product Insights ──────────────────────────────
+    // Top Trending Destinations (from plan generations)
+    const topDestinations = await UsageLog.aggregate([
+      { $match: { action: { $in: ["generate_plan", "chatbot_plan_generated"] }, "details.city": { $ne: null } } },
+      { $group: { _id: "$details.city", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 8 }
+    ]);
+
+    // Peak Usage Hours (24h distribution)
+    const peakHours = await UsageLog.aggregate([
+      { $group: { _id: { $hour: "$createdAt" }, count: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Most Popular Pages / Actions
+    const topActions = await UsageLog.aggregate([
+      { $group: { _id: "$action", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 8 }
+    ]);
+
+    // Popular Interests from plan generation
+    const topInterests = await UsageLog.aggregate([
+      { $match: { action: "chatbot_plan_generated", "details.interests": { $exists: true } } },
+      { $unwind: "$details.interests" },
+      { $group: { _id: "$details.interests", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 6 }
+    ]);
+
+    // Drop-off funnel: visitors → registered → generated plan → saved trip
+    const usersWhoGeneratedPlan = await UsageLog.distinct("userId", { 
+      action: { $in: ["generate_plan", "chatbot_plan_generated"] }, 
+      userId: { $ne: null } 
+    });
+    const usersWhoSavedTrip = await Trip.distinct("userId");
+
+    const funnel = {
+      visitors: totalUniqueVisitors,
+      registered: totalRegisteredCount,
+      generatedPlan: usersWhoGeneratedPlan.length,
+      savedTrip: usersWhoSavedTrip.length
+    };
+
     res.json({
       summary: {
         totalRegisteredUsers: totalRegisteredCount,
@@ -474,7 +519,14 @@ router.get("/stats", protect, verifyAdminEmail, async (req, res) => {
       growthChart: chartData,
       recentRegisteredUsers: recentUsers,
       recentActivityLogs: recentUsage,
-      recentReviews
+      recentReviews,
+      productInsights: {
+        topDestinations,
+        peakHours,
+        topActions,
+        topInterests,
+        funnel
+      }
     });
   } catch (err) {
     console.error("Admin stats error:", err);
