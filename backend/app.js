@@ -62,7 +62,7 @@ app.use(helmet({
 // CORS - Must be before routes to handle preflight
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(",") 
-  : ["http://localhost:5173", "http://localhost:3000", "https://bharat-trip.vercel.app", "https://gotripo.vercel.app"];
+  : ["http://localhost:5173", "http://localhost:3000", "https://bharat-trip.vercel.app", "https://gotripo.vercel.app", "https://gotripo.tech", "https://www.gotripo.tech"];
 
 app.use(
   cors({
